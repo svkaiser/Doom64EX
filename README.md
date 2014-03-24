@@ -1,0 +1,4 @@
+Doom64EX
+========
+
+Doom64EX is a reverse-engineering project aimed to recreate Doom64 as close as possible with additional modding features.
