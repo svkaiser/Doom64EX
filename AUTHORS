@@ -1,0 +1,39 @@
+This file is now the amalgamated list of authors, contributors and credits
+for Doom64 EX. Hopefully by keeping these all in one place, they will remain
+more accurate.
+
+Doom was originally written by id software; when playing with any id main
+wad file, you can see their list of credits, which includes the list of
+programmers. After some years, they released the source code, to allow
+others to work on improving the game.
+
+In October 1999, id Software re-released the Doom source code under the
+GNU General Public License.
+
+Samuel Villarreal <svkaiser@gmail.com>
+Doom64 EX Author
+
+Paul Brook
+Author of the Doom3D source port in which Doom64 EX was originally based off of
+
+Zohar Malamant
+Additional programming, multi-platform support
+
+Cray Elliott
+Additional programming, multi-platform support
+
+Urchlay B. Watson
+*Unix support
+
+James 'Quasar' Haley <haleyjd@hotmail.com>
+For providing wisdom when it comes to working with all the backend stuff such as
+Doom's zone memory allocator. Also provided the macro script compiler utility.
+
+Simon 'Fraggle' Howard
+Networking system
+
+Lee Killough
+For just about anything that fixed all of Doom's mistakes, bugs, and errors.
+
+Team TNT
+For all Boom related enhancements and fixes.

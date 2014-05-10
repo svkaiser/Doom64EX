@@ -1,0 +1,174 @@
+.TH DOOM64EX "6" "January 2012" "Doom64EX" "Games"
+.SH NAME
+doom64ex \- recreation of Midway's Doom64 for modern operating systems.
+.SH SYNOPSIS
+.B doom64ex
+[\fIoptions...\fR]
+.P
+\fBdoom64ex\-wadgen\fR \fI<rom\-file>\fR
+.SH DESCRIPTION
+Doom 64 is a unofficial sequel to Doom II for the Nintendo 64.
+.P
+\fBdoom64ex\fR faithful recreation of the original game using the Doom source
+code as the base.
+.P
+\fBdoom64ex\fR requires the data (aka WAD)
+files from the original game. These must be extracted from the Nintendo 64 ROM
+image, using the \fBdoom64ex\-wadgen\fR tool (see \fBDATA FILES\fR, below).
+.SH OPTIONS
+.SS File Options
+.TP
+\fB\-iwad\fR \fI<wadfile>\fR
+The IWAD file to use.
+.TP
+\fB\-file\fR \fI<wadfile>\fR
+Add a PWAD (patch WAD). Used for custom levels, music, etc.
+.TP
+\fB\-config\fR \fI<configfile>\fR
+Use \fIconfigfile\fR instead of the default config file (which is
+\fI~/.doom64ex/config.cfg\fR).
+.SS Game Options
+.TP
+\fB\-warp\fR \fI<level>\fR
+Skip the intro, start the game at the given level. Valid level numbers
+are 1 through 32. Warping to level 33 plays the intro demo.
+.TP
+\fB\-nomonsters\fR
+Self\-explanatory. Usually used for multiplayer deathmatch games.
+.TP
+\fB\-fast\fR
+Fast monster mode (similar to "Nightmare" difficulty level).
+.TP
+\fB\-respawn\fR
+Monsters respawn after being killed (similar to "Nightmare" difficulty level).
+.TP
+\fB\-respawnitem\fR
+Items respawn after being picked up.
+.TP
+\fB\-skill\fR \fI<skill\-level>\fR
+Set skill level (useful with \fB\-warp\fR). Level is a number from 1 to 4, where
+1 is "Be Gentle" and 4 is "Watch Me Die".
+.TP
+\fB\-turbo\fR \fI<speed>\fR
+Enables turbo mode based on speed value.
+.TP
+\fB\-devparm\fR
+Enables developer mode. Very useful for testing custom wads (see devparm.txt
+for more information about using developer mode).
+.TP
+\fB\-heapsize \fI<size>\fR
+Allocate a <size> MB heap (default is 32).
+.TP
+\fB\-setvars\fR \fI<cvarname>\fR \fI<value>\fR [\fI<cvarname>\fR \fI<value>\fR ...]
+Set a cvar value. Can set multiple cvars following \fB\-setvars\fR.
+.SS Video/Audio Options
+.TP
+\fB\-fullscreen
+Run the game fullscreen, regardless of the setting in config.cfg.
+.TP
+\fB\-window
+Run the game in a window, regardless of the setting in config.cfg.
+.TP
+\fB\-width\fR \fI<pixels>\fR, \fB\-height\fR \fI<pixels>\fR
+Set video mode. These options (unlike other command line options) will be
+stored in the config file.
+.TP
+\fB\-nosound\fR
+Disable sound interface, use this if you're having problems such as
+"Unable to create primary sound buffer".
+.TP
+\fB\-nomusic\fR
+Disable ingame music.
+.TP
+\fB\-nogun\fR
+Don't draw player's gun sprite on screen.
+.SS Demo Options
+.TP
+\fB\-record \fI<lumpname>\fR
+Record a demo. The demo will be saved in a file called \fI<lumpname>.lmp\fR. The \fI.lmp\fR
+is always added, so don't include it in the lump name.
+.TP
+\fB\-playdemo \fI<filename>\fR
+Play back a demo. If the filename has no extension, ".lmp" will be added. Press
+the space bar to stop the demo.
+.SS Network Options
+Note that the networking support in \fBdoom64ex\fR is highly experimental, and
+likely to fail during use. Also, the official Doom 64 levels don't support
+multiplayer because they lack deathmatch and co\-op player starts. This is
+because the original
+game for the Nintendo 64 didn't support multiplayer at all.
+.TP
+\fB\-server\fR
+Host a game. When one or more clients connects, press any
+key to begin the network game.
+.TP
+\fB-connect\fR \fI<ipaddress>\fR
+Connect to a game hosted by the server.
+.TP
+\fB\-port\fR \fI<n>\fR
+Specify network UDP port for \fB\-connect\fR or \fB\-server\fR options. Default
+port is 2342.
+.SH DATA FILES
+\fBdoom64ex\fR (and Doom\-related games in general) load all game resources
+such as graphics and levels from a file known as an IWAD file. In
+addition, \fBdoom64ex\fR loads its sounds from a SoundFont file.
+.P
+Since Doom 64 is a Nintendo 64 game, the WAD and SF2 files must be generating
+by extracting the data from a Nintendo 64 ROM image. \fBdoom64ex\fR ships
+with a utility called \fBdoom64ex\-wadgen\fR which does this. Usage:
+.P
+\fBdoom64ex\-wadgen\fR \fI<rom\-file>\fR
+.P
+\fI<rom\-file>\fR must be a Doom64 ROM image, in .z64 format. The files \fRDOOM64.WAD\fB
+and \fRDOOMSND.SF2\fR will be created in the current directory.
+.P
+The WAD file must be called \fRDOOM64.WAD\fR (all\-uppercase), and the sound font
+must be called \fRDOOMSND.SF2\fR. Both files must be
+found in \fI/usr/share/games/doom64\fR, \fI/usr/local/share/games/doom64\fR,
+or in the current directory where \fBdoom64ex\fR is started.
+.SH OTHER FILES
+.TP
+\fB~/.doom64ex/\fR
+Config file \fBconfig.cfg\fR is located here. Will be created if it
+doesn't already exist. Also, saved games are stored here, as \fBdoomsav\fR\fIn\fR\fB.dsg\fR,
+where \fIn\fR is the save slot, numbered 0 to 7.
+.SH SEE ALSO
+The main \fBdoom64ex\fR documentation is supplied with the source code, and is
+usually installed in /usr/share/doc/doom64ex on most Linux systems.
+.SH AUTHORS
+Doom was originally written by id software; when playing with any id main
+wad file, you can see their list of credits, which includes the list of
+programmers. After some years, they released the source code, to allow
+others to work on improving the game.
+.P
+In October 1999, id Software re\-released the Doom source code under the
+GNU General Public License.
+.P
+Samuel 'Kaiser' Villarreal <svkaiser@gmail.com>
+.br
+Doom64 EX Author
+.P
+Paul Brook
+.br
+Author of the Doom3D source port in which Doom64 EX was originally based off of.
+.P
+James 'Quasar' Haley <haleyjd@hotmail.com>
+.br
+For providing wisdom when it comes to working with all the backend stuff such as
+Doom's zone memory allocator. Also provided the macro script compiler utility.
+.P
+Simon 'Fraggle' Howard
+.br
+Networking system
+.P
+Lee Killough
+.br
+For just about anything that fixed all of Doom's mistakes, bugs, and errors.
+.P
+Team TNT
+.br
+For all Boom related enhancements and fixes.
+.P
+B. Watson <yalhcru@gmail.com>
+.br
+Linux port and various minor bugfixes.

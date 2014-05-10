@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfluidsynth", "libfluidsynth.vcproj", "{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		MinSizeRel|Win32 = MinSizeRel|Win32
+		Release|Win32 = Release|Win32
+		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.Debug|Win32.Build.0 = Debug|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.Release|Win32.ActiveCfg = Release|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.Release|Win32.Build.0 = Release|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{E11923E9-E42C-4E69-80F8-AAACBEDA7EFF}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
