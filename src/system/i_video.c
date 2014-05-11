@@ -77,6 +77,7 @@ int video_width;
 int video_height;
 float video_ratio;
 dboolean window_focused;
+dboolean window_mouse;
 
 int mouse_x = 0;
 int mouse_y = 0;
@@ -290,11 +291,9 @@ void I_FinishUpdate(void) {
 // Input
 //================================================================================
 
-static SDL_Cursor* cursors[2] = { NULL, NULL };
 float mouse_accelfactor;
 
 int         UseJoystick;
-int         UseMouse[2];
 dboolean    DigiJoy;
 int         DualMouse;
 
@@ -395,34 +394,34 @@ static int I_TranslateKey(const int key) {
     case SDLK_MINUS:
         rc = KEY_MINUS;
         break;
-    /*case SDLK_KP0:
+	case SDLK_KP_0:
         rc = KEY_KEYPAD0;
         break;
-    case SDLK_KP1:
+	case SDLK_KP_1:
         rc = KEY_KEYPAD1;
         break;
-    case SDLK_KP2:
+	case SDLK_KP_2:
         rc = KEY_KEYPAD2;
         break;
-    case SDLK_KP3:
+	case SDLK_KP_3:
         rc = KEY_KEYPAD3;
         break;
-    case SDLK_KP4:
+	case SDLK_KP_4:
         rc = KEY_KEYPAD4;
         break;
-    case SDLK_KP5:
+	case SDLK_KP_5:
         rc = KEY_KEYPAD5;
         break;
-    case SDLK_KP6:
+	case SDLK_KP_6:
         rc = KEY_KEYPAD6;
         break;
-    case SDLK_KP7:
+	case SDLK_KP_7:
         rc = KEY_KEYPAD7;
         break;
-    case SDLK_KP8:
+	case SDLK_KP_8:
         rc = KEY_KEYPAD8;
         break;
-    case SDLK_KP9:
+	case SDLK_KP_9:
         rc = KEY_KEYPAD9;
         break;
     case SDLK_KP_PLUS:
@@ -442,7 +441,7 @@ static int I_TranslateKey(const int key) {
         break;
     case SDLK_KP_PERIOD:
         rc = KEY_KEYPADPERIOD;
-        break;*/
+		break;
     case SDLK_LSHIFT:
     case SDLK_RSHIFT:
         rc = KEY_RSHIFT;
@@ -481,66 +480,6 @@ static int I_SDLtoDoomMouseState(Uint8 buttonstate) {
 }
 
 //
-// I_UpdateFocus
-//
-
-static void I_UpdateFocus(void) {
-    Uint8 state;
-    state = SDL_GetWindowFlags(window);
-
-    // We should have input (keyboard) focus and be visible
-    // (not minimised)
-    window_focused = (state & SDL_WINDOW_INPUT_FOCUS) || (state & SDL_WINDOW_MOUSE_FOCUS);
-}
-
-// I_CenterMouse
-// Warp the mouse back to the middle of the screen
-//
-
-void I_CenterMouse(void) {
-    // warp the screen center
-    SDL_WarpMouseInWindow(window,
-        (unsigned short)(video_width/2),
-        (unsigned short)(video_height/2));
-
-    // Clear any relative movement caused by warping
-    SDL_PumpEvents();
-    SDL_GetRelativeMouseState(NULL, NULL);
-}
-
-//
-// I_MouseShouldBeGrabbed
-//
-
-static dboolean I_MouseShouldBeGrabbed() {
-#ifndef _WIN32
-    // 20120105 bkw: Always grab the mouse in fullscreen mode
-    if(!InWindow) {
-        return true;
-    }
-#endif
-
-    // if the window doesnt have focus, never grab it
-    if(!window_focused) {
-        return false;
-    }
-
-#ifdef _WIN32
-    if(!InWindow && m_menumouse.value <= 0) {
-        return true;
-    }
-#endif
-
-    // when menu is active or game is paused, release the mouse
-    if(menuactive || paused) {
-        return false;
-    }
-
-    // only grab mouse when playing levels (but not demos)
-    return (gamestate == GS_LEVEL) && !demoplayback;
-}
-
-//
 // I_ReadMouse
 //
 
@@ -562,11 +501,7 @@ static void I_ReadMouse(void) {
         D_PostEvent(&ev);
     }
 
-    lastmbtn = btn;
-
-    if(I_MouseShouldBeGrabbed()) {
-        I_CenterMouse();
-    }
+	lastmbtn = btn;
 }
 
 //
@@ -617,18 +552,25 @@ static void I_DeactivateMouse(void) {
 
 void I_UpdateGrab(void) {
     static dboolean currently_grabbed = false;
-    dboolean grab;
+	dboolean grab;
 
-    grab = I_MouseShouldBeGrabbed();
-    if(grab && !currently_grabbed) {
-        I_ActivateMouse();
-    }
+	grab = /*window_mouse &&*/ !menuactive
+	&& (gamestate == GS_LEVEL)
+	&& !demoplayback;
 
-    if(!grab && currently_grabbed) {
-        I_DeactivateMouse();
-    }
+	if (grab && !currently_grabbed) {
+		SDL_ShowCursor(0);
+		SDL_SetRelativeMouseMode(1);
+		SDL_SetWindowGrab(window, 1);
+	}
 
-    currently_grabbed = grab;
+	if (!grab && currently_grabbed) {
+		SDL_SetRelativeMouseMode(0);
+		SDL_SetWindowGrab(window, 0);
+		SDL_ShowCursor(m_menumouse.value < 1);
+	}
+
+	currently_grabbed = grab;
 }
 
 //
@@ -641,7 +583,9 @@ static void I_GetEvent(SDL_Event *Event) {
     uint32 tic = gametic;
 
     switch(Event->type) {
-    case SDL_KEYDOWN:
+	case SDL_KEYDOWN:
+		if(Event->key.repeat)
+			break;
         event.type = ev_keydown;
         event.data1 = I_TranslateKey(Event->key.keysym.sym);
         D_PostEvent(&event);
@@ -653,40 +597,57 @@ static void I_GetEvent(SDL_Event *Event) {
         D_PostEvent(&event);
         break;
 
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
-        if(!window_focused) {
-            break;
-        }
+	case SDL_MOUSEBUTTONDOWN:
+	case SDL_MOUSEBUTTONUP:
+		if (!window_focused)
+			break;
 
-        if(Event->button.button == SDL_BUTTON_X1) {
-            event.type = ev_keydown;
-            event.data1 = KEY_MWHEELUP;
-            mwheeluptic = tic;
-        }
-        else if(Event->button.button == SDL_BUTTON_X2) {
-            event.type = ev_keydown;
-            event.data1 = KEY_MWHEELDOWN;
-            mwheeldowntic = tic;
-        }
-        else {
-            event.type = Event->type ==
-                         SDL_MOUSEBUTTONUP ? ev_mouseup : ev_mousedown;
-            event.data1 = I_SDLtoDoomMouseState(SDL_GetMouseState(NULL, NULL));
-        }
+		event.type = (Event->type == SDL_MOUSEBUTTONUP) ? ev_mouseup : ev_mousedown;
+		event.data1 =
+			I_SDLtoDoomMouseState(SDL_GetMouseState(NULL, NULL));
+		event.data2 = event.data3 = 0;
 
-        event.data2 = event.data3 = 0;
-        D_PostEvent(&event);
-        break;
+		D_PostEvent(&event);
+		break;
 
-    case SDL_WINDOWEVENT:
-        switch(Event->window.event) {
-        case SDL_WINDOWEVENT_FOCUS_GAINED:
-        case SDL_WINDOWEVENT_ENTER:
-            I_UpdateFocus();
-            break;
-        }
-        break;
+	case SDL_MOUSEWHEEL:
+		if (Event->wheel.y > 0) {
+			event.type = ev_keydown;
+			event.data1 = KEY_MWHEELUP;
+			mwheeluptic = tic;
+		} else if (Event->wheel.y < 0) {
+			event.type = ev_keydown;
+			event.data1 = KEY_MWHEELDOWN;
+			mwheeldowntic = tic;
+		} else
+			break;
+
+		event.data2 = event.data3 = 0;
+		D_PostEvent(&event);
+		break;
+
+	case SDL_WINDOWEVENT:
+		switch (Event->window.event) {
+		case SDL_WINDOWEVENT_FOCUS_GAINED:
+			window_focused = true;
+			break;
+
+		case SDL_WINDOWEVENT_FOCUS_LOST:
+			window_focused = false;
+			break;
+
+		case SDL_WINDOWEVENT_ENTER:
+			window_mouse = true;
+			break;
+
+		case SDL_WINDOWEVENT_LEAVE:
+			window_mouse = false;
+			break;
+
+		default:
+			break;
+		}
+		break;
 
     case SDL_QUIT:
         I_Quit();
@@ -716,18 +677,10 @@ static void I_GetEvent(SDL_Event *Event) {
 //
 
 static void I_InitInputs(void) {
-    Uint8 data[1] = { 0x00 };
-
-    SDL_PumpEvents();
-    cursors[0] = SDL_GetCursor();
-    cursors[1] = SDL_CreateCursor(data, data, 8, 1, 0, 0);
+	SDL_PumpEvents();
 
     SDL_ShowCursor(m_menumouse.value < 1);
 
-    UseMouse[0] = 1;
-    UseMouse[1] = 2;
-
-    I_CenterMouse();
     I_MouseAccelChange();
 
 #ifdef _USE_XINPUT
