@@ -27,7 +27,6 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
-#include "i_opndir.h"
 #include "z_zone.h"
 #include "p_tick.h"
 #include "g_local.h"
@@ -35,6 +34,12 @@
 #include "m_misc.h"
 #include "m_random.h"
 #include "con_console.h"
+
+#ifdef _MSVC_VER
+#include "i_opndir.h"
+#else
+#include <unistd.h>
+#endif
 
 void        G_DoLoadLevel(void);
 dboolean    G_CheckDemoStatus(void);

@@ -31,12 +31,7 @@
 
 #endif // _WIN32
 
-#ifdef _WIN32
 #include <stdio.h>
-#else
-#include <stdio.h>
-#undef dprintf
-#endif
 
 #include "doomtype.h"
 #include "d_keywds.h"
@@ -51,7 +46,7 @@ extern const char version_date[];
 #pragma warning(error:4189)        // initialized but unused variable
 #endif
 
-void        dprintf(const char *s, ...);
+void        _dprintf(const char *s, ...);
 void        *dmemcpy(void *s1, const void *s2, size_t n);
 void        *dmemset(void *s, dword c, size_t n);
 char        *dstrcpy(char *dest, const char *src);

@@ -250,11 +250,8 @@ add_sources(statusbar
 # src/system
 add_sources(system
 	i_audio.c
-	i_cpu.c
 	i_cpu_posix.c
-	i_exception.c
 	i_main.c
-	i_opndir.c
 	i_png.c
 	i_swap.h
 	i_system.c
@@ -279,7 +276,7 @@ add_sources(zone
 
 include_directories(${SOURCE_ROOT_DIR})
 add_executable(doom64ex ${SOURCES})
-target_link_libraries(doom64ex ${LIBRARIES})
+target_link_libraries(doom64ex ${LIBRARIES} m)
 
 ##------------------------------------------------------------------------------
 ## Install target

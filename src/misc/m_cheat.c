@@ -176,7 +176,7 @@ static void M_CheatWarp(player_t* player, char dat[4]) {
 }
 
 static void M_CheatMyPos(player_t* player, char dat[4]) {
-    dprintf("ang = %d; x,y = (%d, %d)",
+	_dprintf("ang = %d; x,y = (%d, %d)",
             (int)(players[consoleplayer].mo->angle * (float)180 / ANG180),
             F2INT(players[consoleplayer].mo->x),
             F2INT(players[consoleplayer].mo->y));

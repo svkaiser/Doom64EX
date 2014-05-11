@@ -44,10 +44,10 @@
 const char version_date[] = __DATE__;
 
 //
-// dprintf
+// _dprintf
 //
 
-void dprintf(const char *s, ...) {
+void _dprintf(const char *s, ...) {
     static char msg[MAX_MESSAGE_SIZE];
     va_list    va;
 
