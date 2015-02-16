@@ -43,9 +43,7 @@
 #endif
 
 #ifndef __APPLE__
-#include <malloc.h>
-#else
-#include <malloc/malloc.h>
+#include <stdlib.h>
 #endif
 
 #include "doomtype.h"
