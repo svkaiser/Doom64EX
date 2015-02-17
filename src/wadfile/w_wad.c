@@ -27,6 +27,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <stdlib.h>
+
 #ifdef _MSC_VER
 #include "i_opndir.h"
 #else
@@ -40,10 +42,6 @@
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
-#endif
-
-#ifndef __APPLE__
-#include <stdlib.h>
 #endif
 
 #include "doomtype.h"
