@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cmake/FindFluidSynth.cmake" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cmake/FindSDL2.cmake" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cmake/FindSDL2_net.cmake" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/automap/am_draw.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/automap/am_draw.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/automap/am_map.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/automap/am_map.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/doomdata.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/doomdef.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/doomstat.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/doomtype.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/info.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/info.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/md5.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/md5.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/tables.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/common/tables.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/console/con_console.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/console/con_console.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/console/con_cvar.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/console/con_cvar.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_devstat.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_devstat.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_englsh.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_event.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_keywds.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_main.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_net.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_net.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_player.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_think.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/doom_main/d_ticcmd.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/finale/f_finale.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/finale/f_finale.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/finale/in_stuff.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_actions.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_actions.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_controls.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_demo.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_demo.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_game.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_game.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_local.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_settings.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/game/g_settings.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/intermission/wi_stuff.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/intermission/wi_stuff.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_cheat.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_cheat.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_fixed.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_fixed.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_keys.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_keys.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_menu.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_menu.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_misc.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_misc.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_password.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_password.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_random.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_random.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_shift.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/misc/m_shift.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_client.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_client.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_common.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_common.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_dedicated.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_dedicated.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_defs.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_io.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_io.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_loop.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_loop.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_packet.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_packet.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_query.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_query.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_sdl.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_sdl.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_server.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_server.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_structrw.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/net/net_structrw.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/dgl.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/dgl.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/gl_draw.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/gl_draw.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/gl_main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/gl_main.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/gl_texture.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/opengl/gl_texture.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/parser/sc_main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/parser/sc_main.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_ceilng.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_doors.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_enemy.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_floor.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_inter.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_inter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_lights.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_local.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_macros.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_macros.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_map.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_maputl.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_mobj.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_mobj.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_plats.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_pspr.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_pspr.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_saveg.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_saveg.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_setup.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_setup.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_sight.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_spec.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_spec.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_switch.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_telept.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_tick.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_tick.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/playloop/p_user.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_bsp.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_clipper.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_clipper.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_drawlist.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_drawlist.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_lights.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_lights.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_local.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_main.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_scene.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_sky.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_sky.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_things.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_things.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_wipe.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer/r_wipe.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/sound/s_sound.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/sound/s_sound.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/sound/sounds.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/statusbar/st_stuff.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/statusbar/st_stuff.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_audio.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_audio.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_cpu_posix.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_png.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_png.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_swap.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_system.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_system.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_video.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/system/i_video.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadfile/w_file.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadfile/w_file.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadfile/w_merge.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadfile/w_merge.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadfile/w_wad.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadfile/w_wad.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/deflate-N64.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/deflate-N64.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/files.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/files.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/gfx.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/gfx.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/level.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/level.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/mem.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/mem.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/png.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/rom.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/rom.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/sndfont.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/sndfont.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/sound.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/sound.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/sprite.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/sprite.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/texture.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/texture.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/wad.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/wad.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/wadgen.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/wadgen/wadgen.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/zone/z_zone.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/zone/z_zone.h" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="Header Search Paths">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/src" />
+          <root url="file:///usr/include" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include/cilk" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include/sanitizer" />
+          <root url="file:///usr/local/include" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/src" />
+          <root url="file:///usr/include" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include/cilk" />
+          <root url="file:///usr/lib/gcc/x86_64-unknown-linux-gnu/5.2.0/include/sanitizer" />
+          <root url="file:///usr/local/include" />
+        </SOURCES>
+        <excluded>
+          <root url="file://$MODULE_DIR$/src/doom_main/d_devstat.c" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_englsh.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_devstat.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_net.c" />
+          <root url="file://$MODULE_DIR$/src/statusbar/st_stuff.c" />
+          <root url="file://$MODULE_DIR$/src/statusbar/st_stuff.h" />
+          <root url="file://$MODULE_DIR$/src/intermission/wi_stuff.h" />
+          <root url="file://$MODULE_DIR$/src/intermission/wi_stuff.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/sndfont.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/wadgen.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/sound.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/sound.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/texture.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/deflate-N64.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/mem.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/rom.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/deflate-N64.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/mem.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/texture.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/png.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/wad.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/gfx.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/sndfont.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/sprite.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/level.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/gfx.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/level.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/files.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/wadgen.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/wad.h" />
+          <root url="file://$MODULE_DIR$/src/wadgen/rom.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/files.c" />
+          <root url="file://$MODULE_DIR$/src/wadgen/sprite.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_defs.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_packet.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_loop.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_sdl.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_client.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_client.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_query.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_io.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_server.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_structrw.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_structrw.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_server.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_io.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_dedicated.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_loop.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_common.c" />
+          <root url="file://$MODULE_DIR$/src/net/net_packet.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_query.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_dedicated.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_common.h" />
+          <root url="file://$MODULE_DIR$/src/net/net_sdl.c" />
+          <root url="file://$MODULE_DIR$/src/game/g_demo.c" />
+          <root url="file://$MODULE_DIR$/src/game/g_game.h" />
+          <root url="file://$MODULE_DIR$/src/game/g_demo.h" />
+          <root url="file://$MODULE_DIR$/src/game/g_actions.h" />
+          <root url="file://$MODULE_DIR$/src/game/g_game.c" />
+          <root url="file://$MODULE_DIR$/src/game/g_local.h" />
+          <root url="file://$MODULE_DIR$/src/game/g_settings.h" />
+          <root url="file://$MODULE_DIR$/src/game/g_actions.c" />
+          <root url="file://$MODULE_DIR$/src/game/g_settings.c" />
+          <root url="file://$MODULE_DIR$/src/game/g_controls.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_password.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_password.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_shift.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_cheat.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_shift.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_cheat.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_keys.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_fixed.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_keys.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_menu.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_misc.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_menu.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_random.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_fixed.h" />
+          <root url="file://$MODULE_DIR$/src/misc/m_random.c" />
+          <root url="file://$MODULE_DIR$/src/misc/m_misc.c" />
+          <root url="file://$MODULE_DIR$/src/zone/z_zone.h" />
+          <root url="file://$MODULE_DIR$/src/zone/z_zone.c" />
+          <root url="file://$MODULE_DIR$/src/sound/s_sound.c" />
+          <root url="file://$MODULE_DIR$/src/sound/sounds.h" />
+          <root url="file://$MODULE_DIR$/src/sound/s_sound.h" />
+          <root url="file://$MODULE_DIR$/src/common/info.h" />
+          <root url="file://$MODULE_DIR$/src/common/doomstat.h" />
+          <root url="file://$MODULE_DIR$/src/common/doomtype.h" />
+          <root url="file://$MODULE_DIR$/src/common/info.c" />
+          <root url="file://$MODULE_DIR$/src/common/doomdef.h" />
+          <root url="file://$MODULE_DIR$/src/common/md5.h" />
+          <root url="file://$MODULE_DIR$/src/common/doomdata.h" />
+          <root url="file://$MODULE_DIR$/src/common/tables.c" />
+          <root url="file://$MODULE_DIR$/src/common/md5.c" />
+          <root url="file://$MODULE_DIR$/src/common/tables.h" />
+          <root url="file://$MODULE_DIR$/src/finale/f_finale.c" />
+          <root url="file://$MODULE_DIR$/src/finale/in_stuff.c" />
+          <root url="file://$MODULE_DIR$/src/finale/f_finale.h" />
+          <root url="file://$MODULE_DIR$/src/opengl/dgl.h" />
+          <root url="file://$MODULE_DIR$/src/opengl/gl_draw.c" />
+          <root url="file://$MODULE_DIR$/src/opengl/gl_texture.c" />
+          <root url="file://$MODULE_DIR$/src/opengl/gl_draw.h" />
+          <root url="file://$MODULE_DIR$/src/opengl/gl_main.c" />
+          <root url="file://$MODULE_DIR$/src/opengl/gl_texture.h" />
+          <root url="file://$MODULE_DIR$/src/opengl/gl_main.h" />
+          <root url="file://$MODULE_DIR$/src/opengl/dgl.c" />
+          <root url="file://$MODULE_DIR$/src/parser/sc_main.c" />
+          <root url="file://$MODULE_DIR$/src/parser/sc_main.h" />
+          <root url="file://$MODULE_DIR$/src/system/i_png.c" />
+          <root url="file://$MODULE_DIR$/src/system/i_swap.h" />
+          <root url="file://$MODULE_DIR$/src/system/i_video.h" />
+          <root url="file://$MODULE_DIR$/src/system/i_audio.c" />
+          <root url="file://$MODULE_DIR$/src/system/i_video.c" />
+          <root url="file://$MODULE_DIR$/src/system/i_png.h" />
+          <root url="file://$MODULE_DIR$/src/system/i_audio.h" />
+          <root url="file://$MODULE_DIR$/src/system/i_system.h" />
+          <root url="file://$MODULE_DIR$/src/system/i_cpu_posix.c" />
+          <root url="file://$MODULE_DIR$/src/system/i_main.c" />
+          <root url="file://$MODULE_DIR$/src/system/i_system.c" />
+          <root url="file://$MODULE_DIR$/src/automap/am_map.h" />
+          <root url="file://$MODULE_DIR$/src/automap/am_draw.h" />
+          <root url="file://$MODULE_DIR$/src/automap/am_draw.c" />
+          <root url="file://$MODULE_DIR$/src/automap/am_map.c" />
+          <root url="file://$MODULE_DIR$/src/console/con_console.c" />
+          <root url="file://$MODULE_DIR$/src/console/con_cvar.c" />
+          <root url="file://$MODULE_DIR$/src/console/con_cvar.h" />
+          <root url="file://$MODULE_DIR$/src/console/con_console.h" />
+          <root url="file://$MODULE_DIR$/src/wadfile/w_wad.h" />
+          <root url="file://$MODULE_DIR$/src/wadfile/w_merge.c" />
+          <root url="file://$MODULE_DIR$/src/wadfile/w_file.h" />
+          <root url="file://$MODULE_DIR$/src/wadfile/w_wad.c" />
+          <root url="file://$MODULE_DIR$/src/wadfile/w_merge.h" />
+          <root url="file://$MODULE_DIR$/src/wadfile/w_file.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_doors.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_macros.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_map.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_saveg.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_saveg.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_spec.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_plats.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_tick.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_maputl.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_macros.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_tick.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_ceilng.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_telept.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_enemy.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_floor.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_lights.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_switch.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_mobj.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_spec.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_mobj.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_user.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_inter.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_pspr.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_pspr.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_sight.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_inter.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_setup.h" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_setup.c" />
+          <root url="file://$MODULE_DIR$/src/playloop/p_local.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_clipper.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_drawlist.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_sky.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_main.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_lights.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_sky.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_wipe.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_local.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_wipe.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_drawlist.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_clipper.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_things.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_things.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_bsp.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_scene.c" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_lights.h" />
+          <root url="file://$MODULE_DIR$/src/renderer/r_main.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_main.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_think.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_ticcmd.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_keywds.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_event.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_main.c" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_player.h" />
+          <root url="file://$MODULE_DIR$/src/doom_main/d_net.h" />
+        </excluded>
+      </library>
+    </orderEntry>
+  </component>
+</module>
