@@ -40,6 +40,7 @@
 #include "m_misc.h"
 #include "i_system.h"
 #include "con_console.h"
+#include "wadgen.h"
 
 const char version_date[] = __DATE__;
 
@@ -546,7 +547,11 @@ int I_Main(int argc, char *argv[]) {
     }
 #endif
 
-    D_DoomMain();
+    if (M_CheckParm("-wadgen")) {
+        WGen_WadgenMain();
+    } else {
+        D_DoomMain();
+    }
 
     return 0;
 }

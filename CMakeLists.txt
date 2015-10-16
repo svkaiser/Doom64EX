@@ -265,6 +265,35 @@ add_sources(wadfile
 	w_wad.c
 )
 
+# src/wadgen
+add_sources(wadgen
+	deflate-N64.c
+	deflate-N64.h
+	files.c
+	files.h
+	gfx.c
+	gfx.h
+	level.c
+	level.h
+	mem.c
+	mem.h
+	png.c
+	rom.c
+	rom.h
+	sndfont.c
+	sndfont.h
+		sound.c
+		sound.h
+	sprite.c
+	sprite.h
+	texture.c
+	texture.h
+	wad.c
+	wad.h
+	wadgen.c
+	wadgen.h
+)
+
 # src/zone
 add_sources(zone
 	z_zone.c
