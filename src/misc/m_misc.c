@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
+#include <GL/glu.h>
 
 #include "doomstat.h"
 #include "m_misc.h"
@@ -341,7 +342,7 @@ int M_CacheThumbNail(byte** data) {
     buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
     tbn = Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0);
 
-    GL_ResampleTexture((int*)buff, video_width, video_height, (int*)tbn, 128, 128, GL_RGB);
+    gluScaleImage(GL_RGB, video_width, video_height, GL_UNSIGNED_BYTE, buff, 128, 128, GL_UNSIGNED_BYTE, tbn);
     Z_Free(buff);
 
     *data = tbn;
