@@ -24,7 +24,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-project(doom64ex)
+project(doom64ex C)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 

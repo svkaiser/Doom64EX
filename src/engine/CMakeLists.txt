@@ -28,13 +28,21 @@ set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 ## CMake functions
 ##
 
+function(add_include_directories)
+  unset(NEW_INCLUDES)
+  foreach(ARG ${ARGN})
+    list(APPEND NEW_INCLUDES ${ARG})
+  endforeach()
+  set(INCLUDES ${INCLUDES} ${NEW_INCLUDES} PARENT_SCOPE)
+endfunction()
+
 function(add_sources PREFIX)
 	unset(NEW_SOURCES)
 	foreach(ARG ${ARGN})
 		list(APPEND NEW_SOURCES "${SOURCE_ROOT_DIR}/${PREFIX}/${ARG}")
 	endforeach()
 	set(SOURCES ${SOURCES} ${NEW_SOURCES} PARENT_SCOPE)
-	include_directories("${SOURCE_ROOT_DIR}/${PREFIX}")
+  set(INCLUDES ${INCLUDES} "${SOURCE_ROOT_DIR}/${PREFIX}" PARENT_SCOPE)
 endfunction()
 
 function(add_link_libraries)
@@ -52,12 +60,12 @@ endfunction()
 
 # SDL2
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+add_include_directories(${SDL2_INCLUDE_DIRS})
 add_link_libraries(${SDL2_LIBRARIES})
 
 # SDL2_Net
 find_package(SDL2_net REQUIRED)
-include_directories(${SDL2_NET_INCLUDE_DIRS})
+add_include_directories(${SDL2_NET_INCLUDE_DIRS})
 add_link_libraries(${SDL2_NET_LIBRARIES})
 
 # zlib
@@ -65,17 +73,17 @@ find_package(ZLIB REQUIRED)
 
 # libpng
 find_package(PNG REQUIRED)
-include_directories(${PNG_INCLUDE_DIRS})
+add_include_directories(${PNG_INCLUDE_DIRS})
 add_link_libraries(${PNG_LIBRARIES})
 
 # FluidSynth
 find_package(FluidSynth REQUIRED)
-include_directories(${FLUIDSYNTH_INCLUDE_DIRS})
+add_include_directories(${FLUIDSYNTH_INCLUDE_DIRS})
 add_link_libraries(${FLUIDSYNTH_LIBRARIES})
 
 # OpenGL
 find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
+add_include_directories(${OPENGL_INCLUDE_DIRS})
 add_link_libraries(${OPENGL_LIBRARIES})
 
 ##------------------------------------------------------------------------------
@@ -298,11 +306,10 @@ add_sources(zone
 ## Build target
 ##
 
-include_directories(${SOURCE_ROOT_DIR})
 add_executable(doom64ex ${SOURCES})
+target_include_directories(doom64ex PRIVATE ${INCLUDES})
 target_link_libraries(doom64ex ${LIBRARIES} m)
 
 ##------------------------------------------------------------------------------
 ## Install target
 ##
-
