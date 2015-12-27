@@ -22,6 +22,8 @@
 ## 02111-1307, USA.
 ##
 
+set(WADTOOL_BINARY "${CMAKE_BINARY_DIR}/src/wadtool/wadtool")
+
 ##------------------------------------------------------------------------------
 ## Sources
 ##
