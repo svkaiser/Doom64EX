@@ -36,8 +36,6 @@ static const char rcsid[] =
 #include "level.h"
 #include "sndfont.h"
 
-#include "m_misc.h"
-
 #include <stdarg.h>
 
 #define MAX_ARGS 256

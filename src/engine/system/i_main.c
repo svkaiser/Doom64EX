@@ -40,7 +40,8 @@
 #include "m_misc.h"
 #include "i_system.h"
 #include "con_console.h"
-#include "wadgen.h"
+
+void WGen_WadgenMain();
 
 const char version_date[] = __DATE__;
 

@@ -74,6 +74,10 @@ Png_Create(int width, int height, int numpal, dPalette_t * pal,
 	png_infop info_ptr;
 	png_colorp palette;
 
+	// hack to make palette fit
+	if (bits < 8)
+		numpal = 1;
+
 	// setup png pointer
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 	if (png_ptr == NULL) {
