@@ -178,8 +178,6 @@ void WGen_Process(void)
 	for (i = 0; i < extPalLumpCount; i++)
 		Wad_AddOutputPalette(&d64PaletteLump[i]);
 
-	WGen_AddLumpFile("PALPLAY3.ACT");
-
 	// Textures
 	Wad_AddOutputLump("T_START", 0, NULL);
 
@@ -197,12 +195,6 @@ void WGen_Process(void)
 	// Hud Sprites
 	for (i = spriteExCount; i < spriteExCount + hudSpriteExCount; i++)
 		Wad_AddOutputHudSprite(&exSpriteLump[i]);
-
-	WGen_AddLumpFile("FANCRED.PNG");
-	WGen_AddLumpFile("CRSHAIRS.PNG");
-	WGen_AddLumpFile("BUTTONS.PNG");
-	WGen_AddLumpFile("CONFONT.PNG");
-	WGen_AddLumpFile("CURSOR.PNG");
 
 	Wad_AddOutputLump("G_END", 0, NULL);
 
@@ -233,15 +225,6 @@ void WGen_Process(void)
 		sprintf(name, "MAP%02d", i + 1);
 		Wad_AddOutputLump(name, levelSize[i], levelData[i]);
 	}
-
-	// Demo lumps
-	//WGen_AddLumpFile("DEMO1LMP.LMP");
-	//WGen_AddLumpFile("DEMO2LMP.LMP");
-	//WGen_AddLumpFile("DEMO3LMP.LMP");
-
-	WGen_AddLumpFile("MAPINFO.TXT");
-	WGen_AddLumpFile("ANIMDEFS.TXT");
-	WGen_AddLumpFile("SKYDEFS.TXT");
 
 	MD5_Final(digest, &md5_context);
 
