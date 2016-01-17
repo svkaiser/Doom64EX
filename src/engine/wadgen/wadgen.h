@@ -37,7 +37,6 @@
 #define S_IEXEC S_IXUSR
 #endif
 
-#include "doomdef.h"
 #include "mem.h"
 
 #ifdef PLATFORM_PC
@@ -59,6 +58,16 @@ typedef uint32_t uint32;
 typedef int bool;
 typedef byte *cache;
 typedef char path[MAX_PATH];
+
+#define false	0
+#define true	1
+
+typedef struct {
+	byte r;
+	byte g;
+	byte b;
+	byte a;
+} dPalette_t;
 
 #ifdef _WIN32
 extern HWND hwnd;

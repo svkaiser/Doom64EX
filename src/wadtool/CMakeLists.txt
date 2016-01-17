@@ -22,34 +22,18 @@
 ## 02111-1307, USA.
 ##
 
-cmake_minimum_required(VERSION 2.6)
-
-project(doom64ex C)
-
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
+set(WADTOOL_BINARY "${CMAKE_BINARY_DIR}/src/wadtool/wadtool")
 
 ##------------------------------------------------------------------------------
-## Options
+## Sources
 ##
 
-option(BUILD_PWAD "Generate kexdata.wad" ON)
-option(BUILD_ENGINE "Build Doom64EX" ON)
+set(SOURCES
+  main.c
+  )
 
 ##------------------------------------------------------------------------------
-## Include subprojects
+## Build target
 ##
 
-if (BUILD_PWAD)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
-
-  # generate kexdata.wad using wadtool
-  add_custom_target(kexdata
-    COMMAND "${WADTOOL_BINARY}" "${DATA_DIR}/kexdata" "${CMAKE_BINARY_DIR}/kexdata.wad"
-    DEPENDS wadtool
-    )
-endif()
-
-if (BUILD_ENGINE)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
-endif()
+add_executable(wadtool ${SOURCES})
