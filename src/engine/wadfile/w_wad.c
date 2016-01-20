@@ -170,6 +170,7 @@ static void W_HashLumps(void) {
 
 void W_Init(void) {
     char*           iwad;
+    char*           kexdata;
     wadinfo_t       header;
     lumpinfo_t*     lump_p;
     int             i;
@@ -235,6 +236,13 @@ void W_Init(void) {
 
     Z_Free(fileinfo);
 
+    if ((kexdata = I_FindDataFile("kexdata.wad"))) {
+        W_MergeFile(kexdata);
+        free(kexdata);
+    } else {
+        I_Error("W_Init: kexdata.wad not found");
+    }
+/*
     p = M_CheckParm("-file");
     if(p) {
         // the parms after p are wadfile/lump names,
@@ -255,7 +263,7 @@ void W_Init(void) {
                 W_MergeFile(filename);
             }
         }
-    }
+    }*/
 
     W_HashLumps();
 }

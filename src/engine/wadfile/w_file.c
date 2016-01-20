@@ -117,139 +117,6 @@ size_t W_Read(wad_file_t *wad, unsigned int offset,
     return wad->file_class->Read(wad, offset, buffer, buffer_len);
 }
 
-// Array of locations to search for IWAD files
-//
-// "128 IWAD search directories should be enough for anybody".
-
-#define MAX_IWAD_DIRS 128
-
-static dboolean iwad_dirs_built = false;
-static char *iwad_dirs[MAX_IWAD_DIRS];
-static int num_iwad_dirs = 0;
-
-static void AddIWADDir(char *dir) {
-    if(num_iwad_dirs < MAX_IWAD_DIRS) {
-        iwad_dirs[num_iwad_dirs] = dir;
-        ++num_iwad_dirs;
-    }
-}
-
-//
-// BuildIWADDirList
-// Build a list of IWAD files
-//
-
-static void BuildIWADDirList(void) {
-    if(iwad_dirs_built) {
-        return;
-    }
-
-    // Look in the current directory.  Doom always does this.
-
-    AddIWADDir(".");
-
-#ifndef _WIN32
-
-    // Standard places where IWAD files are installed under Unix.
-
-    AddIWADDir("/usr/share/games/doom64");
-    AddIWADDir("/usr/local/share/games/doom64");
-    AddIWADDir("/usr/local/share/doom64");
-
-#endif
-
-    // Don't run this function again.
-
-    iwad_dirs_built = true;
-}
-
-//
-// SearchDirectoryForIWAD
-// Search a directory to try to find an IWAD
-// Returns the location of the IWAD if found, otherwise NULL.
-
-static char *SearchDirectoryForIWAD(char *dir) {
-    char *filename;
-    char *iwadname;
-
-    iwadname = "DOOM64.WAD";
-    filename = malloc(strlen(dir) + strlen(iwadname) + 3);
-
-    if(!strcmp(dir, ".")) {
-        strcpy(filename, iwadname);
-    }
-    else {
-        sprintf(filename, "%s%c%s", dir, '/', iwadname);
-    }
-
-    if(M_FileExists(filename)) {
-        return filename;
-    }
-
-    free(filename);
-
-    return NULL;
-}
-
-//
-// W_FindWADByName
-// Searches WAD search paths for an WAD with a specific filename.
-//
-
-char *W_FindWADByName(char *name) {
-    char *buf;
-    int i;
-    dboolean exists;
-
-    // Absolute path?
-    if(M_FileExists(name)) {
-        return name;
-    }
-
-    BuildIWADDirList();
-
-    // Search through all IWAD paths for a file with the given name.
-
-    for(i = 0; i < num_iwad_dirs; ++i) {
-        // Construct a string for the full path
-
-        buf = malloc(strlen(iwad_dirs[i]) + strlen(name) + 5);
-        sprintf(buf, "%s%c%s", iwad_dirs[i], '/', name);
-
-        exists = M_FileExists(buf);
-
-        if(exists) {
-            return buf;
-        }
-
-        free(buf);
-    }
-
-    // File not found
-
-    return NULL;
-}
-
-//
-// W_TryFindWADByName
-//
-// Searches for a WAD by its filename, or passes through the filename
-// if not found.
-//
-
-char *W_TryFindWADByName(char *filename) {
-    char *result;
-
-    result = W_FindWADByName(filename);
-
-    if(result != NULL) {
-        return result;
-    }
-    else {
-        return filename;
-    }
-}
-
 //
 // W_FindIWAD
 // Checks availability of IWAD files by name,
@@ -260,7 +127,7 @@ char *W_FindIWAD(void) {
     char *iwadfile;
     int iwadparm;
     int i;
-
+/*
     // Check for the -iwad parameter
     iwadparm = M_CheckParm("-iwad");
 
@@ -274,18 +141,8 @@ char *W_FindIWAD(void) {
             I_Error("W_FindIWAD: IWAD file '%s' not found!", iwadfile);
         }
     }
-    else {
-        // Search through the list and look for an IWAD
+    else*/
 
-        result = NULL;
-
-        BuildIWADDirList();
-
-        for(i = 0; result == NULL && i < num_iwad_dirs; ++i) {
-            result = SearchDirectoryForIWAD(iwad_dirs[i]);
-        }
-    }
-
-    return result;
+    return I_FindDataFile("doom64.wad");
 }
 

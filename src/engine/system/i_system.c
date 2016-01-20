@@ -34,6 +34,7 @@
 #endif
 
 #include <stdarg.h>
+#include <sys/stat.h>
 #include "doomstat.h"
 #include "doomdef.h"
 #include "m_misc.h"
@@ -404,39 +405,111 @@ ticcmd_t* I_BaseTiccmd(void) {
     return &emptycmd;
 }
 
-//
-// I_DoomExeDir
-//
+/**
+ * @brief Get the user-writeable directory.
+ *
+ * Assume this is the only user-writeable directory on the system.
+ *
+ * @return Fully-qualified path that ends with a separator or NULL if not found.
+ * @note The returning value MUST be freed by the caller.
+ */
 
-char *I_DoomExeDir(void) {
-    static char current_dir_dummy[] = {"./"};
-    static char *base;
-    if(!base) {   // cache multiple requests
-        size_t len = dstrlen(*myargv);
-        char *p = (base = malloc(len+1)) + len - 1;
-
-        dstrcpy(base,*myargv);
-
-        while(p > base && *p!='/' && *p!='\\') {
-            *p--=0;
-        }
-
-        if(*p=='/' || *p=='\\') {
-            *p--=0;
-        }
-
-        if(dstrlen(base)<2) {
-            free(base);
-            base = malloc(1024);
-            if(!getcwd(base,1024)) {
-                dstrcpy(base, current_dir_dummy);
-            }
-        }
-    }
-
-    return base;
+char *I_GetUserDir(void) {
+    return SDL_GetPrefPath("", "doom64ex");
 }
 
+/**
+ * @brief Get the directory which contains this program.
+ *
+ * @return Fully-qualified path that ends with a separator or NULL if not found.
+ * @note The returning value MUST be freed by the caller.
+ */
+
+char *I_GetBaseDir(void) {
+    return SDL_GetBasePath();
+}
+
+/**
+ * @brief Find a regular file in the user-writeable directory.
+ *
+ * @return Fully-qualified path or NULL if not found.
+ * @note The returning value MUST be freed by the caller.
+ */
+
+char *I_GetUserFile(const char *file) {
+    char *path;
+    char *userdir;
+
+    if (!(userdir = I_GetUserDir()))
+        return NULL;
+
+    path = malloc(512);
+
+    snprintf(path, 511, "%s%s", userdir, file);
+    free(userdir);
+    
+    return path;
+}
+
+/**
+ * @brief Find a regular read-only data file.
+ *
+ * @return Fully-qualified path or NULL if not found.
+ * @note The returning value MUST be freed by the caller.
+ */
+
+char *I_FindDataFile(const char *file) {
+    char *path, *dir;
+
+    path = malloc(512);
+
+    if ((dir = I_GetBaseDir())) {
+        snprintf(path, 511, "%s%s", dir, file);
+        free(dir);
+        if (I_FileExists(path))
+            return path;
+    }
+
+    if ((dir = I_GetUserDir())) {
+        snprintf(path, 511, "%s%s", dir, file);
+        free(dir);
+        if (I_FileExists(path))
+            return path;
+    }
+
+#ifdef __LINUX__
+    {
+        int i;
+        const char *paths[] = {
+                "/usr/local/share/doom64ex/",
+                "/usr/local/share/doom/",
+                "/usr/share/doom64ex/",
+                "/usr/share/doom/",
+                "/opt/doom64ex/",
+        };
+
+        for (i = 0; i < sizeof(paths) / sizeof(*paths); i++) {
+            snprintf(path, 511, "%s%s", paths[i], file);
+            if (I_FileExists(path))
+                return path;
+        }
+    }
+#endif
+
+    free(path);
+    return NULL;
+}
+
+/**
+ * @brief Checks to see if the given absolute path is a regular file.
+ * @param path Absolute path to check.
+ */
+
+dboolean I_FileExists(const char *path)
+{
+    struct stat st;
+    return !stat(path, &st) && S_ISREG(st.st_mode);
+}
 
 //
 // I_GetTime
