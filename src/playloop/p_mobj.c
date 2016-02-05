@@ -1118,7 +1118,10 @@ mobj_t* P_SpawnMapThing(mapthing_t* mthing) {
 
     if(mthing->options & MTF_SECRET) {
         mobj->flags |= MF_COUNTSECRET;
-        totalsecret++;
+
+        if(gameaction != ga_loadgame) {
+            totalsecret++;
+        }
     }
 
     // At least set BF_MIDPOINTONLY if no flags exist..
