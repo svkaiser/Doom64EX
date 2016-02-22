@@ -81,7 +81,13 @@ void I_Quit(void);
 void I_BeginRead(void);
 void I_Error(char *error, ...);
 void I_Printf(char *msg, ...);
-char *I_DoomExeDir(void);
+
+char *I_GetUserDir(void);
+char *I_GetBaseDir(void);
+char *I_GetUserFile(const char *file);
+char *I_FindDataFile(const char *file);
+
+dboolean I_FileExists(const char *path);
 
 void I_RegisterCvars(void);
 

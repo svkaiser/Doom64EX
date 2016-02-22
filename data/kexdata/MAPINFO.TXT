@@ -1,0 +1,421 @@
+//
+// MAPINFO FOR DOOM 64
+//
+
+map MAP01 "Staging Area"
+{
+	levelnum = 1
+	music = "MUSAMB04"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP02 "The Terraformer"
+{
+	levelnum = 2
+	music = "MUSAMB05"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP03 "Main Engineering"
+{
+	levelnum = 3
+	music = "MUSAMB13"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP04 "Holding Area"
+{
+	levelnum = 4
+	music = "MUSAMB12"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP05 "Tech Center"
+{
+	levelnum = 5
+	music = "MUSAMB09"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP06 "Alpha Quadrant"
+{
+	levelnum = 6
+	music = "MUSAMB15"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP07 "Research Lab"
+{
+	levelnum = 7
+	music = "MUSAMB16"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP08 "Final Outpost"
+{
+	levelnum = 8
+	music = "MUSAMB18"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP09 "Even Simpler"
+{
+	levelnum = 9
+	music = "MUSAMB03"
+	classtype = 0
+	cluster = 1
+	exitdelay = 15
+}
+
+map MAP10 "The Bleeding"
+{
+	levelnum = 10
+	music = "MUSAMB06"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP11 "Terror Core"
+{
+	levelnum = 11
+	music = "MUSAMB07"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP12 "Altar of Pain"
+{
+	levelnum = 12
+	music = "MUSAMB10"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP13 "Dark Citadel"
+{
+	levelnum = 13
+	music = "MUSAMB01"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP14 "Eye of the Storm"
+{
+	levelnum = 14
+	music = "MUSAMB14"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP15 "Dark Entries"
+{
+	levelnum = 15
+	music = "MUSAMB19"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP16 "Blood Keep"
+{
+	levelnum = 16
+	music = "MUSAMB05"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP17 "Watch Your Step"
+{
+	levelnum = 17
+	music = "MUSAMB11"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP18 "Spawned Fear"
+{
+	levelnum = 18
+	music = "MUSAMB02"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP19 "The Spiral"
+{
+	levelnum = 19
+	music = "MUSAMB08"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP20 "Breakdown"
+{
+	levelnum = 20
+	music = "MUSAMB20"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP21 "Pitfalls"
+{
+	levelnum = 21
+	music = "MUSAMB17"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP22 "Burnt Offerings"
+{
+	levelnum = 22
+	music = "MUSAMB09"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP23 "Unholy Temple"
+{
+	levelnum = 23
+	music = "MUSAMB16"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP24 "No Escape"
+{
+	levelnum = 24
+	music = "MUSAMB06"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP25 "Cat And Mouse"
+{
+	levelnum = 25
+	music = "MUSAMB05"
+	classtype = 1
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP26 "HardCore"
+{
+	levelnum = 26
+	music = "MUSAMB06"
+	classtype = 1
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP27 "Playground"
+{
+	levelnum = 27
+	music = "MUSAMB02"
+	classtype = 1
+	cluster = 0
+	exitdelay = 15
+}
+
+map MAP28 "The Absolution"
+{
+	levelnum = 28
+	music = "MUSAMB07"
+	classtype = 0
+	cluster = 6
+	exitdelay = 120
+}
+
+map MAP29 "Outpost Omega"
+{
+	levelnum = 29
+	music = "MUSAMB09"
+	classtype = 0
+	cluster = 2
+	exitdelay = 15
+}
+
+map MAP30 "The Lair"
+{
+	levelnum = 30
+	music = "MUSAMB10"
+	classtype = 0
+	cluster = 3
+	exitdelay = 15
+}
+
+map MAP31 "In The Void"
+{
+	levelnum = 31
+	music = "MUSAMB11"
+	classtype = 0
+	cluster = 4
+	exitdelay = 15
+}
+
+map MAP32 "Hectic"
+{
+	levelnum = 32
+	music = "MUSAMB12"
+	classtype = 0
+	cluster = 5
+	exitdelay = 15
+	clearcheats
+}
+
+map MAP33 "TITLE"
+{
+	levelnum = 33
+	music = "MUSINTRO"
+	classtype = 0
+	cluster = 0
+	exitdelay = 15
+	compat_collision = 1
+	nointermission
+	continuemusiconexit
+	forcegodmode
+}
+
+cluster 1
+{
+	pic = "EVIL"
+	pic_x = 64
+	pic_y = 30
+	entertext =	"you cackle as the",
+			"familiarity of the",
+			"situation occurs to you.",
+			"The gateway to the Demons",
+			"domain was too accessible.",
+			"You realize the demons mock",
+			"you with their invitation.",
+			"It does not matter...",
+			"The demons spawn like rats",
+			"and you have the grade AAA",
+			"U.A.C. poison they crave.",
+			"Your bloodthirsty scream",
+			"shatters the teleport haze.",
+			"Once again you find yourself",
+			"amidst..."
+}
+
+cluster 2
+{
+	pic = "EVIL"
+	pic_x = 64
+	pic_y = 30
+	entertext =	"The vast silence reminds",
+			"you of the military morgue.",
+			"",
+			"You knew the installation",
+			"had a classified level.",
+			"",
+			"The U.A.C. had some good",
+			"reason to hide this place.",
+			"",
+			"You wonder what it",
+			"could be..."
+}
+
+cluster 3
+{
+	pic = "EVIL"
+	pic_x = 64
+	pic_y = 30
+	entertext =	"You smile.",
+			"",
+			"What strange place have",
+			"you stumbled upon?",
+			"",
+			"The Demons did not expect",
+			"you to survive this far.",
+			"You feel their demonic",
+			"presence waiting for you...",
+			"",
+			"Let them taste their guts!"
+}
+
+cluster 4
+{
+	pic = "EVIL"
+	pic_x = 64
+	pic_y = 30
+	entertext =	"You wretch as a strange",
+			"acrid odor assaults you.",
+			"",
+			"Death and Demon carcass!",
+			"",
+			"No nightmare could have",
+			"prepared you for this.",
+			"",
+			"You realize that this",
+			"place was not meant for",
+			"living humans."
+}
+
+cluster 5
+{
+	pic = "EVIL"
+	pic_x = 64
+	pic_y = 30
+	nointermission
+	entertext =	"Congratulations!",
+			"You found...",
+			"",
+			"HECTIC",
+			"",
+			"Only the best will reap",
+			"its rewards."
+}
+
+cluster 6
+{
+	pic = "FINAL"
+	music = "MUSFINAL"
+	pic_x = 0
+	pic_y = 0
+	scrolltextend
+	exittext =	"Finally...",
+			"The mother of all demons",
+			"is dead!",
+			"",
+			"The blood pours from",
+			"your eyes as you stand",
+			"in defiance.",
+			"",
+			"As the only marine to",
+			"endure the slaughter-",
+			"you decide to remain",
+			"in Hell and ensure no",
+			"demon ever rises again.",
+			"",
+			"The End."
+}
+

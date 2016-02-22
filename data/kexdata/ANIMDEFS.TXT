@@ -1,0 +1,126 @@
+//
+// ANIMATION DEFINITIONS FOR DOOM 64
+//
+
+
+animpic "SMONAA"
+{
+	restartdelay = 15
+	frames = 4
+	speed = 7
+}
+
+animpic "SMONBA"
+{
+	restartdelay = 0
+	frames = 4
+	speed = 1
+}
+
+animpic "SMONCA"
+{
+	restartdelay = 0
+	frames = 4
+	speed = 7
+}
+
+animpic "CFACEA"
+{
+	restartdelay = 90
+	frames = 3
+	speed = 3
+	rewind
+}
+
+animpic "SMONDA"
+{
+	restartdelay = 0
+	frames = 4
+	speed = 3
+}
+
+animpic "SMONEA"
+{
+	restartdelay = 10
+	frames = 4
+	speed = 7
+}
+
+animpic "SPORTA"
+{
+	restartdelay = 0
+	frames = 9
+	speed = 3
+	cyclepalettes
+}
+
+animpic "SMONF"
+{
+	restartdelay = 10
+	frames = 5
+	speed = 1
+	rewind
+	cyclepalettes
+}
+
+animpic "STRAKR"
+{
+	restartdelay = 10
+	frames = 5
+	speed = 1
+	rewind
+	cyclepalettes
+}
+
+animpic "STRAKB"
+{
+	restartdelay = 10
+	frames = 5
+	speed = 1
+	rewind
+	cyclepalettes
+}
+
+animpic "STRAKY"
+{
+	restartdelay = 10
+	frames = 5
+	speed = 1
+	rewind
+	cyclepalettes
+}
+
+animpic "C307B"
+{
+	restartdelay = 50
+	frames = 5
+	speed = 1
+	rewind
+	cyclepalettes
+}
+
+animpic "CTEL"
+{
+	restartdelay = 0
+	frames = 8
+	speed = 3
+	cyclepalettes
+}
+
+animpic "CASFL98"
+{
+	restartdelay = 0
+	frames = 5
+	speed = 7
+	rewind
+	cyclepalettes
+}
+
+animpic "HTELA"
+{
+	restartdelay = 0
+	frames = 4
+	speed = 1
+	rewind
+}
+

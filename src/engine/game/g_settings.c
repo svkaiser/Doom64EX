@@ -56,33 +56,7 @@ char    DefaultConfig[] =
 //
 
 char *G_GetConfigFileName(void) {
-#ifdef _WIN32
-    CON_DPrintf("Loading config: %s\\%s\n", I_DoomExeDir(), ConfigFileName);
-    return ConfigFileName;
-#else
-    // 20120105 bkw: Be UNIX-friendly and use ~/.doom64ex/config.cfg
-    if(ConfigFileName == NULL) {
-        char confdir[PATH_MAX];
-        static char conffile[PATH_MAX];
-
-        char *homedir = getenv("HOME");
-
-        if(!homedir) {
-            homedir = ".";    // Fall back to ./.doom64ex if HOME not set
-        }
-
-        // make sure the directory exists
-        sprintf(confdir, "%s/.doom64ex", homedir);
-        (void)mkdir(confdir, 0755); // ignore return value
-
-        sprintf(conffile, "%s/config.cfg", confdir);
-        ConfigFileName = conffile;
-        I_Printf("G_GetConfigFileName: using config file '%s'\n", ConfigFileName);
-    }
-
-    CON_DPrintf("Loading config: %s\n", ConfigFileName);
-    return ConfigFileName;
-#endif
+    return I_GetUserFile("config.cfg");
 }
 
 void G_ExecuteMultipleCommands(char *data) {

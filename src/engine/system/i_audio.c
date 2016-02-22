@@ -1175,6 +1175,9 @@ static int SDLCALL Thread_PlayerHandler(void *param) {
 //
 
 void I_InitSequencer(void) {
+    dboolean sffound;
+    char *sfpath;
+
     CON_DPrintf("--------Initializing Software Synthesizer--------\n");
 
     //
@@ -1248,44 +1251,30 @@ void I_InitSequencer(void) {
     //
     // load soundfont
     //
-#ifdef _WIN32
-    doomseq.sfont_id = fluid_synth_sfload(
-                           doomseq.synth, s_soundfont.string, 1);
 
-    CON_DPrintf("Loading %s\\%s\n", I_DoomExeDir(), s_soundfont.string);
+    sffound = false;
+    if (s_soundfont.string[0]) {
+        if (I_FileExists(s_soundfont.string)) {
+            I_Printf("Found SoundFont %s\n", s_soundfont.string);
+            doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont.string, 1);
 
-#else
-    // 20120111 bkw: look in the same places as doom64.wad. Someday this needs
-    // to be a config file setting and not hard-coded.
-    // 20120203 villsa - done :)
-    {
-        struct stat buf;
-        char *sfpath;
+            CON_DPrintf("Loading %s\n", s_soundfont.string);
 
-        // 20120126 bkw: stat the files instead of trying to fluid_synth_sfload
-        // each one, to avoid "fluidsynth: cant't load soundfont" messages.
-        if(!stat("DOOMSND.SF2", &buf)) {
-            sfpath = "DOOMSND.SF2";
+            sffound = true;
+        } else {
+            CON_Warnf("CVar s_soundfont doesn't point to a file.", s_soundfont.string);
         }
-        else if(!stat("/usr/local/share/games/doom64/DOOMSND.SF2", &buf)) {
-            sfpath = "/usr/local/share/games/doom64/DOOMSND.SF2";
-        }
-        else if(!stat("/usr/share/games/doom64/DOOMSND.SF2", &buf)) {
-            sfpath = "/usr/share/games/doom64/DOOMSND.SF2";
-        }
-        else if(!stat("/usr/local/share/doom64/DOOMSND.SF2", &buf)) {
-            sfpath = "/usr/local/share/doom64/DOOMSND.SF2";
-        }
-        else {
-            sfpath = s_soundfont.string;
-        }
+    }
 
+    if ((sfpath = I_FindDataFile("doomsnd.sf2"))) {
         I_Printf("Found SoundFont %s\n", sfpath);
         doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath, 1);
 
         CON_DPrintf("Loading %s\n", sfpath);
+
+        free(sfpath);
+        sffound = true;
     }
-#endif
 
     //
     // set state
