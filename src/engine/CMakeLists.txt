@@ -313,3 +313,5 @@ target_link_libraries(doom64ex ${LIBRARIES} m)
 ##------------------------------------------------------------------------------
 ## Install target
 ##
+
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)

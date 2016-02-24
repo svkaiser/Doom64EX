@@ -22,8 +22,6 @@
 ## 02111-1307, USA.
 ##
 
-set(WADTOOL_BINARY "${CMAKE_BINARY_DIR}/src/wadtool/wadtool")
-
 ##------------------------------------------------------------------------------
 ## Sources
 ##
@@ -37,3 +35,16 @@ set(SOURCES
 ##
 
 add_executable(wadtool ${SOURCES})
+
+# Generate kexdata.wad
+add_custom_command(TARGET wadtool POST_BUILD
+  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/wadtool" "${DATA_DIR}/kexdata" "${CMAKE_CURRENT_BINARY_DIR}/kexdata.wad"
+  DEPENDS wadtool
+  )
+
+##------------------------------------------------------------------------------
+## Install target
+##
+
+# Install kexdata.wad
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kexdata.wad DESTINATION share/games/doom64ex)

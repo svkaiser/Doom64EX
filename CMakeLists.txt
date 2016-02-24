@@ -42,12 +42,6 @@ option(BUILD_ENGINE "Build Doom64EX" ON)
 
 if (BUILD_PWAD)
   add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
-
-  # generate kexdata.wad using wadtool
-  add_custom_target(kexdata
-    COMMAND "${WADTOOL_BINARY}" "${DATA_DIR}/kexdata" "${CMAKE_BINARY_DIR}/kexdata.wad"
-    DEPENDS wadtool
-    )
 endif()
 
 if (BUILD_ENGINE)
