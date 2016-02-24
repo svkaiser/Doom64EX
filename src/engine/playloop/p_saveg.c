@@ -61,16 +61,10 @@ static unsigned long save_offset = 0;
 //
 
 char *P_GetSaveGameName(int num) {
-    static char name[256];
+    char name[256];
 
-#ifdef _WIN32
-    sprintf(name, SAVEGAMENAME"%d.dsg", num);
-#else
-    // 20120105 bkw: UNIX-friendly savegame location
-    sprintf(name, "%s/.doom64ex/"SAVEGAMENAME"%d.dsg", getenv("HOME"), num);
-#endif
-
-    return name;
+    sprintf(name, SAVEGAMENAME "%d.dsg", num);
+    return I_GetUserFile(name);
 }
 
 //------------------------------------------------------------------------
