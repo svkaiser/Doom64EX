@@ -1042,6 +1042,7 @@ static dboolean Seq_RegisterSongs(doomseq_t* seq) {
     int i;
     int start;
     int end;
+    int fail;
 
     seq->nsongs = 0;
     i = 0;
@@ -1060,6 +1061,7 @@ static dboolean Seq_RegisterSongs(doomseq_t* seq) {
 
     seq->songs = (song_t*)Z_Calloc(seq->nsongs * sizeof(song_t), PU_STATIC, 0);
 
+    fail = 0;
     for(i = 0; i < seq->nsongs; i++) {
         song_t* song;
 
@@ -1073,7 +1075,8 @@ static dboolean Seq_RegisterSongs(doomseq_t* seq) {
 
         dmemcpy(song, song->data, 0x0e);
         if(dstrncmp(song->header, "MThd", 4)) {
-            return false;
+            fail++;
+            continue;
         }
 
         song->chunksize = I_SwapBE32(song->chunksize);
@@ -1084,8 +1087,13 @@ static dboolean Seq_RegisterSongs(doomseq_t* seq) {
         song->tempo     = 480000;
 
         if(!Song_RegisterTracks(song)) {
-            return false;    // bad midi lump?
+            fail++;
+            continue;
         }
+    }
+
+    if (fail) {
+        I_Printf("Failed to load %d MIDI tracks.\n", fail);
     }
 
     return true;
@@ -1266,7 +1274,7 @@ void I_InitSequencer(void) {
         }
     }
 
-    if ((sfpath = I_FindDataFile("doomsnd.sf2"))) {
+    if (!sffound && (sfpath = I_FindDataFile("doomsnd.sf2"))) {
         I_Printf("Found SoundFont %s\n", sfpath);
         doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath, 1);
 

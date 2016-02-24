@@ -104,11 +104,9 @@ int main(int argc, char *argv[])
     add_file("CURSOR", "CURSOR.PNG");
     add_marker("G_END");
 
-    add_marker("DS_START");
     add_file("MAPINFO", "MAPINFO.TXT");
     add_file("ANIMDEFS", "ANIMDEFS.TXT");
     add_file("SKYDEFS", "SKYDEFS.TXT");
-    add_marker("DS_END");
 
     add_marker("ENDOFWAD");
 
