@@ -3,6 +3,8 @@ Doom64EX
 
 Doom64EX is a reverse-engineering project aimed to recreate Doom64 as close as possible with additional modding features.
 
+**NOTE for Linux users:** As of Feb. 24, 2016, the save data is located in `$XDG_DATA_DIR/doom64ex` (typically `~/.local/share/doom64ex`) and not in `~/.doom64ex`. The files can be safely moved to their new home.
+
 ## Dependencies
 
 * SDL2
