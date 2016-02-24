@@ -481,8 +481,10 @@ char *I_FindDataFile(const char *file) {
     {
         int i;
         const char *paths[] = {
+                "/usr/local/share/games/doom64ex/",
                 "/usr/local/share/doom64ex/",
                 "/usr/local/share/doom/",
+                "/usr/share/games/doom64ex/",
                 "/usr/share/doom64ex/",
                 "/usr/share/doom/",
                 "/opt/doom64ex/",
