@@ -3,7 +3,7 @@ Doom64EX
 
 Doom64EX is a reverse-engineering project aimed to recreate Doom64 as close as possible with additional modding features.
 
-**NOTE for Linux users:** As of Feb. 24, 2016, the save data is located in `$XDG_DATA_DIR/doom64ex` (typically `~/.local/share/doom64ex`) and not in `~/.doom64ex`. The files can be safely moved to their new home.
+**NOTE for Linux users:** As of Feb. 24, 2016, the save data is located in `$XDG_DATA_HOME/doom64ex` (typically `~/.local/share/doom64ex`) and not in `~/.doom64ex`. The files can be safely moved to their new home.
 
 ## Dependencies
 
@@ -41,7 +41,7 @@ Install doom64ex
 Doom64EX needs the Doom 64 data to be present in any of the following directories:
 
 * The directory in which `doom64ex` resides
-* `$XDG_DATA_DIR/doom64ex` (eg. `~/.local/share/doom64ex`)
+* `$XDG_DATA_HOME/doom64ex` (eg. `~/.local/share/doom64ex`)
 * `/usr/local/share/games/doom64ex`
 * `/usr/local/share/doom64ex`
 * `/usr/share/games/doom64ex`
