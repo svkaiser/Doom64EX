@@ -242,15 +242,17 @@ void W_Init(void) {
     } else {
         I_Error("W_Init: kexdata.wad not found");
     }
-/*
+
     p = M_CheckParm("-file");
     if(p) {
         // the parms after p are wadfile/lump names,
         // until end of parms or another - preceded parm
         while(++p != myargc && myargv[p][0] != '-') {
             char *filename;
-            filename = W_TryFindWADByName(myargv[p]);
-            W_MergeFile(filename);
+            if ((filename = I_FindDataFile(myargv[p]))) {
+                W_MergeFile(filename);
+                free(filename);
+            }
         }
     }
     // 20120724 villsa - find drag & drop wad files
@@ -259,11 +261,13 @@ void W_Init(void) {
             if(dstrstr(myargv[i], ".wad") ||
                     dstrstr(myargv[i], ".WAD")) {
                 char *filename;
-                filename = W_TryFindWADByName(myargv[i]);
-                W_MergeFile(filename);
+                if ((filename = I_FindDataFile(myargv[i]))) {
+                    W_MergeFile(filename);
+                    free(filename);
+                }
             }
         }
-    }*/
+    }
 
     W_HashLumps();
 }
