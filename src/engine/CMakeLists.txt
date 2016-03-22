@@ -99,6 +99,20 @@ set(VERSION_GIT true)
 ## Platform-specific sources
 ##
 
+if(WIN32)
+	add_sources(system/win32
+			doom64.rc
+            )
+
+    add_sources(system
+            i_cpu.c
+            )
+else()
+    add_sources(system
+            i_cpu_posix.c
+            )
+endif()
+
 ##------------------------------------------------------------------------------
 ## Sources
 ##
@@ -253,7 +267,6 @@ add_sources(statusbar
 # src/system
 add_sources(system
 	i_audio.c
-	i_cpu_posix.c
 	i_main.c
 	i_png.c
 	i_swap.h
@@ -286,7 +299,7 @@ add_sources(wadgen
 	sndfont.c
 	sndfont.h
 	sound.c
-  sound.h
+    sound.h
 	sprite.c
 	sprite.h
 	texture.c
@@ -308,10 +321,12 @@ add_sources(zone
 
 add_executable(doom64ex ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES})
-target_link_libraries(doom64ex ${LIBRARIES} m)
+target_link_libraries(doom64ex ${LIBRARIES})
 
 ##------------------------------------------------------------------------------
 ## Install target
 ##
 
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)
+if(NOT WIN32)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)
+endif()
