@@ -40,6 +40,9 @@ set(SDL2_MD5 "44fc4a023349933e7f5d7a582f7b886e")
 set(SDL2_net_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz")
 set(SDL2_net_MD5 "5c1d9d1cfa63301b141cb5c0de2ea7c4")
 
+set(FluidSynth_URL "https://sourceforge.net/projects/fluidsynth/files/fluidsynth-1.1.6/fluidsynth-1.1.6.tar.gz/download")
+set(FluidSynth_MD5 "ae5aca6de824b4173667cbd3a310b263")
+
 ##------------------------------------------------------------------------------
 ## SDL2
 ##
@@ -65,7 +68,6 @@ ExternalProject_Add(SDL2
   CMAKE_ARGS -DVIDEO_WAYLAND=OFF -DVIDEO_MIR=OFF -DVIDEO_RPI=OFF -DDIRECTX=OFF
   )
 
-
 ##------------------------------------------------------------------------------
 ## SDL2_net
 ##
@@ -81,4 +83,29 @@ ExternalProject_Add(SDL2_net
   INSTALL_DIR ${INSTALL_DIR}
 
   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+  )
+
+##------------------------------------------------------------------------------
+## FluidSynth
+##
+set(FluidSynth_PREFIX "${SOURCE_DIR}/fluidsynth")
+
+ExternalProject_Add(FluidSynth
+  PREFIX ${FluidSynth_PREFIX}
+  URL ${FluidSynth_URL}
+  URL_MD5 ${FluidSynth_MD5}
+
+  DOWNLOAD_DIR ${FluidSynth_PREFIX}/download
+
+  INSTALL_DIR ${INSTALL_DIR}
+
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+
+  # We don't need these audio drivers
+  CMAKE_ARGS -Denable-libsndfile=OFF -Denable-aufile=OFF -Denable-jack=OFF -Denable-midishare=OFF
+  CMAKE_ARGS -Denable-ladcca=OFF -Denable-lash=OFF
+  CMAKE_ARGS -Denable-coremidi=OFF
+
+  # A MIDI synth with IPv6 support... sure...
+  CMAKE_ARGS -Denable-readline=OFF -Denable-dbus=OFF -Denable-ipv6=OFF
   )
