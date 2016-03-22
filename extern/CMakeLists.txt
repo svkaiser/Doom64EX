@@ -40,6 +40,9 @@ set(SDL2_MD5 "44fc4a023349933e7f5d7a582f7b886e")
 set(SDL2_net_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz")
 set(SDL2_net_MD5 "5c1d9d1cfa63301b141cb5c0de2ea7c4")
 
+set(GLib_URL "http://ftp.gnome.org/pub/GNOME/sources/glib/2.24/glib-2.24.2.tar.gz")
+set(GLib_MD5 "071b8e246197d334e20ab67956aef936")
+
 set(FluidSynth_URL "https://sourceforge.net/projects/fluidsynth/files/fluidsynth-1.1.6/fluidsynth-1.1.6.tar.gz/download")
 set(FluidSynth_MD5 "ae5aca6de824b4173667cbd3a310b263")
 
@@ -86,6 +89,23 @@ ExternalProject_Add(SDL2_net
   )
 
 ##------------------------------------------------------------------------------
+## GLib
+##
+set(GLib_PREFIX "${SOURCE_DIR}/glib")
+
+ExternalProject_Add(GLib
+  PREFIX ${GLib_PREFIX}
+  URL ${GLib_URL}
+  URL_MD5 ${GLib_MD5}
+
+  DOWNLOAD_DIR ${GLib_PREFIX}/download
+
+  INSTALL_DIR ${INSTALL_DIR}
+
+  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+  )
+
+##------------------------------------------------------------------------------
 ## FluidSynth
 ##
 set(FluidSynth_PREFIX "${SOURCE_DIR}/fluidsynth")
@@ -94,6 +114,7 @@ ExternalProject_Add(FluidSynth
   PREFIX ${FluidSynth_PREFIX}
   URL ${FluidSynth_URL}
   URL_MD5 ${FluidSynth_MD5}
+  DEPENDS GLib
 
   DOWNLOAD_DIR ${FluidSynth_PREFIX}/download
 
