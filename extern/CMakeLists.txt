@@ -37,6 +37,9 @@ set(INSTALL_DIR "${CMAKE_BINARY_DIR}")
 set(SDL2_URL "https://www.libsdl.org/release/SDL2-2.0.4.tar.gz")
 set(SDL2_MD5 "44fc4a023349933e7f5d7a582f7b886e")
 
+set(SDL2_net_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz")
+set(SDL2_net_MD5 "5c1d9d1cfa63301b141cb5c0de2ea7c4")
+
 ##------------------------------------------------------------------------------
 ## SDL2
 ##
@@ -49,7 +52,7 @@ ExternalProject_Add(SDL2
 
   DOWNLOAD_DIR ${SDL2_PREFIX}/download
 
-  INSTALL_DIR ${INTALL_DIR}
+  INSTALL_DIR ${INSTALL_DIR}
 
   # Only compile the shared lib
   CMAKE_ARGS -DSDL_STATIC=OFF -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
@@ -60,4 +63,22 @@ ExternalProject_Add(SDL2
 
   # Video is for suckers
   CMAKE_ARGS -DVIDEO_WAYLAND=OFF -DVIDEO_MIR=OFF -DVIDEO_RPI=OFF -DDIRECTX=OFF
+  )
+
+
+##------------------------------------------------------------------------------
+## SDL2_net
+##
+set(SDL2_net_PREFIX "${SOURCE_DIR}/sdl2_net")
+
+ExternalProject_Add(SDL2_net
+  PREFIX ${SDL2_net_PREFIX}
+  URL ${SDL2_net_URL}
+  URL_MD5 ${SDL2_net_MD5}
+
+  DOWNLOAD_DIR ${SDL2_net_PREFIX}/download
+
+  INSTALL_DIR ${INSTALL_DIR}
+
+  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
   )
