@@ -109,6 +109,7 @@ if(WIN32)
 	  CONFIGURE_COMMAND ""
 	  BUILD_COMMAND ""
 	  INSTALL_COMMAND
+		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/bin <INSTALL_DIR>/bin
 		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/lib <INSTALL_DIR>/lib
 		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/include <INSTALL_DIR>/include
 	  )
