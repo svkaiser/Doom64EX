@@ -49,6 +49,9 @@ set(FluidSynth_MD5 "ae5aca6de824b4173667cbd3a310b263")
 set(libpng_URL "http://download.sourceforge.net/libpng/libpng-1.6.21.tar.gz")
 set(libpng_MD5 "aca36ec8e0a3b406a5912243bc243717")
 
+set(zlib_URL "http://zlib.net/zlib-1.2.8.tar.gz")
+set(zlib_MD5 "44d667c142d7cda120332623eab69f40")
+
 ##------------------------------------------------------------------------------
 ## SDL2
 ##
@@ -149,4 +152,21 @@ ExternalProject_Add(libpng
   INSTALL_DIR ${INSTALL_DIR}
 
   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+  )
+
+##------------------------------------------------------------------------------
+## zlib
+##
+set(zlib_PREFIX "${SOURCE_DIR}/zlib")
+
+ExternalProject_Add(zlib
+  PREFIX ${zlib_PREFIX}
+  URL ${zlib_URL}
+  URL_MD5 ${zlib_MD5}
+
+  DOWNLOAD_DIR ${zlib_PREFIX}/download
+
+  INSTALL_DIR ${INSTALL_DIR}
+
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
   )
