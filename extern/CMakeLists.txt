@@ -46,6 +46,9 @@ set(GLib_MD5 "071b8e246197d334e20ab67956aef936")
 set(FluidSynth_URL "https://sourceforge.net/projects/fluidsynth/files/fluidsynth-1.1.6/fluidsynth-1.1.6.tar.gz/download")
 set(FluidSynth_MD5 "ae5aca6de824b4173667cbd3a310b263")
 
+set(libpng_URL "http://download.sourceforge.net/libpng/libpng-1.6.21.tar.gz")
+set(libpng_MD5 "aca36ec8e0a3b406a5912243bc243717")
+
 ##------------------------------------------------------------------------------
 ## SDL2
 ##
@@ -129,4 +132,21 @@ ExternalProject_Add(FluidSynth
 
   # A MIDI synth with IPv6 support... sure...
   CMAKE_ARGS -Denable-readline=OFF -Denable-dbus=OFF -Denable-ipv6=OFF
+  )
+
+##------------------------------------------------------------------------------
+## libpng
+##
+set(libpng_PREFIX "${SOURCE_DIR}/libpng")
+
+ExternalProject_Add(libpng
+  PREFIX ${libpng_PREFIX}
+  URL ${libpng_URL}
+  URL_MD5 ${libpng_MD5}
+
+  DOWNLOAD_DIR ${libpng_PREFIX}/download
+
+  INSTALL_DIR ${INSTALL_DIR}
+
+  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
   )
