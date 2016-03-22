@@ -1,4 +1,6 @@
-.idea/
-temp/
+# ignore CLion-specific project files
+/.idea/
 
-.idea/
+# ignore various build directories
+temp/
+/extern/build/
