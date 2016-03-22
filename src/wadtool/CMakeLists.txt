@@ -38,7 +38,7 @@ add_executable(wadtool ${SOURCES})
 
 # Generate kexdata.wad
 add_custom_command(TARGET wadtool POST_BUILD
-  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/wadtool" "${DATA_DIR}/kexdata" "${CMAKE_CURRENT_BINARY_DIR}/kexdata.wad"
+  COMMAND wadtool "${CMAKE_SOURCE_DIR}/data/kexdata" "${CMAKE_BINARY_DIR}/kexdata.wad"
   DEPENDS wadtool
   )
 
@@ -47,4 +47,6 @@ add_custom_command(TARGET wadtool POST_BUILD
 ##
 
 # Install kexdata.wad
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kexdata.wad DESTINATION share/games/doom64ex)
+if(NOT WIN32)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kexdata.wad DESTINATION share/games/doom64ex)
+endif()

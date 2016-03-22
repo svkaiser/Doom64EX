@@ -7,6 +7,7 @@ if exist ".\devenv\" (
   echo.
   pause
 
+  rmdir /S /Q .\devenv
 )
 
 mkdir .\devenv
