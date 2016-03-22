@@ -2,5 +2,6 @@
 /.idea/
 
 # ignore various build directories
-temp/
 /extern/build/
+/devenv
+temp/
