@@ -51,10 +51,7 @@ set(PkgConfig_URL "http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pk
 set(GLib_URL "http://ftp.gnome.org/pub/GNOME/sources/glib/2.24/glib-2.24.2.tar.gz")
 set(GLib_MD5 "071b8e246197d334e20ab67956aef936")
 
-if(WIN64)
-  set(GLib_BIN_URL "http://ftp.gnome.org/pub/GNOME/binaries/win64/glib/2.24/glib_2.24.2-2_win64.zip")
-  set(GLib_DEV_URL "http://ftp.gnome.org/pub/GNOME/binaries/win64/glib/2.24/glib-dev_2.24.2-2_win64.zip")
-elseif(WIN32)
+if(WIN32)
   set(GLib_BIN_URL "http://ftp.gnome.org/pub/GNOME/binaries/win32/glib/2.24/glib_2.24.2-2_win32.zip")
   set(GLib_DEV_URL "http://ftp.gnome.org/pub/GNOME/binaries/win32/glib/2.24/glib-dev_2.24.2-2_win32.zip")
 endif()
@@ -75,15 +72,9 @@ set(libpng_MD5 "aca36ec8e0a3b406a5912243bc243717")
 ##------------------------------------------------------------------------------
 ## SDL2
 ##
-set(SDL2_PREFIX "${SOURCE_DIR}/sdl2")
-
 ExternalProject_Add(SDL2
-  PREFIX ${SDL2_PREFIX}
   URL ${SDL2_URL}
   URL_MD5 ${SDL2_MD5}
-
-  DOWNLOAD_DIR ${SDL2_PREFIX}/download
-
   INSTALL_DIR ${INSTALL_DIR}
 
   # Only compile the shared lib
@@ -103,34 +94,22 @@ ExternalProject_Add(SDL2
 
 if(WIN32)
 # SDL2_net doesn't have a CMakeLists.txt, so just download the binaries
-set(SDL2_net_BIN_PREFIX "${SOURCE_DIR}/sdl2_net_bin")
 ExternalProject_Add(SDL2_net_BIN
-  PREFIX ${SDL2_net_BIN}
   URL ${SDL2_net_BIN_URL}
-  #URL_MD5 ${SDL2_net_WIN32BIN_MD5}
-
-  DOWNLOAD_DIR ${SDL2_net_BIN}/download
   INSTALL_DIR ${INSTALL_DIR}
   
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND
-	COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x86 <INSTALL_DIR>/lib32
-	COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x64 <INSTALL_DIR>/lib64
+	COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x86 <INSTALL_DIR>/lib
 	COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
   )
 else()
 # Build using Autotools
-set(SDL2_net_PREFIX "${SOURCE_DIR}/sdl2_net")
-
 ExternalProject_Add(SDL2_net
-  PREFIX ${SDL2_net_PREFIX}
   URL ${SDL2_net_URL}
   URL_MD5 ${SDL2_net_MD5}
   DEPENDS SDL2
-
-  DOWNLOAD_DIR ${SDL2_net_PREFIX}/download
-
   INSTALL_DIR ${INSTALL_DIR}
 
   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --with-sdl-prefix=<INSTALL_DIR>
@@ -142,12 +121,8 @@ endif()
 ##
 
 if(WIN32)
-	set(GLib_DEV_PREFIX "${SOURCE_DIR}/glib_dev")
 	ExternalProject_Add(GLib_DEV
-	  PREFIX ${GLib_DEV_PREFIX}
       URL ${GLib_DEV_URL}
-
-	  DOWNLOAD_DIR ${GLib_DEV}/download
 	  INSTALL_DIR ${INSTALL_DIR}
 	  
 	  CONFIGURE_COMMAND ""
@@ -161,8 +136,6 @@ if(WIN32)
 	ExternalProject_Add(GLib_BIN
 	  PREFIX ${GLib_BIN_PREFIX}
       URL ${GLib_BIN_URL}
-
-	  DOWNLOAD_DIR ${GLib_BIN}/download
 	  INSTALL_DIR ${INSTALL_DIR}
 	  
 	  CONFIGURE_COMMAND ""
@@ -173,14 +146,9 @@ if(WIN32)
 	
 	add_custom_target(GLib DEPENDS GLib_DEV GLib_BIN)
 elseif()
-	set(GLib_PREFIX "${SOURCE_DIR}/glib")
 	ExternalProject_Add(GLib
-	  PREFIX ${GLib_PREFIX}
 	  URL ${GLib_URL}
 	  URL_MD5 ${GLib_MD5}
-
-	  DOWNLOAD_DIR ${GLib_PREFIX}/download
-
 	  INSTALL_DIR ${INSTALL_DIR}
 
 	  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
@@ -258,15 +226,9 @@ ExternalProject_Add(FluidSynth
 ##------------------------------------------------------------------------------
 ## zlib
 ##
-set(zlib_PREFIX "${SOURCE_DIR}/zlib")
-
 ExternalProject_Add(zlib
-  PREFIX ${zlib_PREFIX}
   URL ${zlib_URL}
   URL_MD5 ${zlib_MD5}
-
-  DOWNLOAD_DIR ${zlib_PREFIX}/download
-
   INSTALL_DIR ${INSTALL_DIR}
 
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
@@ -275,16 +237,10 @@ ExternalProject_Add(zlib
 ##------------------------------------------------------------------------------
 ## libpng
 ##
-set(libpng_PREFIX "${SOURCE_DIR}/libpng")
-
 ExternalProject_Add(libpng
-  PREFIX ${libpng_PREFIX}
   URL ${libpng_URL}
   URL_MD5 ${libpng_MD5}
   DEPENDS zlib
-
-  DOWNLOAD_DIR ${libpng_PREFIX}/download
-
   INSTALL_DIR ${INSTALL_DIR}
 
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>  
