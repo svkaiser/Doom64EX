@@ -50,7 +50,6 @@
 #include "g_controls.h"
 
 #ifdef _WIN32
-#include "i_xinput.h"
 #include "g_controls.h"
 #endif
 

@@ -36,10 +36,6 @@
 #include "con_console.h"
 #include "z_zone.h"
 
-#ifdef _WIN32
-#include "i_xinput.h"
-#endif
-
 //do controls menu length properly
 //if list of actions for menu>=MAX_MENUACTION_LENGTH then won't display any more
 #define MAX_MENUACTION_LENGTH 25

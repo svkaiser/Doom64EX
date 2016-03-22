@@ -27,9 +27,9 @@
 
 #ifdef _WIN32
 #include "SDL_config.h"
-#else
-#include <stdint.h>
 #endif
+
+#include <stdint.h>
 
 #define false 0
 #define true (!false)

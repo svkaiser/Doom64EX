@@ -52,13 +52,6 @@
 #include "gl_draw.h"
 #include "g_demo.h"
 
-#ifdef _WIN32
-#include "i_xinput.h"
-
-void M_DrawXInputButton(int x, int y, int button);
-
-#endif
-
 CVAR(st_drawhud, 1);
 CVAR(st_crosshair, 0);
 CVAR(st_crosshairopacity, 80);

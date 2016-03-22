@@ -506,33 +506,14 @@ int dsnprintf(char *src, size_t n, const char *str, ...) {
 // main
 //
 
-#ifndef _MSC_VER
-#define I_Main main
-#else
-#ifndef _DEBUG
-#include <windows.h>
-#include "SDL_syswm.h"
+int WINAPI WinMain(HINSTANCE hWnd, HINSTANCE hPrevInst, LPSTR CmdLine, int CmdShow) {
+    int argc = __argc;
+    char **argv = __argv;
 
-extern int __cdecl I_W32ExceptionHandler(PEXCEPTION_POINTERS ep);
-int I_Main(int argc, char *argv[]);
-
-int main(int argc, char **argv) {
-    __try {
-        I_Main(argc, argv);
-    }
-    __except(I_W32ExceptionHandler(GetExceptionInformation())) {
-        I_Error("Exception caught in main: see CRASHLOG.TXT for info\n");
-    }
-
-    return 0;
+    return main(argc, argv);
 }
-#else
-#define I_Main main
-#endif  /*_DEBUG*/
 
-#endif  /*_WIN32*/
-
-int I_Main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     myargc = argc;
     myargv = argv;
 

@@ -13,7 +13,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <commctrl.h>
-#include <resource.h>
+#include <win32/resource.h>
 #include <rpcdce.h>
 #include <io.h>
 #else

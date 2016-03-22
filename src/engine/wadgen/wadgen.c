@@ -43,46 +43,7 @@ char *ArgBuffer[MAX_ARGS + 1];
 int myargc = 0;
 char **myargv;
 
-#ifdef _WIN32
-HINSTANCE hAppInst = NULL;
-HWND hwnd = NULL;
-HWND hwndWait = NULL;
-HWND hwndLoadBar = NULL;
-#endif
-
 void WGen_ShutDownApplication(void);
-
-#ifdef _WIN32
-//**************************************************************
-//**************************************************************
-//      LoadingDlgProc
-//**************************************************************
-//**************************************************************
-
-bool __stdcall
-LoadingDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg) {
-	case WM_INITDIALOG:
-		hwndLoadBar = GetDlgItem(hWnd, IDC_PROGRESS1);
-		SendMessage(hwndLoadBar, PBM_SETRANGE, 0,
-			    MAKELPARAM(0, TOTALSTEPS));
-		SendMessage(hwndLoadBar, PBM_SETSTEP, (WPARAM) (int)1, 0);
-		return TRUE;
-	case WM_PAINT:
-		return TRUE;
-	case WM_DESTROY:
-		return TRUE;
-	case WM_CLOSE:
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		}
-		break;
-	}
-	return FALSE;
-}
-#endif
 
 //**************************************************************
 //**************************************************************
@@ -238,9 +199,6 @@ void WGen_Process(void)
 	Wad_WriteOutput(outFile);
 
 	// Done
-#ifdef _WIN32
-	EndDialog(hwndWait, FALSE);
-#endif
 	WGen_Printf("Sucessfully created %s", outFile);
 
 	// Write out the soundfont file
@@ -329,11 +287,6 @@ void WGen_Complain(char *fmt, ...)
 	va_list va;
 	char buff[1024];
 
-#ifdef _WIN32
-	if (hwndWait)
-		EndDialog(hwndWait, FALSE);
-#endif
-
 	va_start(va, fmt);
 	vsprintf(buff, fmt, va);
 	va_end(va);
@@ -356,13 +309,7 @@ void WGen_UpdateProgress(char *fmt, ...)
 	vsprintf(buff, fmt, va);
 	va_end(va);
 
-#ifdef _WIN32
-	SendMessage(hwndLoadBar, PBM_STEPIT, 0, 0);
-	SetDlgItemText(hwndWait, IDC_PROGRESSTEXT, buff);
-	UpdateWindow(hwndWait);
-#else
 	WGen_Printf("%s\n", buff);
-#endif
 }
 
 //**************************************************************

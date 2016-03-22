@@ -28,7 +28,6 @@ project(Doom64EX_Extern)
 
 include(ExternalProject)
 
-set(SOURCE_DIR "${CMAKE_BINARY_DIR}/source")
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}")
 
 ##------------------------------------------------------------------------------
@@ -40,11 +39,8 @@ set(SDL2_MD5 "44fc4a023349933e7f5d7a582f7b886e")
 set(SDL2_net_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz")
 set(SDL2_net_MD5 "5c1d9d1cfa63301b141cb5c0de2ea7c4")
 
-if(MSVC)
-  set(SDL2_net_BIN_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-devel-2.0.1-VC.zip")
-elseif(MINGW)
-  set(SDL2_net_BIN_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-devel-2.0.1-mingw.tar.gz")
-endif()
+set(SDL2_net_VC_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-devel-2.0.1-VC.zip")
+set(SDL2_net_MINGW_URL "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-devel-2.0.1-mingw.tar.gz")
 
 set(PkgConfig_URL "http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.23-3_win32.zip")
 
@@ -94,16 +90,29 @@ ExternalProject_Add(SDL2
 
 if(WIN32)
 # SDL2_net doesn't have a CMakeLists.txt, so just download the binaries
-ExternalProject_Add(SDL2_net_BIN
-  URL ${SDL2_net_BIN_URL}
-  INSTALL_DIR ${INSTALL_DIR}
-  
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND
-	COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x86 <INSTALL_DIR>/lib
-	COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
-  )
+  if(MSVC)
+	ExternalProject_Add(SDL2_net
+	  URL ${SDL2_net_VC_URL}
+	  INSTALL_DIR ${INSTALL_DIR}
+	  
+	  CONFIGURE_COMMAND ""
+	  BUILD_COMMAND ""
+	  INSTALL_COMMAND
+		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x86 <INSTALL_DIR>/lib
+		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
+	  )
+  elseif(MINGW)
+	ExternalProject_Add(SDL2_net
+	  URL ${SDL2_net_MINGW_URL}
+	  INSTALL_DIR ${INSTALL_DIR}
+	  
+	  CONFIGURE_COMMAND ""
+	  BUILD_COMMAND ""
+	  INSTALL_COMMAND
+		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/lib <INSTALL_DIR>/lib
+		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/include <INSTALL_DIR>/include
+	  )
+  endif()
 else()
 # Build using Autotools
 ExternalProject_Add(SDL2_net
@@ -132,9 +141,7 @@ if(WIN32)
 	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
 	  )
 	  
-	set(GLib_BIN_PREFIX "${SOURCE_DIR}/glib_bin")
 	ExternalProject_Add(GLib_BIN
-	  PREFIX ${GLib_BIN_PREFIX}
       URL ${GLib_BIN_URL}
 	  INSTALL_DIR ${INSTALL_DIR}
 	  
@@ -160,13 +167,9 @@ endif()
 ##
 
 if(WIN32)
-	set(PkgConfig_PREFIX "${SOURCE_DIR}/pkg-config")
 	ExternalProject_Add(PkgConfig
-	  PREFIX ${PkgConfig_PREFIX}
       URL ${PkgConfig_URL}
 	  DEPENDS GLib
-
-	  DOWNLOAD_DIR ${PkgConfig_PREFIX}/download
 	  INSTALL_DIR ${INSTALL_DIR}
 	  
 	  CONFIGURE_COMMAND ""
@@ -183,7 +186,6 @@ endif()
 if(WIN32)
 	ExternalProject_Add(proxy_libintl
       URL ${proxy_libintl_URL}
-	  
 	  INSTALL_DIR ${INSTALL_DIR}
 	  
 	  CONFIGURE_COMMAND ""
@@ -197,15 +199,10 @@ endif()
 ##------------------------------------------------------------------------------
 ## FluidSynth
 ##
-set(FluidSynth_PREFIX "${SOURCE_DIR}/fluidsynth")
-
 ExternalProject_Add(FluidSynth
-  PREFIX ${FluidSynth_PREFIX}
   URL ${FluidSynth_URL}
   URL_MD5 ${FluidSynth_MD5}
   DEPENDS GLib PkgConfig proxy_libintl
-
-  DOWNLOAD_DIR ${FluidSynth_PREFIX}/download
 
   INSTALL_DIR ${INSTALL_DIR}
 
@@ -220,7 +217,7 @@ ExternalProject_Add(FluidSynth
   CMAKE_ARGS -Denable-readline=OFF -Denable-dbus=OFF -Denable-ipv6=OFF
   
   # Fix Windows' stdio.h complaining about macro'd snprintf
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/patched-config_win32.h <SOURCE_DIR>/src/config_win32.cmake
+  #PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/patched-config_win32.h <SOURCE_DIR>/src/config_win32.cmake
   )
 
 ##------------------------------------------------------------------------------

@@ -41,10 +41,6 @@
 #include "d_main.h"
 #include "gl_main.h"
 
-#ifdef _WIN32
-#include "i_xinput.h"
-#endif
-
 SDL_Window      *window;
 SDL_GLContext   glContext;
 

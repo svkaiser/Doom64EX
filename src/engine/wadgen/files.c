@@ -47,52 +47,6 @@ char *File_GetExePath(void);
 
 wgenfile_t wgenfile;
 
-#ifdef _WIN32
-//**************************************************************
-//**************************************************************
-//      File_Dialog
-//**************************************************************
-//**************************************************************
-
-bool
-File_Dialog(wgenfile_t * wgenfile, const char *type, const char *title,
-	    HWND hwnd)
-{
-	OPENFILENAME ofn;
-
-	ZeroMemory(&ofn, sizeof(ofn));
-
-	ZeroMemory(wgenfile->filePath, MAX_PATH);
-	ZeroMemory(wgenfile->fileNoExt, MAX_PATH);
-	ZeroMemory(wgenfile->fileName, MAX_PATH);
-	ZeroMemory(wgenfile->basePath, MAX_PATH);
-	ZeroMemory(wgenfile->pathOnly, MAX_PATH);
-
-	sprintf(wgenfile->basePath, "%s", File_GetExePath());
-
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFilter = type;
-	ofn.lpstrFile = wgenfile->filePath;
-	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrTitle = title;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-
-	if (GetOpenFileName(&ofn)) {
-		memcpy(wgenfile->fileNoExt, wgenfile->filePath, MAX_PATH);
-		memcpy(wgenfile->fileName, wgenfile->filePath, MAX_PATH);
-		memcpy(wgenfile->pathOnly, wgenfile->filePath, MAX_PATH);
-
-		File_StripExt(wgenfile->fileNoExt);
-		File_StripPath(wgenfile->fileName);
-
-        File_StripFile(wgenfile->pathOnly);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-#else
 bool File_Prepare(wgenfile_t * wgenfile, const char *filename)
 {
 	ZeroMemory(wgenfile->filePath, MAX_PATH);
@@ -114,7 +68,6 @@ bool File_Prepare(wgenfile_t * wgenfile, const char *filename)
     File_StripFile(wgenfile->pathOnly);
 	return true;
 }
-#endif
 
 //**************************************************************
 //**************************************************************
