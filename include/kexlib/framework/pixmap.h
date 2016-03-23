@@ -2,21 +2,31 @@
 #ifndef __DOOM64EX_KEXLIB_FRAMEWORK_PIXMAP_H__
 #define __DOOM64EX_KEXLIB_FRAMEWORK_PIXMAP_H__
 
-#include "../kexlib.h"
+#include "pixel.h"
 
 KEX_C_BEGIN
 
-typedef enum PixmapFormat {
-    PF_RGB8,
-} PixmapFormat;
+/* TODO: Relocate into one big enum for all kexlib-related stuff, maybe. */
+enum PixmapError {
+    PIXMAP_ESUCCESS = 0, // Success
+    PIXMAP_EINVALFMT = 1, // Invalid Format
+    PIXMAP_EINVALDIM = 2, // Invalid dimensions
+};
 
 typedef struct Pixmap Pixmap;
+typedef enum PixmapError PixmapError;
 
-KEXAPI Pixmap *Pixmap_New(uint16_t width, uint16_t height, PixmapFormat fmt);
+KEXAPI Pixmap *Pixmap_New(int width, int height, int pitch, PixelFormat fmt, PixmapError *error);
+KEXAPI Pixmap *Pixmap_NewFrom(const void *src, int width, int height, int pitch, PixelFormat fmt, PixmapError *error);
 KEXAPI void Pixmap_Free(Pixmap *ptr);
 
-KEXAPI uint16_t Pixmap_GetWidth(Pixmap *pixmap);
-KEXAPI uint16_t Pixmap_GetHeight(Pixmap *pixmap);
+KEXAPI uint16_t Pixmap_GetWidth(const Pixmap *pixmap);
+KEXAPI uint16_t Pixmap_GetHeight(const Pixmap *pixmap);
+KEXAPI uint32_t Pixmap_GetArea(const Pixmap *pixmap);
+KEXAPI size_t Pixmap_GetSize(const Pixmap *pixmap);
+
+KEXAPI void *Pixmap_GetScanline(const Pixmap *pixmap, size_t idx);
+KEXAPI PixelRGB8 Pixmap_GetRGB8(const Pixmap *pixmap, int x, int y);
 
 KEX_C_END
 
