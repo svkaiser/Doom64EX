@@ -6,7 +6,17 @@
 
 KEX_C_BEGIN
 
-KEXAPI int Pixmap_Return42();
+typedef enum PixmapFormat {
+    PF_RGB8,
+} PixmapFormat;
+
+typedef struct Pixmap Pixmap;
+
+KEXAPI Pixmap *Pixmap_New(uint16_t width, uint16_t height, PixmapFormat fmt);
+KEXAPI void Pixmap_Free(Pixmap *ptr);
+
+KEXAPI uint16_t Pixmap_GetWidth(Pixmap *pixmap);
+KEXAPI uint16_t Pixmap_GetHeight(Pixmap *pixmap);
 
 KEX_C_END
 

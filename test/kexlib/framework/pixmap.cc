@@ -3,7 +3,17 @@
 
 #include <framework/pixmap.h>
 
-TEST(pixmap, Pixmap_Return42_should_return_42)
+#define WIDTH 320
+#define HEIGHT 240
+
+TEST(Pixmap, create_and_free)
 {
-    EXPECT_EQ(42, Pixmap_Return42());
+    Pixmap *pixmap;
+
+    pixmap = Pixmap_New(WIDTH, HEIGHT, PF_RGB8);
+
+    EXPECT_EQ(WIDTH, Pixmap_GetWidth(pixmap));
+    EXPECT_EQ(HEIGHT, Pixmap_GetHeight(pixmap));
+
+    Pixmap_Free(pixmap);
 }

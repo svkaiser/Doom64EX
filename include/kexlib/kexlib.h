@@ -2,6 +2,10 @@
 #ifndef __DOOM64EX_KEXLIB_H__
 #define __DOOM64EX_KEXLIB_H__
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
 #define KEXAPI extern
 
 #ifdef __cplusplus
