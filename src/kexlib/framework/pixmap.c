@@ -16,6 +16,14 @@ static struct pf_info pf_table[] = {
     { PF_RGBA8, 32, 4 },
 };
 
+static uint16_t pad_width(uint16_t width, uint8_t pitch)
+{
+    if (pitch == 0)
+        return width;
+
+    return (uint16_t) (((width / pitch) + 1) * pitch);
+}
+
 static Pixmap *alloc_pixmap(int width, int height, int pitch, PixelFormat fmt, PixmapError *error)
 {
     Pixmap *pixmap;
@@ -69,7 +77,7 @@ Pixmap *Pixmap_NewFrom(const void *src, int width, int height, int pitch, PixelF
 
     memcpy(pixmap->data, src, pixmap->size);
 
-    return NULL;
+    return pixmap;
 }
 
 void Pixmap_Free(Pixmap *ptr)
@@ -100,24 +108,28 @@ size_t Pixmap_GetSize(const Pixmap *pixmap)
 
 void *Pixmap_GetScanline(const Pixmap *pixmap, size_t idx)
 {
-    return pixmap->data + idx * pixmap->width * pf_table[pixmap->fmt].bytes;
+    return pixmap->data + idx * pad_width(pixmap->width, pixmap->pitch) * pf_table[pixmap->fmt].bytes;
 }
 
 PixelRGB8 Pixmap_GetRGB8(const Pixmap *pixmap, int x, int y)
 {
+    uint16_t padded_width;
+
     if (x < 0 || x >= pixmap->width || y < 0 || y >= pixmap->height) {
         return PixelRGB8_Black;
     }
 
+    padded_width = pad_width(pixmap->width, pixmap->pitch);
+
     switch (pixmap->fmt) {
     case PF_RGB8:
-        return ((rgb8_t *)pixmap->data)[y * pixmap->width + x];
+        return ((rgb8_t *)pixmap->data)[y * padded_width + x];
 
     case PF_RGBA8: {
         rgb8_t rgb8;
         rgba8_t rgba8;
 
-        rgba8 = ((rgba8_t *)pixmap->data)[y * pixmap->width + x];
+        rgba8 = ((rgba8_t *)pixmap->data)[y * padded_width + x];
         rgb8.r = rgba8.r;
         rgb8.g = rgba8.g;
         rgb8.b = rgba8.b;
