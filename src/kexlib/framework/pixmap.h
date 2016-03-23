@@ -14,4 +14,12 @@ struct Pixmap {
     void *data;
 };
 
+struct pf_info {
+    PixelFormat fmt;
+    size_t bits;
+    size_t bytes;
+};
+
+extern struct pf_info pf_table[];
+
 #endif //DOOM64EX_PIXMAP_H

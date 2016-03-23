@@ -28,6 +28,10 @@ KEXAPI size_t Pixmap_GetSize(const Pixmap *pixmap);
 KEXAPI void *Pixmap_GetScanline(const Pixmap *pixmap, size_t idx);
 KEXAPI PixelRGB8 Pixmap_GetRGB8(const Pixmap *pixmap, int x, int y);
 
+KEXAPI Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapError *error);
+KEXAPI Pixmap *Pixmap_Resize_Raw(const void *data, size_t size, int old_width, int old_height, int pitch, PixelFormat fmt,
+                                 int new_width, int new_height, PixmapError *error);
+
 KEX_C_END
 
 #endif //__DOOM64EX_KEXLIB_FRAMEWORK_PIXMAP_H__

@@ -55,6 +55,8 @@ static Pixmap *windows_logo_pixmap_for_pitch()
     pixmap = Pixmap_NewFrom(data, width, height, pitch, PF_RGB8, &error);
     EXPECT_FALSE(error);
 
+    delete[] data;
+
     return pixmap;
 }
 
@@ -112,6 +114,8 @@ TEST(Pixmap, TestGetScanlinePitch)
 
     EXPECT_EQ(PixelRGB8_Red, ((rgb8_t*)Pixmap_GetScanline(pixmap, 99))[0]);
     EXPECT_EQ(PixelRGB8_Blue, ((rgb8_t*)Pixmap_GetScanline(pixmap, 100))[0]);
+
+    Pixmap_Free(pixmap);
 }
 
 TEST(Pixmap, TestGetRGB8Pitch)
@@ -122,4 +126,39 @@ TEST(Pixmap, TestGetRGB8Pitch)
 
     EXPECT_EQ(PixelRGB8_Green, Pixmap_GetRGB8(pixmap, 197, 99));
     EXPECT_EQ(PixelRGB8_Blue, Pixmap_GetRGB8(pixmap, 0, 100));
+
+    Pixmap_Free(pixmap);
+}
+
+TEST(Pixmap, TestResizeToBigger)
+{
+    PixmapError error;
+    Pixmap *pixmap, *resized;
+    int x, y;
+    rgb8_t *oldline, *newline;
+
+    pixmap = windows_logo_pixmap_for_pitch();
+
+    resized = Pixmap_Resize(pixmap, 400, 300, &error);
+    EXPECT_FALSE(error);
+
+    for (y = 0; y < Pixmap_GetHeight(resized); y++) {
+        newline = (rgb8_t *) Pixmap_GetScanline(resized, y);
+
+        if (y < Pixmap_GetHeight(pixmap)) {
+            oldline = (rgb8_t *) Pixmap_GetScanline(pixmap, y);
+
+            for (x = 0; x < Pixmap_GetWidth(resized); x++) {
+                if (x < Pixmap_GetWidth(pixmap)) {
+                    EXPECT_EQ(oldline[x], newline[x]);
+                } else {
+                    EXPECT_EQ(PixelRGB8_Black, newline[x]);
+                }
+            }
+        } else {
+            for (x = 0; x < Pixmap_GetWidth(resized); x++) {
+                EXPECT_EQ(PixelRGB8_Black, newline[x]);
+            }
+        }
+    }
 }

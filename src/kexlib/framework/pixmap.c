@@ -5,13 +5,7 @@
 
 #define SET_ERROR(x) { if (error) *error = x; }
 
-struct pf_info {
-    PixelFormat fmt;
-    size_t bits;
-    size_t bytes;
-};
-
-static struct pf_info pf_table[] = {
+struct pf_info pf_table[] = {
     { PF_RGB8, 24, 3 },
     { PF_RGBA8, 32, 4 },
 };
@@ -46,7 +40,7 @@ static Pixmap *alloc_pixmap(int width, int height, int pitch, PixelFormat fmt, P
     pixmap->pitch = (uint8_t) pitch;
     pixmap->fmt = fmt;
 
-    pixmap->size = (size_t) width * height * pf_table[fmt].bytes;
+    pixmap->size = (size_t) pad_width(pixmap->width, pixmap->pitch) * height * pf_table[fmt].bytes;
     pixmap->data = malloc(pixmap->size);
 
     SET_ERROR(PIXMAP_ESUCCESS)
