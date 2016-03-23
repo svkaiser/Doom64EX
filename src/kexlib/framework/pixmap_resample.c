@@ -35,18 +35,3 @@ Pixmap *Pixmap_Resample(const Pixmap *src, int new_width, int new_height, Pixmap
         return NULL;
     }
 }
-
-Pixmap *Pixmap_Resample_Raw(const void *data, int old_width, int old_height, int pitch, PixelFormat fmt,
-                            int new_width, int new_height, PixmapInterp interp, PixmapExtrap extrap)
-{
-    Pixmap src;
-
-    src.width = (uint16_t) old_width;
-    src.height = (uint16_t) old_height;
-    src.pitch = (uint8_t) pitch;
-    src.fmt = fmt;
-
-    src.data = (void *) data;
-
-    return Pixmap_Resample(&src, new_width, new_height, interp, extrap);
-}

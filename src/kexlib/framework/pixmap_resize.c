@@ -24,18 +24,3 @@ Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapEr
 
     return pixmap;
 }
-
-Pixmap *Pixmap_Resize_Raw(const void *data, int old_width, int old_height, int pitch, PixelFormat fmt,
-                          int new_width, int new_height, PixmapError *error)
-{
-    Pixmap src;
-
-    src.width = (uint16_t) old_width;
-    src.height = (uint16_t) old_height;
-    src.pitch = (uint8_t) pitch;
-    src.fmt = fmt;
-
-    src.data = (void *) data;
-
-    return Pixmap_Resize(&src, new_width, new_height, error);
-}

@@ -257,11 +257,10 @@ void GL_SetNewPalette(int id, byte palID) {
 // SetTextureImage
 //
 
-static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type) {
-    Pixmap *pixmap;
-
+static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
+{
     if(r_texnonpowresize.value > 0) {
-        byte* pad;
+        Pixmap pixmap_src, *pixmap;
         int wp;
         int hp;
 
@@ -269,14 +268,14 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
         wp = GL_PadTextureDims(*origwidth);
         hp = GL_PadTextureDims(*origheight);
 
-        pad = Z_Calloc(wp * hp * bits, PU_STATIC, 0);
+        Pixmap_Raw(&pixmap_src, data, *origwidth, *origheight, 0, PF_RGBA8);
 
         if(r_texnonpowresize.value >= 2) {
             // this will probably look like crap
-            pixmap = Pixmap_Resample_Raw(data, *origwidth, *origheight, 0, PF_RGBA8, wp, hp, 0, 0);
+            pixmap = Pixmap_Resample(&pixmap_src, wp, hp, PIXMAP_INTERP_NEAREST, PIXMAP_EXTRAP_NEAREST);
         }
         else {
-            pixmap = Pixmap_Resize_Raw(data, *origwidth, *origheight, 0, PF_RGBA8, wp, hp, NULL);
+            pixmap = Pixmap_Resize(&pixmap_src, wp, hp, NULL);
 
             *origwidth = wp;
             *origheight = hp;
@@ -294,7 +293,6 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
             Pixmap_GetData(pixmap)
         );
 
-        Z_Free(pad);
         Pixmap_Free(pixmap);
     }
     else {
