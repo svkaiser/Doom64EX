@@ -4,7 +4,7 @@
 ##
 ## LICENSE:
 ##
-## Copyright(C) 2016 Zohar Malamant
+## Copyright(C) 2014-2016 Zohar Malamant
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -22,35 +22,37 @@
 ## 02111-1307, USA.
 ##
 
-cmake_minimum_required(VERSION 2.6)
-
-project(doom64ex C CXX)
-
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/extern/build")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
-
 ##------------------------------------------------------------------------------
-## Options
+## CMake functions
 ##
 
-option(KEXWAD "Generate kex.wad" ON)
-option(ENGINE "Build Doom64EX" ON)
-option(TESTING "Build unit tests" ON)
+##------------------------------------------------------------------------------
+## Sources
+##
+
+# We're lazy, so add all C files
+file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.c")
 
 ##------------------------------------------------------------------------------
-## Include subprojects
+## Build target
+##
+
+add_library(kexlib STATIC ${SOURCES})
+target_include_directories(kexlib PRIVATE "${CMAKE_SOURCE_DIR}/include/kexlib")
+target_link_libraries(kexlib m)
+
+##------------------------------------------------------------------------------
+## Build tests
 ##
 
 if (TESTING)
-  enable_testing()
-endif()
+  find_package(GTest REQUIRED)
 
-if (KEXWAD)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
-endif()
+  file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/test/kexlib/*.cc")
 
-if (ENGINE)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/kexlib")
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
+  add_executable(kexlib_test ${TEST_SOURCES})
+  target_include_directories(kexlib_test PRIVATE "${CMAKE_SOURCE_DIR}/include/kexlib" ${GTEST_INCLUDE_DIRS})
+  target_link_libraries(kexlib_test kexlib ${GTEST_BOTH_LIBRARIES})
+
+  add_test(AllTestsInKexlib COMMAND kexlib_test)
 endif()

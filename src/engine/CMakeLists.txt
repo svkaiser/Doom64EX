@@ -57,6 +57,9 @@ endfunction()
 ## Set up external dependencies
 ##
 
+# kexlib
+add_include_directories("${CMAKE_SOURCE_DIR}/include/kexlib")
+add_link_libraries(kexlib)
 
 # SDL2
 find_package(SDL2 REQUIRED)
