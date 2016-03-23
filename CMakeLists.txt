@@ -34,17 +34,17 @@ set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
 ## Options
 ##
 
-option(BUILD_PWAD "Generate kexdata.wad" ON)
-option(BUILD_ENGINE "Build Doom64EX" ON)
+option(KEXWAD "Generate kex.wad" ON)
+option(ENGINE "Build Doom64EX" ON)
 
 ##------------------------------------------------------------------------------
 ## Include subprojects
 ##
 
-if (BUILD_PWAD)
+if (KEXWAD)
   add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
 endif()
 
-if (BUILD_ENGINE)
+if (ENGINE)
   add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
 endif()
