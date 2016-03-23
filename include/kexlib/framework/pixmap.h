@@ -22,14 +22,14 @@ KEXAPI void Pixmap_Free(Pixmap *ptr);
 
 KEXAPI uint16_t Pixmap_GetWidth(const Pixmap *pixmap);
 KEXAPI uint16_t Pixmap_GetHeight(const Pixmap *pixmap);
-KEXAPI uint32_t Pixmap_GetArea(const Pixmap *pixmap);
 KEXAPI size_t Pixmap_GetSize(const Pixmap *pixmap);
 
+KEXAPI const void *Pixmap_GetData(const Pixmap *pixmap);
 KEXAPI void *Pixmap_GetScanline(const Pixmap *pixmap, size_t idx);
 KEXAPI PixelRGB8 Pixmap_GetRGB8(const Pixmap *pixmap, int x, int y);
 
 KEXAPI Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapError *error);
-KEXAPI Pixmap *Pixmap_Resize_Raw(const void *data, size_t size, int old_width, int old_height, int pitch, PixelFormat fmt,
+KEXAPI Pixmap *Pixmap_Resize_Raw(const void *data, int old_width, int old_height, int pitch, PixelFormat fmt,
                                  int new_width, int new_height, PixmapError *error);
 
 KEX_C_END

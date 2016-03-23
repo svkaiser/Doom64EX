@@ -10,7 +10,6 @@ struct Pixmap {
     uint8_t pitch;
     PixelFormat fmt;
 
-    size_t size;
     void *data;
 };
 

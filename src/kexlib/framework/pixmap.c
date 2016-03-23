@@ -40,8 +40,7 @@ static Pixmap *alloc_pixmap(int width, int height, int pitch, PixelFormat fmt, P
     pixmap->pitch = (uint8_t) pitch;
     pixmap->fmt = fmt;
 
-    pixmap->size = (size_t) pad_width(pixmap->width, pixmap->pitch) * height * pf_table[fmt].bytes;
-    pixmap->data = malloc(pixmap->size);
+    pixmap->data = malloc(Pixmap_GetSize(pixmap));
 
     SET_ERROR(PIXMAP_ESUCCESS)
 
@@ -56,7 +55,7 @@ Pixmap *Pixmap_New(int width, int height, int pitch, PixelFormat fmt, PixmapErro
         return NULL;
     }
 
-    memset(pixmap->data, 0, pixmap->size);
+    memset(pixmap->data, 0, Pixmap_GetSize(pixmap));
 
     return pixmap;
 }
@@ -69,7 +68,7 @@ Pixmap *Pixmap_NewFrom(const void *src, int width, int height, int pitch, PixelF
         return NULL;
     }
 
-    memcpy(pixmap->data, src, pixmap->size);
+    memcpy(pixmap->data, src, Pixmap_GetSize(pixmap));
 
     return pixmap;
 }
@@ -90,14 +89,14 @@ uint16_t Pixmap_GetHeight(const Pixmap *pixmap)
     return pixmap->height;
 }
 
-uint32_t Pixmap_GetArea(const Pixmap *pixmap)
-{
-    return (uint32_t) pixmap->width * pixmap->height;
-}
-
 size_t Pixmap_GetSize(const Pixmap *pixmap)
 {
-    return pixmap->size;
+    return (size_t) pad_width(pixmap->width, pixmap->pitch) * pixmap->height * pf_table[pixmap->fmt].bytes;
+}
+
+const void *Pixmap_GetData(const Pixmap *pixmap)
+{
+    return pixmap->data;
 }
 
 void *Pixmap_GetScanline(const Pixmap *pixmap, size_t idx)

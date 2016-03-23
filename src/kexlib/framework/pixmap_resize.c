@@ -16,8 +16,8 @@ Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapEr
     height = MIN(new_height, src->height);
 
     for (y = 0; y < height; y++) {
-        srcline = Pixmap_GetScanline(src, y);
-        dstline = Pixmap_GetScanline(pixmap, y);
+        srcline = Pixmap_GetScanline(src, (size_t) y);
+        dstline = Pixmap_GetScanline(pixmap, (size_t) y);
 
         memcpy(dstline, srcline, width * pf_table[src->fmt].bytes);
     }
@@ -25,7 +25,7 @@ Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapEr
     return pixmap;
 }
 
-Pixmap *Pixmap_Resize_Raw(const void *data, size_t size, int old_width, int old_height, int pitch, PixelFormat fmt,
+Pixmap *Pixmap_Resize_Raw(const void *data, int old_width, int old_height, int pitch, PixelFormat fmt,
                           int new_width, int new_height, PixmapError *error)
 {
     Pixmap src;
@@ -36,7 +36,6 @@ Pixmap *Pixmap_Resize_Raw(const void *data, size_t size, int old_width, int old_
     src.fmt = fmt;
 
     src.data = (void *) data;
-    src.size = size;
 
     return Pixmap_Resize(&src, new_width, new_height, error);
 }

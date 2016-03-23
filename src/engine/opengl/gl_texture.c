@@ -24,6 +24,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <framework/pixmap.h>
 #include "doomstat.h"
 #include "r_local.h"
 #include "i_png.h"
@@ -257,6 +258,8 @@ void GL_SetNewPalette(int id, byte palID) {
 //
 
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type) {
+    Pixmap *pixmap;
+
     if(r_texnonpowresize.value > 0) {
         byte* pad;
         int wp;
@@ -273,12 +276,7 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
             GL_ResampleTexture((int*)data, *origwidth, *origheight, (int*)pad, wp, hp, type);
         }
         else {
-            int y;
-
-            for(y = 0; y < *origheight; y++) {
-                dmemcpy(pad + y * wp * bits,
-                        ((byte*)data) + y **origwidth * bits, *origwidth * bits);
-            }
+            pixmap = Pixmap_Resize_Raw(data, *origwidth, *origheight, 0, PF_RGBA8, wp, hp, NULL);
 
             *origwidth = wp;
             *origheight = hp;
@@ -293,10 +291,11 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
             0,
             type,
             GL_UNSIGNED_BYTE,
-            pad
+            Pixmap_GetData(pixmap)
         );
 
         Z_Free(pad);
+        Pixmap_Free(pixmap);
     }
     else {
         dglTexImage2D(

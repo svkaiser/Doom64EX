@@ -74,7 +74,6 @@ TEST(Pixmap, TestNewAndSizeGetters)
 
     EXPECT_EQ(width, Pixmap_GetWidth(pixmap));
     EXPECT_EQ(height, Pixmap_GetHeight(pixmap));
-    EXPECT_EQ(area, Pixmap_GetArea(pixmap));
     EXPECT_EQ(3 * area, Pixmap_GetSize(pixmap)); // If broken, it's likely to do with pitch
 
     Pixmap_Free(pixmap);
