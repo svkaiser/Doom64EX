@@ -13,8 +13,18 @@ enum PixmapError {
     PIXMAP_EINVALDIM = 2, // Invalid dimensions
 };
 
+enum PixmapInterp {
+    PIXMAP_INTERP_NEAREST,
+};
+
+enum PixmapExtrap {
+    PIXMAP_EXTRAP_NEAREST,
+};
+
 typedef struct Pixmap Pixmap;
 typedef enum PixmapError PixmapError;
+typedef enum PixmapInterp PixmapInterp;
+typedef enum PixmapExtrap PixmapExtrap;
 
 KEXAPI Pixmap *Pixmap_New(int width, int height, int pitch, PixelFormat fmt, PixmapError *error);
 KEXAPI Pixmap *Pixmap_NewFrom(const void *src, int width, int height, int pitch, PixelFormat fmt, PixmapError *error);
@@ -31,6 +41,10 @@ KEXAPI PixelRGB8 Pixmap_GetRGB8(const Pixmap *pixmap, int x, int y);
 KEXAPI Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapError *error);
 KEXAPI Pixmap *Pixmap_Resize_Raw(const void *data, int old_width, int old_height, int pitch, PixelFormat fmt,
                                  int new_width, int new_height, PixmapError *error);
+
+KEXAPI Pixmap *Pixmap_Resample(const Pixmap *src, int new_width, int new_height, PixmapInterp interp, PixmapExtrap extrap);
+KEXAPI Pixmap *Pixmap_Resample_Raw(const void *data, int old_width, int old_height, int pitch, PixelFormat fmt,
+                                   int new_width, int new_height, PixmapInterp interp, PixmapExtrap extrap);
 
 KEX_C_END
 
