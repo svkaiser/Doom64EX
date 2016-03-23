@@ -506,12 +506,14 @@ int dsnprintf(char *src, size_t n, const char *str, ...) {
 // main
 //
 
+#ifdef _WIN32 // Hack because SDL2main doesn't work for some reason.
 int WINAPI WinMain(HINSTANCE hWnd, HINSTANCE hPrevInst, LPSTR CmdLine, int CmdShow) {
     int argc = __argc;
     char **argv = __argv;
 
     return main(argc, argv);
 }
+#endif
 
 int main(int argc, char *argv[]) {
     myargc = argc;

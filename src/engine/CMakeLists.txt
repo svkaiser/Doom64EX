@@ -30,27 +30,27 @@ set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
 function(add_include_directories)
   unset(NEW_INCLUDES)
-  foreach(ARG ${ARGN})
+  foreach (ARG ${ARGN})
     list(APPEND NEW_INCLUDES ${ARG})
-  endforeach()
+  endforeach ()
   set(INCLUDES ${INCLUDES} ${NEW_INCLUDES} PARENT_SCOPE)
 endfunction()
 
 function(add_sources PREFIX)
-	unset(NEW_SOURCES)
-	foreach(ARG ${ARGN})
-		list(APPEND NEW_SOURCES "${SOURCE_ROOT_DIR}/${PREFIX}/${ARG}")
-	endforeach()
-	set(SOURCES ${SOURCES} ${NEW_SOURCES} PARENT_SCOPE)
+  unset(NEW_SOURCES)
+  foreach (ARG ${ARGN})
+    list(APPEND NEW_SOURCES "${SOURCE_ROOT_DIR}/${PREFIX}/${ARG}")
+  endforeach ()
+  set(SOURCES ${SOURCES} ${NEW_SOURCES} PARENT_SCOPE)
   set(INCLUDES ${INCLUDES} "${SOURCE_ROOT_DIR}/${PREFIX}" PARENT_SCOPE)
 endfunction()
 
 function(add_link_libraries)
-	unset(NEW_LIBRARIES)
-	foreach(ARG ${ARGN})
-		list(APPEND NEW_LIBRARIES ${ARG})
-	endforeach()
-	set(LIBRARIES ${LIBRARIES} ${NEW_LIBRARIES} PARENT_SCOPE)
+  unset(NEW_LIBRARIES)
+  foreach (ARG ${ARGN})
+    list(APPEND NEW_LIBRARIES ${ARG})
+  endforeach ()
+  set(LIBRARIES ${LIBRARIES} ${NEW_LIBRARIES} PARENT_SCOPE)
 endfunction()
 
 ##------------------------------------------------------------------------------
@@ -99,19 +99,21 @@ set(VERSION_GIT true)
 ## Platform-specific sources
 ##
 
-if(WIN32)
-	add_sources(system/win32
-			doom64.rc
-            )
+if (WIN32)
+  add_sources(system/win32
+    doom64.rc
+    )
 
-    add_sources(system
-            i_cpu.c
-            )
-else()
-    add_sources(system
-            i_cpu_posix.c
-            )
-endif()
+  add_sources(system
+    i_cpu.c
+    )
+else ()
+  add_sources(system
+    i_cpu_posix.c
+    )
+
+  add_link_libraries(m) # math lib
+endif ()
 
 ##------------------------------------------------------------------------------
 ## Sources
@@ -119,201 +121,201 @@ endif()
 
 # src/automap
 add_sources(automap
-	am_draw.c
-	am_map.c
-)
+  am_draw.c
+  am_map.c
+  )
 
 # src/common
 add_sources(common
-	doomdata.h
-	doomdef.h
-	doomstat.h
-	doomtype.h
-	info.c
-	md5.c
-	tables.c
-)
+  doomdata.h
+  doomdef.h
+  doomstat.h
+  doomtype.h
+  info.c
+  md5.c
+  tables.c
+  )
 
 # src/console
 add_sources(console
-	con_console.c
-	con_cvar.c
-)
+  con_console.c
+  con_cvar.c
+  )
 
 # src/doom_main
 add_sources(doom_main
-	d_devstat.c
-	d_englsh.h
-	d_event.h
-	d_keywds.h
-	d_main.c
-	d_net.c
-	d_player.h
-	d_think.h
-	d_ticcmd.h
-)
+  d_devstat.c
+  d_englsh.h
+  d_event.h
+  d_keywds.h
+  d_main.c
+  d_net.c
+  d_player.h
+  d_think.h
+  d_ticcmd.h
+  )
 
 # src/finale
 add_sources(finale
-	f_finale.c
-	in_stuff.c
-)
+  f_finale.c
+  in_stuff.c
+  )
 
 # src/game
 add_sources(game
-	g_actions.c
-	g_controls.h
-	g_demo.c
-	g_game.c
-	g_local.h
-	g_settings.c
-)
+  g_actions.c
+  g_controls.h
+  g_demo.c
+  g_game.c
+  g_local.h
+  g_settings.c
+  )
 
 # src/intermission
 add_sources(intermission
-	wi_stuff.c
-)
+  wi_stuff.c
+  )
 
 # src/misc
 add_sources(misc
-	m_cheat.c
-	m_fixed.c
-	m_keys.c
-	m_menu.c
-	m_misc.c
-	m_password.c
-	m_random.c
-	m_shift.c
-)
+  m_cheat.c
+  m_fixed.c
+  m_keys.c
+  m_menu.c
+  m_misc.c
+  m_password.c
+  m_random.c
+  m_shift.c
+  )
 
 # src/net
 add_sources(net
-	net_client.c
-	net_common.c
-	net_dedicated.c
-	net_defs.h
-	net_io.c
-	net_loop.c
-	net_packet.c
-	net_query.c
-	net_sdl.c
-	net_server.c
-	net_structrw.c
-)
+  net_client.c
+  net_common.c
+  net_dedicated.c
+  net_defs.h
+  net_io.c
+  net_loop.c
+  net_packet.c
+  net_query.c
+  net_sdl.c
+  net_server.c
+  net_structrw.c
+  )
 
 # src/opengl
 add_sources(opengl
-	dgl.c
-	gl_draw.c
-	gl_main.c
-	gl_texture.c
-)
+  dgl.c
+  gl_draw.c
+  gl_main.c
+  gl_texture.c
+  )
 
 # src/parser
 add_sources(parser
-	sc_main.c
-)
+  sc_main.c
+  )
 
 # src/playloop
 add_sources(playloop
-	p_ceilng.c
-	p_doors.c
-	p_enemy.c
-	p_floor.c
-	p_inter.c
-	p_lights.c
-	p_local.h
-	p_macros.c
-	p_map.c
-	p_maputl.c
-	p_mobj.c
-	p_plats.c
-	p_pspr.c
-	p_saveg.c
-	p_setup.c
-	p_sight.c
-	p_spec.c
-	p_switch.c
-	p_telept.c
-	p_tick.c
-	p_user.c
-)
+  p_ceilng.c
+  p_doors.c
+  p_enemy.c
+  p_floor.c
+  p_inter.c
+  p_lights.c
+  p_local.h
+  p_macros.c
+  p_map.c
+  p_maputl.c
+  p_mobj.c
+  p_plats.c
+  p_pspr.c
+  p_saveg.c
+  p_setup.c
+  p_sight.c
+  p_spec.c
+  p_switch.c
+  p_telept.c
+  p_tick.c
+  p_user.c
+  )
 
 # src/renderer
 add_sources(renderer
-	r_bsp.c
-	r_clipper.c
-	r_drawlist.c
-	r_lights.c
-	r_local.h
-	r_main.c
-	r_scene.c
-	r_sky.c
-	r_things.c
-	r_wipe.c
-)
+  r_bsp.c
+  r_clipper.c
+  r_drawlist.c
+  r_lights.c
+  r_local.h
+  r_main.c
+  r_scene.c
+  r_sky.c
+  r_things.c
+  r_wipe.c
+  )
 
 # src/sound
 add_sources(sound
-	sounds.h
-	s_sound.c
-)
+  sounds.h
+  s_sound.c
+  )
 
 # src/statusbar
 add_sources(statusbar
-	st_stuff.c
-)
+  st_stuff.c
+  )
 
 # src/system
 add_sources(system
-	i_audio.c
-	i_main.c
-	i_png.c
-	i_swap.h
-	i_system.c
-	i_video.c
-)
+  i_audio.c
+  i_main.c
+  i_png.c
+  i_swap.h
+  i_system.c
+  i_video.c
+  )
 
 # src/wadfile
 add_sources(wadfile
-	w_file.c
-	w_merge.c
-	w_wad.c
-)
+  w_file.c
+  w_merge.c
+  w_wad.c
+  )
 
 # src/wadgen
 add_sources(wadgen
-	deflate-N64.c
-	deflate-N64.h
-	files.c
-	files.h
-	gfx.c
-	gfx.h
-	level.c
-	level.h
-	mem.c
-	mem.h
-	png.c
-	rom.c
-	rom.h
-	sndfont.c
-	sndfont.h
-	sound.c
-    sound.h
-	sprite.c
-	sprite.h
-	texture.c
-	texture.h
-	wad.c
-	wad.h
-	wadgen.c
-	wadgen.h
-)
+  deflate-N64.c
+  deflate-N64.h
+  files.c
+  files.h
+  gfx.c
+  gfx.h
+  level.c
+  level.h
+  mem.c
+  mem.h
+  png.c
+  rom.c
+  rom.h
+  sndfont.c
+  sndfont.h
+  sound.c
+  sound.h
+  sprite.c
+  sprite.h
+  texture.c
+  texture.h
+  wad.c
+  wad.h
+  wadgen.c
+  wadgen.h
+  )
 
 # src/zone
 add_sources(zone
-	z_zone.c
-)
+  z_zone.c
+  )
 
 ##------------------------------------------------------------------------------
 ## Build target
@@ -327,6 +329,6 @@ target_link_libraries(doom64ex ${LIBRARIES})
 ## Install target
 ##
 
-if(NOT WIN32)
+if (NOT WIN32)
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)
-endif()
+endif ()
