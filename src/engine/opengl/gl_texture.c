@@ -273,7 +273,7 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
 
         if(r_texnonpowresize.value >= 2) {
             // this will probably look like crap
-            GL_ResampleTexture((int*)data, *origwidth, *origheight, (int*)pad, wp, hp, type);
+            pixmap = Pixmap_Resample_Raw(data, *origwidth, *origheight, 0, PF_RGBA8, wp, hp, 0, 0);
         }
         else {
             pixmap = Pixmap_Resize_Raw(data, *origwidth, *origheight, 0, PF_RGBA8, wp, hp, NULL);
