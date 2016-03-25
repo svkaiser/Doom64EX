@@ -26,6 +26,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <framework/pixmap.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
@@ -38,19 +39,22 @@
 #include "con_console.h"
 #include "i_png.h"
 
-static byte*    pngWriteData;
-static byte*    pngReadData;
-static size_t   pngWritePos = 0;
-
 CVAR_CMD(i_gamma, 0) {
     GL_DumpTextures();
 }
+
+struct chunk_read_io {
+    byte *chunk;
+    size_t pos;
+};
+
+typedef struct chunk_read_io chunk_read_io;
 
 //
 // I_PNGRowSize
 //
 
-d_inline static size_t I_PNGRowSize(int width, byte bits) {
+static inline size_t I_PNGRowSize(int width, byte bits) {
     if(bits >= 8) {
         return ((width * bits) >> 3);
     }
@@ -64,8 +68,10 @@ d_inline static size_t I_PNGRowSize(int width, byte bits) {
 //
 
 static void I_PNGReadFunc(png_structp ctx, byte* area, size_t size) {
-    dmemcpy(area, pngReadData, size);
-    pngReadData += size;
+    chunk_read_io *io = png_get_io_ptr(ctx);
+
+    dmemcpy(area, (io->chunk + io->pos), size);
+    io->pos += size;
 }
 
 //
@@ -114,6 +120,8 @@ static void I_TranslatePalette(png_colorp dest) {
 
 byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex) {
+    Pixmap *pixmap;
+    chunk_read_io read_io;
     png_structp png_ptr;
     png_infop   info_ptr;
     png_uint_32 width;
@@ -122,20 +130,20 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
     int         color_type;
     int         interlace_type;
     int         pixel_depth;
-    byte*       png;
-    byte*       out;
+    byte*       lumpdata;
     size_t      row;
     size_t      rowSize;
     byte**      row_pointers;
 
     // get lump data
-    png = W_CacheLumpNum(lump, PU_STATIC);
-    pngReadData = png;
+    lumpdata = W_CacheLumpNum(lump, PU_STATIC);
+    read_io.chunk = lumpdata;
+    read_io.pos = 0;
 
     // setup struct
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
     if(png_ptr == NULL) {
-        I_Error("I_PNGReadData: Failed to read struct");
+        I_Error("I_PNGReadData: Failed to create read struct");
         return NULL;
     }
 
@@ -149,12 +157,12 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
 
     if(setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-        I_Error("I_PNGReadData: Failed on setjmp");
+        I_Error("I_PNGReadData: Failed to setjmp");
         return NULL;
     }
 
     // setup callback function for reading data
-    png_set_read_fn(png_ptr, NULL, I_PNGReadFunc);
+    png_set_read_fn(png_ptr, &read_io, I_PNGReadFunc);
 
     // look for offset chunk if specified
     if(offset) {
@@ -291,41 +299,40 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
     }
 
     // allocate output and row pointers
-    out = (byte*)Z_Calloc(rowSize * height, PU_STATIC, 0);
+    pixmap = Pixmap_New(width, height, 0, PF_RGBA8, NULL);
     row_pointers = (byte**)Z_Malloc(sizeof(byte*)*height, PU_STATIC, 0);
 
     for(row = 0; row < height; row++) {
-        row_pointers[row] = out + (row * rowSize);
+        row_pointers[row] = Pixmap_GetScanline(pixmap, row);
     }
 
     png_read_image(png_ptr, row_pointers);
     png_read_end(png_ptr, info_ptr);
 
-    if(alpha) {
-        size_t i;
-        int* check = (int*)out;
-
-        // need to reverse the bytes to ABGR format
-        for(i = 0; i < (height * rowSize) / 4; i++) {
-            int c = *check;
-
-            byte b = (byte)((c >> 24) & 0xff);
-            byte g = (byte)((c >> 16) & 0xff);
-            byte r = (byte)((c >> 8) & 0xff);
-            byte a = (byte)(c & 0xff);
-
-            *check = ((a<<24)|(b<<16)|(g<<8)|r);
-
-            check++;
-        }
-    }
+//    if(alpha) {
+//        size_t i;
+//        int* check = (int*)out;
+//
+//        // need to reverse the bytes to ABGR format
+//        for(i = 0; i < (height * rowSize) / 4; i++) {
+//            int c = *check;
+//
+//            byte b = (byte)((c >> 24) & 0xff);
+//            byte g = (byte)((c >> 16) & 0xff);
+//            byte r = (byte)((c >> 8) & 0xff);
+//            byte a = (byte)(c & 0xff);
+//
+//            *check = ((a<<24)|(b<<16)|(g<<8)|r);
+//
+//            check++;
+//        }
+//    }
 
     //cleanup
     Z_Free(row_pointers);
-    Z_Free(png);
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+//    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
-    return out;
+    return Pixmap_GetData(pixmap);
 }
 
 //
@@ -333,9 +340,9 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
 //
 
 static void I_PNGWriteFunc(png_structp png_ptr, byte* data, size_t length) {
-    pngWriteData = (byte*)Z_Realloc(pngWriteData, pngWritePos + length, PU_STATIC, 0);
-    dmemcpy(pngWriteData + pngWritePos, data, length);
-    pngWritePos += length;
+//    pngWriteData = (byte*)Z_Realloc(pngWriteData, pngWritePos + length, PU_STATIC, 0);
+//    dmemcpy(pngWriteData + pngWritePos, data, length);
+//    pngWritePos += length;
 }
 
 //
@@ -423,13 +430,13 @@ byte* I_PNGCreate(int width, int height, byte* data, int* size) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
 
     // allocate output
-    out = (byte*)Z_Malloc(pngWritePos, PU_STATIC, 0);
-    dmemcpy(out, pngWriteData, pngWritePos);
-    *size = pngWritePos;
-
-    Z_Free(pngWriteData);
-    pngWriteData = NULL;
-    pngWritePos = 0;
+//    out = (byte*)Z_Malloc(pngWritePos, PU_STATIC, 0);
+//    dmemcpy(out, pngWriteData, pngWritePos);
+//    *size = pngWritePos;
+//
+//    Z_Free(pngWriteData);
+//    pngWriteData = NULL;
+//    pngWritePos = 0;
 
     return out;
 }

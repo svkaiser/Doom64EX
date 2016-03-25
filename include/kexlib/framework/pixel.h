@@ -9,6 +9,7 @@ KEX_C_BEGIN
 enum PixelFormat {
     PF_RGB8,
     PF_RGBA8,
+    PF_ABGR8,
 
     PF_NUM
 };
@@ -26,9 +27,17 @@ struct PixelRGBA8 {
     uint8_t a;
 };
 
+struct PixelABGR8 {
+    uint8_t a;
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+};
+
 typedef enum PixelFormat PixelFormat;
 typedef struct PixelRGB8 PixelRGB8;
 typedef struct PixelRGBA8 PixelRGBA8;
+typedef struct PixelABGR8 PixelABGR8;
 
 typedef PixelRGB8 rgb8_t;
 typedef PixelRGBA8 rgba8_t;

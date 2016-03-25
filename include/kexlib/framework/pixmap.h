@@ -28,6 +28,7 @@ struct Pixmap {
     PixelFormat fmt;
 
     void *data;
+    rgba8_t *palette;
 };
 
 typedef struct Pixmap Pixmap;

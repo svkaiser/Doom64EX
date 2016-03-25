@@ -26,15 +26,17 @@
 
 #include "doomtype.h"
 
-typedef struct cvar_s {
+typedef struct cvar_s cvar_t;
+
+struct cvar_s {
     char*           name;
     char*           string;
     dboolean        nonclient;
-    void (*callback)(void*);
+    void (*callback)(cvar_t*);
     float           value;
     char*           defvalue;
     struct cvar_s*  next;
-} cvar_t;
+};
 
 #define CVAR(name, str)                                     \
     cvar_t name = { # name, # str, 0, NULL }

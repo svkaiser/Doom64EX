@@ -162,7 +162,7 @@ static void InitWorldTextures(void) {
         texturewidth[i] = w;
         textureheight[i] = h;
 
-        Z_Free(png);
+        free(png);
     }
 
     CON_DPrintf("%i world textures initialized\n", numtextures);
@@ -233,7 +233,7 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
         *height = textureheight[texnum];
     }
 
-    Z_Free(png);
+    free(png);
 
     if(devparm) {
         glBindCalls++;
@@ -342,7 +342,7 @@ static void InitGfxTextures(void) {
         gfxorigheight[i] = h;
         gfxheight[i] = h;
 
-        Z_Free(png);
+        free(png);
     }
 
     CON_DPrintf("%i generic textures initialized\n", numgfx);
@@ -397,7 +397,7 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     type = alpha ? GL_RGBA : GL_RGB;
 
     SetTextureImage(png, (alpha ? 4 : 3), &width, &height, format, type);
-    Z_Free(png);
+    free(png);
 
     gfxwidth[gfxid] = width;
     gfxheight[gfxid] = height;
@@ -480,7 +480,7 @@ static void InitSpriteTextures(void) {
         spriteoffset[i]     = (float)offset[0];
         spritetopoffset[i]  = (float)offset[1];
 
-        Z_Free(png);
+        free(png);
     }
 }
 
@@ -537,7 +537,7 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DGL_CLAMP);
 
     SetTextureImage(png, 4, &w, &h, GL_RGBA8, GL_RGBA);
-    Z_Free(png);
+    free(png);
 
     spritewidth[spritenum] = w;
     spriteheight[spritenum] = h;
