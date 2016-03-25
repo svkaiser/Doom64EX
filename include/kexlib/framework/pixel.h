@@ -7,27 +7,46 @@
 KEX_C_BEGIN
 
 enum PixelFormat {
-    PF_RGB8,
-    PF_RGBA8,
-    PF_ABGR8,
+    PF_INVALID  = 0x00,
+
+    /* Palette */
+    PF_PAL8     = 0x01,
+
+    /* RGB */
+    PF_RGB24    = 0x02,
+    PF_BGR24    = 0x03,
+
+    /* RGB Alpha */
+    PF_RGBA32   = 0x04,
+    PF_ABGR32   = 0x05,
 
     PF_NUM
 };
 
-struct PixelRGB8 {
+struct PixelPAL8 {
+    uint8_t c;
+};
+
+struct PixelRGB24 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 };
 
-struct PixelRGBA8 {
+struct PixelBGR24 {
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+};
+
+struct PixelRGBA32 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
     uint8_t a;
 };
 
-struct PixelABGR8 {
+struct PixelABGR32 {
     uint8_t a;
     uint8_t b;
     uint8_t g;
@@ -35,26 +54,30 @@ struct PixelABGR8 {
 };
 
 typedef enum PixelFormat PixelFormat;
-typedef struct PixelRGB8 PixelRGB8;
-typedef struct PixelRGBA8 PixelRGBA8;
-typedef struct PixelABGR8 PixelABGR8;
+typedef struct PixelPAL8 PixelPAL8;
+typedef struct PixelRGB24 PixelRGB24;
+typedef struct PixelBGR24 PixelBGR24;
+typedef struct PixelRGBA32 PixelRGBA32;
+typedef struct PixelABGR32 PixelABGR32;
 
-typedef PixelRGB8 rgb8_t;
-typedef PixelRGBA8 rgba8_t;
+typedef PixelRGB24 rgb24_t;
+typedef PixelBGR24 bgr24_t;
+typedef PixelRGBA32 rgba32_t;
+typedef PixelABGR32 abgr32_t;
 
-KEXAPI PixelRGB8 PixelRGB8_Black;   // #000
-KEXAPI PixelRGB8 PixelRGB8_Blue;    // #00f
-KEXAPI PixelRGB8 PixelRGB8_Green;   // #0f0
-KEXAPI PixelRGB8 PixelRGB8_Cyan;    // #0ff
-KEXAPI PixelRGB8 PixelRGB8_Red;     // #f00
-KEXAPI PixelRGB8 PixelRGB8_Magenta; // #f0f
-KEXAPI PixelRGB8 PixelRGB8_Yellow;  // #ff0
-KEXAPI PixelRGB8 PixelRGB8_White;   // #fff
+KEXAPI const PixelRGB24 PixelRGB24_Black;   // #000
+KEXAPI const PixelRGB24 PixelRGB24_Blue;    // #00f
+KEXAPI const PixelRGB24 PixelRGB24_Green;   // #0f0
+KEXAPI const PixelRGB24 PixelRGB24_Cyan;    // #0ff
+KEXAPI const PixelRGB24 PixelRGB24_Red;     // #f00
+KEXAPI const PixelRGB24 PixelRGB24_Magenta; // #f0f
+KEXAPI const PixelRGB24 PixelRGB24_Yellow;  // #ff0
+KEXAPI const PixelRGB24 PixelRGB24_White;   // #fff
 
 KEX_C_END
 
 #ifdef __cplusplus
-inline bool operator==(const PixelRGB8 &lhs, const PixelRGB8 &rhs)
+inline bool operator==(const PixelRGB24 &lhs, const PixelRGB24 &rhs)
 {
     return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b;
 }

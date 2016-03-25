@@ -1,5 +1,5 @@
 
-#include "pixmap.h"
+#include "pixmap_priv.h"
 
 #define SET_ERROR(x) { if (error) *error = x; }
 
@@ -74,6 +74,8 @@ void Pixmap_Raw(Pixmap *dst, const void *data, int width, int height, int pitch,
 
 void Pixmap_Free(Pixmap *ptr)
 {
-    free(ptr->data);
-    free(ptr);
+    if (ptr) {
+        free(ptr->data);
+        free(ptr);
+    }
 }

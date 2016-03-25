@@ -1,5 +1,5 @@
 
-#include "pixmap.h"
+#include "pixmap_priv.h"
 
 Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapError *error)
 {

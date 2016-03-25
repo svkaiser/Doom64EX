@@ -118,8 +118,10 @@ static void I_TranslatePalette(png_colorp dest) {
 // I_PNGReadData
 //
 
-byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
+Pixmap *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex) {
+    PixmapError error;
+    PixelFormat fmt;
     Pixmap *pixmap;
     chunk_read_io read_io;
     png_structp png_ptr;
@@ -129,10 +131,8 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
     int         bit_depth;
     int         color_type;
     int         interlace_type;
-    int         pixel_depth;
     byte*       lumpdata;
     size_t      row;
-    size_t      rowSize;
     byte**      row_pointers;
 
     // get lump data
@@ -279,17 +279,19 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
         NULL,
         NULL);
 
-    // get the size of each row
-    pixel_depth = bit_depth;
+    switch (color_type) {
+    case PNG_COLOR_TYPE_RGB:
+        fmt = PF_RGB24;
+        break;
 
-    if(color_type == PNG_COLOR_TYPE_RGB) {
-        pixel_depth *= 3;
-    }
-    else if(color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
-        pixel_depth *= 4;
-    }
+    case PNG_COLOR_TYPE_RGB_ALPHA:
+        fmt = PF_RGBA32;
+        break;
 
-    rowSize = I_PNGRowSize(width, pixel_depth /*info_ptr->pixel_depth*/);
+    default:
+        return NULL;
+        break;
+    }
 
     if(w) {
         *w = width;
@@ -299,7 +301,7 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
     }
 
     // allocate output and row pointers
-    pixmap = Pixmap_New(width, height, 0, PF_RGBA8, NULL);
+    pixmap = Pixmap_New(width, height, 0, fmt, NULL);
     row_pointers = (byte**)Z_Malloc(sizeof(byte*)*height, PU_STATIC, 0);
 
     for(row = 0; row < height; row++) {
@@ -332,7 +334,7 @@ byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
     Z_Free(row_pointers);
 //    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
-    return Pixmap_GetData(pixmap);
+    return pixmap;
 }
 
 //

@@ -3,22 +3,22 @@
 
 #include <framework/pixmap.h>
 
-static void windows_logo(rgb8_t *data, int width, int height, int pitch)
+static void windows_logo(rgb24_t *data, int width, int height, int pitch)
 {
     int x, y;
-    rgb8_t *line;
+    rgb24_t *line;
 
     for (y = 0; y < height / 2; y++) {
         line = data + width * y;
 
         for (x = 0; x < width / 2; x++) {
             /* Top-left square is red */
-            line[x] = PixelRGB8_Red;
+            line[x] = PixelRGB24_Red;
         }
 
         for (x = width / 2; x < width; x++) {
             /* Top-right square is green */
-            line[x] = PixelRGB8_Green;
+            line[x] = PixelRGB24_Green;
         }
     }
 
@@ -27,12 +27,12 @@ static void windows_logo(rgb8_t *data, int width, int height, int pitch)
 
         for (x = 0; x < width / 2; x++) {
             /* Bottom-left square is blue */
-            line[x] = PixelRGB8_Blue;
+            line[x] = PixelRGB24_Blue;
         }
 
         for (x = width / 2; x < width; x++) {
             /* Bottom-right square is yellow */
-            line[x] = PixelRGB8_Yellow;
+            line[x] = PixelRGB24_Yellow;
         }
     }
 }
@@ -40,7 +40,7 @@ static void windows_logo(rgb8_t *data, int width, int height, int pitch)
 static Pixmap *windows_logo_pixmap_for_pitch()
 {
     PixmapError error;
-    rgb8_t *data;
+    rgb24_t *data;
     Pixmap *pixmap;
 
     const int width = 198;
@@ -48,11 +48,11 @@ static Pixmap *windows_logo_pixmap_for_pitch()
     const int height = 200;
     const int pitch = 8;
 
-    data = new rgb8_t[width_padded * height];
+    data = new rgb24_t[width_padded * height];
 
     windows_logo(data, width_padded, height, pitch);
 
-    pixmap = Pixmap_NewFrom(data, width, height, pitch, PF_RGB8, &error);
+    pixmap = Pixmap_NewFrom(data, width, height, pitch, PF_RGB24, &error);
     EXPECT_FALSE(error);
 
     delete[] data;
@@ -69,7 +69,7 @@ TEST(Pixmap, TestNewAndSizeGetters)
     const int height = 240;
     const int area = width * height;
 
-    pixmap = Pixmap_New(width, height, 0, PF_RGB8, &error);
+    pixmap = Pixmap_New(width, height, 0, PF_RGB24, &error);
     EXPECT_FALSE(error);
 
     EXPECT_EQ(width, Pixmap_GetWidth(pixmap));
@@ -82,24 +82,24 @@ TEST(Pixmap, TestNewAndSizeGetters)
 TEST(Pixmap, TestGetRGB8)
 {
     PixmapError error;
-    rgb8_t *data;
+    rgb24_t *data;
     Pixmap *pixmap;
 
     const int width = 200;
     const int height = 200;
     const int pitch = 0;
 
-    data = new rgb8_t[width * height];
+    data = new rgb24_t[width * height];
 
     windows_logo(data, width, height, 0);
 
-    pixmap = Pixmap_NewFrom(data, width, height, pitch, PF_RGB8, &error);
+    pixmap = Pixmap_NewFrom(data, width, height, pitch, PF_RGB24, &error);
     EXPECT_FALSE(error);
 
-    EXPECT_EQ(PixelRGB8_Red, Pixmap_GetRGB8(pixmap, 50, 50));
-    EXPECT_EQ(PixelRGB8_Green, Pixmap_GetRGB8(pixmap, 150, 50));
-    EXPECT_EQ(PixelRGB8_Blue, Pixmap_GetRGB8(pixmap, 50, 150));
-    EXPECT_EQ(PixelRGB8_Yellow, Pixmap_GetRGB8(pixmap, 150, 150));
+    EXPECT_EQ(PixelRGB24_Red, Pixmap_GetRGB(pixmap, 50, 50));
+    EXPECT_EQ(PixelRGB24_Green, Pixmap_GetRGB(pixmap, 150, 50));
+    EXPECT_EQ(PixelRGB24_Blue, Pixmap_GetRGB(pixmap, 50, 150));
+    EXPECT_EQ(PixelRGB24_Yellow, Pixmap_GetRGB(pixmap, 150, 150));
 
     Pixmap_Free(pixmap);
     delete[] data;
@@ -111,8 +111,8 @@ TEST(Pixmap, TestGetScanlinePitch)
 
     pixmap = windows_logo_pixmap_for_pitch();
 
-    EXPECT_EQ(PixelRGB8_Red, ((rgb8_t*)Pixmap_GetScanline(pixmap, 99))[0]);
-    EXPECT_EQ(PixelRGB8_Blue, ((rgb8_t*)Pixmap_GetScanline(pixmap, 100))[0]);
+    EXPECT_EQ(PixelRGB24_Red, ((rgb24_t*)Pixmap_GetScanline(pixmap, 99))[0]);
+    EXPECT_EQ(PixelRGB24_Blue, ((rgb24_t*)Pixmap_GetScanline(pixmap, 100))[0]);
 
     Pixmap_Free(pixmap);
 }
@@ -123,8 +123,8 @@ TEST(Pixmap, TestGetRGB8Pitch)
 
     pixmap = windows_logo_pixmap_for_pitch();
 
-    EXPECT_EQ(PixelRGB8_Green, Pixmap_GetRGB8(pixmap, 197, 99));
-    EXPECT_EQ(PixelRGB8_Blue, Pixmap_GetRGB8(pixmap, 0, 100));
+    EXPECT_EQ(PixelRGB24_Green, Pixmap_GetRGB(pixmap, 197, 99));
+    EXPECT_EQ(PixelRGB24_Blue, Pixmap_GetRGB(pixmap, 0, 100));
 
     Pixmap_Free(pixmap);
 }
@@ -134,7 +134,7 @@ TEST(Pixmap, TestResizeToBigger)
     PixmapError error;
     Pixmap *pixmap, *resized;
     int x, y;
-    rgb8_t *oldline, *newline;
+    rgb24_t *oldline, *newline;
 
     pixmap = windows_logo_pixmap_for_pitch();
 
@@ -142,21 +142,21 @@ TEST(Pixmap, TestResizeToBigger)
     EXPECT_FALSE(error);
 
     for (y = 0; y < Pixmap_GetHeight(resized); y++) {
-        newline = (rgb8_t *) Pixmap_GetScanline(resized, y);
+        newline = (rgb24_t *) Pixmap_GetScanline(resized, y);
 
         if (y < Pixmap_GetHeight(pixmap)) {
-            oldline = (rgb8_t *) Pixmap_GetScanline(pixmap, y);
+            oldline = (rgb24_t *) Pixmap_GetScanline(pixmap, y);
 
             for (x = 0; x < Pixmap_GetWidth(resized); x++) {
                 if (x < Pixmap_GetWidth(pixmap)) {
                     EXPECT_EQ(oldline[x], newline[x]);
                 } else {
-                    EXPECT_EQ(PixelRGB8_Black, newline[x]);
+                    EXPECT_EQ(PixelRGB24_Black, newline[x]);
                 }
             }
         } else {
             for (x = 0; x < Pixmap_GetWidth(resized); x++) {
-                EXPECT_EQ(PixelRGB8_Black, newline[x]);
+                EXPECT_EQ(PixelRGB24_Black, newline[x]);
             }
         }
     }

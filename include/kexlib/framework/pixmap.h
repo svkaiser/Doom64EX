@@ -28,7 +28,6 @@ struct Pixmap {
     PixelFormat fmt;
 
     void *data;
-    rgba8_t *palette;
 };
 
 typedef struct Pixmap Pixmap;
@@ -48,7 +47,7 @@ KEXAPI size_t Pixmap_GetSize(const Pixmap *pixmap);
 
 KEXAPI const void *Pixmap_GetData(const Pixmap *pixmap);
 KEXAPI void *Pixmap_GetScanline(const Pixmap *pixmap, size_t idx);
-KEXAPI PixelRGB8 Pixmap_GetRGB8(const Pixmap *pixmap, int x, int y);
+KEXAPI PixelRGB24 Pixmap_GetRGB(const Pixmap *pixmap, int x, int y);
 
 KEXAPI Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapError *error);
 KEXAPI Pixmap *Pixmap_Resample(const Pixmap *src, int new_width, int new_height, PixmapInterp interp, PixmapExtrap extrap);

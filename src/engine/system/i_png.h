@@ -26,7 +26,9 @@
 #include "png.h"
 #include "doomtype.h"
 
-byte* I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
+#include <framework/pixmap.h>
+
+Pixmap *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex);
 
 byte* I_PNGCreate(int width, int height, byte* data, int* size);

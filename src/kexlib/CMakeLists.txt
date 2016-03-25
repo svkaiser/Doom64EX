@@ -30,14 +30,15 @@
 ## Sources
 ##
 
-# We're lazy, so add all C files
-file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.c")
+# We're lazy, so add all source files
+file(GLOB_RECURSE C_SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.c")
+file(GLOB_RECURSE CC_SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.cc")
 
 ##------------------------------------------------------------------------------
 ## Build target
 ##
 
-add_library(kexlib STATIC ${SOURCES})
+add_library(kexlib STATIC ${C_SOURCES} ${CC_SOURCES})
 target_include_directories(kexlib PRIVATE "${CMAKE_SOURCE_DIR}/include/kexlib")
 target_link_libraries(kexlib m)
 
