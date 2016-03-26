@@ -281,11 +281,11 @@ Pixmap *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alph
 
     switch (color_type) {
     case PNG_COLOR_TYPE_RGB:
-        fmt = PF_RGB24;
+        fmt = PF_BGR24;
         break;
 
     case PNG_COLOR_TYPE_RGB_ALPHA:
-        fmt = PF_RGBA32;
+        fmt = PF_ABGR32;
         break;
 
     default:
@@ -311,24 +311,9 @@ Pixmap *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alph
     png_read_image(png_ptr, row_pointers);
     png_read_end(png_ptr, info_ptr);
 
-//    if(alpha) {
-//        size_t i;
-//        int* check = (int*)out;
-//
-//        // need to reverse the bytes to ABGR format
-//        for(i = 0; i < (height * rowSize) / 4; i++) {
-//            int c = *check;
-//
-//            byte b = (byte)((c >> 24) & 0xff);
-//            byte g = (byte)((c >> 16) & 0xff);
-//            byte r = (byte)((c >> 8) & 0xff);
-//            byte a = (byte)(c & 0xff);
-//
-//            *check = ((a<<24)|(b<<16)|(g<<8)|r);
-//
-//            check++;
-//        }
-//    }
+    if (pixmap->fmt == PF_ABGR32) {
+        Pixmap_Reformat_InPlace(&pixmap, PF_BGRA32);
+    }
 
     //cleanup
     Z_Free(row_pointers);

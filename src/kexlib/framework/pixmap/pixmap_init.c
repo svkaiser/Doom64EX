@@ -11,7 +11,8 @@ struct pf_info pf_table[] = {
     { PF_RGB24, 24, 3 },
     { PF_BGR24, 24, 3 },
     { PF_RGBA32, 32, 4 },
-    { PF_RGBA32, 32, 4 },
+    { PF_ABGR32, 32, 4 },
+    { PF_BGRA32, 32, 4 },
 };
 
 uint16_t Pixmap_GetWidth(const Pixmap *pixmap)

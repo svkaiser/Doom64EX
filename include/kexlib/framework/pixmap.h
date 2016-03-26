@@ -51,6 +51,7 @@ KEXAPI PixelRGB24 Pixmap_GetRGB(const Pixmap *pixmap, int x, int y);
 
 KEXAPI Pixmap *Pixmap_Resize(const Pixmap *src, int new_width, int new_height, PixmapError *error);
 KEXAPI Pixmap *Pixmap_Resample(const Pixmap *src, int new_width, int new_height, PixmapInterp interp, PixmapExtrap extrap);
+KEXAPI void Pixmap_Reformat_InPlace(Pixmap **pixmap, PixelFormat new_fmt);
 
 KEX_C_END
 

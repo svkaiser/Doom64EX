@@ -1,5 +1,5 @@
 
-#include "pixmap_priv.h"
+    #include "pixmap_priv.h"
 
 template<typename Color>
 static Pixmap *pixmap_resample_nearest(const Pixmap *src, int new_width, int new_height)
@@ -43,6 +43,9 @@ Pixmap *Pixmap_Resample(const Pixmap *src, int new_width, int new_height, Pixmap
 
     case PF_ABGR32:
         return pixmap_resample_nearest<PixelABGR32>(src, new_width, new_height);
+
+    case PF_BGRA32:
+        return pixmap_resample_nearest<PixelBGRA32>(src, new_width, new_height);
 
     default:
         return NULL;

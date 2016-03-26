@@ -14,7 +14,7 @@ Pixmap *pixmap_alloc(int width, int height, int pitch, PixelFormat fmt, PixmapEr
         return NULL;
     }
 
-    if (fmt < 0 || fmt >= PF_NUM) {
+    if (fmt <= PF_INVALID || fmt >= PF_NUM) {
         SET_ERROR(PIXMAP_EINVALFMT);
         return NULL;
     }
