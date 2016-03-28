@@ -20,4 +20,8 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) < (b)) ? (b) : (a))
 
+#define K_BOOL int
+#define K_TRUE 1
+#define K_FALSE 0
+
 #endif //__DOOM64EX_KEXLIB_H__
