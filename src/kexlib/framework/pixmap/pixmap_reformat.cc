@@ -1,6 +1,6 @@
 
 #include <framework/pixel_traits.hh>
-#include "pixmap_priv.h"
+#include "pixmap.h"
 
 template <typename From, typename To>
 static void pixmap_reformat_from_to(Pixmap **pixmap, PixelFormat new_fmt)

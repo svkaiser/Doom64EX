@@ -1,5 +1,5 @@
 
-    #include "pixmap_priv.h"
+    #include "pixmap.h"
 
 template<typename Color>
 static Pixmap *pixmap_resample_nearest(const Pixmap *src, int new_width, int new_height)

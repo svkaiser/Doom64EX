@@ -1,7 +1,7 @@
 
 #include <framework/pixel.h>
 
-#include "pixmap_priv.h"
+#include "pixmap.h"
 
 #define SET_ERROR(x) { if (error) *error = x; }
 

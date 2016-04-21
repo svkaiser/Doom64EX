@@ -24,4 +24,8 @@
 #define K_TRUE 1
 #define K_FALSE 0
 
+#define K_REFCNT size_t _refcnt;
+#define K_REF(ptr) _refcnt++
+#define K_DEREF(ptr) if (ptr->_refcnt && !(--ptr->_refcnt))
+
 #endif //__DOOM64EX_KEXLIB_H__

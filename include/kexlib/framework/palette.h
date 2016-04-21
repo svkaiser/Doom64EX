@@ -14,8 +14,7 @@ struct Palette {
 
 typedef struct Palette Palette;
 
-KEXAPIPalette *Palette_New(PixelFormat palette_fmt, PixelFormat pixel_fmt);
-
+KEXAPI Palette *Palette_New(PixelFormat palette_fmt, PixelFormat pixel_fmt);
 
 KEX_C_END
 

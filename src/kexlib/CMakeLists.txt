@@ -57,4 +57,6 @@ if (TESTING)
   target_link_libraries(kexlib_test kexlib ${GTEST_BOTH_LIBRARIES})
 
   add_test(AllTestsInKexlib COMMAND kexlib_test)
+
+  file(COPY "${DATA_DIR}/kexlib_test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data/")
 endif()
