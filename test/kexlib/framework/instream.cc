@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <framework/instream.h>
+#include <stdlib.h>
 
 #define IDENT_STREAM_SIZE 256
 

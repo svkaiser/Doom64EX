@@ -14,6 +14,8 @@ struct ImageFormatFn {
 };
 
 struct image_header {
+    uint32_t width;
+    uint32_t height;
 };
 
 struct Image {

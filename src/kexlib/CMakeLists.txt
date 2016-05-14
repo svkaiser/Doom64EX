@@ -41,7 +41,7 @@ file(GLOB_RECURSE CC_SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.cc")
 
 add_library(kexlib STATIC ${C_SOURCES} ${C_HEADERS} ${CC_SOURCES})
 target_include_directories(kexlib PRIVATE "${CMAKE_SOURCE_DIR}/include/kexlib")
-target_link_libraries(kexlib m)
+target_link_libraries(kexlib m png)
 
 ##------------------------------------------------------------------------------
 ## Build tests

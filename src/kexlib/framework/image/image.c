@@ -24,12 +24,22 @@ Image *Image_Load(InStream *stream)
     image->format = format;
     image->stream = stream;
 
+    ISSeek(stream, 0, SEEK_SET);
+
     switch (format) {
     case IF_PNG:
-        image_format_png.read_header(image);
+        if (image_format_png.read_header(image))
+            return image;
         break;
 
     default:
         break;
     }
+
+    return NULL;
+}
+
+void Image_Free(Image *image)
+{
+
 }
