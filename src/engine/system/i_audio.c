@@ -57,6 +57,8 @@ CVAR(s_soundfont, DOOMSND.SF2);
 CVAR_CMD(s_driver, dsound)
 #elif __linux__
 CVAR_CMD(s_driver, pulseaudio)
+#elif __APPLE__
+CVAR_CMD(s_driver, coreaudio)
 #else
 CVAR_CMD(s_driver, sndio)
 #endif
