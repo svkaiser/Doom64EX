@@ -23,8 +23,13 @@
 ##
 
 ##------------------------------------------------------------------------------
-## CMake functions
+## Set up external dependencies
 ##
+
+# libpng
+find_package(PNG REQUIRED)
+add_include_directories(${PNG_INCLUDE_DIRS})
+add_link_libraries(${PNG_LIBRARIES})
 
 ##------------------------------------------------------------------------------
 ## Sources
@@ -40,8 +45,8 @@ file(GLOB_RECURSE CC_SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.cc")
 ##
 
 add_library(kexlib STATIC ${C_SOURCES} ${C_HEADERS} ${CC_SOURCES})
-target_include_directories(kexlib PRIVATE "${CMAKE_SOURCE_DIR}/include/kexlib")
-target_link_libraries(kexlib m png)
+target_include_directories(kexlib PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include/kexlib")
+target_link_libraries(kexlib m ${LIBRARIES})
 
 ##------------------------------------------------------------------------------
 ## Build tests
@@ -53,7 +58,7 @@ if (TESTING)
   file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/test/kexlib/*.cc")
 
   add_executable(kexlib_test ${TEST_SOURCES})
-  target_include_directories(kexlib_test PRIVATE "${CMAKE_SOURCE_DIR}/include/kexlib" ${GTEST_INCLUDE_DIRS})
+  target_include_directories(kexlib_test PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include/kexlib" ${GTEST_INCLUDE_DIRS})
   target_link_libraries(kexlib_test kexlib ${GTEST_BOTH_LIBRARIES})
 
   add_test(AllTestsInKexlib COMMAND kexlib_test)
