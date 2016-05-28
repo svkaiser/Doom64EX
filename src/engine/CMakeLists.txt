@@ -81,7 +81,7 @@ add_link_libraries(${PNG_LIBRARIES})
 
 # FluidSynth
 find_package(FluidSynth REQUIRED)
-add_include_directories(${FLUIDSYNTH_INCLUDE_DIRS})
+add_include_directories(${FLUIDSYNTH_INCLUDE_DIR})
 add_link_libraries(${FLUIDSYNTH_LIBRARIES})
 
 # OpenGL
