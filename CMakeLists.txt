@@ -38,7 +38,7 @@ set(CMAKE_CXX_FLAGS -std=c++14)
 
 option(KEXWAD "Generate kex.wad" ON)
 option(ENGINE "Build Doom64EX" ON)
-option(TESTING "Build unit tests" ON)
+option(TESTING "Build unit tests" OFF)
 
 ##------------------------------------------------------------------------------
 ## CMake functions
