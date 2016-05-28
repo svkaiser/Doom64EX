@@ -25,35 +25,6 @@
 set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
 ##------------------------------------------------------------------------------
-## CMake functions
-##
-
-function(add_include_directories)
-  unset(NEW_INCLUDES)
-  foreach (ARG ${ARGN})
-    list(APPEND NEW_INCLUDES ${ARG})
-  endforeach ()
-  set(INCLUDES ${INCLUDES} ${NEW_INCLUDES} PARENT_SCOPE)
-endfunction()
-
-function(add_sources PREFIX)
-  unset(NEW_SOURCES)
-  foreach (ARG ${ARGN})
-    list(APPEND NEW_SOURCES "${SOURCE_ROOT_DIR}/${PREFIX}/${ARG}")
-  endforeach ()
-  set(SOURCES ${SOURCES} ${NEW_SOURCES} PARENT_SCOPE)
-  set(INCLUDES ${INCLUDES} "${SOURCE_ROOT_DIR}/${PREFIX}" PARENT_SCOPE)
-endfunction()
-
-function(add_link_libraries)
-  unset(NEW_LIBRARIES)
-  foreach (ARG ${ARGN})
-    list(APPEND NEW_LIBRARIES ${ARG})
-  endforeach ()
-  set(LIBRARIES ${LIBRARIES} ${NEW_LIBRARIES} PARENT_SCOPE)
-endfunction()
-
-##------------------------------------------------------------------------------
 ## Set up external dependencies
 ##
 
