@@ -22,7 +22,7 @@
 ## 02111-1307, USA.
 ##
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
 
 project(doom64ex C CXX)
 
