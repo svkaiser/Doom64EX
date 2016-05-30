@@ -324,6 +324,10 @@ void GL_SetTextureFilter(void) {
 //
 
 void GL_SetDefaultCombiner(void) {
+    if (!usingGL) {
+        return;
+    }
+
     if(has_GL_ARB_multitexture) {
         GL_SetTextureUnit(1, false);
         GL_SetTextureUnit(2, false);
@@ -346,6 +350,10 @@ void GL_SetDefaultCombiner(void) {
 //
 
 void GL_SetColorScale(void) {
+    if (!usingGL) {
+        return;
+    }
+
     int cs = (int)r_colorscale.value;
 
     switch(cs) {

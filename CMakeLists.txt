@@ -22,7 +22,7 @@
 ## 02111-1307, USA.
 ##
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
 
 project(doom64ex C CXX)
 
@@ -38,7 +38,36 @@ set(CMAKE_CXX_FLAGS -std=c++14)
 
 option(KEXWAD "Generate kex.wad" ON)
 option(ENGINE "Build Doom64EX" ON)
-option(TESTING "Build unit tests" ON)
+option(TESTING "Build unit tests" OFF)
+
+##------------------------------------------------------------------------------
+## CMake functions
+##
+
+function(add_include_directories)
+  unset(NEW_INCLUDES)
+  foreach (ARG ${ARGN})
+    list(APPEND NEW_INCLUDES ${ARG})
+  endforeach ()
+  set(INCLUDES ${INCLUDES} ${NEW_INCLUDES} PARENT_SCOPE)
+endfunction()
+
+function(add_sources PREFIX)
+  unset(NEW_SOURCES)
+  foreach (ARG ${ARGN})
+    list(APPEND NEW_SOURCES "${SOURCE_ROOT_DIR}/${PREFIX}/${ARG}")
+  endforeach ()
+  set(SOURCES ${SOURCES} ${NEW_SOURCES} PARENT_SCOPE)
+  set(INCLUDES ${INCLUDES} "${SOURCE_ROOT_DIR}/${PREFIX}" PARENT_SCOPE)
+endfunction()
+
+function(add_link_libraries)
+  unset(NEW_LIBRARIES)
+  foreach (ARG ${ARGN})
+    list(APPEND NEW_LIBRARIES ${ARG})
+  endforeach ()
+  set(LIBRARIES ${LIBRARIES} ${NEW_LIBRARIES} PARENT_SCOPE)
+endfunction()
 
 ##------------------------------------------------------------------------------
 ## Include subprojects

@@ -939,6 +939,10 @@ void GL_DumpTextures(void) {
     int j;
     int p;
 
+    if (!usingGL) {
+        return;
+    }
+
     for(i = 0; i < numtextures; i++) {
         GL_UnloadTexture(&textureptr[i][0]);
 
