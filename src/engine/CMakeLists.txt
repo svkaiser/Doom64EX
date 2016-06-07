@@ -299,6 +299,10 @@ add_executable(doom64ex ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES})
 target_link_libraries(doom64ex ${LIBRARIES})
 
+if (KEXWAD)
+  add_dependencies(doom64ex kexwad)
+endif (KEXWAD)
+
 ##------------------------------------------------------------------------------
 ## Install target
 ##

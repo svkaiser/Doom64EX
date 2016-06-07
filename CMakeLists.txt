@@ -37,7 +37,6 @@ set(CMAKE_CXX_FLAGS -std=c++14)
 ##
 
 option(KEXWAD "Generate kex.wad" ON)
-option(ENGINE "Build Doom64EX" ON)
 option(TESTING "Build unit tests" OFF)
 
 ##------------------------------------------------------------------------------
@@ -77,11 +76,6 @@ if (TESTING)
   enable_testing()
 endif()
 
-if (KEXWAD)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
-endif()
-
-if (ENGINE)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/kexlib")
-  add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
-endif()
+add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
+add_subdirectory("${CMAKE_SOURCE_DIR}/src/kexlib")
+add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
