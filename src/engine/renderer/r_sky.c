@@ -665,12 +665,13 @@ void R_InitFire(void) {
         firePal16[i].a = 0xff;
     }
 
-    fireBuffer = I_PNGReadData(g_start + fireLump,
-                               true, true, false, 0, 0, 0, 0);
-
-    for(i = 0; i < 4096; i++) {
-        fireBuffer[i] >>= 4;
-    }
+    // TODO: Re-add Fire
+//    fireBuffer = I_PNGReadData(g_start + fireLump,
+//                               true, true, false, 0, 0, 0, 0);
+//
+//    for(i = 0; i < 4096; i++) {
+//        fireBuffer[i] >>= 4;
+//    }
 }
 
 //
@@ -678,9 +679,10 @@ void R_InitFire(void) {
 //
 
 static void R_FireTicker(void) {
-    if(leveltime & 1) {
-        R_Fire(fireBuffer);
-    }
+    // TODO: Re-add Fire
+//    if(leveltime & 1) {
+//        R_Fire(fireBuffer);
+//    }
 }
 
 //
@@ -700,9 +702,10 @@ static void R_DrawFire(void) {
     for(i = 0; i < FIRESKY_WIDTH * FIRESKY_HEIGHT; i++) {
         byte rgb[3];
 
-        rgb[0] = firePal16[fireBuffer[i]].r;
-        rgb[1] = firePal16[fireBuffer[i]].g;
-        rgb[2] = firePal16[fireBuffer[i]].b;
+        // TODO: Re-add Fire
+//        rgb[0] = firePal16[fireBuffer[i]].r;
+//        rgb[1] = firePal16[fireBuffer[i]].g;
+//        rgb[2] = firePal16[fireBuffer[i]].b;
 
         firetexture[i] = D_RGBA(rgb[2], rgb[1], rgb[0], 0xff);
     }

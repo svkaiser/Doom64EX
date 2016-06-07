@@ -295,7 +295,7 @@ add_sources(zone
 ## Build target
 ##
 
-add_executable(doom64ex ${SOURCES})
+add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES})
 target_link_libraries(doom64ex ${LIBRARIES})
 
