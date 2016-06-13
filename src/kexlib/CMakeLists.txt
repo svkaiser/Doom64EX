@@ -35,16 +35,14 @@ add_link_libraries(${PNG_LIBRARIES})
 ## Sources
 ##
 
-# We're lazy, so add all source files
-file(GLOB_RECURSE C_SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.c")
-file(GLOB_RECURSE C_HEADERS "${CMAKE_SOURCE_DIR}/src/kexlib/*.h")
-file(GLOB_RECURSE CC_SOURCES "${CMAKE_SOURCE_DIR}/src/kexlib/*.cc")
+set(SOURCES
+  framework/Pixmap.cc)
 
 ##------------------------------------------------------------------------------
 ## Build target
 ##
 
-add_library(kexlib STATIC ${C_SOURCES} ${C_HEADERS} ${CC_SOURCES})
+add_library(kexlib STATIC ${SOURCES})
 target_include_directories(kexlib PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include/kexlib")
 target_link_libraries(kexlib m ${LIBRARIES})
 
