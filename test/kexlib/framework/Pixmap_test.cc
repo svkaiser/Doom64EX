@@ -1,21 +1,25 @@
 
 #include <gtest/gtest.h>
 
-#include <framework/Pixmap.hh>
+#include <framework/Pixmap>
 #include <cstdint>
+
+using namespace kex::gfx;
 
 #define WIDTH 256
 #define HEIGHT 128
 
-static unique_ptr<uint8_t[]> rgb_data()
+namespace {
+
+unique_ptr<uint8_t[]> rgb_data()
 {
-    uint8_t* data = new uint8_t[WIDTH * HEIGHT * 3];
+    uint8_t *data = new uint8_t[WIDTH * HEIGHT * 3];
 
     for (size_t y = 0; y < HEIGHT; y++)
     {
         for (size_t x = 0; x < WIDTH; x++)
         {
-            uint8_t* ptr = &data[3 * (y * WIDTH + x)];
+            uint8_t *ptr = &data[3 * (y * WIDTH + x)];
 
             ptr[0] = (uint8_t) y;
             ptr[1] = (uint8_t) x;
@@ -26,40 +30,112 @@ static unique_ptr<uint8_t[]> rgb_data()
     return unique_ptr<uint8_t[]>(data);
 }
 
-static Pixmap default_rgb_pixmap = Pixmap::FromData(rgb_data().get(), WIDTH, HEIGHT, PixelFormat::RGB);
+unique_ptr<uint8_t[]> index8_data()
+{
+    unique_ptr<uint8_t[]> data(new uint8_t[WIDTH * HEIGHT]);
+
+    for (size_t y = 0; y < HEIGHT; y++)
+    {
+        for (size_t x = 0; x < WIDTH; x++)
+        {
+            data[y * WIDTH + x] = x ^ y;
+        }
+    }
+}
+
+Pixmap default_rgb_pixmap = Pixmap::from_data(rgb_data().get(), WIDTH, HEIGHT, PixelFormat::rgb);
+//Pixmap default_index8_pixmap = Pixmap::from_data(index8_data().get(), WIDTH, HEIGHT, PixelFormat::index8);
+
+}
 
 TEST(Pixmap, FromDataRGB)
 {
-    EXPECT_EQ(WIDTH, default_rgb_pixmap.Width());
-    EXPECT_EQ(HEIGHT, default_rgb_pixmap.GetHeight());
+    ASSERT_EQ(WIDTH, default_rgb_pixmap.width());
+    ASSERT_EQ(HEIGHT, default_rgb_pixmap.height());
 }
 
-TEST(Pixmap, ScanlineIterator)
+TEST(Pixmap, PixelIteratorCount)
 {
-    size_t height = 0;
+    size_t pixels = 0;
 
-    for (auto line : default_rgb_pixmap)
-    {
-        height++;
-    }
+    for (auto pixel : default_rgb_pixmap.map<PixelFormat::rgb>())
+        pixels++;
 
-    EXPECT_EQ(HEIGHT, height);
+    ASSERT_EQ(WIDTH * HEIGHT, pixels);
 }
 
-TEST(Pixmap, PixelIterator)
+TEST(Pixmap, PixelIteratorReadAccess)
 {
-    size_t height = 0;
-    size_t width = 0;
+    unique_ptr<uint8_t[]> data = rgb_data();
+    size_t pxIndex = 0;
 
-    for (auto line : default_rgb_pixmap.Map<PixelFormat::RGB>())
+    for (auto pixel : default_rgb_pixmap.map<PixelFormat::rgb>())
     {
-        for (auto px : line)
-        {
-            width++;
-        }
-        height++;
+        Rgb rgb = *pixel;
+
+        ASSERT_EQ(data[pxIndex * 3 + 0], rgb.red);
+        ASSERT_EQ(data[pxIndex * 3 + 1], rgb.green);
+        ASSERT_EQ(data[pxIndex * 3 + 2], rgb.blue);
+
+        pxIndex++;
+    }
+}
+
+TEST(Pixmap, PixelIteratorWriteAccess)
+{
+    Pixmap pixmap(640, 480, PixelFormat::rgb);
+    size_t pxIndex = 0;
+
+    // Set the pixels
+    for (auto pixel : pixmap.map<PixelFormat::rgb>())
+    {
+        Rgb toSet{(uint8_t) (pxIndex / WIDTH), (uint8_t) (pxIndex / HEIGHT),
+                  (uint8_t) ((pxIndex / WIDTH) ^ (pxIndex / HEIGHT))};
+
+        pixel = toSet;
+
+        pxIndex++;
     }
 
-    EXPECT_EQ(WIDTH, width);
-    EXPECT_EQ(HEIGHT, height);
+    // Verify that they're correctly set
+    pxIndex = 0;
+    for (auto pixel : pixmap.map<PixelFormat::rgb>())
+    {
+        Rgb expect{(uint8_t) (pxIndex / WIDTH), (uint8_t) (pxIndex / HEIGHT),
+                   (uint8_t) ((pxIndex / WIDTH) ^ (pxIndex / HEIGHT))};
+
+        Rgb actual = *pixel;
+
+        ASSERT_EQ(expect.red, actual.red);
+        ASSERT_EQ(expect.green, actual.green);
+        ASSERT_EQ(expect.blue, actual.blue);
+
+        pxIndex++;
+    }
+}
+
+TEST(Pixmap, PixelMapIncorrectFormatException)
+{
+    ASSERT_ANY_THROW(default_rgb_pixmap.map<PixelFormat::rgba>());
+}
+
+TEST(Pixmap, ConvertRgbToRgba)
+{
+    Pixmap rgba = move(default_rgb_pixmap.convert(PixelFormat::rgba));
+    size_t pxIndex = 0;
+
+    for (auto pixel : rgba.map<PixelFormat::rgba>())
+    {
+        Rgba expect{(uint8_t) (pxIndex / WIDTH), (uint8_t) (pxIndex / HEIGHT),
+                   (uint8_t) ((pxIndex / WIDTH) ^ (pxIndex / HEIGHT)), 0xff};
+
+        Rgba actual = *pixel;
+
+        ASSERT_EQ(expect.red, actual.red);
+        ASSERT_EQ(expect.green, actual.green);
+        ASSERT_EQ(expect.blue, actual.blue);
+        ASSERT_EQ(expect.alpha, actual.alpha);
+
+        pxIndex++;
+    }
 }

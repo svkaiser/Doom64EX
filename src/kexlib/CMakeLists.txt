@@ -36,7 +36,8 @@ add_link_libraries(${PNG_LIBRARIES})
 ##
 
 set(SOURCES
-  framework/Pixmap.cc)
+  framework/Pixmap.cc
+  framework/Pixel.cc)
 
 ##------------------------------------------------------------------------------
 ## Build target

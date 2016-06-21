@@ -1,118 +1,178 @@
-#include <cstring>
 #include <iostream>
-#include <cstdlib>
-#include "framework/Pixmap.hh"
+#include <framework/Pixmap>
 
-static PixelFormatType fmts[]{
-    {0, false},
-    {24, false},
-    {32, false},
-    {8, true}
-};
+using namespace kex::gfx;
 
-static uint8_t* alloc_data(size_t width, size_t height, PixelFormat format)
+namespace {
+
+size_t alloc_length(size_t width, size_t height, PixelFormat format)
 {
-    uint8_t* data;
+    PixelTypeinfo const &type = GetPixelTypeinfo(format);
+    return width * height * type.bytes;
+}
 
-    data = new uint8_t[width * height * fmts[(int) format].bits / 8];
-
+uint8_t *alloc_data(size_t width, size_t height, PixelFormat format)
+{
+    uint8_t *data;
+    data = new uint8_t[alloc_length(width, height, format)];
     return data;
 }
 
-Pixmap::Pixmap()
-    :
-    m_fmt(PixelFormat::Unknown),
-    m_pixels(nullptr),
-    m_width(0),
-    m_height(0)
+template <PixelFormat _SrcFmt, PixelFormat _DstFmt>
+Pixmap _convert2(const Pixmap &pSrc)
 {
-    std::cout << m_pixels << std::endl;
+    Pixmap &src = const_cast<Pixmap &>(pSrc);
+    Pixmap dst(src.width(), src.height(), _DstFmt);
+
+    auto srcMap = src.map<_SrcFmt, _DstFmt>();
+    auto srcIt = srcMap.begin();
+    auto srcEnd = srcMap.end();
+
+    auto dstIt = dst.map<_DstFmt>().begin();
+
+    for (; srcIt != srcEnd; ++srcIt, ++dstIt)
+    {
+        *dstIt = *srcIt;
+    }
+
+    return dst;
 }
 
-Pixmap::Pixmap(Pixmap const& other)
-    :
-    m_fmt(other.m_fmt),
-    m_width(other.m_width),
-    m_height(other.m_height)
+template <PixelFormat _DstFmt>
+Pixmap _convert(const Pixmap &src)
 {
-    m_pixels = alloc_data(m_width, m_height, m_fmt);
+    switch (src.format())
+    {
+    case PixelFormat::rgb:
+        return _convert2<PixelFormat::rgb, _DstFmt>(src);
+
+    case PixelFormat::rgba:
+        return _convert2<PixelFormat::rgba, _DstFmt>(src);
+
+    default:
+        throw std::exception();
+    }
 }
 
-Pixmap::Pixmap(Pixmap&& other)
-    :
-    m_fmt(other.m_fmt),
-    m_width(other.m_width),
-    m_height(other.m_height),
-    m_pixels(other.m_pixels)
+}
+
+Pixmap::Pixmap() :
+    mFormat(PixelFormat::unknown),
+    mPixels(nullptr),
+    mWidth(0),
+    mHeight(0)
 {
-    other.m_pixels = nullptr;
+}
+
+Pixmap::Pixmap(const Pixmap &other) :
+    mFormat(other.mFormat),
+    mWidth(other.mWidth),
+    mHeight(other.mHeight)
+{
+    mPixels = alloc_data(mWidth, mHeight, mFormat);
+}
+
+Pixmap::Pixmap(Pixmap &&other) :
+    mFormat(other.mFormat),
+    mWidth(other.mWidth),
+    mHeight(other.mHeight),
+    mPixels(other.mPixels)
+{
+    other.mPixels = nullptr;
+    other.reset();
+}
+
+Pixmap::Pixmap(size_t pWidth, size_t pHeight, PixelFormat pFormat):
+    mFormat(pFormat),
+    mWidth(pWidth),
+    mHeight(pHeight)
+{
+    mPixels = alloc_data(mWidth, mHeight, mFormat);
 }
 
 Pixmap::~Pixmap()
 {
-    if (m_pixels) {
-        delete[] m_pixels;
-    }
+    if (mPixels)
+        delete[] mPixels;
 }
 
-void Pixmap::Reset()
+void Pixmap::reset()
 {
-    if (!m_pixels)
-        return;
+    if (mPixels)
+        delete[] mPixels;
 
-    delete[] m_pixels;
-    m_pixels = nullptr;
-    m_width = 0;
-    m_height = 0;
-    m_fmt = PixelFormat::Unknown;
+    mPixels = nullptr;
+    mWidth = 0;
+    mHeight = 0;
+    mFormat = PixelFormat::unknown;
 }
 
-Pixmap& Pixmap::operator=(Pixmap const& other)
+Pixmap &Pixmap::operator=(const Pixmap &other)
 {
-    Reset();
+    reset();
 
-    m_fmt = other.m_fmt;
-    m_width = other.m_width;
-    m_height = other.m_height;
-    m_pixels = alloc_data(m_width, m_height, m_fmt);
+    mFormat = other.mFormat;
+    mWidth = other.mWidth;
+    mHeight = other.mHeight;
+    mPixels = alloc_data(mWidth, mHeight, mFormat);
 
     return *this;
 }
 
-Pixmap& Pixmap::operator=(Pixmap&& other)
+Pixmap &Pixmap::operator=(Pixmap &&other)
 {
-    Reset();
+    reset();
 
-    m_fmt = other.m_fmt;
-    m_width = other.m_width;
-    m_height = other.m_height;
-    m_pixels = other.m_pixels;
+    mFormat = other.mFormat;
+    mWidth = other.mWidth;
+    mHeight = other.mHeight;
+    mPixels = other.mPixels;
 
-    other.m_pixels = nullptr;
+    other.mPixels = nullptr;
+    other.reset();
 
     return *this;
 }
 
-void* Pixmap::Scanline(size_t yIndex)
+uint8_t *Pixmap::scanline(size_t yIndex)
 {
-    return nullptr;
+    return mPixels + yIndex * mWidth * typeinfo().bytes;
 }
 
-void const* Pixmap::Scanline(size_t yIndex) const
+uint8_t const *Pixmap::scanline(size_t yIndex) const
 {
-    return nullptr;
+    return mPixels + yIndex * mWidth * typeinfo().bytes;
 }
 
-Pixmap Pixmap::FromData(void const* pxData, size_t width, size_t height, PixelFormat format)
+const PixelTypeinfo &Pixmap::typeinfo() const
 {
-    Pixmap retval;
+    return GetPixelTypeinfo(mFormat);
+}
 
-    retval.m_width = width;
-    retval.m_height = height;
-    retval.m_fmt = format;
-    retval.m_pixels = alloc_data(width, height, format);
+Pixmap Pixmap::from_data(const void *pxData, size_t width, size_t height, PixelFormat format)
+{
+    Pixmap retval(width, height, format);
 
-    memcpy(retval.m_pixels, pxData, width * height * (fmts[(int) format].bits / 8));
+    std::copy_n((const uint8_t *) pxData, alloc_length(width, height, format), retval.data());
 
     return retval;
+}
+
+Pixmap Pixmap::convert(PixelFormat pConvFormat) const
+{
+    if (mFormat == pConvFormat)
+        return *this;
+
+    switch (pConvFormat)
+    {
+    case PixelFormat::rgb:
+        return _convert<PixelFormat::rgb>(*this);
+
+    case PixelFormat::rgba:
+        return _convert<PixelFormat::rgba>(*this);
+
+    default:
+        throw std::exception();
+    }
+
 }
