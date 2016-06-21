@@ -48,5 +48,5 @@ add_custom_target(kexwad
 
 # Install kex.wad
 if (NOT WIN32)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kex.wad DESTINATION share/games/doom64ex)
+  install(FILES ${CMAKE_BINARY_DIR}/kex.wad DESTINATION share/games/doom64ex)
 endif ()
