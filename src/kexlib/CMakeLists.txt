@@ -36,6 +36,9 @@ add_link_libraries(${PNG_LIBRARIES})
 ##
 
 set(SOURCES
+  Lib.cc
+  framework/Image.cc
+  framework/PngImage.cc
   framework/Pixmap.cc
   framework/Pixel.cc)
 
@@ -44,8 +47,8 @@ set(SOURCES
 ##
 
 add_library(kexlib STATIC ${SOURCES})
-target_include_directories(kexlib PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include/kexlib")
-target_link_libraries(kexlib m ${LIBRARIES})
+target_include_directories(kexlib PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include/kexlib" "/usr/local/include")
+target_link_libraries(kexlib m fmt ${LIBRARIES})
 
 ##------------------------------------------------------------------------------
 ## Build tests
@@ -54,11 +57,14 @@ target_link_libraries(kexlib m ${LIBRARIES})
 if (TESTING)
   find_package(GTest REQUIRED)
 
-  file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/test/kexlib/*.cc")
+    set(TEST_SOURCES
+      ${CMAKE_SOURCE_DIR}/test/kexlib/Main.cc
+      ${CMAKE_SOURCE_DIR}/test/kexlib/framework/PngImage_test.cc
+      ${CMAKE_SOURCE_DIR}/test/kexlib/framework/Pixmap_test.cc)
 
   add_executable(kexlib_test ${TEST_SOURCES})
   target_include_directories(kexlib_test PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include/kexlib" ${GTEST_INCLUDE_DIRS})
-  target_link_libraries(kexlib_test kexlib ${GTEST_BOTH_LIBRARIES})
+  target_link_libraries(kexlib_test kexlib ${GTEST_LIBRARIES})
 
   add_test(AllTestsInKexlib COMMAND kexlib_test)
 

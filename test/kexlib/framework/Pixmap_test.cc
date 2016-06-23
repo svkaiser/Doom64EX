@@ -58,7 +58,7 @@ TEST(Pixmap, PixelIteratorCount)
 {
     size_t pixels = 0;
 
-    for (auto pixel : default_rgb_pixmap.map<PixelFormat::rgb>())
+    for (auto pixel : default_rgb_pixmap.map<Rgb>())
         pixels++;
 
     ASSERT_EQ(WIDTH * HEIGHT, pixels);
@@ -69,7 +69,7 @@ TEST(Pixmap, PixelIteratorReadAccess)
     unique_ptr<uint8_t[]> data = rgb_data();
     size_t pxIndex = 0;
 
-    for (auto pixel : default_rgb_pixmap.map<PixelFormat::rgb>())
+    for (auto pixel : default_rgb_pixmap.map<Rgb>())
     {
         Rgb rgb = *pixel;
 
@@ -87,7 +87,7 @@ TEST(Pixmap, PixelIteratorWriteAccess)
     size_t pxIndex = 0;
 
     // Set the pixels
-    for (auto pixel : pixmap.map<PixelFormat::rgb>())
+    for (auto pixel : pixmap.map<Rgb>())
     {
         Rgb toSet{(uint8_t) (pxIndex / WIDTH), (uint8_t) (pxIndex / HEIGHT),
                   (uint8_t) ((pxIndex / WIDTH) ^ (pxIndex / HEIGHT))};
@@ -99,7 +99,7 @@ TEST(Pixmap, PixelIteratorWriteAccess)
 
     // Verify that they're correctly set
     pxIndex = 0;
-    for (auto pixel : pixmap.map<PixelFormat::rgb>())
+    for (auto pixel : pixmap.map<Rgb>())
     {
         Rgb expect{(uint8_t) (pxIndex / WIDTH), (uint8_t) (pxIndex / HEIGHT),
                    (uint8_t) ((pxIndex / WIDTH) ^ (pxIndex / HEIGHT))};
@@ -116,7 +116,7 @@ TEST(Pixmap, PixelIteratorWriteAccess)
 
 TEST(Pixmap, PixelMapIncorrectFormatException)
 {
-    ASSERT_ANY_THROW(default_rgb_pixmap.map<PixelFormat::rgba>());
+    ASSERT_ANY_THROW(default_rgb_pixmap.map<Rgba>());
 }
 
 TEST(Pixmap, ConvertRgbToRgba)
@@ -124,7 +124,7 @@ TEST(Pixmap, ConvertRgbToRgba)
     Pixmap rgba = move(default_rgb_pixmap.convert(PixelFormat::rgba));
     size_t pxIndex = 0;
 
-    for (auto pixel : rgba.map<PixelFormat::rgba>())
+    for (auto pixel : rgba.map<Rgba>())
     {
         Rgba expect{(uint8_t) (pxIndex / WIDTH), (uint8_t) (pxIndex / HEIGHT),
                    (uint8_t) ((pxIndex / WIDTH) ^ (pxIndex / HEIGHT)), 0xff};

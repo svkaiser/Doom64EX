@@ -21,6 +21,11 @@ struct Rgb {
     uint8_t red, green, blue;
 };
 
+inline bool operator==(const Rgb &a, const Rgb &b)
+{
+    return a.red == b.red && a.green == b.green && a.blue == b.blue;
+}
+
 struct Rgba {
     uint8_t red, green, blue, alpha;
 };
@@ -34,19 +39,11 @@ struct PixelTypeinfo {
     size_t bytes;
 };
 
-template<PixelFormat _Format>
+template<typename _T>
 struct PixelTraits;
 
 template<>
-struct PixelTraits<PixelFormat::unknown> {
-    using pixel_type = void;
-    static constexpr auto format = PixelFormat::unknown;
-    static constexpr size_t bits = 0;
-    static constexpr size_t bytes = 0;
-};
-
-template<>
-struct PixelTraits<PixelFormat::index8> {
+struct PixelTraits<Index8> {
     using pixel_type = Index8;
     static constexpr auto format = PixelFormat::index8;
     static constexpr size_t bits = 8;
@@ -54,7 +51,7 @@ struct PixelTraits<PixelFormat::index8> {
 };
 
 template<>
-struct PixelTraits<PixelFormat::rgb> {
+struct PixelTraits<Rgb> {
     using pixel_type = Rgb;
     static constexpr auto format = PixelFormat::rgb;
     static constexpr size_t bits = 24;
@@ -62,7 +59,7 @@ struct PixelTraits<PixelFormat::rgb> {
 };
 
 template<>
-struct PixelTraits<PixelFormat::rgba> {
+struct PixelTraits<Rgba> {
     using pixel_type = Rgba;
     static constexpr auto format = PixelFormat::rgba;
     static constexpr size_t bits = 32;
@@ -81,7 +78,7 @@ inline void to_pixel(const Rgba &src, Rgb &dst)
 
 PixelTypeinfo const &GetPixelTypeinfo(PixelFormat fmt);
 
-template<PixelFormat _T, PixelFormat _U = _T>
+template<typename _T, typename _U = _T>
 class PixelReference {
 public:
     using native_traits_type = PixelTraits<_T>;
@@ -122,15 +119,9 @@ public:
     {
         return set(pPixel);
     }
-
-    template <PixelFormat _T2>
-    PixelReference &operator=(const PixelReference<_T2, _U> &x)
-    {
-        *this = *x;
-    }
 };
 
-template<PixelFormat _T, PixelFormat _U = _T>
+template<typename _T, typename _U = _T>
 class PixelIterator {
     size_t mWidth;
     size_t mYSkip;
@@ -168,7 +159,7 @@ public:
 
     reference_type operator*()
     {
-        return reference_type(*(native_pixel_type *)mPixels);
+        return reference_type(*(native_pixel_type *) mPixels);
     }
 };
 

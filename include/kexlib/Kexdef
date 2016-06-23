@@ -7,11 +7,24 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 using std::enable_if;
 using std::unique_ptr;
 using std::move;
 using std::forward;
+
+namespace fmt {
+
+template <class... _Args>
+void println(_Args... args)
+{
+    fmt::print(args...);
+    fmt::print("\n");
+}
+
+}
 
 namespace kex {
 
@@ -29,5 +42,7 @@ struct is_any_of_type<_T, _T, _Args...> : std::true_type
 template<typename _T, typename _U, typename... _Args>
 struct is_any_of_type<_T, _U, _Args...> : is_any_of_type<_T, _Args...>
 { };
+
+extern void init_lib();
 
 }

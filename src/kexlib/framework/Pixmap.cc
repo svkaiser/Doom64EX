@@ -18,36 +18,34 @@ uint8_t *alloc_data(size_t width, size_t height, PixelFormat format)
     return data;
 }
 
-template <PixelFormat _SrcFmt, PixelFormat _DstFmt>
+template <typename _Src, typename _Dst>
 Pixmap _convert2(const Pixmap &pSrc)
 {
     Pixmap &src = const_cast<Pixmap &>(pSrc);
-    Pixmap dst(src.width(), src.height(), _DstFmt);
+    Pixmap dst(src.width(), src.height(), PixelTraits<_Dst>::format);
 
-    auto srcMap = src.map<_SrcFmt, _DstFmt>();
+    auto srcMap = src.map<_Src, _Dst>();
     auto srcIt = srcMap.begin();
     auto srcEnd = srcMap.end();
 
-    auto dstIt = dst.map<_DstFmt>().begin();
+    auto dstIt = dst.map<_Dst>().begin();
 
     for (; srcIt != srcEnd; ++srcIt, ++dstIt)
-    {
-        *dstIt = *srcIt;
-    }
+        (*dstIt).set((*srcIt).get());
 
     return dst;
 }
 
-template <PixelFormat _DstFmt>
+template <typename _Dst>
 Pixmap _convert(const Pixmap &src)
 {
     switch (src.format())
     {
     case PixelFormat::rgb:
-        return _convert2<PixelFormat::rgb, _DstFmt>(src);
+        return _convert2<Rgb, _Dst>(src);
 
     case PixelFormat::rgba:
-        return _convert2<PixelFormat::rgba, _DstFmt>(src);
+        return _convert2<Rgba, _Dst>(src);
 
     default:
         throw std::exception();
@@ -105,6 +103,16 @@ void Pixmap::reset()
     mWidth = 0;
     mHeight = 0;
     mFormat = PixelFormat::unknown;
+}
+
+void Pixmap::reset(size_t pWidth, size_t pHeight, PixelFormat pFormat)
+{
+    reset();
+
+    mWidth = pWidth;
+    mHeight = pHeight;
+    mFormat = pFormat;
+    mPixels = alloc_data(mWidth, mHeight, mFormat);
 }
 
 Pixmap &Pixmap::operator=(const Pixmap &other)
@@ -166,10 +174,10 @@ Pixmap Pixmap::convert(PixelFormat pConvFormat) const
     switch (pConvFormat)
     {
     case PixelFormat::rgb:
-        return _convert<PixelFormat::rgb>(*this);
+        return _convert<Rgb>(*this);
 
     case PixelFormat::rgba:
-        return _convert<PixelFormat::rgba>(*this);
+        return _convert<Rgba>(*this);
 
     default:
         throw std::exception();

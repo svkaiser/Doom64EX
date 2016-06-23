@@ -4,7 +4,7 @@ using namespace kex::gfx;
 
 namespace {
 
-template<PixelFormat _T>
+template<typename _T>
 constexpr auto pixel_traits_gen()
 {
     using traits_type = PixelTraits<_T>;
@@ -12,10 +12,9 @@ constexpr auto pixel_traits_gen()
 }
 
 const PixelTypeinfo formats[] = {
-    pixel_traits_gen<PixelFormat::unknown>(),
-    pixel_traits_gen<PixelFormat::index8>(),
-    pixel_traits_gen<PixelFormat::rgb>(),
-    pixel_traits_gen<PixelFormat::rgba>(),
+    pixel_traits_gen<Index8>(),
+    pixel_traits_gen<Rgb>(),
+    pixel_traits_gen<Rgba>(),
 };
 
 }

@@ -6,7 +6,7 @@
 namespace kex {
 namespace gfx {
 
-template<PixelFormat _T, PixelFormat _U = _T>
+template<typename _T, typename _U = _T>
 class PixmapMap;
 
 class Pixmap {
@@ -42,6 +42,8 @@ public:
      * \brief Empty the object and free the buffer
      */
     void reset();
+
+    void reset(size_t width, size_t height, PixelFormat format);
 
     /*!
      * \brief
@@ -92,10 +94,10 @@ public:
     PixelFormat format() const
     { return mFormat; }
 
-    template<PixelFormat _T, PixelFormat _U = _T>
+    template<typename _T, typename _U = _T>
     auto map()
     {
-        if (mFormat != _T)
+        if (mFormat != PixelTraits<_T>::format)
             throw std::exception();
         return PixmapMap<_T, _U>(*this);
     }
@@ -113,7 +115,7 @@ public:
     static Pixmap from_data(const void *pxData, size_t width, size_t height, PixelFormat format);
 };
 
-template<PixelFormat _T, PixelFormat _U>
+template<typename _T, typename _U>
 class PixmapMap {
     Pixmap &mPixmap;
 
@@ -151,6 +153,8 @@ public:
             width(), 0, width());
     }
 };
+
+using Pixmap_sp = std::shared_ptr<Pixmap>;
 
 } // namespace gfx
 } // namespace kex
