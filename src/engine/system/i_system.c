@@ -575,7 +575,7 @@ void I_Error(char* string, ...) {
     fflush(stderr);
 
     I_Printf("\n********* ERROR *********\n");
-    I_Printf(buff);
+    I_Printf("%s", buff);
 
     if(usingGL) {
         while(1) {
@@ -677,7 +677,7 @@ void I_Printf(char* string, ...) {
     }
 #endif
 
-    printf(buff);
+    printf("%s", buff);
     if(console_initialized) {
         CON_AddText(buff);
     }

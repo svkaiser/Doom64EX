@@ -225,7 +225,7 @@ void CON_Printf(rcolor clr, const char *s, ...) {
     vsprintf(msg, s, va);
     va_end(va);
 
-    I_Printf(msg);
+    I_Printf("%s", msg);
     console_buffer[console_head]->color = clr;
 }
 
@@ -242,7 +242,7 @@ void CON_Warnf(const char *s, ...) {
     va_end(va);
 
     CON_Printf(YELLOW, "WARNING: ");
-    CON_Printf(YELLOW, msg);
+    CON_Printf(YELLOW, "%s", msg);
 }
 
 //
@@ -258,7 +258,7 @@ void CON_DPrintf(const char *s, ...) {
         vsprintf(msg, s, va);
         va_end(va);
 
-        CON_Printf(RED, msg);
+        CON_Printf(RED, "%s", msg);
     }
 }
 
