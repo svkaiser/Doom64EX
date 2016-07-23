@@ -1,7 +1,6 @@
-
+#include <kex/gfx/Image>
 #include <fstream>
 #include <gtest/gtest.h>
-#include <framework/Image>
 
 using namespace kex::gfx;
 
@@ -16,11 +15,12 @@ TEST(PngImage, LoadTest)
     ASSERT_TRUE(file.is_open());
 
     Image image(file);
-    Pixmap_sp pixmap = image.data();
+}
 
-    Rgb *p = rgb_test_image;
-    for (auto pixel : pixmap->map<Rgb>())
-    {
-        ASSERT_EQ(*p++, *pixel);
-    }
+TEST(PngImage, LoadIndexed)
+{
+    std::ifstream file("./data/kexlib_test/fire.png");
+    ASSERT_TRUE(file.is_open());
+
+    Image image(file);
 }

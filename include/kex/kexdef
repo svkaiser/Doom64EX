@@ -1,0 +1,101 @@
+// -*- mode: c++ -*-
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2016 Zohar Malamant
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+// 02111-1307, USA.
+//
+//-----------------------------------------------------------------------------
+
+#ifndef __KEX_DEF__
+#define __KEX_DEF__
+
+#include <utility>
+#include <tuple>
+#include <memory>
+#include <stdexcept>
+#include <kex/format>
+
+#define ALIAS_FN(NewName, OldName) \
+    template <class... Args> \
+    inline decltype(auto) NewName(Args&&... args)     \
+    { return OldName(std::forward<Args>(args)...); }
+
+namespace kex
+{
+/** A metafunction to be able to detect the validity of an expression at compile time. See C++17's `std::void_t' */
+  template<class... Args>
+  using void_t = void;
+
+  template<bool Val>
+  using bool_t = std::integral_constant<bool, Val>;
+
+/** Analog of std::is_same, but for N types */
+  template<class... Args>
+  struct is_any_same;
+
+/** When there are no more types to check -> false */
+  template<class T>
+  struct is_any_same<T>: std::false_type
+  {
+  };
+
+/** When the first two types are the same -> true */
+  template<class T, class... Args>
+  struct is_any_same<T, T, Args...>: std::true_type
+  {
+  };
+
+/** When the first two types are not the same -> recurse */
+  template<class T, class U, class... Args>
+  struct is_any_same<T, U, Args...>: is_any_same<T, Args...>
+  {
+  };
+
+/** Value version of kex::is_any_same<...> */
+  template<class... Args>
+  constexpr auto is_any_same_v = is_any_same<Args...>::value;
+
+  template<class... Args>
+  constexpr void unused(Args&& ...) noexcept
+  {}
+
+  template<class... Args>
+  using $t = std::tuple<Args...>;
+
+  template<class... Args>
+  using tuple = std::tuple<Args...>;
+
+  static decltype(auto) _ = std::ignore;
+
+  ALIAS_FN($, std::tie)
+  ALIAS_FN($$, std::make_tuple)
+
+  template<class T>
+  inline auto to_tuple(T&& x)
+  {
+      return std::forward<T>(x).to_tuple();
+  }
+  void init_lib();
+}
+
+#ifdef KEX_DONT_POLLUTE
+# undef ALIAS_FN
+#else
+using namespace kex;
+#endif
+
+#endif //__KEX_DEF__

@@ -1,7 +1,7 @@
-// Emacs style mode select   -*- C++ -*-
+// -*- mode: c++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2007-2012 Samuel Villarreal
+// Copyright(C) 2016 Zohar Malamant
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,17 +20,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __I_PNG_H__
-#define __I_PNG_H__
+#include <kex/kexdef>
+#include <kex/lib>
 
-#include "png.h"
-#include "doomtype.h"
+void init_image();
 
-#include <kex/compat/gfx.h>
+void kex::init_lib()
+{
+    using namespace kex::lib;
+    init_image();
+}
 
-Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
-                    int* w, int* h, int* offset, int palindex);
-
-byte* I_PNGCreate(int width, int height, byte* data, int* size);
-
-#endif // __I_PNG_H__
+extern "C" void Kexlib_Init()
+{ kex::init_lib(); }

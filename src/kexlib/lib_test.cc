@@ -1,5 +1,5 @@
 
-#include <Kexdef>
+#include <kex/kexdef>
 #include <gtest/gtest.h>
 
 int main(int argc, char *argv[])

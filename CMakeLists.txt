@@ -30,8 +30,6 @@ set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/extern/build")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
 
-add_definitions(-std=c++14)
-
 ##------------------------------------------------------------------------------
 ## Options
 ##

@@ -969,6 +969,10 @@ void D_DoomMain(void) {
 
     // init subsystems
 
+    I_Printf("Kexlib_Init: Init kexlib\n");
+    void Kexlib_Init();
+    Kexlib_Init();
+
     I_Printf("Z_Init: Init Zone Memory Allocator\n");
     Z_Init();
 
