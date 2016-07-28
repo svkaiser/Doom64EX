@@ -559,20 +559,20 @@ namespace kex {
     { dst = { src.blue, src.green, src.red }; }
 
     constexpr void copy_pixel(const Rgb &src, Rgba &dst) noexcept
-    { dst = { src.red, src.green, src.blue, 0 }; }
+    { dst = { src.red, src.green, src.blue, 0xff }; }
 
     constexpr void copy_pixel(const Rgb &src, Bgra &dst) noexcept
-    { dst = { src.blue, src.green, src.red, 0 }; }
+    { dst = { src.blue, src.green, src.red, 0xff }; }
 
     /* BGR copy_pixel */
     constexpr void copy_pixel(const Bgr &src, Rgb &dst) noexcept
     { dst = { src.red, src.green, src.blue }; }
 
     constexpr void copy_pixel(const Bgr &src, Rgba &dst) noexcept
-    { dst = { src.red, src.green, src.blue, 0 }; }
+    { dst = { src.red, src.green, src.blue, 0xff }; }
 
     constexpr void copy_pixel(const Bgr &src, Bgra &dst) noexcept
-    { dst = { src.blue, src.green, src.red, 0 }; }
+    { dst = { src.blue, src.green, src.red, 0xff }; }
 
     /* RGBA copy_pixel */
     constexpr void copy_pixel(const Rgba &src, Rgb &dst) noexcept

@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 
 #include <sstream>
+#include <fstream>
 #include <kex/gfx/Image>
 
 using namespace kex::gfx;
@@ -32,8 +33,7 @@ Image* Image_New(uint16_t width, uint16_t height, pixel_format format)
 
 Image* Image_New_FromData(const uint8_t *data, uint16_t width, uint16_t height, pixel_format format)
 {
-    Image *retval = new Image;
-    *retval = make_image(data, format, width, height);
+    Image *retval = new Image(make_image(data, format, width, height));
     return retval;
 }
 

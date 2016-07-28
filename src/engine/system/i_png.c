@@ -131,7 +131,6 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
     lsize = W_LumpLength(lump);
 
     image = Image_New_FromMemory(lcache, lsize);
-    Z_Free(lcache);
 
     // look for offset chunk if specified
     if(offset) {
@@ -140,7 +139,7 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
 
         // TODO: Read from Image
     }
-    Image_Convert(image, PF_RGB);
+    Image_Convert(image, alpha ? PF_RGBA : PF_RGB);
 
     if (palindex && Image_IsIndexed(image))
     {

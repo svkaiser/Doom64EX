@@ -48,24 +48,24 @@ namespace {
 
   Image PngImage::load(std::istream &s) const
   {
-      png_structp readp = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-      if (readp == nullptr)
+      png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+      if (png_ptr == nullptr)
           throw image_load_error("Failed to create PNG read struct");
 
-      png_infop infop = png_create_info_struct(readp);
+      png_infop infop = png_create_info_struct(png_ptr);
       if (infop == nullptr)
       {
-          png_destroy_read_struct(&readp, nullptr, nullptr);
+          png_destroy_read_struct(&png_ptr, nullptr, nullptr);
           throw image_load_error("Failed to create PNG info struct");
       }
 
-      if (setjmp(png_jmpbuf(readp)))
+      if (setjmp(png_jmpbuf(png_ptr)))
       {
-          png_destroy_read_struct(&readp, &infop, nullptr);
+          png_destroy_read_struct(&png_ptr, &infop, nullptr);
           throw image_load_error("An error occurred in libpng");
       }
 
-      png_set_read_fn(readp, &s,
+      png_set_read_fn(png_ptr, &s,
                       [](auto ctx, auto area, auto size) {
                           auto s = static_cast<std::istream *>(png_get_io_ptr(ctx));
                           s->read(reinterpret_cast<char *>(area), size);
@@ -75,8 +75,22 @@ namespace {
 
       png_uint_32 width, height;
       int bitDepth, colorType, interlaceMethod;
-      png_read_info(readp, infop);
-      png_get_IHDR(readp, infop, &width, &height, &bitDepth, &colorType, &interlaceMethod, nullptr, nullptr);
+      png_read_info(png_ptr, infop);
+      png_get_IHDR(png_ptr, infop, &width, &height, &bitDepth, &colorType, &interlaceMethod, nullptr, nullptr);
+
+      png_set_strip_16(png_ptr);
+      png_set_packing(png_ptr);
+
+      if (colorType == PNG_COLOR_TYPE_GRAY)
+          png_set_expand(png_ptr);
+
+      // TODO: Check png_get_tRNS for transparency
+
+      if (colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+          png_set_gray_to_rgb(png_ptr);
+
+      png_read_update_info(png_ptr, infop);
+      png_get_IHDR(png_ptr, infop, &width, &height, &bitDepth, &colorType, &interlaceMethod, nullptr, nullptr);
 
       fmt::print(">>> bitDepth: {}, colorType: {}\n", bitDepth, colorType);
 
@@ -92,9 +106,6 @@ namespace {
 
           case PNG_COLOR_TYPE_PALETTE:
               switch (bitDepth) {
-              case 4:
-                  format = pixel_format::index4;
-                  break;
               case 8:
                   format = pixel_format::index8;
                   break;
@@ -117,7 +128,7 @@ namespace {
       {
           png_colorp pal = nullptr;
           int numPal = 0;
-          png_get_PLTE(readp, infop, &pal, &numPal);
+          png_get_PLTE(png_ptr, infop, &pal, &numPal);
 
           for (auto&& c : retval.palette().map<Rgb>() )
           {
@@ -128,12 +139,10 @@ namespace {
           }
       }
 
-      png_read_update_info(readp, infop);
+      png_read_image(png_ptr, scanlines);
+      png_read_end(png_ptr, infop);
 
-      png_read_image(readp, scanlines);
-      png_read_end(readp, infop);
-
-      return retval.convert_copy(pixel_format::rgb);
+      return retval;
   }
 
   void PngImage::save(std::ostream &s, const Image &image) const

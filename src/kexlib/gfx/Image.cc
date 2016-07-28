@@ -88,17 +88,10 @@ namespace {
 
 Image kex::gfx::make_image(const uint8_t data[], pixel_format format, uint16_t width, uint16_t height)
 {
-    Image retval;
+    Image retval(width, height, format);
 
-    auto traits = &get_pixel_traits(format);
-    auto length = calc_length(traits, width, height);
-
-    retval.mTraits = traits;
-    retval.mWidth = width;
-    retval.mHeight = height;
-    retval.mData = std::make_unique<uint8_t[]>(length);
-
-    std::copy_n(data, length, retval.mData.get());
+    auto length = calc_length(&retval.traits(), width, height);
+    std::copy_n(data, length, retval.data_ptr());
 
     return retval;
 }

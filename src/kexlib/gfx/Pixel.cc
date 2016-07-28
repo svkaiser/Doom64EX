@@ -36,9 +36,9 @@ namespace {
       static_pixel_traits<Bgra>{}
   };
 
-  size_t calc_length(const pixel_traits &traits, size_t count)
+  size_t calc_length(const pixel_traits *traits, size_t count)
   {
-      return traits.bytes * count;
+      return traits ? traits->bytes * count : 0;
   }
 }
 
@@ -57,12 +57,12 @@ const pixel_traits& kex::gfx::get_pixel_traits(pixel_format format)
 }
 
 Palette::Palette(const Palette &other) noexcept:
-    mColors(std::make_unique<uint8_t[]>(calc_length(*other.mTraits, other.mCount))),
+    mColors(std::make_unique<uint8_t[]>(calc_length(other.mTraits, other.mCount))),
     mTraits(other.mTraits),
     mCount(other.mCount),
     mOffset(other.mOffset)
 {
-    std::copy_n(other.mColors.get(), calc_length(*mTraits, mCount), mColors.get());
+    std::copy_n(other.mColors.get(), calc_length(mTraits, mCount), mColors.get());
 }
 
 Palette& Palette::operator=(const Palette &other) noexcept
@@ -70,7 +70,7 @@ Palette& Palette::operator=(const Palette &other) noexcept
     mTraits = other.mTraits;
     mCount = other.mCount;
 
-    auto length = calc_length(*mTraits, mCount);
+    auto length = calc_length(mTraits, mCount);
     mColors = std::make_unique<uint8_t[]>(length);
     std::copy_n(other.mColors.get(), length, mColors.get());
 
