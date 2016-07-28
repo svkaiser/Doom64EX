@@ -165,6 +165,15 @@ namespace kex
         const Palette& palette() const
         { return mPalette; }
 
+        const int* offsets() const
+        { return mOffsets; }
+
+        void offsets(const int *vals)
+        {
+            mOffsets[0] = vals[0];
+            mOffsets[1] = vals[1];
+        }
+
         bool is_indexed() const
         { return mTraits->format == pixel_format::index8; }
 
@@ -179,11 +188,12 @@ namespace kex
         Image& operator=(Image&& other) noexcept = default;
 
     private:
-        const pixel_traits* mTraits{nullptr};
-        uint16_t mWidth{0};
-        uint16_t mHeight{0};
-        Palette mPalette;
-        std::unique_ptr<uint8_t[]> mData{nullptr};
+        const pixel_traits* mTraits {nullptr};
+        uint16_t mWidth {0};
+        uint16_t mHeight {0};
+        Palette mPalette {nullptr};
+        std::unique_ptr<uint8_t[]> mData {nullptr};
+        int mOffsets[2] {0};
 
         friend Image make_image(const uint8_t data[], pixel_format format, uint16_t width, uint16_t height);
         friend Image make_image(std::unique_ptr<uint8_t[]> data, pixel_format format, uint16_t width, uint16_t height);

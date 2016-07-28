@@ -76,6 +76,9 @@ auto Image_GetData(Image *image)
 auto Image_GetPalette(Image *image)
 { return &image->palette(); }
 
+auto Image_GetOffsets(Image *image)
+{ return image->offsets(); }
+
 auto Image_IsIndexed(Image *image)
 { return image->is_indexed(); }
 

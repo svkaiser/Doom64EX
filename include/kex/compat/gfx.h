@@ -60,6 +60,7 @@ uint16_t Image_GetWidth(Image*);
 uint16_t Image_GetHeight(Image*);
 void *Image_GetData(Image*);
 Palette *Image_GetPalette(Image*);
+int* Image_GetOffsets(Image*);
 int Image_IsIndexed(Image*);
 void Image_Convert(Image*, pixel_format);
 

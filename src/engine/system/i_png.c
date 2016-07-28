@@ -134,10 +134,8 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
 
     // look for offset chunk if specified
     if(offset) {
-        offset[0] = 0;
-        offset[1] = 0;
-
-        // TODO: Read from Image
+        offset[0] = Image_GetOffsets(image)[0];
+        offset[1] = Image_GetOffsets(image)[1];
     }
     Image_Convert(image, alpha ? PF_RGBA : PF_RGB);
 

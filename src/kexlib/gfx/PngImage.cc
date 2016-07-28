@@ -71,7 +71,21 @@ namespace {
                           s->read(reinterpret_cast<char *>(area), size);
                       });
 
-      // TODO: Add unknown chunk loading (should be simple enough for a handsome guy like you)
+      /* Grab offset information if available. This seems like a hack since this is
+       * probably only used by Doom64EX and not a general thing as this file might imply. */
+      int offsets[2];
+      auto chunkFn = [](png_structp png_ptr, png_unknown_chunkp chunk) -> int {
+          if (std::strncmp((char*)chunk->name, "grAb", 4) == 0 && chunk->size >= 8) {
+              auto offsets = reinterpret_cast<int*>(png_get_user_chunk_ptr(png_ptr));
+              auto data = reinterpret_cast<int*>(chunk->data);
+              offsets[0] = kex::cpu::swap_be(data[0]);
+              offsets[1] = kex::cpu::swap_be(data[1]);
+              return 1;
+          }
+
+          return 0;
+      };
+      png_set_read_user_chunk_fn(png_ptr, offsets, chunkFn);
 
       png_uint_32 width, height;
       int bitDepth, colorType, interlaceMethod;
@@ -91,8 +105,6 @@ namespace {
 
       png_read_update_info(png_ptr, infop);
       png_get_IHDR(png_ptr, infop, &width, &height, &bitDepth, &colorType, &interlaceMethod, nullptr, nullptr);
-
-      fmt::print(">>> bitDepth: {}, colorType: {}\n", bitDepth, colorType);
 
       pixel_format format;
       switch (colorType) {
@@ -138,6 +150,8 @@ namespace {
               c.blue = p.blue;
           }
       }
+
+      retval.offsets(offsets);
 
       png_read_image(png_ptr, scanlines);
       png_read_end(png_ptr, infop);
