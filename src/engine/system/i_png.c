@@ -137,7 +137,6 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
         offset[0] = Image_GetOffsets(image)[0];
         offset[1] = Image_GetOffsets(image)[1];
     }
-    Image_Convert(image, alpha ? PF_RGBA : PF_RGB);
 
     if (palindex && Image_IsIndexed(image))
     {
@@ -168,6 +167,9 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
 
         I_TranslatePalette(pal);
     }
+
+    if (!palette)
+        Image_Convert(image, alpha ? PF_RGBA : PF_RGB);
 
     if(w) {
         *w = Image_GetWidth(image);

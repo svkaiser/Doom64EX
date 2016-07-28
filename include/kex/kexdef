@@ -93,25 +93,25 @@ namespace kex
   void init_lib();
 
     // TODO: Move this namespace somewhere else
-    namespace cpu {
-        template <class T, class = std::enable_if_t<std::is_arithmetic<T>::value>>
-        T swap_be(T x)
-        {
-          union {
-              T val;
-              uint8_t bytes[sizeof(T)];
-          } src, dst;
-            src.val = x;
-            std::reverse_copy(src.bytes, src.bytes + sizeof(T), dst.bytes);
-            return dst.val;
-        };
+  namespace cpu {
+    template <class T, class = std::enable_if_t<std::is_arithmetic<T>::value>>
+    T swap_be(T x)
+    {
+        union {
+            T val;
+            uint8_t bytes[sizeof(T)];
+        } src, dst;
+        src.val = x;
+        std::reverse_copy(src.bytes, src.bytes + sizeof(T), dst.bytes);
+        return dst.val;
+    };
 
-        template <class T, class = std::enable_if_t<std::is_arithmetic<T>::value>>
-        T swap_le(T x)
-        {
-          return x;
-        };
-    }
+    template <class T, class = std::enable_if_t<std::is_arithmetic<T>::value>>
+    T swap_le(T x)
+    {
+        return x;
+    };
+  }
 }
 
 #ifdef KEX_DONT_POLLUTE
