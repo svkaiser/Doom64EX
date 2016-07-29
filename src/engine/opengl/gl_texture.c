@@ -269,17 +269,10 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
         hp = GL_PadTextureDims(*origheight);
 
         image_src = Image_New_FromData(data, *origwidth, *origheight, PF_RGBA);
+        image = Image_Resize(image_src, wp, hp);
 
-        if(r_texnonpowresize.value >= 2) {
-            // this will probably look like crap
-            image = Image_Resize(image_src, wp, hp, INTERP_NEAREST, EXTRAP_NEAREST);
-        }
-        else {
-            image = Image_CropFill(image_src, wp, hp);
-
-            *origwidth = wp;
-            *origheight = hp;
-        }
+        *origwidth = wp;
+        *origheight = hp;
 
         dglTexImage2D(
             GL_TEXTURE_2D,

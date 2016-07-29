@@ -138,6 +138,52 @@ namespace {
   {
       process_pixel(convert_unknown_to_unknown(), src.format(), src, dst);
   }
+
+  template <class Src, class Dst>
+  void resize_normal_to_normal(const Image &src, Image &dst)
+  {
+      int h = std::min(src.height(), dst.height());
+      int w = std::min(src.width(), dst.width());
+      auto srcLinePad = (src.width() < dst.width()) ? 0 : src.width() - w;
+      auto dstLinePad = (src.width() < dst.width()) ? dst.width() - w : 0;
+
+      auto srcIt = src.map<Src>().cbegin();
+      auto dstIt = dst.map<Dst>().begin();
+
+      for (int y = 0; y < h; y++)
+      {
+          for (int x = 0; x < w; x++)
+          {
+              copy_pixel(*srcIt, *dstIt);
+              ++srcIt, ++dstIt;
+          }
+
+          srcIt += srcLinePad;
+          dstIt += dstLinePad;
+      }
+  };
+
+  template <class Src>
+  struct resize_normal_to_unknown : default_pixel_processor {
+      template <class Dst>
+      void normal(const Image &src, Image &dst)
+      {
+          resize_normal_to_normal<Src, Dst>(src, dst);
+      }
+  };
+
+  struct resize_unknown_to_unknown : default_pixel_processor {
+      template <class Src>
+      void normal(const Image &src, Image &dst)
+      {
+          process_pixel(resize_normal_to_unknown<Src>(), dst.format(), src, dst);
+      }
+  };
+
+  void tresize(const Image &src, Image &dst)
+  {
+      process_pixel(resize_unknown_to_unknown(), src.format(), src, dst);
+  }
 }
 
 Image kex::gfx::make_image(const uint8_t data[], pixel_format format, uint16_t width, uint16_t height)
@@ -209,10 +255,12 @@ Image Image::convert_copy(pixel_format format) const
     return newImage;
 }
 
-Image Image::crop_fill(uint16_t width, uint16_t height) const
+Image Image::resize(uint16_t width, uint16_t height) const
 {
     Image copy { width, height, mTraits->format };
     copy.palette() = palette();
+
+    tresize(*this, copy);
 
     return copy;
 }
