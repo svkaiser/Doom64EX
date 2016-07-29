@@ -98,8 +98,6 @@ namespace {
       if (colorType == PNG_COLOR_TYPE_GRAY)
           png_set_expand(png_ptr);
 
-      // TODO: Check png_get_tRNS for transparency
-
       if (colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
           png_set_gray_to_rgb(png_ptr);
 
@@ -138,16 +136,40 @@ namespace {
 
       if (colorType == PNG_COLOR_TYPE_PALETTE)
       {
-          png_colorp pal = nullptr;
-          int numPal = 0;
-          png_get_PLTE(png_ptr, infop, &pal, &numPal);
-
-          for (auto&& c : retval.palette().map<Rgb>() )
+          if (png_get_valid(png_ptr, infop, PNG_INFO_tRNS))
           {
-              auto p = *pal++;
-              c.red = p.red;
-              c.green = p.green;
-              c.blue = p.blue;
+              int palNum, transNum;
+              png_bytep alpha;
+              png_colorp colors;
+              png_get_tRNS(png_ptr, infop, &alpha, &transNum, nullptr);
+              png_get_PLTE(png_ptr, infop, &colors, &palNum);
+
+              auto paldata = std::make_unique<Rgba[]>(palNum);
+
+              for (int i = 0; i < palNum; i++)
+              {
+                  auto& c = paldata[i];
+                  c.red = (uint8_t) colors[i].red;
+                  c.green = (uint8_t) colors[i].green;
+                  c.blue = (uint8_t) colors[i].blue;
+                  c.alpha = (i < transNum) ? alpha[i] : 0xff;
+              }
+
+              const auto &traits = get_pixel_traits(pixel_format::rgba);
+              std::unique_ptr<uint8_t[]> p(reinterpret_cast<uint8_t*>(paldata.release()));
+              retval.palette() = Palette(std::move(p), traits, traits.pal_mask, palNum);
+          } else {
+              png_colorp pal = nullptr;
+              int numPal = 0;
+              png_get_PLTE(png_ptr, infop, &pal, &numPal);
+
+              for (auto &&c : retval.palette().map<Rgb>())
+              {
+                  auto p = *pal++;
+                  c.red = p.red;
+                  c.green = p.green;
+                  c.blue = p.blue;
+              }
           }
       }
 
