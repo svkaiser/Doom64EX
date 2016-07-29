@@ -107,11 +107,11 @@ namespace {
       pixel_format format;
       switch (colorType) {
           case PNG_COLOR_TYPE_RGB:
-              format = pixel_format::bgr;
+              format = pixel_format::rgb;
               break;
 
           case PNG_COLOR_TYPE_RGB_ALPHA:
-              format = pixel_format::bgra;
+              format = pixel_format::rgba;
               break;
 
           case PNG_COLOR_TYPE_PALETTE:

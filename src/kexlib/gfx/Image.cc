@@ -70,19 +70,7 @@ namespace {
   { return std::make_unique<uint8_t[]>(calc_length(traits, width, height)); }
 
   template <class SrcT, class DstT>
-  void tconvert2(const Image &src, Image &dst)
-  {
-      auto srcMap = src.map<SrcT>();
-      auto srcIt = srcMap.cbegin();
-      auto srcEnd = srcMap.cend();
-      auto dstIt = dst.map<DstT>().begin();
-
-      for (; srcIt != srcEnd; ++srcIt, ++dstIt)
-          copy_pixel(*srcIt, *dstIt);
-  };
-
-  template <class SrcT, class DstT>
-  void tconvertpal2(const Image &src, Image &dst)
+  void convert_indexed_to_normal(const Image &src, Image &dst)
   {
       auto srcMap = src.map<Index8>();
       auto srcIt = srcMap.cbegin();
@@ -94,65 +82,61 @@ namespace {
           copy_pixel(*(srcPal + srcIt->index), *dstIt);
   };
 
-  template <class DstT>
-  void tconvertpal(const Image &src, Image &dst)
+  template <class Src, class Dst>
+  void convert_normal_to_normal(const Image &src, Image &dst)
   {
-      switch (src.palette().format())
+      auto srcMap = src.map<Src>();
+      auto srcIt = srcMap.cbegin();
+      auto srcEnd = srcMap.cend();
+      auto dstIt = dst.map<Dst>().begin();
+
+      for (; srcIt != srcEnd; ++srcIt, ++dstIt)
+          copy_pixel(*srcIt, *dstIt);
+  }
+
+  template <class Src>
+  struct convert_normal_to_unknown : default_pixel_processor {
+      template <class Dst>
+      void normal(const Image &src, Image &dst)
       {
-      case pixel_format::rgb:
-          tconvertpal2<Rgb, DstT>(src, dst);
-          break;
-
-      case pixel_format::bgr:
-          tconvertpal2<Bgr, DstT>(src, dst);
-          break;
-
-      case pixel_format::rgba:
-          tconvertpal2<Rgba, DstT>(src, dst);
-          break;
-
-      case pixel_format::bgra:
-          tconvertpal2<Bgra, DstT>(src, dst);
-          break;
-
-      default:
-          throw bad_pixel_format();
+          convert_normal_to_normal<Src, Dst>(src, dst);
       }
   };
 
-  /*!
-   * \brief Templated image conversion. (the first 't' stands for 'template')
-   * \param src The source image
-   * \param dst The destination image
-   */
-  template <class DstT>
+  template <class PalSrc>
+  struct convert_indexed_to_unknown : default_pixel_processor {
+      template <class Dst>
+      void normal(const Image &src, Image &dst)
+      {
+          convert_indexed_to_normal<PalSrc, Dst>(src, dst);
+      }
+  };
+
+  struct convert_unknown_indexed_to_unknown : default_pixel_processor {
+      template <class Src>
+      void normal(const Image &src, Image &dst)
+      {
+          process_pixel(convert_indexed_to_unknown<Src>(), dst.format(), src, dst);
+      }
+  };
+
+  struct convert_unknown_to_unknown {
+      template <class Src>
+      void normal(const Image &src, Image &dst)
+      {
+          process_pixel(convert_normal_to_unknown<Src>(), dst.format(), src, dst);
+      }
+
+      template <class Src>
+      void indexed(const Image &src, Image &dst)
+      {
+          process_pixel(convert_unknown_indexed_to_unknown(), src.palette().format(), src, dst);
+      }
+  };
+
   void tconvert(const Image &src, Image &dst)
   {
-      switch (src.format())
-      {
-      case pixel_format::index8:
-          tconvertpal<DstT>(src, dst);
-          break;
-
-      case pixel_format::rgb:
-          tconvert2<Rgb, DstT>(src, dst);
-          break;
-
-      case pixel_format::bgr:
-          tconvert2<Bgr, DstT>(src, dst);
-          break;
-
-      case pixel_format::rgba:
-          tconvert2<Rgba, DstT>(src, dst);
-          break;
-
-      case pixel_format::bgra:
-          tconvert2<Bgra, DstT>(src, dst);
-          break;
-
-      default:
-          throw bad_pixel_format();
-      }
+      process_pixel(convert_unknown_to_unknown(), src.format(), src, dst);
   }
 }
 
@@ -219,26 +203,8 @@ Image Image::convert_copy(pixel_format format) const
         return *this;
 
     Image newImage(mWidth, mHeight, format);
-    switch (format) {
-        case pixel_format::rgb:
-            tconvert<Rgb>(*this, newImage);
-            break;
 
-        case pixel_format::bgr:
-            tconvert<Bgr>(*this, newImage);
-            break;
-
-        case pixel_format::rgba:
-            tconvert<Rgba>(*this, newImage);
-            break;
-
-        case pixel_format::bgra:
-            tconvert<Bgra>(*this, newImage);
-            break;
-
-        default:
-            throw bad_pixel_format();
-    }
+    tconvert(*this, newImage);
 
     return newImage;
 }

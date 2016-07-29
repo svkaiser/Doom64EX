@@ -557,6 +557,39 @@ namespace kex {
         }
     }
 
+    struct default_pixel_processor {
+        template <class, class... Args>
+        void normal(Args&&...)
+        { throw bad_pixel_format("Pixel processor didn't implement a normal pixel handler"); }
+
+        template <class, class... Args>
+        void indexed(Args&&...)
+        { throw bad_pixel_format("Pixel processor didn't implement an indexed pixel handler"); }
+    };
+
+    template <class Processor, class... Args>
+    void process_pixel(Processor proc, pixel_format fmt, Args&&... args)
+    {
+#define CASE(fmt, type, func) \
+        case pixel_format::fmt: \
+            proc.template func<type>(std::forward<Args>(args)...); \
+            break;
+
+        switch (fmt)
+        {
+        CASE(index8, Index8, indexed)
+        CASE(rgb, Rgb, normal)
+        CASE(bgr, Bgr, normal)
+        CASE(rgba, Rgba, normal)
+        CASE(bgra, Bgra, normal)
+
+        default:
+            throw bad_pixel_format("process_pixel doesn't have a case for this pixel type");
+        }
+
+#undef CASE
+    };
+
     template <class T, class = std::enable_if_t<is_pixel_v<T>>>
     constexpr void copy_pixel(const T &src, T &dst) noexcept
     { dst = src; }
