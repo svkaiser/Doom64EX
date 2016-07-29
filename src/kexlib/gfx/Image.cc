@@ -69,20 +69,90 @@ namespace {
   auto alloc_pixels(const pixel_traits *traits, uint16_t width, uint16_t height)
   { return std::make_unique<uint8_t[]>(calc_length(traits, width, height)); }
 
+  template <class SrcT, class DstT>
+  void tconvert2(const Image &src, Image &dst)
+  {
+      auto srcMap = src.map<SrcT>();
+      auto srcIt = srcMap.cbegin();
+      auto srcEnd = srcMap.cend();
+      auto dstIt = dst.map<DstT>().begin();
+
+      for (; srcIt != srcEnd; ++srcIt, ++dstIt)
+          copy_pixel(*srcIt, *dstIt);
+  };
+
+  template <class SrcT, class DstT>
+  void tconvertpal2(const Image &src, Image &dst)
+  {
+      auto srcMap = src.map<Index8>();
+      auto srcIt = srcMap.cbegin();
+      auto srcEnd = srcMap.cend();
+      auto srcPal = src.palette().map<SrcT>().cbegin();
+      auto dstIt = dst.map<DstT>().begin();
+
+      for (; srcIt != srcEnd; ++srcIt, ++dstIt)
+          copy_pixel(*(srcPal + srcIt->index), *dstIt);
+  };
+
+  template <class DstT>
+  void tconvertpal(const Image &src, Image &dst)
+  {
+      switch (src.palette().format())
+      {
+      case pixel_format::rgb:
+          tconvertpal2<Rgb, DstT>(src, dst);
+          break;
+
+      case pixel_format::bgr:
+          tconvertpal2<Bgr, DstT>(src, dst);
+          break;
+
+      case pixel_format::rgba:
+          tconvertpal2<Rgba, DstT>(src, dst);
+          break;
+
+      case pixel_format::bgra:
+          tconvertpal2<Bgra, DstT>(src, dst);
+          break;
+
+      default:
+          throw bad_pixel_format();
+      }
+  };
+
   /*!
    * \brief Templated image conversion. (the first 't' stands for 'template')
    * \param src The source image
    * \param dst The destination image
    */
-  template <class T>
+  template <class DstT>
   void tconvert(const Image &src, Image &dst)
   {
-      auto srcIt = src.auto_map<const T>().cbegin();
-      auto srcEndIt = src.auto_map<const T>().cend();
-      auto dstIt = dst.map<T>().begin();
+      switch (src.format())
+      {
+      case pixel_format::index8:
+          tconvertpal<DstT>(src, dst);
+          break;
 
-      for (; srcIt != srcEndIt; ++srcIt, ++dstIt)
-          *dstIt = *srcIt;
+      case pixel_format::rgb:
+          tconvert2<Rgb, DstT>(src, dst);
+          break;
+
+      case pixel_format::bgr:
+          tconvert2<Bgr, DstT>(src, dst);
+          break;
+
+      case pixel_format::rgba:
+          tconvert2<Rgba, DstT>(src, dst);
+          break;
+
+      case pixel_format::bgra:
+          tconvert2<Bgra, DstT>(src, dst);
+          break;
+
+      default:
+          throw bad_pixel_format();
+      }
   }
 }
 

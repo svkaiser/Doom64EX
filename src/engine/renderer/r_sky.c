@@ -666,10 +666,9 @@ void R_InitFire(void) {
 
     paldata = Palette_GetData(Image_GetPalette(fireImage));
     for(i = 0; i < 16; i++) {
-        paldata[i * 4 + 0] = 16 * i;
-        paldata[i * 4 + 1] = 16 * i;
-        paldata[i * 4 + 2] = 16 * i;
-        paldata[i * 4 + 3] = 0xff;
+        paldata[i * 3 + 0] = 16 * i;
+        paldata[i * 3 + 1] = 16 * i;
+        paldata[i * 3 + 2] = 16 * i;
     }
 }
 

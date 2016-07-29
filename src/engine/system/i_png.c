@@ -28,6 +28,7 @@
 #include <math.h>
 #include <kex/compat/gfx.h>
 #include <w_wad.h>
+#include <SDL_timer.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
