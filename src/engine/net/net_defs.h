@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // Copyright(C) 2005 Simon Howard
@@ -139,7 +139,7 @@ typedef struct
 #define NET_TICDIFF_SIDE         (1 << 1)
 #define NET_TICDIFF_TURN         (1 << 2)
 #define NET_TICDIFF_BUTTONS      (1 << 3)
-#define NET_TICDIFF_CONSISTANCY  (1 << 4)
+#define NET_TICDIFF_CONSISTENCY  (1 << 4)
 #define NET_TICDIFF_CHATCHAR     (1 << 5)
 #define NET_TICDIFF_BUTTONS2     (1 << 6)
 #define NET_TICDIFF_PITCH		 (1 << 7)

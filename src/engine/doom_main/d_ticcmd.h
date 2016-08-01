@@ -39,7 +39,7 @@ typedef struct {
     char    sidemove;    // *2048 for move
     short    angleturn;    // <<16 for angle delta
     short    pitch;
-    byte    consistancy;    // checks for net game
+    byte    consistency;    // checks for net game
     byte    chatchar;
     byte    buttons;
     byte    buttons2;

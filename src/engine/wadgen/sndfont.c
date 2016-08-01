@@ -568,7 +568,7 @@ void SF_WriteSoundFont(void)
 	Mem_Free((void **)&inst->bag.instbags);
 	Mem_Free((void **)&inst->gen.info);
 
-	WGen_Printf("Sucessfully created %s", outFile);
+	WGen_Printf("Successfully created %s", outFile);
 }
 
 //**************************************************************
