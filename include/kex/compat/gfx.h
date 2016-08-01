@@ -62,6 +62,7 @@ Palette *Image_GetPalette(Image*);
 int* Image_GetOffsets(Image*);
 int Image_IsIndexed(Image*);
 void Image_Convert(Image*, pixel_format);
+void Image_Scale(Image*, uint16_t new_width, uint16_t new_height);
 
 void *Palette_GetData(Palette*);
 int Palette_GetCount(Palette*);

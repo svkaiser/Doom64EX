@@ -338,12 +338,17 @@ void M_ScreenShot(void) {
 int M_CacheThumbNail(byte** data) {
     byte* buff;
     byte* tbn;
+    Image* image;
 
-//    buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
+    buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
     tbn = Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0);
 
-//    gluScaleImage(GL_RGB, video_width, video_height, GL_UNSIGNED_BYTE, buff, 128, 128, GL_UNSIGNED_BYTE, tbn);
-//    Z_Free(buff);
+    image = Image_New_FromData(buff, video_width, video_height, PF_RGB);
+    Image_Scale(image, 128, 128);
+    dmemcpy(tbn, Image_GetData(image), 128 * 128 * 3);
+    Image_Free(image);
+
+    Z_Free(buff);
 
     *data = tbn;
     return SAVEGAMETBSIZE;

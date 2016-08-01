@@ -184,6 +184,51 @@ namespace {
   {
       process_pixel(resize_unknown_to_unknown(), src.format(), src, dst);
   }
+
+  template <class Src, class Dst>
+  void scale_normal_to_normal(const Image &src, Image &dst)
+  {
+      auto srcWidth = src.width();
+      auto width = dst.width();
+      auto height = dst.height();
+      auto dx = static_cast<double>(src.width()) / width;
+      auto dy = static_cast<double>(src.height()) / height;
+
+      auto srcIt = src.map<Src>().cbegin();
+      auto dstIt = dst.map<Dst>().begin();
+
+      for (int y = 0; y < height; y++)
+      {
+          for (int x = 0; x < width; x++)
+          {
+              size_t pos = static_cast<size_t>(dy * y) * srcWidth + static_cast<size_t>(dx * x);
+              copy_pixel(*(srcIt + pos), *dstIt);
+              ++dstIt;
+          }
+      }
+  }
+
+  template <class Src>
+  struct scale_normal_to_unknown : default_pixel_processor {
+      template <class Dst>
+      void normal(const Image &src, Image &dst)
+      {
+          scale_normal_to_normal<Src, Dst>(src, dst);
+      }
+  };
+
+  struct scale_unknown_to_unknown : default_pixel_processor {
+      template <class Src>
+      void normal(const Image &src, Image &dst)
+      {
+          process_pixel(scale_normal_to_unknown<Src>(), dst.format(), src, dst);
+      }
+  };
+
+  void tscale(const Image &src, Image &dst)
+  {
+      process_pixel(scale_unknown_to_unknown(), src.format(), src, dst);
+  }
 }
 
 Image kex::gfx::make_image(const uint8_t data[], pixel_format format, uint16_t width, uint16_t height)
@@ -260,6 +305,20 @@ Image& Image::resize(uint16_t width, uint16_t height)
     copy.offsets(offsets());
 
     tresize(*this, copy);
+
+    return (*this = std::move(copy));
+}
+
+Image& Image::scale(uint16_t width, uint16_t height)
+{
+    if (mWidth == width && mHeight == height)
+        return *this;
+
+    Image copy { width, height, mTraits->format };
+    copy.palette() = palette();
+    copy.offsets(offsets());
+
+    tscale(*this, copy);
 
     return (*this = std::move(copy));
 }

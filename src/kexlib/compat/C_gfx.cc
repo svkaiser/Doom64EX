@@ -80,6 +80,9 @@ auto Image_IsIndexed(Image *image)
 void Image_Convert(Image *image, pixel_format format)
 { image->convert(format); }
 
+void Image_Scale(Image *image, uint16_t new_width, uint16_t new_height)
+{ image->scale(new_width, new_height); }
+
 auto Palette_GetData(Palette *pal)
 { return pal->colors_ptr(); }
 
