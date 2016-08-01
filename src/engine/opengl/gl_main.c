@@ -248,6 +248,7 @@ float GL_GetOrthoScale(void) {
 //
 
 void GL_SwapBuffers(void) {
+    I_FinishUpdate();
 }
 
 //
