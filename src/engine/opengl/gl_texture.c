@@ -260,7 +260,7 @@ void GL_SetNewPalette(int id, byte palID) {
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
     if(r_texnonpowresize.value > 0) {
-        Image *image_src, *image;
+        Image *image;
         int wp;
         int hp;
 
@@ -268,8 +268,8 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
         wp = GL_PadTextureDims(*origwidth);
         hp = GL_PadTextureDims(*origheight);
 
-        image_src = Image_New_FromData(data, *origwidth, *origheight, PF_RGBA);
-        image = Image_Resize(image_src, wp, hp);
+        image = Image_New_FromData(data, *origwidth, *origheight, format == GL_RGBA8 ? PF_RGBA : PF_RGB);
+        Image_Resize(image, wp, hp);
 
         *origwidth = wp;
         *origheight = hp;
@@ -287,7 +287,6 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
         );
 
         Image_Free(image);
-        Image_Free(image_src);
     }
     else {
         dglTexImage2D(

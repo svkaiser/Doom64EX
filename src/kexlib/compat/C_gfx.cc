@@ -48,9 +48,9 @@ Image* Image_New_FromMemory(const char *data, size_t size)
     }
 }
 
-Image* Image_Resize(Image *src, uint16_t new_width, uint16_t new_height)
+void Image_Resize(Image *src, uint16_t new_width, uint16_t new_height)
 {
-    return new Image(src->resize(new_width, new_height));
+    src->resize(new_width, new_height);
 }
 
 void Image_Free(Image* ptr)
