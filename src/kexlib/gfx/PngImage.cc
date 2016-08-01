@@ -215,16 +215,12 @@ namespace {
       int format;
       switch (image.format()) {
           case pixel_format::rgb:
-              copy = image.clone().convert(pixel_format::bgr);
-              im = &copy;
                [[fallthrough]];
           case pixel_format::bgr:
               format = PNG_COLOR_TYPE_RGB;
               break;
 
           case pixel_format::rgba:
-              copy = image.clone().convert(pixel_format::bgra);
-              im = &copy;
                [[fallthrough]];
           case pixel_format::bgra:
               format = PNG_COLOR_TYPE_RGB_ALPHA;

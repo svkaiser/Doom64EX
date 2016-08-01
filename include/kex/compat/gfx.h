@@ -53,6 +53,7 @@ typedef enum pixel_extrap {
 Image* Image_New(uint16_t width, uint16_t height, pixel_format format);
 Image* Image_New_FromData(char *data, uint16_t width, uint16_t height, pixel_format format);
 Image* Image_New_FromMemory(char *data, long size);
+int Image_Save(Image*, const char *filename, const char *format);
 void Image_Resize(Image *src, uint16_t new_width, uint16_t new_height);
 void Image_Free(Image* ptr);
 uint16_t Image_GetWidth(Image*);

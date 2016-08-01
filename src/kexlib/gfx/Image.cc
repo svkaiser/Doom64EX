@@ -335,11 +335,12 @@ const uint8_t *Image::scanline_ptr(uint16_t index) const
 
 Image& Image::operator=(const Image &other)
 {
-    auto length = calc_length(mTraits, mWidth, mHeight);
     mTraits = other.mTraits;
     mWidth = other.mWidth;
     mHeight = other.mHeight;
     mPalette = other.mPalette;
+
+    auto length = calc_length(mTraits, mWidth, mHeight);
     mData = std::make_unique<uint8_t[]>(length);
     std::copy_n(other.mData.get(), length, mData.get());
     offsets(other.offsets());

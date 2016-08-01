@@ -48,6 +48,21 @@ Image* Image_New_FromMemory(const char *data, size_t size)
     }
 }
 
+int Image_Save(Image *image, const char *filename, const char *format)
+{
+    try {
+        std::ofstream f(filename);
+        if (!f.is_open())
+            return -1;
+
+        image->save(f, format);
+    } catch (...) {
+        return -1;
+    }
+
+    return 0;
+}
+
 void Image_Resize(Image *src, uint16_t new_width, uint16_t new_height)
 {
     src->resize(new_width, new_height);

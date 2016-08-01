@@ -289,9 +289,8 @@ void M_LoadDefaults(void) {
 void M_ScreenShot(void) {
     char    name[13];
     int     shotnum=0;
-    FILE    *fh;
     byte    *buff;
-    byte    *png;
+    Image   *image;
     int     size;
 
     while(shotnum < 1000) {
@@ -306,11 +305,6 @@ void M_ScreenShot(void) {
         return;
     }
 
-    fh = fopen(name, "wb");
-    if(!fh) {
-        return;
-    }
-
     if((video_height % 2)) {  // height must be power of 2
         return;
     }
@@ -320,11 +314,11 @@ void M_ScreenShot(void) {
 
     // Get PNG image
 
-    png = I_PNGCreate(video_width, video_height, buff, &size);
-    fwrite(png, size, 1, fh);
+    image = Image_New_FromData(buff, video_width, video_height, PF_RGB);
+    Image_Save(image, name, "png");
+    Image_Free(image);
 
-    Z_Free(png);
-    fclose(fh);
+    Z_Free(buff);
 
     I_Printf("Saved Screenshot %s\n", name);
 }
