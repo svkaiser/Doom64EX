@@ -199,7 +199,7 @@ void WGen_Process(void)
 	Wad_WriteOutput(outFile);
 
 	// Done
-	WGen_Printf("Sucessfully created %s", outFile);
+	WGen_Printf("Successfully created %s", outFile);
 
 	// Write out the soundfont file
 #ifdef USE_SOUNDFONTS
