@@ -833,7 +833,7 @@ void ST_Drawer(void) {
         ST_DrawJMessage(plyr->messagepic);
     }
     else if(st_msg && (int)m_messages.value) {
-        Draw_Text(20, 20, ST_MSGCOLOR(automapactive ? 0xff : st_msgalpha), 1, false, st_msg);
+        Draw_Text(20, 20, ST_MSGCOLOR(automapactive ? 0xff : st_msgalpha), 1, false, "%s", st_msg);
     }
     else if(automapactive) {
         char str[128];
