@@ -302,7 +302,7 @@ static void saveg_read_ticcmd_t(ticcmd_t* cmd) {
     cmd->sidemove       = saveg_read8();
     cmd->angleturn      = saveg_read16();
     cmd->pitch          = saveg_read16();
-    cmd->consistancy    = saveg_read8();
+    cmd->consistency    = saveg_read8();
     cmd->chatchar       = saveg_read8();
     cmd->buttons        = saveg_read8();
     cmd->buttons2       = saveg_read8();
@@ -313,7 +313,7 @@ static void saveg_write_ticcmd_t(ticcmd_t* cmd) {
     saveg_write8(cmd->sidemove);
     saveg_write16(cmd->angleturn);
     saveg_write16(cmd->pitch);
-    saveg_write8(cmd->consistancy);
+    saveg_write8(cmd->consistency);
     saveg_write8(cmd->chatchar);
     saveg_write8(cmd->buttons);
     saveg_write8(cmd->buttons2);
