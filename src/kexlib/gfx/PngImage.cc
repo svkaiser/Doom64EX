@@ -94,6 +94,7 @@ namespace {
 
       png_set_strip_16(png_ptr);
       png_set_packing(png_ptr);
+      png_set_interlace_handling(png_ptr);
 
       if (colorType == PNG_COLOR_TYPE_GRAY)
           png_set_expand(png_ptr);
@@ -149,10 +150,10 @@ namespace {
               for (int i = 0; i < palNum; i++)
               {
                   auto& c = paldata[i];
-                  c.red = (uint8_t) colors[i].red;
-                  c.green = (uint8_t) colors[i].green;
-                  c.blue = (uint8_t) colors[i].blue;
-                  c.alpha = (i < transNum) ? alpha[i] : 0xff;
+                  c.red = colors[i].red;
+                  c.green = colors[i].green;
+                  c.blue = colors[i].blue;
+                  c.alpha = i < transNum ? alpha[i] : 0xff;
               }
 
               const auto &traits = get_pixel_traits(pixel_format::rgba);
@@ -214,7 +215,7 @@ namespace {
       int format;
       switch (image.format()) {
           case pixel_format::rgb:
-              copy = image.convert_copy(pixel_format::bgr);
+              copy = image.clone().convert(pixel_format::bgr);
               im = &copy;
                [[fallthrough]];
           case pixel_format::bgr:
@@ -222,7 +223,7 @@ namespace {
               break;
 
           case pixel_format::rgba:
-              copy = image.convert_copy(pixel_format::bgra);
+              copy = image.clone().convert(pixel_format::bgra);
               im = &copy;
                [[fallthrough]];
           case pixel_format::bgra:

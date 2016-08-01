@@ -91,6 +91,11 @@ namespace kex
             mData = nullptr;
         }
 
+        Image clone() const
+        {
+            return Image(*this);
+        }
+
         uint8_t* data_ptr()
         { return mData.get(); }
 
@@ -105,11 +110,9 @@ namespace kex
 
         const uint8_t* pixel_ptr(uint16_t x, uint16_t y) const;
 
-        void convert(pixel_format);
+        Image& convert(pixel_format);
 
-        Image convert_copy(pixel_format) const;
-
-        Image resize(uint16_t width, uint16_t height) const;
+        Image& resize(uint16_t width, uint16_t height);
 
         template<class T, class U = T>
         auto map()

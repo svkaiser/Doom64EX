@@ -204,6 +204,7 @@ Image::Image(const Image &other):
         mData(std::make_unique<uint8_t[]>(calc_length(mTraits, mWidth, mHeight)))
 {
     std::copy_n(other.mData.get(), calc_length(mTraits, mWidth, mHeight), mData.get());
+    offsets(other.offsets());
 }
 
 Image::Image(uint16_t width, uint16_t height, pixel_format format):
@@ -235,34 +236,32 @@ void Image::save(std::ostream &s, const char *mimetype) const
     type->save(s, *this);
 }
 
-void Image::convert(pixel_format format)
-{
-    if (mTraits->format == format)
-        return;
-
-    *this = convert_copy(format);
-}
-
-Image Image::convert_copy(pixel_format format) const
+Image& Image::convert(pixel_format format)
 {
     if (mTraits->format == format)
         return *this;
 
-    Image newImage(mWidth, mHeight, format);
+    Image copy { mWidth, mHeight, format };
+    copy.palette() = palette();
+    copy.offsets(offsets());
 
-    tconvert(*this, newImage);
+    tconvert(*this, copy);
 
-    return newImage;
+    return (*this = std::move(copy));
 }
 
-Image Image::resize(uint16_t width, uint16_t height) const
+Image& Image::resize(uint16_t width, uint16_t height)
 {
+    if (mWidth == width && mHeight == height)
+        return *this;
+
     Image copy { width, height, mTraits->format };
     copy.palette() = palette();
+    copy.offsets(offsets());
 
     tresize(*this, copy);
 
-    return copy;
+    return (*this = std::move(copy));
 }
 
 uint8_t *Image::scanline_ptr(uint16_t index)
@@ -284,6 +283,7 @@ Image& Image::operator=(const Image &other)
     mPalette = other.mPalette;
     mData = std::make_unique<uint8_t[]>(length);
     std::copy_n(other.mData.get(), length, mData.get());
+    offsets(other.offsets());
     return *this;
 }
 

@@ -141,23 +141,29 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
 
     if (palindex && Image_IsIndexed(image))
     {
-        png_colorp pal;
+        Palette *palette;
+        int pal_bytes;
+        int pal_count;
+        byte *pal;
 
-        pal = Palette_GetData(Image_GetPalette(image));
+        palette = Image_GetPalette(image);
+        pal = Palette_GetData(palette);
+        pal_bytes = Palette_HasAlpha(palette) ? 4 : 3;
+        pal_count = Palette_GetCount(palette);
 
         char palname[9];
         snprintf(palname, sizeof(palname), "PAL%4.4s%d", lumpinfo[lump].name, palindex);
 
         if (W_CheckNumForName(palname) != -1)
         {
-            png_colorp pallump = W_CacheLumpName(palname, PU_STATIC);
+            byte *pallump = W_CacheLumpName(palname, PU_STATIC);
 
             // swap out current palette with the new one
-            for (i = 0; i < 256; i++)
+            for (i = 0; i < pal_count; i++)
             {
-                pal[i].red = pallump[i].red;
-                pal[i].green = pallump[i].green;
-                pal[i].blue = pallump[i].blue;
+                pal[i * pal_bytes + 0] = pallump[i * 3 + 0];
+                pal[i * pal_bytes + 1] = pallump[i * 3 + 1];
+                pal[i * pal_bytes + 2] = pallump[i * 3 + 2];
             }
 
             Z_Free(pallump);

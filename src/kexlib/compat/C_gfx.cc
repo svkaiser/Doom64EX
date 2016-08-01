@@ -83,4 +83,10 @@ void Image_Convert(Image *image, pixel_format format)
 auto Palette_GetData(Palette *pal)
 { return pal->colors_ptr(); }
 
+int Palette_GetCount(Palette *pal)
+{ return pal->size(); }
+
+int Palette_HasAlpha(Palette *pal)
+{ return pal->traits().alpha; }
+
 } // extern "C"

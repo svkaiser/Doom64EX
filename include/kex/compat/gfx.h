@@ -64,5 +64,7 @@ int Image_IsIndexed(Image*);
 void Image_Convert(Image*, pixel_format);
 
 void *Palette_GetData(Palette*);
+int Palette_GetCount(Palette*);
+int Palette_HasAlpha(Palette*);
 
 #endif //__KEX_GFX_H__10293413

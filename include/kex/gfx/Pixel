@@ -85,6 +85,7 @@ namespace kex {
         static constexpr bool normal = false;
         static constexpr size_t bytes = 1;
         static constexpr size_t pack = 2;
+        static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 16;
         static constexpr int pal_mask = 0xf;
@@ -96,6 +97,7 @@ namespace kex {
         static constexpr bool normal = false;
         static constexpr size_t bytes = 1;
         static constexpr size_t pack = 1;
+        static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 256;
         static constexpr int pal_mask = 0xff;
@@ -107,6 +109,7 @@ namespace kex {
         static constexpr bool normal = true;
         static constexpr size_t bytes = 3;
         static constexpr size_t pack = 1;
+        static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 0;
         static constexpr int pal_mask = 0;
@@ -118,6 +121,7 @@ namespace kex {
         static constexpr bool normal = true;
         static constexpr size_t bytes = 3;
         static constexpr size_t pack = 1;
+        static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 0;
         static constexpr int pal_mask = 0;
@@ -129,6 +133,7 @@ namespace kex {
         static constexpr bool normal = true;
         static constexpr size_t bytes = 4;
         static constexpr size_t pack = 1;
+        static constexpr bool alpha = true;
 
         static constexpr size_t pal_size = 0;
         static constexpr int pal_mask = 0;
@@ -140,6 +145,7 @@ namespace kex {
         static constexpr bool normal = true;
         static constexpr size_t bytes = 4;
         static constexpr size_t pack = 1;
+        static constexpr bool alpha = true;
 
         static constexpr size_t pal_size = 0;
         static constexpr int pal_mask = 0;
@@ -150,6 +156,7 @@ namespace kex {
         bool normal { false };
         size_t bytes { 0 };
         size_t pack { 0 };
+        bool alpha { false };
 
         size_t pal_size { 0 };
         int pal_mask { 0 };
@@ -166,6 +173,7 @@ namespace kex {
             normal(traits.normal),
             bytes(traits.bytes),
             pack(traits.pack),
+            alpha(traits.alpha),
             pal_size(traits.pal_size),
             pal_mask(traits.pal_mask) {}
 
@@ -438,9 +446,8 @@ namespace kex {
         Palette() noexcept = default;
 
         Palette(std::unique_ptr<uint8_t[]> colors, const pixel_traits &traits, int mask, size_t count):
-            mColors(std::move(colors)),
+            mColors(colors.get(), colors.get() + count * traits.bytes),
             mTraits(&traits),
-            mCount(count),
             mMask(mask) {}
 
         Palette(std::nullptr_t) noexcept:
@@ -454,10 +461,10 @@ namespace kex {
         { *this = Palette { }; }
 
         uint8_t *colors_ptr()
-        { return mColors.get(); }
+        { return mColors.data(); }
 
         const uint8_t *colors_ptr() const
-        { return mColors.get(); }
+        { return mColors.data(); }
 
         pixel_format format() const
         { return mTraits->format; }
@@ -466,7 +473,7 @@ namespace kex {
         { return *mTraits; }
 
         size_t size() const
-        { return mCount; }
+        { return mColors.size() / mTraits->bytes; }
 
         uint8_t &offset()
         { return mOffset; }
@@ -488,20 +495,29 @@ namespace kex {
         }
 
         template <class T, class U = T>
+        auto map()
+        {
+            if (static_pixel_traits<std::decay_t<T>>::format != mTraits->format)
+                throw bad_pixel_format();
+
+            return pixel_map<T, U>(reinterpret_cast<T *>(&(*mColors.begin())),
+                                   reinterpret_cast<T *>(&(*mColors.end())));
+        }
+
+        template <class T, class U = T>
         auto map() const
         {
             if (static_pixel_traits<std::decay_t<T>>::format != mTraits->format)
                 throw bad_pixel_format();
 
-            auto size = static_pixel_traits<std::decay_t<T>>::bytes * mCount;
-            return pixel_map<T, U>(reinterpret_cast<T *>(mColors.get()),
-                                   reinterpret_cast<T *>(mColors.get() + size));
+            return pixel_map<const T, const U>(reinterpret_cast<const T *>(&(*mColors.begin())),
+                                   reinterpret_cast<const T *>(&(*mColors.end())));
         }
 
         template <class T>
         auto auto_map()
         {
-            return auto_pixel_map<T>(mTraits, mColors.get(), mColors.get() + mTraits->bytes * mCount);
+            return auto_pixel_map<T>(mTraits, mColors.begin(), mColors.end());
         }
 
         Palette& operator=(std::nullptr_t) noexcept
@@ -515,11 +531,10 @@ namespace kex {
         Palette& operator=(const Palette &) noexcept;
 
     private:
-        std::unique_ptr<uint8_t[]> mColors { nullptr };
-        const pixel_traits *mTraits { nullptr };
-        size_t mCount { 0 };
-        uint8_t mOffset { 0 };
-        int mMask { 0 };
+        std::vector<uint8_t> mColors;
+        const pixel_traits *mTraits = nullptr;
+        uint8_t mOffset = 0;
+        int mMask = 0;
     };
 
     template <class Normal, class Index>
@@ -638,7 +653,7 @@ namespace kex {
     constexpr void copy_pixel(const Rgba &src, Bgra &dst) noexcept
     { dst = { src.blue, src.green, src.red, src.alpha }; }
 
-    /* ABGR copy_pixel */
+    /* BGRA copy_pixel */
     constexpr void copy_pixel(const Bgra &src, Rgb &dst) noexcept
     { dst = { src.red, src.green, src.blue }; }
 
