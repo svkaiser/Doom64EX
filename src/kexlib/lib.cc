@@ -23,8 +23,6 @@
 #include <kex/kexdef>
 #include <kex/lib>
 
-void init_image();
-
 void kex::init_lib()
 {
     using namespace kex::lib;

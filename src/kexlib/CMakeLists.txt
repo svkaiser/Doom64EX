@@ -49,7 +49,7 @@ set(SOURCES lib.cc
 add_library(kexlib STATIC ${SOURCES})
 target_include_directories(kexlib PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(kexlib m ${LIBRARIES})
-set_target_properties(kexlib PROPERTIES CMAKE_CXX_STANDARD 14)
+set_target_properties(kexlib PROPERTIES CXX_STANDARD 14)
 
 ##------------------------------------------------------------------------------
 ## Build tests

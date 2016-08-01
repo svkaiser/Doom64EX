@@ -66,7 +66,7 @@ namespace {
       }
 
       png_set_read_fn(png_ptr, &s,
-                      [](auto ctx, auto area, auto size) {
+                      [](png_structp ctx, png_bytep area, png_size_t size) {
                           auto s = static_cast<std::istream *>(png_get_io_ptr(ctx));
                           s->read(reinterpret_cast<char *>(area), size);
                       });
@@ -202,10 +202,10 @@ namespace {
       }
 
       png_set_write_fn(writep, &s,
-                       [](auto ctx, auto data, auto length) {
+                       [](png_structp ctx, png_bytep data, png_size_t length) {
                            static_cast<std::ostream*>(png_get_io_ptr(ctx))->write((char*)data, length);
                        },
-                       [](auto ctx) {
+                       [](png_structp ctx) {
                            static_cast<std::ostream*>(png_get_io_ptr(ctx))->flush();
                        });
 
