@@ -519,7 +519,7 @@ void Wad_AddOutputTexture(d64ExTexture_t * tex)
 		}
 	}
 
-	png = Png_Create(tex->header.width, tex->header.height, tex->header.numpal, pngpal, 4,	// texture bytes are always packed so its always 4 bits
+	png = Png_Create(tex->header.width, tex->header.height, tex->header.numpal, pngpal, 8,	// texture bytes are always packed so its always 4 bits
 			 tex->data, tex->lumpRef, &pngsize);
 
 	Wad_AddOutputLump(romWadFile.lump[tex->lumpRef].name, pngsize, png);

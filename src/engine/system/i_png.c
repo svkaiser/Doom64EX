@@ -168,8 +168,7 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
 
             Z_Free(pallump);
         } else {
-            for (i = 0; i < 16; i++)
-                dmemcpy(&pal[i], &pal[(16 * palindex) + i], sizeof(png_color));
+            dmemcpy(pal, pal + (16 * palindex) * pal_bytes, 16 * pal_bytes);
         }
 
         I_TranslatePalette(pal);

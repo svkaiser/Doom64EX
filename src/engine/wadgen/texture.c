@@ -116,11 +116,17 @@ void Texture_CreateExLump(d64ExTexture_t * pcTex, d64RawTexture_t * romTex)
 	pcTex->header.height = (1 << romTex->header.hshift);
 	pcTex->header.compressed = 1;
 	pcTex->header.numpal = romTex->header.numpal;
-	pcTex->size = (pcTex->header.width * pcTex->header.height) / 2;
+	pcTex->size = (pcTex->header.width * pcTex->header.height);
 
 	pcTex->data =
 	    (byte *) Mem_Alloc(pcTex->header.width * pcTex->header.height);
-	memcpy(pcTex->data, romTex->data, pcTex->size);
+
+	for (i = 0; i < pcTex->size / 2; i++)
+	{
+		byte tmp = romTex->data[i];
+		pcTex->data[2*i+1] = tmp >> 4;
+		pcTex->data[2*i] = tmp & 0xf;
+	}
 
 	for (i = 0; i < romTex->header.numpal; i++)
 		WGen_ConvertN64Pal(pcTex->palette[i],
