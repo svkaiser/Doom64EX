@@ -22,6 +22,11 @@
 ## 02111-1307, USA.
 ##
 
+# CMake 3.1.3 added the CXX_STANDARD property, but Debian is still on 3.0
+if (CMAKE_VERSION VERSION_LESS 3.1.3)
+  add_definitions(-std=c++14)
+endif ()
+
 ##------------------------------------------------------------------------------
 ## Set up external dependencies
 ##
@@ -36,8 +41,8 @@ add_link_libraries(${PNG_LIBRARIES})
 ##
 
 set(SOURCES lib.cc
-        format.cc
-        gfx/Image.cc
+  format.cc
+  gfx/Image.cc
   gfx/PngImage.cc
   gfx/Pixel.cc
   compat/C_gfx.cc)
