@@ -1,0 +1,29 @@
+language: c++
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.5
+    packages:
+      - clang-3.5
+
+matrix:
+  include:
+    - os: linux
+      compiler: clang35-release
+    # - os: linux
+    #   compiler: clang35-debug
+    # - os: osx
+    #   osx_image: xcode7.3
+    #   compiler: clang
+    # - os: osx
+    #   osx_image: xcode7.3
+    #   compiler: clang
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DTESTING=ON
+  - make
