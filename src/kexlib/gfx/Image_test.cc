@@ -41,22 +41,4 @@ TEST(Image, FromDataRgb)
 
 TEST(Image, ConvertRgbToRgba)
 {
-    auto rgba_image = rgb_image.convert_copy(pixel_format::rgba);
-
-    ASSERT_EQ(WIDTH, rgba_image.width());
-    ASSERT_EQ(HEIGHT, rgba_image.height());
-
-    uint8_t *rgb_ptr = rgb_image.data_ptr();
-    uint8_t *rgba_ptr = rgba_image.data_ptr();
-
-    for (size_t i = 0; i < WIDTH * HEIGHT; i++ )
-    {
-        for (size_t j = 0; j < 3; j++)
-        {
-            ASSERT_EQ(rgb_ptr[j], rgba_ptr[j]);
-        }
-
-        rgb_ptr += 3;
-        rgba_ptr += 4;
-    }
 }

@@ -71,9 +71,10 @@ if (TESTING)
 
   add_executable(kexlib_test ${TEST_SOURCES})
   target_include_directories(kexlib_test PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include" ${GTEST_INCLUDE_DIRS})
-  target_link_libraries(kexlib_test kexlib ${GTEST_LIBRARIES})
+  target_link_libraries(kexlib_test ${GTEST_LIBRARIES} kexlib)
+  set_target_properties(kexlib_test PROPERTIES CXX_STANDARD 14)
 
-  add_test(AllTestsInKexlib COMMAND kexlib_test)
+  add_test(AllTestsInKexlib kexlib_test)
 
   file(COPY "${DATA_DIR}/kexlib_test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data/")
 endif()

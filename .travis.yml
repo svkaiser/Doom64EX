@@ -1,29 +1,69 @@
 language: c++
-sudo: false
-
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.5
-    packages:
-      - clang-3.5
+dist: precise
+sudo: required 
 
 matrix:
   include:
     - os: linux
-      compiler: clang35-release
-    # - os: linux
-    #   compiler: clang35-debug
-    # - os: osx
-    #   osx_image: xcode7.3
-    #   compiler: clang
-    # - os: osx
-    #   osx_image: xcode7.3
-    #   compiler: clang
+      compiler: gcc
+      env: GCC_VERSION=5
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - kubuntu-backports
+          packages:
+            - gcc-5
+            - g++-5
+            - cmake
+            - libpng-dev
+            - libfluidsynth-dev
+            - libgtest-dev
+    - os: linux
+      compiler: clang
+      env: CLANG_VERSION=3.5
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.5
+            - kubuntu-backports
+          packages:
+            - clang-3.5
+            - cmake
+            - libstdc++-5-dev
+            - libpng-dev
+            - libfluidsynth-dev
+            - libgtest-dev
+
+before_install:
+  # Install SDL2 packages
+  - sudo add-apt-repository ppa:zoogie/sdl2-snapshots -y
+  - sudo apt-get update -q
+  - sudo apt-get install libsdl2-dev libsdl2-net-dev
+
+  # Set correct GCC or Clang versions.
+  - if [ -n "$GCC_VERSION" ]; then export CC="gcc-${GCC_VERSION}" CXX="g++-${GCC_VERSION}"; fi
+  - if [ -n "$CLANG_VERSION" ]; then export CC="clang-${CLANG_VERSION}" CXX="clang++-${CLANG_VERSION}"; fi
+  - which $CC
+  - which $CXX
+
+install:
+  # Compile google test library
+  - cd /usr/src/gtest
+  - sudo cmake -Dgtest_disable_pthreads=ON .
+  - sudo cmake --build .
+  - sudo mv libg* /usr/local/lib/
+  - cd -
 
 script:
+  # Compile our thing!
   - mkdir build
   - cd build
-  - cmake .. -DTESTING=ON
-  - make
+  - cmake -DTESTING=ON ..
+  - cmake --build .
+  - ctest
+
+notifications:
+  email: false
+  irc: "irc.oftc.net#doom64ex"
