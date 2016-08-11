@@ -36,8 +36,9 @@
 
 typedef int             dboolean;
 typedef unsigned char   byte;
-typedef unsigned short  word;
-typedef unsigned long   dword;
+typedef unsigned short  word;  // TODO: Rename every instance of 'word' to 'uint16'.
+                               // 'Word' isn't the correct term unless you're writing for 16-bit systems, which we're not.
+typedef unsigned int    dword; // TODO: ditto, but 'dword' -> 'uint32'
 typedef int8_t          int8;
 typedef uint8_t         uint8;
 typedef int16_t         int16;

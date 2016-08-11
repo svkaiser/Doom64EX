@@ -26,12 +26,11 @@
 //              from SoundFonts. In fact, they're almost identical...
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] =
-    "$Id: SndFont.c 1096 2012-03-31 18:28:01Z svkaiser $";
-#endif
 
+#include <stdio.h>
 #include <math.h>
+#include <string.h>
+#include <i_system.h>
 
 #include "wadgen.h"
 #include "files.h"
@@ -49,15 +48,6 @@ sfpreset_t *preset;
 sfinst_t *inst;
 
 //
-// UTILITES
-//
-
-static double mylog2(double x)
-{
-	return (log10(x) / log10(2));
-}
-
-//
 // not really sure how they're calculated in the actual game
 // but they have to be measured in milliseconds. wouldn't make sense
 // if it wasn't
@@ -65,7 +55,7 @@ static double mylog2(double x)
 static double usectotimecents(int usec)
 {
 	double t = (double)usec / 1000.0;
-	return (1200 * mylog2(t));
+	return (1200 * log2(t));
 }
 
 static double pantopercent(int pan)
@@ -101,9 +91,9 @@ static int npresets = 0;
 static int curpbag = 0;
 
 void
-SF_AddPreset(sfpheader_t * preset, char *name, int idx, int bank, int presetidx)
+SF_AddPreset(sfpresetheader_t * preset, char *name, int idx, int bank, int presetidx)
 {
-	SF_NEWITEM(preset->presets, sfpresetinfo_t, npresets);
+	SF_NEWITEM(preset->presets, sd_sfpresetinfo_t, npresets);
 	strncpy(preset->presets[idx].achPresetName, name, 20);
 	preset->presets[idx].wPresetBagNdx = curpbag;
 	preset->presets[idx].wPreset = presetidx;
@@ -111,7 +101,7 @@ SF_AddPreset(sfpheader_t * preset, char *name, int idx, int bank, int presetidx)
 	preset->presets[idx].dwLibrary = 0;
 	preset->presets[idx].dwMorphology = 0;
 	preset->presets[idx].wBank = bank;
-	preset->size = 38 * npresets;
+	preset->sd.size = 38 * npresets;
 }
 
 //**************************************************************
@@ -123,10 +113,10 @@ SF_AddPreset(sfpheader_t * preset, char *name, int idx, int bank, int presetidx)
 static int ninstruments = 0;
 void SF_AddInstrument(sfinstheader_t * inst, char *name, int idx)
 {
-	SF_NEWITEM(inst->instruments, sfinstinfo_t, ninstruments);
+	SF_NEWITEM(inst->instruments, sd_sfinstinfo_t, ninstruments);
 	strncpy(inst->instruments[idx].achInstName, name, 20);
 	inst->instruments[idx].wInstBagNdx = idx;
-	inst->size += sizeof(sfinstinfo_t);
+	inst->sd.size += sizeof(sd_sfinstinfo_t);
 }
 
 //**************************************************************
@@ -138,16 +128,16 @@ void SF_AddInstrument(sfinstheader_t * inst, char *name, int idx)
 static int igenpos = 0;
 static int nigens = 0;
 void
-SF_AddInstrumentGenerator(sfigenheader_t * gen, generatorops_e op,
-			  gentypes_t value)
+SF_AddInstrumentGenerator(sfinstgenheader_t * gen, generatorops_e op,
+			  sd_sfgen_t value)
 {
-	sfinstgen_t *igen;
+	sd_sfinstgen_t *igen;
 
-	SF_NEWITEM(gen->info, sfinstgen_t, nigens);
+	SF_NEWITEM(gen->info, sd_sfinstgen_t, nigens);
 	igen = &gen->info[nigens - 1];
 	igen->sfGenOper = op;
 	igen->genAmount = value;
-	gen->size += sizeof(sfinstgen_t);
+	gen->sd.size += sizeof(sd_sfinstgen_t);
 	igenpos++;
 }
 
@@ -160,15 +150,15 @@ SF_AddInstrumentGenerator(sfigenheader_t * gen, generatorops_e op,
 static int pgenpos = 0;
 static int npgens = 0;
 void
-SF_AddPresetGenerator(sfpgenheader_t * gen, generatorops_e op, gentypes_t value)
+SF_AddPresetGenerator(sfpresetgenheader_t * gen, generatorops_e op, sd_sfgen_t value)
 {
-	sfpresetgen_t *pgen;
+	sd_sfpresetgen_t *pgen;
 
-	SF_NEWITEM(gen->info, sfpresetgen_t, npgens);
+	SF_NEWITEM(gen->info, sd_sfpresetgen_t, npgens);
 	pgen = &gen->info[npgens - 1];
 	pgen->sfGenOper = op;
 	pgen->genAmount = value;
-	gen->size += sizeof(sfpresetgen_t);
+	gen->sd.size += sizeof(sd_sfpresetgen_t);
 	pgenpos++;
 }
 
@@ -179,15 +169,15 @@ SF_AddPresetGenerator(sfpgenheader_t * gen, generatorops_e op, gentypes_t value)
 //**************************************************************
 
 static int nibags = 0;
-void SF_AddInstrumentBag(sfibagheader_t * bag)
+void SF_AddInstrumentBag(sfinstbagheader_t * bag)
 {
-	sfinstbag_t *instbag;
+	sd_sfinstbag_t *instbag;
 
-	SF_NEWITEM(bag->instbags, sfinstbag_t, nibags);
+	SF_NEWITEM(bag->instbags, sd_sfinstbag_t, nibags);
 	instbag = &bag->instbags[nibags - 1];
 	instbag->wInstGenNdx = igenpos;
 	instbag->wInstModNdx = 0;
-	bag->size += sizeof(sfinstbag_t);
+	bag->sd.size += sizeof(sd_sfinstbag_t);
 }
 
 //**************************************************************
@@ -197,15 +187,15 @@ void SF_AddInstrumentBag(sfibagheader_t * bag)
 //**************************************************************
 
 static int npbags = 0;
-void SF_AddPresetBag(sfpbagheader_t * bag)
+void SF_AddPresetBag(sfpresetbagheader_t * bag)
 {
-	sfpresetbag_t *presetbag;
+	sd_sfpresetbag_t *presetbag;
 
-	SF_NEWITEM(bag->presetbags, sfpresetbag_t, npbags);
+	SF_NEWITEM(bag->presetbags, sd_sfpresetbag_t, npbags);
 	presetbag = &bag->presetbags[npbags - 1];
 	presetbag->wGenNdx = pgenpos;
 	presetbag->wModNdx = 0;
-	bag->size += sizeof(sfpresetbag_t);
+	bag->sd.size += sizeof(sd_sfpresetbag_t);
 
 	curpbag = npbags;
 }
@@ -218,14 +208,14 @@ void SF_AddPresetBag(sfpbagheader_t * bag)
 
 static int nsamples = 0;
 void
-SF_AddSample(sfsample_t * sample, char *name, size_t size, size_t offset,
+SF_AddSample(sfsample_t * sample, char *name, uint size, uint offset,
 	     int loopid)
 {
-	sfsampleinfo_t *info;
+	sd_sfsampleinfo_t *info;
 	looptable_t *lptbl;
 
-	SF_NEWITEM(sample->info, sfsampleinfo_t, nsamples);
-	sample->size = 46 * nsamples;
+	SF_NEWITEM(sample->info, sd_sfsampleinfo_t, nsamples);
+	sample->sd.size = 46 * nsamples;
 
 	if (loopid != -1)
 		lptbl = &looptable[loopid];
@@ -263,14 +253,14 @@ SF_AddSampleData(soundfont_t * sf, cache in, size_t insize,
 	sfdata_t *data;
 
 	data = &sf->data;
-	data->size += (insize + 64);
-	data->listsize = data->size + 12;
-	data->wavdata = (byte *) realloc((byte *) data->wavdata, data->size);
-	memset(data->wavdata + (data->size - 64), 0, 64);
+	data->sd.size += (insize + 64);
+	data->sd.listsize = data->sd.size + 12;
+	data->wavdata = (byte *) realloc((byte *) data->wavdata, data->sd.size);
+	memset(data->wavdata + (data->sd.size - 64), 0, 64);
 	memcpy(data->wavdata + offset, in, insize);
 	SF_AddSample(&sf->samples, newname, insize, offset, loopid);
 
-	offset = data->size;
+	offset = data->sd.size;
 }
 
 //**************************************************************
@@ -304,18 +294,18 @@ void SF_SetupModulators(void)
 
 void SF_FinalizeChunkSizes(void)
 {
-	list->listsize = 0x4C;
-	list->listsize += preset->info.size;
-	list->listsize += preset->bag.size;
-	list->listsize += preset->mod.size;
-	list->listsize += preset->gen.size;
-	list->listsize += inst->info.size;
-	list->listsize += inst->bag.size;
-	list->listsize += inst->mod.size;
-	list->listsize += inst->gen.size;
-	list->listsize += sample->size;
+	list->sd.listsize = 0x4C;
+	list->sd.listsize += preset->info.sd.size;
+	list->sd.listsize += preset->bag.sd.size;
+	list->sd.listsize += preset->mod.size;
+	list->sd.listsize += preset->gen.sd.size;
+	list->sd.listsize += inst->info.sd.size;
+	list->sd.listsize += inst->bag.sd.size;
+	list->sd.listsize += inst->mod.size;
+	list->sd.listsize += inst->gen.sd.size;
+	list->sd.listsize += sample->sd.size;
 
-	soundfont.filesize += list->listsize + 8 + data->listsize;
+	soundfont.sd.filesize += list->sd.listsize + 8 + data->sd.listsize;
 }
 
 //**************************************************************
@@ -335,7 +325,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 	int j;
 	uint banks = 0;
 	uint presetcount = 0;
-	gentypes_t value;
+	sd_sfgen_t value;
 	char name[20];
 
 	WGen_UpdateProgress("Building Soundfont Presets...");
@@ -387,7 +377,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 			//
 			if (sp->attenuation < 127) {
 				value.wAmount =
-				    (int)attentopercent(sp->attenuation);
+				    (uint16)attentopercent(sp->attenuation);
 				SF_AddInstrumentGenerator(&inst->gen,
 							  GEN_ATTENUATION,
 							  value);
@@ -396,7 +386,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 			// panning
 			//
 			if (sp->pan != 64) {
-				value.wAmount = (int)pantopercent(sp->pan);
+				value.wAmount = (uint16)pantopercent(sp->pan);
 				SF_AddInstrumentGenerator(&inst->gen, GEN_PAN,
 							  value);
 			}
@@ -405,7 +395,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 			//
 			if (sp->attacktime > 1) {
 				value.wAmount =
-				    (int)usectotimecents(sp->attacktime);
+				    (uint16)usectotimecents(sp->attacktime);
 				SF_AddInstrumentGenerator(&inst->gen,
 							  GEN_VOLENVATTACK,
 							  value);
@@ -415,7 +405,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 			//
 			if (sp->decaytime > 1) {
 				value.wAmount =
-				    (int)usectotimecents(sp->decaytime);
+				    (uint16)usectotimecents(sp->decaytime);
 				SF_AddInstrumentGenerator(&inst->gen,
 							  GEN_VOLENVRELEASE,
 							  value);
@@ -433,7 +423,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 			// root key override
 			//
 			value.wAmount =
-			    getoriginalpitch(sp->rootkey, wt->pitch);
+				(uint16)getoriginalpitch(sp->rootkey, wt->pitch);
 			SF_AddInstrumentGenerator(&inst->gen,
 						  GEN_OVERRIDEROOTKEY, value);
 
@@ -469,106 +459,60 @@ SF_CreatePresets(patch_t * patch, int npatch,
 
 void SF_WriteSoundFont(void)
 {
-	int handle;
+	FILE *handle;
 	int i;
-	path outFile;
+    char *outFile;
 
     // MP2E: Use ROM directory instead of executable directory
-    sprintf(outFile, "%s/doomsnd.sf2", wgenfile.pathOnly);
-	handle = File_Open(outFile);
+    outFile = I_GetUserFile("doomsnd.sf2");
+	handle = fopen(outFile, "wb");
 
-	File_Write(handle, soundfont.RIFF, 4);
-	File_Write(handle, &soundfont.filesize, 4);
-	File_Write(handle, soundfont.sfbk, 4);
-	File_Write(handle, soundfont.LIST, 4);
-	File_Write(handle, &soundfont.listsize, 4);
-	File_Write(handle, soundfont.INFO, 4);
-	File_Write(handle, &soundfont.version, sizeof(sfversion_t));
-	File_Write(handle, soundfont.name.INAM, 4);
-	File_Write(handle, &soundfont.name.size, 4);
-	File_Write(handle, soundfont.name.name, soundfont.name.size);
-	File_Write(handle, data->LIST, 4);
-	File_Write(handle, &data->listsize, 4);
-	File_Write(handle, data->sdta, 4);
-	File_Write(handle, data->smpl, 4);
-	File_Write(handle, &data->size, 4);
-	File_Write(handle, data->wavdata, data->size);
-	File_Write(handle, list->LIST, 4);
-	File_Write(handle, &list->listsize, 4);
-	File_Write(handle, list->pdta, 4);
-	File_Write(handle, preset->info.phdr, 4);
-	File_Write(handle, &preset->info.size, 4);
-
-	for (i = 0; i < npresets; i++) {
-		File_Write(handle, preset->info.presets[i].achPresetName, 20);
-		File_Write(handle, &preset->info.presets[i].wPreset, 2);
-		File_Write(handle, &preset->info.presets[i].wBank, 2);
-		File_Write(handle, &preset->info.presets[i].wPresetBagNdx, 2);
-		File_Write(handle, &preset->info.presets[i].dwLibrary, 4);
-		File_Write(handle, &preset->info.presets[i].dwGenre, 4);
-		File_Write(handle, &preset->info.presets[i].dwMorphology, 4);
+	if (!handle) {
+        perror("Couldn't open soundfont file: ");
+        exit(1);
 	}
 
-	File_Write(handle, preset->bag.pbag, 4);
-	File_Write(handle, &preset->bag.size, 4);
-	File_Write(handle, preset->bag.presetbags,
-		   sizeof(sfpresetbag_t) * npbags);
-	File_Write(handle, preset->mod.pmod, 4);
-	File_Write(handle, &preset->mod.size, 4);
-	File_Write(handle, &preset->mod.sfModSrcOper, 2);
-	File_Write(handle, &preset->mod.sfModDestOper, 2);
-	File_Write(handle, &preset->mod.modAmount, 2);
-	File_Write(handle, &preset->mod.sfModAmtSrcOper, 2);
-	File_Write(handle, &preset->mod.sfModTransOper, 2);
-	File_Write(handle, preset->gen.pgen, 4);
-	File_Write(handle, &preset->gen.size, 4);
-	File_Write(handle, preset->gen.info, sizeof(sfpresetgen_t) * npgens);
-	File_Write(handle, inst->info.inst, 4);
-	File_Write(handle, &inst->info.size, 4);
-	File_Write(handle, inst->info.instruments,
-		   sizeof(sfinstinfo_t) * ninstruments);
-	File_Write(handle, inst->bag.ibag, 4);
-	File_Write(handle, &inst->bag.size, 4);
-	File_Write(handle, inst->bag.instbags, sizeof(sfinstbag_t) * nibags);
-	File_Write(handle, inst->mod.imod, 4);
-	File_Write(handle, &inst->mod.size, 4);
-	File_Write(handle, &inst->mod.sfModSrcOper, 2);
-	File_Write(handle, &inst->mod.sfModDestOper, 2);
-	File_Write(handle, &inst->mod.modAmount, 2);
-	File_Write(handle, &inst->mod.sfModAmtSrcOper, 2);
-	File_Write(handle, &inst->mod.sfModTransOper, 2);
-	File_Write(handle, inst->gen.igen, 4);
-	File_Write(handle, &inst->gen.size, 4);
-	File_Write(handle, inst->gen.info, sizeof(sfinstgen_t) * nigens);
-	File_Write(handle, sample->shdr, 4);
-	File_Write(handle, &sample->size, 4);
+	fwrite(&soundfont, sizeof(sd_soundfont_t), 1, handle);
+    fwrite(&soundfont.name, 8, 1, handle);
+	fwrite(soundfont.name.name, soundfont.name.size, 1, handle);
+	fwrite(data, sizeof(sd_sfdata_t), 1, handle);
+    fwrite(data->wavdata, data->sd.size, 1, handle);
+	fwrite(list, sizeof(sd_sfpresetlist_t), 1, handle);
 
-	for (i = 0; i < nsamples; i++) {
-		File_Write(handle, sample->info[i].achSampleName, 20);
-		File_Write(handle, &sample->info[i].dwStart, 4);
-		File_Write(handle, &sample->info[i].dwEnd, 4);
-		File_Write(handle, &sample->info[i].dwStartloop, 4);
-		File_Write(handle, &sample->info[i].dwEndloop, 4);
-		File_Write(handle, &sample->info[i].dwSampleRate, 4);
-		File_Write(handle, &sample->info[i].byOriginalPitch, 1);
-		File_Write(handle, &sample->info[i].chPitchCorrection, 1);
-		File_Write(handle, &sample->info[i].wSampleLink, 2);
-		File_Write(handle, &sample->info[i].sfSampleType, 2);
-	}
+	fwrite(&preset->info, sizeof(sd_sfpresetheader_t), 1, handle);
+	fwrite(preset->info.presets, sizeof(sd_sfpresetinfo_t), npresets, handle);
+	fwrite(&preset->bag, sizeof(sd_sfpresetbagheader_t), 1, handle);
+	fwrite(preset->bag.presetbags, sizeof(sd_sfpresetbag_t), npbags, handle);
+    fwrite(&preset->mod, sizeof(sd_sfpresetmod_t), 1, handle);
+	fwrite(&preset->gen, sizeof(sd_sfpresetgenheader_t), 1, handle);
+    fwrite(preset->gen.info, sizeof(sd_sfpresetgen_t), npgens, handle);
 
-	File_Close(handle);
-	File_SetReadOnly(outFile);
+	fwrite(&inst->info, sizeof(sd_sfinstheader_t), 1, handle);
+	fwrite(inst->info.instruments, sizeof(sd_sfinstinfo_t), ninstruments, handle);
+	fwrite(&inst->bag, sizeof(sd_sfinstbagheader_t), 1, handle);
+    fwrite(inst->bag.instbags, sizeof(sd_sfinstbag_t), nibags, handle);
 
-	Mem_Free((void **)&sample->info);
-	Mem_Free((void **)&data->wavdata);
-	Mem_Free((void **)&preset->info.presets);
-	Mem_Free((void **)&preset->bag.presetbags);
-	Mem_Free((void **)&preset->gen.info);
-	Mem_Free((void **)&inst->info.instruments);
-	Mem_Free((void **)&inst->bag.instbags);
-	Mem_Free((void **)&inst->gen.info);
+	fwrite(&inst->mod, sizeof(sd_sfinstmod_t), 1, handle);
+    fwrite(&inst->gen, sizeof(sd_sfinstgenheader_t), 1, handle);
+    fwrite(inst->gen.info, sizeof(sd_sfinstgen_t), nigens, handle);
+
+    fwrite(sample, sizeof(sd_sfsample_t), 1, handle);
+	fwrite(sample->info, sizeof(sd_sfsampleinfo_t), nsamples, handle);
+
+	fclose(handle);
+
+	free(sample->info);
+	free(data->wavdata);
+	free(preset->info.presets);
+	free(preset->bag.presetbags);
+	free(preset->gen.info);
+	free(inst->info.instruments);
+	free(inst->bag.instbags);
+	free(inst->gen.info);
 
 	WGen_Printf("Successfully created %s", outFile);
+
+	free(outFile);
 }
 
 //**************************************************************
@@ -588,65 +532,66 @@ void SF_Setup(void)
 	//
 	// setup tags
 	//
-	strncpy(soundfont.RIFF, "RIFF", 4);
-	strncpy(soundfont.sfbk, "sfbk", 4);
-	strncpy(soundfont.LIST, "LIST", 4);
-	strncpy(soundfont.INFO, "INFO", 4);
-	strncpy(soundfont.data.LIST, "LIST", 4);
-	strncpy(soundfont.data.sdta, "sdta", 4);
-	strncpy(soundfont.data.smpl, "smpl", 4);
-	strncpy(soundfont.version.ifil, "ifil", 4);
+	strncpy(soundfont.sd.RIFF, "RIFF", 4);
+	strncpy(soundfont.sd.sfbk, "sfbk", 4);
+	strncpy(soundfont.sd.LIST, "LIST", 4);
+	strncpy(soundfont.sd.INFO, "INFO", 4);
+	strncpy(soundfont.sd.ifil, "ifil", 4);
+	strncpy(soundfont.data.sd.LIST, "LIST", 4);
+	strncpy(soundfont.data.sd.sdta, "sdta", 4);
+	strncpy(soundfont.data.sd.smpl, "smpl", 4);
 	strncpy(soundfont.name.INAM, "INAM", 4);
-	strncpy(list->LIST, "LIST", 4);
-	strncpy(list->pdta, "pdta", 4);
-	strncpy(preset->info.phdr, "phdr", 4);
-	strncpy(preset->gen.pgen, "pgen", 4);
-	strncpy(preset->bag.pbag, "pbag", 4);
+	strncpy(list->sd.LIST, "LIST", 4);
+	strncpy(list->sd.pdta, "pdta", 4);
+	strncpy(preset->info.sd.phdr, "phdr", 4);
+	strncpy(preset->gen.sd.pgen, "pgen", 4);
+	strncpy(preset->bag.sd.pbag, "pbag", 4);
 	strncpy(preset->mod.pmod, "pmod", 4);
-	strncpy(inst->info.inst, "inst", 4);
-	strncpy(inst->gen.igen, "igen", 4);
-	strncpy(inst->bag.ibag, "ibag", 4);
+	strncpy(inst->info.sd.inst, "inst", 4);
+	strncpy(inst->gen.sd.igen, "igen", 4);
+	strncpy(inst->bag.sd.ibag, "ibag", 4);
 	strncpy(inst->mod.imod, "imod", 4);
-	strncpy(soundfont.samples.shdr, "shdr", 4);
+	strncpy(soundfont.samples.sd.shdr, "shdr", 4);
 
 	//
 	// version
 	//
-	soundfont.version.size = 4;
-	soundfont.version.wMajor = 2;
-	soundfont.version.wMinor = 1;
+	soundfont.sd.size = 4;
+	soundfont.sd.version.wMajor = 2;
+	soundfont.sd.version.wMinor = 1;
 
 	//
 	// name
 	//
-	soundfont.name.size = strlen("doomsnd.sf2") + 1;
+    char sfname[] = "Doom 64 Soundfont";
+	soundfont.name.size = sizeof(sfname);
 	_PAD4(soundfont.name.size);
-	soundfont.name.name = (char *)Mem_Alloc(soundfont.name.size);
-	strncpy(soundfont.name.name, "doomsnd.sf2", soundfont.name.size);
+	soundfont.name.name = malloc(soundfont.name.size);
+	strncpy(soundfont.name.name, sfname, sizeof(sfname));
 
 	//
 	// initalize chunks
 	//
-	soundfont.listsize = 24 + soundfont.name.size;
-	soundfont.filesize = 20 + soundfont.listsize;
+	soundfont.sd.listsize = 24 + soundfont.name.size;
+	soundfont.sd.filesize = 20 + soundfont.sd.listsize;
 
-	sample->size = 0;
-	sample->info = (sfsampleinfo_t *) Mem_Alloc(1);
+	sample->sd.size = 0;
+	sample->info = NULL;
 
-	data->size = 0;
-	data->wavdata = (byte *) Mem_Alloc(1);
+	data->sd.size = 0;
+	data->wavdata = NULL;
 
-	preset->info.size = 0;
-	preset->bag.size = 0;
-	preset->gen.size = 0;
-	preset->info.presets = (sfpresetinfo_t *) Mem_Alloc(1);
-	preset->bag.presetbags = (sfpresetbag_t *) Mem_Alloc(1);
-	preset->gen.info = (sfpresetgen_t *) Mem_Alloc(1);
+	preset->info.sd.size = 0;
+	preset->bag.sd.size = 0;
+	preset->gen.sd.size = 0;
+	preset->info.presets = NULL;
+	preset->bag.presetbags = NULL;
+	preset->gen.info = NULL;
 
-	inst->info.size = 0;
-	inst->bag.size = 0;
-	inst->gen.size = 0;
-	inst->info.instruments = (sfinstinfo_t *) Mem_Alloc(1);
-	inst->bag.instbags = (sfinstbag_t *) Mem_Alloc(1);
-	inst->gen.info = (sfinstgen_t *) Mem_Alloc(1);
+	inst->info.sd.size = 0;
+	inst->bag.sd.size = 0;
+	inst->gen.sd.size = 0;
+	inst->info.instruments = NULL;
+	inst->bag.instbags = NULL;
+	inst->gen.info = NULL;
 }

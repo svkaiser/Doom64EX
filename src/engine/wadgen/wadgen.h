@@ -52,15 +52,11 @@
 
 typedef unsigned char byte;
 typedef unsigned short word;
-typedef unsigned int uint;
 typedef int32_t int32;
 typedef uint32_t uint32;
 typedef int bool;
 typedef byte *cache;
 typedef char path[MAX_PATH];
-
-#define false	0
-#define true	1
 
 typedef struct {
 	byte r;

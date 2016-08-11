@@ -24,13 +24,8 @@
 // DESCRIPTION: File handling stuff
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] = "$Id: Files.c 1221 2012-08-19 04:30:22Z svkaiser $";
-#endif
 
-#ifdef _WIN32
-#include <direct.h>
-#endif
+#include <string.h>
 
 #include "wadgen.h"
 #include "files.h"

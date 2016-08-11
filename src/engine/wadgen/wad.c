@@ -29,6 +29,9 @@
 static const char rcsid[] = "$Id: wad.c 1150 2012-06-11 00:18:31Z svkaiser $";
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "wadgen.h"
 #include "rom.h"
 #include "wad.h"
@@ -358,7 +361,7 @@ void Wad_AddOutputLump(const char *name, int size, cache data)
 		_PAD4(padSize);
 
 		//Allocate Cache
-		cache = (byte *) Mem_Alloc(padSize);
+		cache = malloc(padSize);
 		memcpy(cache, data, size);
 
 		outWadFile.lumpcache[header->lmpcount] = cache;

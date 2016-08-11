@@ -24,9 +24,8 @@
 // DESCRIPTION: Rom handling stuff
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] = "$Id: Rom.c 1100 2012-04-08 19:17:31Z svkaiser $";
-#endif
+
+#include <string.h>
 
 #include "wadgen.h"
 #include "files.h"

@@ -236,6 +236,7 @@ void WGen_Process(void)
 #endif
 }
 
+int M_CheckParm(char *);
 void WGen_WadgenMain(void)
 {
 	char *p;
