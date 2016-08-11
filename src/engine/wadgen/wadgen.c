@@ -24,19 +24,17 @@
 // DESCRIPTION: Global stuff and main application functions
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] =
-    "$Id: wadgen.c 1230 2013-03-04 06:18:10Z svkaiser $";
-#endif
+
+#include <string.h>
 
 #include "wadgen.h"
-#include "files.h"
 #include "rom.h"
 #include "wad.h"
 #include "level.h"
 #include "sndfont.h"
 
 #include <stdarg.h>
+#include <i_system.h>
 
 #define MAX_ARGS 256
 char *ArgBuffer[MAX_ARGS + 1];
@@ -44,35 +42,6 @@ int myargc = 0;
 char **myargv;
 
 void WGen_ShutDownApplication(void);
-
-//**************************************************************
-//**************************************************************
-//      WGen_AddLumpFile
-//**************************************************************
-//**************************************************************
-
-static void WGen_AddLumpFile(const char *name)
-{
-	path file;
-	int size;
-	cache data;
-	char lumpname[16];
-
-#ifdef _WIN32
-	sprintf(file, "%s/Content/%s", wgenfile.basePath, name);
-#else
-	// on *NIX, File_Read searches a couple of places besides current dir
-	sprintf(file, "Content/%s", name);
-#endif
-	size = File_Read(file, &data);
-
-	strncpy(lumpname, name, 16);
-	File_StripExt(lumpname);
-
-	Wad_AddOutputLump(lumpname, size, data);
-
-	Mem_Free((void **)&data);
-}
 
 //**************************************************************
 //**************************************************************
@@ -108,14 +77,14 @@ void WGen_AddDigest(char *name, int lump, int size)
 //**************************************************************
 //**************************************************************
 
-void WGen_Process(void)
+void WGen_Process(char *path)
 {
 	int i = 0;
 	char name[9];
-	path outFile;
+	char *outFile;
 	md5_digest_t digest;
 
-	Rom_Open();
+	Rom_Open(path);
 
 	Sound_Setup();
 	Sprite_Setup();
@@ -195,44 +164,18 @@ void WGen_Process(void)
 	Wad_AddOutputLump("ENDOFWAD", 0, NULL);
 
 	WGen_UpdateProgress("Writing IWAD File...");
-	sprintf(outFile, "%s/doom64.wad", wgenfile.pathOnly);
+	outFile = I_GetUserFile("doom64.wad");
 	Wad_WriteOutput(outFile);
 
 	// Done
 	WGen_Printf("Successfully created %s", outFile);
 
+	free(outFile);
+
 	// Write out the soundfont file
 #ifdef USE_SOUNDFONTS
 	WGen_UpdateProgress("Writing Soundfont File...");
 	SF_WriteSoundFont();
-#endif
-
-#ifdef _DEBUG
-	{
-		FILE *md5info;
-		path tbuff;
-		int j = 0;
-
-		do {
-			sprintf(tbuff, "md5info%02d.txt", j++);
-		} while (File_Poke(tbuff));
-
-		md5info = fopen(tbuff, "w");
-
-		fprintf(md5info, "static const md5_digest_t <rename me> =\n");
-		fprintf(md5info, "{ ");
-
-		for (i = 0; i < 16; i++) {
-			fprintf(md5info, "0x%02x", digest[i]);
-			if (i < 15)
-				fprintf(md5info, ",");
-			else
-				fprintf(md5info, " ");
-		}
-
-		fprintf(md5info, "};\n");
-		fclose(md5info);
-	}
 #endif
 }
 
@@ -250,8 +193,7 @@ void WGen_WadgenMain(void)
 		    ("Provide the location of the Doom64 Rom as a command line parameter.");
 		exit(1);
 	}
-	File_Prepare(&wgenfile, myargv[parm + 1]);
-	WGen_Process();
+	WGen_Process(myargv[parm + 1]);
 	WGen_ShutDownApplication();
 }
 

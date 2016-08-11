@@ -39,7 +39,7 @@ typedef struct {
 
 extern rom_t RomFile;
 
-void Rom_Open(void);
+void Rom_Open(char *path);
 void Rom_Close(void);
 bool Rom_VerifyRomCode(const romLumpSpecial_t * l);
 

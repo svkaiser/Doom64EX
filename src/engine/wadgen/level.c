@@ -34,7 +34,6 @@ static const char rcsid[] = "$Id: Level.c 1097 2012-04-01 22:24:04Z svkaiser $";
 
 #include "wadgen.h"
 #include "wad.h"
-#include "files.h"
 #include "level.h"
 
 //#define DUMPMAPWAD

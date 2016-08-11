@@ -25,9 +25,6 @@
 //                              Wad output and sprite/gfx/data writing also included
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] = "$Id: wad.c 1150 2012-06-11 00:18:31Z svkaiser $";
-#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +32,6 @@ static const char rcsid[] = "$Id: wad.c 1150 2012-06-11 00:18:31Z svkaiser $";
 #include "wadgen.h"
 #include "rom.h"
 #include "wad.h"
-#include "files.h"
 #include "deflate-N64.h"
 
 #define ROM_IWADTITLE	0x44415749	// IWAD
@@ -185,13 +181,13 @@ void *Wad_GetLump(char *name, bool dcmpType)
 	byte *dmpLmp;		/*Decompression buffer */
 	int lump = Wad_GetLumpNum(name);
 
-	data = (byte *) Mem_Alloc(romWadFile.lump[lump].size);
+	data = malloc(romWadFile.lump[lump].size);
 	memcpy(data, romWadData + romWadFile.lump[lump].filepos,
 	       romWadFile.lump[lump].size);
 
 	/*Parse compressed lump */
 	if (romWadFile.lump[lump].name[0] & 0x80) {
-		dmpLmp = (byte *) Mem_Alloc(romWadFile.lump[lump].size);
+		dmpLmp = (byte *) malloc(romWadFile.lump[lump].size);
 		if (dcmpType)
 			Deflate_Decompress(data, dmpLmp);
 		else
@@ -267,7 +263,7 @@ void Wad_GetIwad(void)
 
 	// Setup IWAD data
 	romWadData = (byte *) (RomFile.data + Wad_FindIwadLocation());
-	ZeroMemory(romWadFile.lump, sizeof(lump_t) * MAX_LUMPS);
+	memset(romWadFile.lump, 0, sizeof(lump_t) * MAX_LUMPS);
 	memcpy(&romWadFile.header, romWadData, sizeof(wadheader_t));
 	romWadFile.size =
 	    ((romWadFile.header.lmpcount * sizeof(lump_t)) +
@@ -291,7 +287,7 @@ void Wad_CreateOutput(void)
 	outWadFile.header.lmpcount = 0;
 	outWadFile.size = sizeof(wadheader_t);
 
-	ZeroMemory(outWadFile.lump, sizeof(lump_t) * MAX_LUMPS);
+	memset(outWadFile.lump, 0, sizeof(lump_t) * MAX_LUMPS);
 }
 
 //**************************************************************
@@ -306,25 +302,27 @@ void Wad_WriteOutput(path outFile)
 {
 	int i = 0;
 	int size = 0;
-	int handle;
+	FILE *handle;
 
-	handle = File_Open(outFile);
+	if (!(handle = fopen(outFile, "wb"))) {
+		perror("Couldn't open doom64.wad file for writing: ");
+		exit(1);
+	}
 
-	File_Write(handle, &outWadFile.header, sizeof(wadheader_t));
+    fwrite(&outWadFile.header, sizeof(wadheader_t), 1, handle);
 
 	for (i = 0; i < outWadFile.header.lmpcount; i++) {
 		size = outWadFile.lump[i].size;
 		if (size) {
 			_PAD4(size);
-			File_Write(handle, outWadFile.lumpcache[i], size);
+            fwrite(outWadFile.lumpcache[i], size, 1, handle);
 		}
 	}
 
 	for (i = 0; i < outWadFile.header.lmpcount; i++)
-		File_Write(handle, &outWadFile.lump[i], sizeof(lump_t));
+        fwrite(&outWadFile.lump[i], sizeof(lump_t), 1, handle);
 
-	File_Close(handle);
-	File_SetReadOnly(outFile);
+    fclose(handle);
 }
 
 //**************************************************************

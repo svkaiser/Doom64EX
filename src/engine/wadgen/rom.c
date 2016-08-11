@@ -28,13 +28,12 @@
 #include <string.h>
 
 #include "wadgen.h"
-#include "files.h"
 #include "rom.h"
 #include "wad.h"
 
 rom_t RomFile;
 
-int Rom_Verify(void);
+int Rom_Verify(char *path);
 void Rom_SwapBigEndian(int swaptype);
 void Rom_GetIwad(void);
 void Rom_VerifyChecksum(void);
@@ -45,15 +44,28 @@ void Rom_VerifyChecksum(void);
 //**************************************************************
 //**************************************************************
 
-void Rom_Open(void)
+void Rom_Open(char *path)
 {
 	int id = 0;
+	FILE *handle;
 
-	RomFile.length = File_Read(wgenfile.filePath, &RomFile.data);
+	if(!(handle = fopen(path, "rb"))) {
+		perror("Couldn't open file for reading: ");
+		exit(1);
+	}
+
+	fseek(handle, 0, SEEK_END);
+	RomFile.length = ftell(handle);
+	fseek(handle, 0, SEEK_SET);
 	if (RomFile.length <= 0)
 		WGen_Complain("Rom_Open: Rom file length <= 0");
 
-	id = Rom_Verify();
+    RomFile.data = malloc(RomFile.length);
+    fread(RomFile.data, RomFile.length, 1, handle);
+
+	fclose(handle);
+
+	id = Rom_Verify(path);
 
 	if (!id)
 		WGen_Complain("VGen_RomOpen: Not a valid n64 rom..");
@@ -212,15 +224,15 @@ void Rom_SwapBigEndian(int swaptype)
 //**************************************************************
 //**************************************************************
 
-int Rom_Verify(void)
+int Rom_Verify(char *path)
 {
-	if (strstr(wgenfile.filePath, ".z64"))	// big endian
+	if (strstr(path, ".z64"))	// big endian
 		return 1;
 
-	if (strstr(wgenfile.filePath, ".n64"))	// little endian
+	if (strstr(path, ".n64"))	// little endian
 		return 2;
 
-	if (strstr(wgenfile.filePath, ".v64"))	// byte swapped
+	if (strstr(path, ".v64"))	// byte swapped
 		return 3;
 
 	return 0;

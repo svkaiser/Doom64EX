@@ -25,10 +25,8 @@
 //                              A majority of the application's workload is spent here...
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] =
-    "$Id: sprite.c 1096 2012-03-31 18:28:01Z svkaiser $";
-#endif
+
+#include <memory.h>
 
 #include "wadgen.h"
 #include "sprite.h"

@@ -33,7 +33,6 @@
 #include <i_system.h>
 
 #include "wadgen.h"
-#include "files.h"
 #include "sound.h"
 #include "sndfont.h"
 
@@ -465,10 +464,8 @@ void SF_WriteSoundFont(void)
 
     // MP2E: Use ROM directory instead of executable directory
     outFile = I_GetUserFile("doomsnd.sf2");
-	handle = fopen(outFile, "wb");
-
-	if (!handle) {
-        perror("Couldn't open soundfont file: ");
+	if (!(handle = fopen(outFile, "wb"))) {
+        perror("Couldn't open soundfont file for writing: ");
         exit(1);
 	}
 

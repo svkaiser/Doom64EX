@@ -261,8 +261,6 @@ add_sources(wadfile
 add_sources(wadgen
   deflate-N64.c
   deflate-N64.h
-  files.c
-  files.h
   gfx.c
   gfx.h
   level.c

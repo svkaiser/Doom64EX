@@ -24,10 +24,8 @@
 // DESCRIPTION: Texture parsing and converting
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] =
-    "$Id: Texture.c 1096 2012-03-31 18:28:01Z svkaiser $";
-#endif
+
+#include <string.h>
 
 #include "wadgen.h"
 #include "wad.h"
