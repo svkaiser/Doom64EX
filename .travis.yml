@@ -66,4 +66,12 @@ script:
 
 notifications:
   email: false
-  irc: "irc.oftc.net#doom64ex"
+  irc:
+    channels:
+      - "irc.oftc.net#doom64ex"
+    on_success: change
+    on_failure: always
+    template:
+      - "%{author}: (%{branch} - %{commit}) -> %{message}"
+      - "Change view -> %{compare_url}"
+      - "Build details -> %{build_url}"
