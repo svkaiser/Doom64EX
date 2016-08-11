@@ -194,7 +194,7 @@ void *Wad_GetLump(char *name, bool dcmpType)
 			Wad_Decompress(data, dmpLmp);
 
 		memcpy(data, dmpLmp, romWadFile.lump[lump].size);
-		Mem_Free((void **)&dmpLmp);
+		free(dmpLmp);
 
 		return data;
 	}
@@ -664,7 +664,7 @@ void Wad_AddOutputPalette(d64PaletteLump_t * palette)
 	size = 768;
 	strncpy(name, palette->name, 8);
 
-	data = (byte *) Mem_Alloc(size);
+	data = malloc(size);
 
 	for (i = 0; i < 256; i++) {
 		memcpy((data + pos), &palette->extPalLumps[i], 3);
@@ -672,7 +672,7 @@ void Wad_AddOutputPalette(d64PaletteLump_t * palette)
 	}
 
 	Wad_AddOutputLump(name, size, data);
-	Mem_Free((void **)&data);
+	free(data);
 }
 
 //**************************************************************
@@ -690,7 +690,7 @@ void Wad_AddOutputMidi(midiheader_t * mthd, int index)
 	int ntracks;
 	int pos = 0;
 
-	data = (cache) Mem_Alloc(mthd->size);
+	data = malloc(mthd->size);
 
 #define COPYMIDIDATA(p, size)       \
     memcpy(data + pos, p, size);    \
@@ -718,5 +718,5 @@ void Wad_AddOutputMidi(midiheader_t * mthd, int index)
 
 	Wad_AddOutputLump(sndlumpnames[index], mthd->size, data);
 
-	Mem_Free((void **)&data);
+	free(data);
 }
