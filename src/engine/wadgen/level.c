@@ -24,13 +24,8 @@
 // DESCRIPTION: Level extraction routines
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] = "$Id: Level.c 1097 2012-04-01 22:24:04Z svkaiser $";
-#endif
 
-#ifndef _WIN32
-#define Sleep(x) usleep(x)
-#endif
+#include <string.h>
 
 #include "wadgen.h"
 #include "wad.h"
@@ -179,10 +174,6 @@ void Level_GetMapWad(int num)
 	int lump = 0;
 	int i = 0;
 	byte *buffer;
-#ifdef DUMPMAPWAD
-	FILE *f;
-	path wadfile;
-#endif
 
 	sprintf(name, "MAP%02d", num + 1);
 	name[8] = 0;
@@ -195,7 +186,7 @@ void Level_GetMapWad(int num)
 
 	memcpy(&wad, romWadFile.lumpcache[lump], sizeof(wadheader_t));
 
-	buffer = Mem_Alloc(levelSize[num]);
+	buffer = malloc(levelSize[num]);
 	memcpy(buffer, &wad, sizeof(wadheader_t));
 	memcpy(buffer + sizeof(wadheader_t),
 	       romWadFile.lumpcache[lump] + sizeof(wadheader_t),
@@ -211,23 +202,7 @@ void Level_GetMapWad(int num)
 
 #endif
 
-#ifdef DUMPMAPWAD
-	sprintf(wadfile, "MAP%02d.wad", num + 1);
-	f = fopen(wadfile, "wb");
-	if (f == NULL)
-		WGen_Complain("Level_GetMapWad: Couldn't write to disk!");
-
-	fwrite(buffer, levelSize[num], 1, f);
-	fclose(f);
-
-	Mem_Free((void **)&buffer);
-
-	levelSize[num] = File_Read(wadfile, &levelData[num]);
-
-	Sleep(100);		// Let everything get caught up
-#else
 	levelData[num] = buffer;
-#endif
 }
 
 //**************************************************************

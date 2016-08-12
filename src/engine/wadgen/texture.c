@@ -64,11 +64,11 @@ void Texture_CreateRomLump(d64RawTexture_t * tex, cache data)
 
 	_PAD8(size);
 
-	tex->data = (byte *) Mem_Alloc(size);
+	tex->data = malloc(size);
 	memcpy(tex->data, data + (sizeof(d64RawTextureHeader_t)), size);
 
 	palsize = sizeof(short) * (NUMTEXPALETTES * tex->header.numpal);
-	tex->palette = (word *) Mem_Alloc(palsize);
+	tex->palette = malloc(palsize);
 	memcpy(tex->palette, data + (sizeof(d64RawTextureHeader_t) + size),
 	       palsize);
 
@@ -116,8 +116,7 @@ void Texture_CreateExLump(d64ExTexture_t * pcTex, d64RawTexture_t * romTex)
 	pcTex->header.numpal = romTex->header.numpal;
 	pcTex->size = (pcTex->header.width * pcTex->header.height);
 
-	pcTex->data =
-	    (byte *) Mem_Alloc(pcTex->header.width * pcTex->header.height);
+	pcTex->data = malloc(pcTex->header.width * pcTex->header.height);
 
 	for (i = 0; i < pcTex->size / 2; i++)
 	{

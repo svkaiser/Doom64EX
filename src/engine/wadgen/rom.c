@@ -88,7 +88,7 @@ void Rom_Open(char *path)
 
 void Rom_Close(void)
 {
-	Mem_Free((void **)&RomFile.data);
+	free(RomFile.data);
 }
 
 //**************************************************************

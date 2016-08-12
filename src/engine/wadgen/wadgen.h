@@ -37,8 +37,6 @@
 #define S_IEXEC S_IXUSR
 #endif
 
-#include "mem.h"
-
 #ifdef PLATFORM_PC
 
 #define USE_PNG

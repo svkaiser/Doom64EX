@@ -56,7 +56,7 @@ static const iwadRomInfo_t IwadRomInfo[4] = {
 
 char weaponName[4] = { 'N', 'U', 'L', 'L' };
 
-cache png;
+byte *png;
 dPalette_t pngpal[256];
 int pngsize;
 
@@ -436,6 +436,8 @@ void Wad_AddOutputSprite(d64ExSpriteLump_t * sprite)
 			 sprite->data, sprite->lumpRef, &pngsize);
 
 	Wad_AddOutputLump(romWadFile.lump[sprite->lumpRef].name, pngsize, png);
+
+	free(png);
 #else
 	cache data;
 	int size;
@@ -524,6 +526,8 @@ void Wad_AddOutputTexture(d64ExTexture_t * tex)
 			 tex->data, tex->lumpRef, &pngsize);
 
 	Wad_AddOutputLump(romWadFile.lump[tex->lumpRef].name, pngsize, png);
+
+	free(png);
 #else
 	cache data;
 	int size;
@@ -569,6 +573,8 @@ void Wad_AddOutputGfx(gfxEx_t * gfx)
 			 &pngsize);
 
 	Wad_AddOutputLump(romWadFile.lump[gfx->lumpRef].name, pngsize, png);
+
+    free(png);
 #else
 	cache data;
 	int size;
@@ -615,6 +621,8 @@ void Wad_AddOutputHudSprite(d64ExSpriteLump_t * sprite)
 			 8, sprite->data, sprite->lumpRef, &pngsize);
 
 	Wad_AddOutputLump(romWadFile.lump[sprite->lumpRef].name, pngsize, png);
+
+	free(png);
 #else
 	cache data;
 	int size;

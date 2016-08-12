@@ -73,7 +73,7 @@ void Gfx_CreateRomLump(gfxRom_t * gfx, cache data)
 	size = (gfx->header.width * gfx->header.height);
 	_PAD8(size);
 
-	gfx->data = (byte *) Mem_Alloc(size);
+	gfx->data = malloc(size);
 
 	memcpy(gfx->data, data + (sizeof(gfxRomHeader_t)), size);
 	memcpy(&gfx->palette, data + (sizeof(gfxRomHeader_t) + size), 512);
@@ -100,7 +100,7 @@ void Gfx_CreateRomFireLump(gfxRom_t * gfx, cache data)
 	size = (gfx->header.width * gfx->header.height);
 	_PAD8(size);
 
-	gfx->data = (byte *) Mem_Alloc(size);
+	gfx->data = malloc(size);
 
 	memcpy(gfx->data, data + (sizeof(gfxRomHeader_t)), size);
 }
@@ -127,7 +127,7 @@ void Gfx_CreateEXLump(gfxEx_t * pcGfx, gfxRom_t * romGfx)
 	_PAD4(pcGfx->width);
 	_PAD4(pcGfx->height);
 
-	pcGfx->data = (byte *) Mem_Alloc(pcGfx->width * pcGfx->height);
+	pcGfx->data = malloc(pcGfx->width * pcGfx->height);
 
 	for (h = 0; h < romGfx->header.height; h++) {
 		for (w = 0; w < romGfx->header.width; w++)
@@ -182,7 +182,7 @@ void Gfx_GetCloudLump(gfxEx_t * pcGfx)
 
 	pcGfx->width = 64;
 	pcGfx->height = 64;
-	pcGfx->data = (byte *) Mem_Alloc(4096);
+	pcGfx->data = malloc(4096);
 
 	memcpy(pcGfx->data, romWadFile.lumpcache[l] + 8, 4096);
 

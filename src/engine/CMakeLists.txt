@@ -265,8 +265,6 @@ add_sources(wadgen
   gfx.h
   level.c
   level.h
-  mem.c
-  mem.h
   png.c
   rom.c
   rom.h

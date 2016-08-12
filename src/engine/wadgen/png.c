@@ -24,9 +24,8 @@
 // DESCRIPTION: PNG image format setup
 //
 //-----------------------------------------------------------------------------
-#ifdef RCSID
-static const char rcsid[] = "$Id: Png.c 922 2011-08-13 00:49:06Z svkaiser $";
-#endif
+
+#include <string.h>
 
 #include "wadgen.h"
 #include "wad.h"
@@ -111,7 +110,7 @@ Png_Create(int width, int height, int numpal, dPalette_t * pal,
 		     PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
 
 	// setup palette
-	palette = (png_colorp) Mem_Alloc((16 * numpal) * sizeof(png_color));
+	palette = malloc((16 * numpal) * sizeof(png_color));
 
 	// copy dPalette_t data over to png_colorp
 	for (x = 0, j = 0; x < numpal; x++) {
@@ -172,10 +171,10 @@ Png_Create(int width, int height, int numpal, dPalette_t * pal,
 
 	// copy data over
 	image = data;
-	row_pointers = (cache *) Mem_Alloc(sizeof(byte *) * height);
+	row_pointers = malloc(sizeof(byte *) * height);
 
 	for (i = 0; i < height; i++) {
-		row_pointers[i] = (cache) Mem_Alloc(width);
+		row_pointers[i] = malloc(width);
 		if (bits == 4) {
 			for (j = 0; j < width; j += 2) {
 				row_pointers[i][j] = *image & 0xf;
@@ -194,14 +193,14 @@ Png_Create(int width, int height, int numpal, dPalette_t * pal,
 
 	// cleanup
 	png_write_end(png_ptr, info_ptr);
-	Mem_Free((void **)&palette);
-	Mem_Free((void **)row_pointers);
-	palette = NULL;
-	row_pointers = NULL;
+	free(palette);
+	for (i = 0; i < height; i++)
+		free(row_pointers[i]);
+	free(row_pointers);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 
 	// allocate output
-	out = (cache) Mem_Alloc(current);
+	out = malloc(current);
 	memcpy(out, writeData, current);
 	*size = current;
 
