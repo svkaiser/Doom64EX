@@ -24,8 +24,17 @@
 #define __KEX_STRINGVIEW__523920528
 
 #include <string>
+#include <experimental/string_view>
 
 namespace kex {
+  template <class Char>
+  constexpr size_t __h_strlen(const Char *s)
+  {
+      size_t len = 0;
+      while (s[len++]);
+      return len;
+  }
+
   template <class Char, class Traits = std::char_traits<Char>>
   struct BasicStringView
   {
@@ -34,25 +43,17 @@ namespace kex {
 
       constexpr BasicStringView() noexcept = default;
 
-      constexpr explicit BasicStringView(std::nullptr_t) :
-          BasicStringView("") {}
-
-      explicit BasicStringView(const std::string &s) :
+      BasicStringView(const std::string &s) :
           mData(s.data()),
           mLength(s.size()) {}
 
-      constexpr explicit BasicStringView(const char *s, std::size_t length) :
+      constexpr BasicStringView(const char *s, std::size_t length) :
           mData(s),
           mLength(length) {}
 
-      explicit BasicStringView(const char *s) :
-          mData(s),
-          mLength(Traits::length(s)) {}
-
-      template <std::size_t Length>
-      constexpr BasicStringView(const char (&str)[Length]):
+      constexpr BasicStringView(const char *str):
           mData(str),
-          mLength(Length) {}
+          mLength(__h_strlen(str)) {}
 
       BasicStringView &operator=(std::nullptr_t)
       {
