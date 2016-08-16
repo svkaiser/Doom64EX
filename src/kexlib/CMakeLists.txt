@@ -40,7 +40,8 @@ add_link_libraries(${PNG_LIBRARIES})
 ## Sources
 ##
 
-set(SOURCES lib.cc
+set(SOURCES
+  lib.cc
   format.cc
   gfx/Image.cc
   gfx/PngImage.cc

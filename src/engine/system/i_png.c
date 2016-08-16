@@ -96,6 +96,7 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
     lsize = W_LumpLength(lump);
 
     image = Image_New_FromMemory(lcache, lsize);
+    assert(image);
 
     // look for offset chunk if specified
     if(offset) {

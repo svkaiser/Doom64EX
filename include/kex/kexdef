@@ -25,99 +25,171 @@
 
 #include <algorithm>
 #include <utility>
-#include <tuple>
 #include <memory>
 #include <stdexcept>
 #include <kex/format>
 
-#define ALIAS_FN(NewName, OldName) \
-    template <class... Args> \
-    inline decltype(auto) NewName(Args&&... args)     \
-    { return OldName(std::forward<Args>(args)...); }
+#include "util/StringView"
 
-namespace kex
-{
-/** A metafunction to be able to detect the validity of an expression at compile time. See C++17's `std::void_t' */
+namespace kex {
+  void init_lib();
+
+  template <bool V>
+  using enable_if = std::enable_if_t<V>;
+
+  /** A metafunction to be able to detect the validity of an expression at compile time. See C++17's `std::void_t` */
   template<class... Args>
   using void_t = void;
 
   template<bool Val>
-  using bool_t = std::integral_constant<bool, Val>;
+  using bool_type = std::integral_constant<bool, Val>;
 
-/** Analog of std::is_same, but for N types */
+  /** Analog of std::is_same, but for N types */
   template<class... Args>
-  struct is_any_same;
+  struct __h_is_any_same;
 
-/** When there are no more types to check -> false */
+  /** When there are no more types to check -> false */
   template<class T>
-  struct is_any_same<T>: std::false_type
-  {
-  };
+  struct __h_is_any_same<T>: std::false_type {};
 
-/** When the first two types are the same -> true */
+  /** When the first two types are the same -> true */
   template<class T, class... Args>
-  struct is_any_same<T, T, Args...>: std::true_type
-  {
-  };
+  struct __h_is_any_same<T, T, Args...> : std::true_type {};
 
-/** When the first two types are not the same -> recurse */
+  /** When the first two types are not the same -> recurse */
   template<class T, class U, class... Args>
-  struct is_any_same<T, U, Args...>: is_any_same<T, Args...>
+  struct __h_is_any_same<T, U, Args...> : __h_is_any_same<T, Args...> {};
+
+  /** Value version of kex::is_any_same<...> */
+  template<class... Args>
+  constexpr auto is_any_same = __h_is_any_same<Args...>::value;
+
+  /** Convenience function to mark unused arguments and disable compiler warnings */
+  template<class... Args>
+  constexpr void unused(Args&& ...) noexcept {}
+
+  using nullptr_t = std::nullptr_t;
+
+  using byte = unsigned char;
+
+  using int8 = signed char;
+  using int16 = short;
+  using int32 = int;
+  using int64 = long long;
+
+  using uint8 = unsigned char;
+  using uint16 = unsigned short;
+  using uint32 = unsigned int;
+  using uint64 = unsigned long long;
+
+  constexpr int8 swap_bytes(int8 x) noexcept
+  { return x; }
+
+  constexpr uint8 swap_bytes(uint8 x) noexcept
+  { return x; }
+
+#if defined(__GNUC__)
+  constexpr int16 swap_bytes(int16 x) noexcept
+  { return __builtin_bswap16(x); }
+
+  constexpr uint16 swap_bytes(uint16 x) noexcept
+  { return __builtin_bswap16(x); }
+
+  constexpr int32 swap_bytes(int32 x) noexcept
+  { return __builtin_bswap32(x); }
+
+  constexpr uint32 swap_bytes(uint32 x) noexcept
+  { return __builtin_bswap32(x); }
+
+  constexpr int64 swap_bytes(int64 x) noexcept
+  { return __builtin_bswap64(x); }
+
+  constexpr uint64 swap_bytes(uint64 x) noexcept
+  { return __builtin_bswap64(x); }
+#else
+#warning "Unknown platform: Add byte swap intrinsic support, please!"
+  template <class T>
+  constexpr T swap_bytes(T x) noexcept
   {
+      union {
+          T value;
+          byte bytes[sizeof(T)];
+      } src, dst;
+      src.value = x;
+
+      for (size_t i = 0; i < sizeof(T); i++)
+          dst.bytes[i] = src.bytes[sizeof(T) - i - 1];
+
+      return dst.value;
+  }
+#endif
+
+  /** Convert a little endian integer to platform-native integer */
+  template <class T, class = enable_if<std::is_integral<T>::value>>
+  constexpr T swap_little_endian(T x) noexcept
+  { return x; };
+
+  /** Convert a big endian integer to platform-native integer */
+  template <class T, class = enable_if<std::is_integral<T>::value>>
+  constexpr T swap_big_endian(T x) noexcept
+  { return swap_bytes(x); };
+
+  struct noinit_tag {};
+
+  /*!
+   * \brief A generic RAII guard
+   * A generic RAII guard that calls the deleter on the Guard going out of scope
+   * \tparam Deleter A Callable type that will be called in {\ref ~Guard}
+   */
+  template <class Deleter>
+  class Guard {
+      bool mExecuted = false;
+      Deleter mDeleter;
+
+  public:
+      Guard(Deleter&& deleter):
+          mDeleter(std::move_if_noexcept(deleter)) {}
+
+      ~Guard()
+      {
+          if (!mExecuted)
+              mDeleter();
+      }
+
+      /*!
+       * Execute the deleter deliberately prior to the Guard object going out of scope
+       */
+      void execute()
+      {
+          if (!mExecuted) {
+            mDeleter();
+            mExecuted = true;
+          }
+      }
+
+      /*!
+       * Prevent deleter being executed on destruction
+       */
+      void release()
+      { mExecuted = true; }
   };
 
-/** Value version of kex::is_any_same<...> */
-  template<class... Args>
-  constexpr auto is_any_same_v = is_any_same<Args...>::value;
-
-  template<class... Args>
-  constexpr void unused(Args&& ...) noexcept
-  {}
-
-  template<class... Args>
-  using $t = std::tuple<Args...>;
-
-  template<class... Args>
-  using tuple = std::tuple<Args...>;
-
-  static decltype(auto) _ = std::ignore;
-
-  ALIAS_FN($, std::tie)
-  ALIAS_FN($$, std::make_tuple)
-
-  template<class T>
-  inline auto to_tuple(T&& x)
+  /*!
+   * \param deleter A deleter object that will be called when the returned Guard is destroyed
+   * \return A Guard object
+   */
+  template <class Deleter>
+  inline Guard<Deleter> make_guard(Deleter&& deleter)
   {
-      return std::forward<T>(x).to_tuple();
-  }
-  void init_lib();
-
-    // TODO: Move this namespace somewhere else
-  namespace cpu {
-    template <class T, class = std::enable_if_t<std::is_arithmetic<T>::value>>
-    T swap_be(T x)
-    {
-        union {
-            T val;
-            uint8_t bytes[sizeof(T)];
-        } src, dst;
-        src.val = x;
-        std::reverse_copy(src.bytes, src.bytes + sizeof(T), dst.bytes);
-        return dst.val;
-    };
-
-    template <class T, class = std::enable_if_t<std::is_arithmetic<T>::value>>
-    T swap_le(T x)
-    {
-        return x;
-    };
-  }
+      return Guard<Deleter>(std::move_if_noexcept<Deleter>(deleter));
+  };
 }
 
 #ifdef KEX_DONT_POLLUTE
 # undef ALIAS_FN
 #else
 using namespace kex;
+
 #endif
 
 #endif //__KEX_DEF__

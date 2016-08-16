@@ -25,184 +25,152 @@
 
 #include "kex/kexdef"
 
+/*!
+ * This header defines classes for low-level pixel operations,
+ * as well as the Palette class.
+ *
+ * We distinguish pixel data into two groups: Color and Index.
+ * Color pixels are pixels whose data is in-band. (ex: Rgb)
+ * Index pixels are pixels whose color values can be found somewhere else. (ex: Index8)
+ */
+
 namespace kex {
   namespace gfx {
-    class bad_pixel_format : public std::logic_error {
+    struct Palette;
+
+    class PixelFormatError : public std::logic_error {
     public:
         using std::logic_error::logic_error;
 
-        bad_pixel_format();
+        PixelFormatError();
     };
 
-    struct Palette;
-
-    enum struct pixel_format {
+    enum struct PixelFormat {
         none,
-        index4,
         index8,
         rgb,
-        bgr,
         rgba,
-        bgra,
-    };
-
-    struct Index4 {
-        std::uint8_t index;
     };
 
     struct Index8 {
-        std::uint8_t index;
+        uint8 index;
     };
 
     struct Rgb {
-        std::uint8_t red, green, blue;
-    };
-
-    struct Bgr {
-        std::uint8_t blue, green, red;
+        uint8 red, green, blue;
     };
 
     struct Rgba {
-        std::uint8_t red, green, blue, alpha;
+        uint8 red, green, blue, alpha;
     };
 
-    struct Bgra {
-        std::uint8_t blue, green, red, alpha;
+    struct index8_tag {
+        using type = Index8;
+    };
+
+    struct rgb_tag {
+        using type = Rgb;
+    };
+
+    struct rgba_tag {
+        using type = Rgba;
     };
 
     template <class T>
-    using is_pixel = kex::is_any_same<T, Index4, Index8, Rgb, Bgr, Rgba, Bgra>;
-
-    template <class T>
-    constexpr auto is_pixel_v = is_pixel<T>::value;
-
-    template <class T>
-    struct static_pixel_traits;
+    struct pixel_traits;
 
     template <>
-    struct static_pixel_traits<Index4> {
-        static constexpr auto format = pixel_format::index4;
-        static constexpr bool normal = false;
+    struct pixel_traits<Index8> {
+        static constexpr auto format = PixelFormat::index8;
+        static constexpr bool color = false;
         static constexpr size_t bytes = 1;
-        static constexpr size_t pack = 2;
-        static constexpr bool alpha = false;
-
-        static constexpr size_t pal_size = 16;
-        static constexpr int pal_mask = 0xf;
-    };
-
-    template <>
-    struct static_pixel_traits<Index8> {
-        static constexpr auto format = pixel_format::index8;
-        static constexpr bool normal = false;
-        static constexpr size_t bytes = 1;
-        static constexpr size_t pack = 1;
         static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 256;
         static constexpr int pal_mask = 0xff;
+
+        using tag_type = index8_tag;
+        static constexpr auto tag() { return index8_tag(); }
     };
 
     template <>
-    struct static_pixel_traits<Rgb> {
-        static constexpr auto format = pixel_format::rgb;
-        static constexpr bool normal = true;
+    struct pixel_traits<Rgb> {
+        static constexpr auto format = PixelFormat::rgb;
+        static constexpr bool color = true;
         static constexpr size_t bytes = 3;
-        static constexpr size_t pack = 1;
         static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 0;
         static constexpr int pal_mask = 0;
+
+        using tag_type = rgb_tag;
+        static constexpr auto tag() { return rgb_tag();}
     };
 
     template <>
-    struct static_pixel_traits<Bgr> {
-        static constexpr auto format = pixel_format::bgr;
-        static constexpr bool normal = true;
-        static constexpr size_t bytes = 3;
-        static constexpr size_t pack = 1;
-        static constexpr bool alpha = false;
-
-        static constexpr size_t pal_size = 0;
-        static constexpr int pal_mask = 0;
-    };
-
-    template <>
-    struct static_pixel_traits<Rgba> {
-        static constexpr auto format = pixel_format::rgba;
-        static constexpr bool normal = true;
+    struct pixel_traits<Rgba> {
+        static constexpr auto format = PixelFormat::rgba;
+        static constexpr bool color = true;
         static constexpr size_t bytes = 4;
-        static constexpr size_t pack = 1;
         static constexpr bool alpha = true;
 
         static constexpr size_t pal_size = 0;
         static constexpr int pal_mask = 0;
+
+        using tag_type = rgba_tag;
+        static constexpr auto tag() { return rgba_tag(); }
     };
 
-    template <>
-    struct static_pixel_traits<Bgra> {
-        static constexpr auto format = pixel_format::bgra;
-        static constexpr bool normal = true;
-        static constexpr size_t bytes = 4;
-        static constexpr size_t pack = 1;
-        static constexpr bool alpha = true;
-
-        static constexpr size_t pal_size = 0;
-        static constexpr int pal_mask = 0;
-    };
-
-    struct pixel_traits {
-        pixel_format format { pixel_format::none };
-        bool normal { false };
-        size_t bytes { 0 };
-        size_t pack { 0 };
-        bool alpha { false };
-
-        size_t pal_size { 0 };
-        int pal_mask { 0 };
-
-        pixel_traits() = default;
-
-        pixel_traits(const pixel_traits &) = delete;
-
-        pixel_traits(pixel_traits&&) = default;
-
-        template <class T>
-        constexpr pixel_traits(const static_pixel_traits<T> &traits):
-            format(traits.format),
-            normal(traits.normal),
-            bytes(traits.bytes),
-            pack(traits.pack),
-            alpha(traits.alpha),
-            pal_size(traits.pal_size),
-            pal_mask(traits.pal_mask) {}
-
-        pixel_traits& operator=(const pixel_traits &) = delete;
-
-        pixel_traits& operator=(pixel_traits&&) = delete;
-    };
-
-    const pixel_traits& get_pixel_traits(pixel_format);
+    template <class T>
+    constexpr bool is_pixel = kex::is_any_same<T, Index8, Rgb, Rgba>;
 
     template <class T, class = void>
-    struct is_normal_pixel : std::false_type {};
+    struct __h_is_color_pixel : std::false_type {};
 
     template <class T>
-    struct is_normal_pixel<T, kex::void_t<decltype(static_pixel_traits<T>::normal)>>:
-        kex::bool_t<static_pixel_traits<T>::normal> {};
+    struct __h_is_color_pixel<T, void_t<decltype(pixel_traits<T>::color)>> : bool_type<pixel_traits<T>::color> {};
 
     template <class T>
-    constexpr auto is_normal_pixel_v = is_normal_pixel<T>::value;
+    constexpr bool is_color_pixel = __h_is_color_pixel<T>::value;
 
     template <class T>
-    constexpr auto is_indexed_pixel_v = !is_normal_pixel_v<T>;
+    constexpr bool is_index_pixel = is_pixel<T> && !is_color_pixel<T>;
+
+    template <class T, class = std::enable_if_t<is_pixel<T>>>
+    using get_traits_type = pixel_traits<T>;
+
+    struct PixelInfo {
+        PixelFormat format = PixelFormat::none;
+        bool color = false;
+        size_t bytes = 0;
+        bool alpha = false;
+
+        size_t pal_size = 0;
+        int pal_mask = 0;
+    };
+
+    const PixelInfo& get_pixel_info(PixelFormat);
+
+    template <class T>
+    inline void test_pixel_format(PixelFormat format)
+    {
+        if (pixel_traits<T>::format != format)
+            throw PixelFormatError();
+    }
+
+    template <class T>
+    inline void test_pixel_format(const PixelInfo *traits)
+    {
+        if (pixel_traits<T>::format != traits->format)
+            throw PixelFormatError();
+    }
 
     template <class T, class U>
-    struct pixel_iterator;
+    struct PixelIterator;
 
     template <class T>
-    struct pixel_iterator<T, T> {
-        pixel_iterator(T *ptr):
+    struct PixelIterator<T, T> {
+        PixelIterator(T *ptr):
             mPtr(ptr) {}
 
         T& operator*()
@@ -217,52 +185,51 @@ namespace kex {
         const T* operator->() const
         { return mPtr; }
 
-        bool operator!=(const pixel_iterator &other) const
+        bool operator==(const PixelIterator &other) const
+        { return mPtr == other.mPtr; }
+
+        bool operator!=(const PixelIterator &other) const
         { return mPtr != other.mPtr; }
 
-        pixel_iterator& operator++()
+        PixelIterator& operator++()
         {
             ++mPtr;
             return *this;
         }
 
-        pixel_iterator operator++(int)
+        PixelIterator operator++(int)
         {
-            pixel_iterator copy(*this);
+            PixelIterator copy(*this);
             ++mPtr;
             return copy;
         }
 
-        pixel_iterator operator+(std::ptrdiff_t idx) const
-        {
-            return pixel_iterator(mPtr + idx);
-        }
+        PixelIterator operator+(int idx) const
+        { return PixelIterator(mPtr + idx); }
 
-        pixel_iterator& operator+=(std::ptrdiff_t idx)
+        PixelIterator& operator+=(int idx)
         {
             mPtr += idx;
             return *this;
         }
 
-        pixel_iterator& operator--()
+        PixelIterator& operator--()
         {
             --mPtr;
             return *this;
         }
 
-        pixel_iterator operator--(int)
+        PixelIterator operator--(int)
         {
-            pixel_iterator copy(*this);
+            PixelIterator copy(*this);
             --mPtr;
             return copy;
         }
 
-        pixel_iterator operator-(std::ptrdiff_t idx) const
-        {
-            return pixel_iterator(mPtr - idx);
-        }
+        PixelIterator operator-(int idx) const
+        { return PixelIterator(mPtr - idx); }
 
-        pixel_iterator& operator-=(std::ptrdiff_t idx)
+        PixelIterator& operator-=(int idx)
         {
             mPtr -= idx;
             return *this;
@@ -272,114 +239,13 @@ namespace kex {
         T *mPtr;
     };
 
-    template <class T>
-    struct auto_pixel_iterator {
-        struct reference {
-            reference(const pixel_traits &traits, const Palette &palette, uint8_t *ptr):
-                mTraits(traits),
-                mPalette(palette),
-                mPtr(ptr) {}
-
-            reference& operator=(const T& other)
-            {
-                if (mTraits.format == pixel_format::index4)
-                    copy_pixel(other, mPalette, *reinterpret_cast<Index4*>(mPtr));
-                else if (mTraits.format == pixel_format::index8)
-                    copy_pixel(other, mPalette, *reinterpret_cast<Index8*>(mPtr));
-                else
-                    copy_pixel(other, mTraits.format, mPtr);
-
-                return *this;
-            }
-
-            operator T() const
-            {
-                T t;
-                if (mTraits.format == pixel_format::index4)
-                    copy_pixel(mPalette, *reinterpret_cast<Index4*>(mPtr), t);
-                else if (mTraits.format == pixel_format::index8)
-                    copy_pixel(mPalette, *reinterpret_cast<Index8*>(mPtr), t);
-                else
-                    copy_pixel(mTraits.format, mPtr, t);
-                return t;
-            }
-
-        private:
-            const pixel_traits &mTraits;
-            const Palette &mPalette;
-            uint8_t *mPtr;
-
-            friend struct auto_pixel_iterator;
-        };
-
-        auto_pixel_iterator(const pixel_traits &traits, const Palette &palette, uint8_t *ptr):
-            mRef(traits, palette, ptr) {}
-
-        reference& operator*()
-        { return mRef; }
-
-        reference* operator->()
-        { return &mRef; }
-
-        bool operator!=(const auto_pixel_iterator &other) const
-        { return mRef.mPtr != other.mRef.mPtr; }
-
-        auto_pixel_iterator& operator++()
-        {
-            mRef.mPtr += mRef.mTraits.bytes;
-            return *this;
-        }
-
-    private:
-        reference mRef;
-    };
-
-    template <class T>
-    struct auto_pixel_iterator<const T> {
-        auto_pixel_iterator(const pixel_traits &traits, const Palette &palette, uint8_t *ptr):
-            mTraits(traits),
-            mPalette(palette),
-            mPtr(ptr)
-        { copy_tmp(); }
-
-        const T& operator*() const
-        { return mTmp; }
-
-        const T* operator->() const
-        { return &mTmp; }
-
-        bool operator!=(const auto_pixel_iterator &other) const
-        { return mPtr != other.mPtr; }
-
-        auto_pixel_iterator& operator++()
-        {
-            mPtr += mTraits.bytes;
-            copy_tmp();
-            return *this;
-        }
-
-    private:
-        const pixel_traits &mTraits;
-        const Palette &mPalette;
-        uint8_t *mPtr;
-        T mTmp;
-
-        void copy_tmp() noexcept
-        {
-            if (mTraits.format == pixel_format::index8)
-                copy_pixel(mPalette, *reinterpret_cast<const Index8*>(mPtr), mTmp);
-            else
-                copy_pixel(mTraits.format, mPtr, mTmp);
-        }
-    };
-
     template <class T, class U>
-    class pixel_map {
+    class PixelMap {
     public:
-        using iterator = pixel_iterator<T, U>;
-        using const_iterator = pixel_iterator<const T, const U>;
+        using iterator = PixelIterator<T, U>;
+        using const_iterator = PixelIterator<const T, const U>;
 
-        pixel_map(T *begin, T *end):
+        PixelMap(T *begin, T *end):
             mBegin(begin),
             mEnd(end) {}
 
@@ -406,349 +272,131 @@ namespace kex {
         T *mEnd;
     };
 
-    template <class T>
-    struct auto_pixel_map {
-        using iterator = auto_pixel_iterator<T>;
-        using const_iterator = auto_pixel_iterator<const T>;
+    class Palette {
+        const PixelInfo *mTraits = nullptr;
+        size_t mCount = 0;
+        std::unique_ptr<byte[]> mData = nullptr;
 
-        auto_pixel_map(const pixel_traits &traits, const Palette &palette, uint8_t *begin, uint8_t *end):
-            mTraits(traits),
-            mPalette(palette),
-            mBegin(begin),
-            mEnd(end) {}
-
-        auto begin()
-        { return iterator(mTraits, mPalette, mBegin); }
-
-        auto begin() const
-        { return const_iterator(mTraits, mPalette, mBegin); }
-
-        auto cbegin() const
-        { return const_iterator(mTraits, mPalette, mBegin); }
-
-        auto end()
-        { return iterator(mTraits, mPalette, mEnd); }
-
-        auto end() const
-        { return const_iterator(mTraits, mPalette, mEnd); }
-
-        auto cend() const
-        { return const_iterator(mTraits, mPalette, mEnd); }
-
-    private:
-        const pixel_traits &mTraits;
-        const Palette &mPalette;
-        uint8_t *mBegin;
-        uint8_t *mEnd;
-    };
-
-    struct Palette {
+    public:
         Palette() noexcept = default;
-
-        Palette(std::unique_ptr<uint8_t[]> colors, const pixel_traits &traits, int mask, size_t count):
-            mColors(colors.get(), colors.get() + count * traits.bytes),
-            mTraits(&traits),
-            mMask(mask) {}
-
-        Palette(std::nullptr_t) noexcept:
-            Palette() {}
 
         Palette(Palette&&) noexcept = default;
 
-        Palette(const Palette &other) noexcept;
+        Palette(const Palette &);
+
+        Palette(PixelFormat format, size_t count, std::unique_ptr<byte[]> data);
+
+        Palette& operator=(Palette&&) noexcept = default;
+
+        Palette& operator=(const Palette &);
 
         void reset()
-        { *this = Palette { }; }
+        { *this = Palette(); }
 
-        uint8_t *colors_ptr()
-        { return mColors.data(); }
+        bool empty() const
+        { return !(mTraits && mCount && mData); }
 
-        const uint8_t *colors_ptr() const
-        { return mColors.data(); }
+        byte *data_ptr()
+        { return mData.get(); }
 
-        pixel_format format() const
+        const byte *data_ptr() const
+        { return mData.get(); }
+
+        PixelFormat format() const
         { return mTraits->format; }
 
-        const pixel_traits &traits() const
+        const PixelInfo &traits() const
         { return *mTraits; }
 
-        size_t size() const
-        { return mColors.size() / mTraits->bytes; }
+        uint8 count() const
+        { return mCount; }
 
-        uint8_t &offset()
-        { return mOffset; }
+        const byte *color_ptr(uint8 index) const noexcept
+        { return &mData[index * mTraits->bytes]; }
 
-        uint8_t offset() const
-        { return mOffset; }
-
-        auto color_ptr(uint8_t index) const noexcept
-        {
-            return &mColors[((index + mOffset) & mMask) * mTraits->bytes];
-        }
-
-        template <class T>
-        auto color(uint8_t index) const noexcept
-        {
-            T retval;
-            copy_pixel(mTraits->format, color_ptr(index), retval);
-            return retval;
-        }
+        template <class SrcT, class DstT>
+        DstT unsafe_color(uint8 index) const noexcept
+        { return convert_pixel(*reinterpret_cast<const SrcT *>(color_ptr(index)), pixel_traits<DstT>::tag); }
 
         template <class T, class U = T>
         auto map()
         {
-            if (static_pixel_traits<std::decay_t<T>>::format != mTraits->format)
-                throw bad_pixel_format();
+            if (pixel_traits<std::decay_t<T>>::format != mTraits->format)
+                throw PixelFormatError();
 
-            return pixel_map<T, U>(reinterpret_cast<T *>(&(*mColors.begin())),
-                                   reinterpret_cast<T *>(&(*mColors.end())));
+            return PixelMap<T, U>(reinterpret_cast<T *>(mData.get()),
+                                  reinterpret_cast<T *>(mData.get()) + mCount);
         }
 
         template <class T, class U = T>
         auto map() const
         {
-            if (static_pixel_traits<std::decay_t<T>>::format != mTraits->format)
-                throw bad_pixel_format();
+            test_pixel_format<T>(mTraits);
 
-            return pixel_map<const T, const U>(reinterpret_cast<const T *>(&(*mColors.begin())),
-                                   reinterpret_cast<const T *>(&(*mColors.end())));
+            return PixelMap<const T, const U>(reinterpret_cast<const T *>(mData.get()),
+                                              reinterpret_cast<const T *>(mData.get()) + mCount);
         }
-
-        template <class T>
-        auto auto_map()
-        {
-            return auto_pixel_map<T>(mTraits, mColors.begin(), mColors.end());
-        }
-
-        Palette& operator=(std::nullptr_t) noexcept
-        {
-            reset();
-            return *this;
-        }
-
-        Palette& operator=(Palette&&) noexcept = default;
-
-        Palette& operator=(const Palette &) noexcept;
-
-    private:
-        std::vector<uint8_t> mColors;
-        const pixel_traits *mTraits = nullptr;
-        uint8_t mOffset = 0;
-        int mMask = 0;
     };
-
-    template <class Normal, class Index>
-    Palette make_palette()
-    {
-        static_assert(is_normal_pixel_v<Normal>, "First arg should be of a normal pixel type");
-        static_assert(is_indexed_pixel_v<Index>, "Second arg should be of an indexed pixel type");
-
-        Palette retval;
-
-        constexpr auto bytes = static_pixel_traits<Normal>::bytes;
-        constexpr auto format = static_pixel_traits<Normal>::format;
-        constexpr auto count = static_pixel_traits<Index>::pal_size;
-        constexpr auto mask = static_pixel_traits<Index>::pal_mask;
-
-        static_assert(bytes * count, "Size of palette is zero");
-
-        return Palette { std::make_unique<uint8_t[]>(bytes * count), get_pixel_traits(format), mask, count };
-    }
-
-    template <class Normal>
-    Palette make_palette(pixel_format format)
-    {
-        static_assert(is_normal_pixel_v<Normal>, "First arg should be of a normal pixel type");
-
-        switch (format) {
-        case pixel_format::index4:
-            return make_palette<Normal, Index4>();
-
-        case pixel_format::index8:
-            return make_palette<Normal, Index8>();
-
-        default:
-            return Palette {};
-        }
-    }
 
     struct default_pixel_processor {
         template <class, class... Args>
-        void normal(Args&&...)
-        { throw bad_pixel_format("Pixel processor didn't implement a normal pixel handler"); }
+        void color(Args&&...)
+        { throw PixelFormatError("color pixel processor not implemented"); }
 
         template <class, class... Args>
-        void indexed(Args&&...)
-        { throw bad_pixel_format("Pixel processor didn't implement an indexed pixel handler"); }
+        void index(Args&&...)
+        { throw PixelFormatError("index pixel processor not implemented"); }
     };
 
     template <class Processor, class... Args>
-    void process_pixel(Processor proc, pixel_format fmt, Args&&... args)
+    void process_pixel(Processor proc, PixelFormat fmt, Args&&... args)
     {
 #define CASE(fmt, type, func) \
-        case pixel_format::fmt: \
+        case PixelFormat::fmt: \
             proc.template func<type>(std::forward<Args>(args)...); \
             break;
 
         switch (fmt)
         {
-        CASE(index8, Index8, indexed)
-        CASE(rgb, Rgb, normal)
-        CASE(bgr, Bgr, normal)
-        CASE(rgba, Rgba, normal)
-        CASE(bgra, Bgra, normal)
+        CASE(index8, Index8, index)
+        CASE(rgb, Rgb, color)
+        CASE(rgba, Rgba, color)
 
         default:
-            throw bad_pixel_format("process_pixel doesn't have a case for this pixel type");
+            throw PixelFormatError("process_pixel doesn't have a case for this pixel type");
         }
 
 #undef CASE
     };
 
-    template <class T, class = std::enable_if_t<is_pixel_v<T>>>
-    constexpr void copy_pixel(const T &src, T &dst) noexcept
-    { dst = src; }
-
-    /* Index4 copy_pixel */
+    /* Identity copy_pixel */
     template <class T>
-    constexpr void copy_pixel(const Palette &srcPal, const Index4 &src, T &dst) noexcept
-    { dst = srcPal.color<T>(src.index); }
-
-    /* Index8 copy_pixel */
-    template <class T>
-    constexpr void copy_pixel(const Palette &srcPal, const Index8 &src, T &dst) noexcept
-    { dst = srcPal.color<T>(src.index); }
-
-    template <class T>
-    constexpr void copy_pixel(const T &src, const Palette &dstPal, Index8 &dst)
-    { throw std::logic_error("unimplemented Normal -> Indexed copy_pixel"); }
+    constexpr T convert_pixel(const T &src, typename pixel_traits<T>::tag_type) noexcept
+    { return src; }
 
     /* RGB copy_pixel */
-    constexpr void copy_pixel(const Rgb &src, Bgr &dst) noexcept
-    { dst = { src.blue, src.green, src.red }; }
+    constexpr Rgba convert_pixel(const Rgb &src, rgba_tag) noexcept
+    { return { src.red, src.green, src.blue, 0xff }; }
 
-    constexpr void copy_pixel(const Rgb &src, Rgba &dst) noexcept
-    { dst = { src.red, src.green, src.blue, 0xff }; }
-
-    constexpr void copy_pixel(const Rgb &src, Bgra &dst) noexcept
-    { dst = { src.blue, src.green, src.red, 0xff }; }
-
-    /* BGR copy_pixel */
-    constexpr void copy_pixel(const Bgr &src, Rgb &dst) noexcept
-    { dst = { src.red, src.green, src.blue }; }
-
-    constexpr void copy_pixel(const Bgr &src, Rgba &dst) noexcept
-    { dst = { src.red, src.green, src.blue, 0xff }; }
-
-    constexpr void copy_pixel(const Bgr &src, Bgra &dst) noexcept
-    { dst = { src.blue, src.green, src.red, 0xff }; }
-
-    /* RGBA copy_pixel */
-    constexpr void copy_pixel(const Rgba &src, Rgb &dst) noexcept
-    { dst = { src.red, src.green, src.blue }; }
-
-    constexpr void copy_pixel(const Rgba &src, Bgr &dst) noexcept
-    { dst = { src.blue, src.green, src.red }; }
-
-    constexpr void copy_pixel(const Rgba &src, Bgra &dst) noexcept
-    { dst = { src.blue, src.green, src.red, src.alpha }; }
-
-    /* BGRA copy_pixel */
-    constexpr void copy_pixel(const Bgra &src, Rgb &dst) noexcept
-    { dst = { src.red, src.green, src.blue }; }
-
-    constexpr void copy_pixel(const Bgra &src, Bgr &dst) noexcept
-    { dst = { src.blue, src.green, src.red }; }
-
-    constexpr void copy_pixel(const Bgra &src, Rgba &dst) noexcept
-    { dst = { src.red, src.green, src.blue, src.alpha }; }
-
-    template <class T,
-        class = std::enable_if_t<is_normal_pixel_v<T>>>
-    inline void copy_pixel(const T &src, pixel_format dst_fmt, uint8_t dst[]) noexcept
-    {
-        switch (dst_fmt) {
-        case pixel_format::rgb:
-            copy_pixel(src, *reinterpret_cast<Rgb*>(dst));
-            break;
-
-        case pixel_format::bgr:
-            copy_pixel(src, *reinterpret_cast<Bgr*>(dst));
-            break;
-
-        case pixel_format::rgba:
-            copy_pixel(src, *reinterpret_cast<Rgba*>(dst));
-            break;
-
-        case pixel_format::bgra:
-            copy_pixel(src, *reinterpret_cast<Bgra*>(dst));
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    template <class T,
-        class = std::enable_if_t<is_normal_pixel_v<T>>>
-    inline void copy_pixel(pixel_format src_fmt, const uint8_t src[], T &dst) noexcept
-    {
-        switch (src_fmt) {
-        case pixel_format::rgb:
-            copy_pixel(*reinterpret_cast<const Rgb*>(src), dst);
-            break;
-
-        case pixel_format::bgr:
-            copy_pixel(*reinterpret_cast<const Bgr*>(src), dst);
-            break;
-
-        case pixel_format::rgba:
-            copy_pixel(*reinterpret_cast<const Rgba*>(src), dst);
-            break;
-
-        case pixel_format::bgra:
-            copy_pixel(*reinterpret_cast<const Bgra*>(src), dst);
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    inline void copy_pixel(pixel_format src_fmt, const uint8_t src[],
-                           pixel_format dst_fmt, uint8_t dst[]) noexcept
-    {
-        switch (src_fmt) {
-        case pixel_format::rgb:
-            copy_pixel(*reinterpret_cast<const Rgb*>(src), dst_fmt, dst);
-            break;
-
-        case pixel_format::bgr:
-            copy_pixel(*reinterpret_cast<const Bgr*>(src), dst_fmt, dst);
-            break;
-
-        case pixel_format::rgba:
-            copy_pixel(*reinterpret_cast<const Rgba*>(src), dst_fmt, dst);
-            break;
-
-        case pixel_format::bgra:
-            copy_pixel(*reinterpret_cast<const Bgra*>(src), dst_fmt, dst);
-            break;
-
-        default:
-            break;
-        }
-    }
+    /* RGBA convert_pixel */
+    constexpr Rgb convert_pixel(const Rgba &src, rgb_tag) noexcept
+    { return { src.red, src.green, src.blue }; }
 
     /*! These are sort of like unit tests */
-    static_assert(is_pixel_v<Index8>, "");
-    static_assert(is_pixel_v<Rgb>, "");
-    static_assert(is_pixel_v<Rgba>, "");
-    static_assert(!is_pixel_v<int>, "");
+    static_assert( is_pixel<Index8>, "");
+    static_assert( is_pixel<Rgb>, "");
+    static_assert( is_pixel<Rgba>, "");
+    static_assert(!is_pixel<int>, "");
 
-    static_assert(!is_normal_pixel_v<Index8>, "");
-    static_assert(is_normal_pixel_v<Rgb>, "");
-    static_assert(is_normal_pixel_v<Rgba>, "");
+    static_assert(!is_color_pixel<Index8>, "");
+    static_assert( is_color_pixel<Rgb>, "");
+    static_assert( is_color_pixel<Rgba>, "");
+    static_assert(!is_color_pixel<int>, "");
+
+    static_assert( is_index_pixel<Index8>, "");
+    static_assert(!is_index_pixel<Rgb>, "");
+    static_assert(!is_index_pixel<Rgba>, "");
+    static_assert(!is_index_pixel<int>, "");
   }
 }
 

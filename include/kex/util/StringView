@@ -1,0 +1,136 @@
+// -*- mode: c++ -*-
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2016 Zohar Malamant
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+// 02111-1307, USA.
+//
+//-----------------------------------------------------------------------------
+
+#ifndef __KEX_STRINGVIEW__523920528
+#define __KEX_STRINGVIEW__523920528
+
+#include <string>
+
+namespace kex {
+  template <class Char, class Traits = std::char_traits<Char>>
+  struct BasicStringView
+  {
+      using string_type = std::basic_string<Char, Traits>;
+      using traits_type = Traits;
+
+      constexpr BasicStringView() noexcept = default;
+
+      constexpr explicit BasicStringView(std::nullptr_t) :
+          BasicStringView("") {}
+
+      explicit BasicStringView(const std::string &s) :
+          mData(s.data()),
+          mLength(s.size()) {}
+
+      constexpr explicit BasicStringView(const char *s, std::size_t length) :
+          mData(s),
+          mLength(length) {}
+
+      explicit BasicStringView(const char *s) :
+          mData(s),
+          mLength(Traits::length(s)) {}
+
+      template <std::size_t Length>
+      constexpr BasicStringView(const char (&str)[Length]):
+          mData(str),
+          mLength(Length) {}
+
+      BasicStringView &operator=(std::nullptr_t)
+      {
+          mData = nullptr;
+          mLength = 0;
+          return *this;
+      }
+
+      BasicStringView &operator=(const std::string &s)
+      {
+          mData = s.data();
+          mLength = s.size();
+          return *this;
+      }
+
+      BasicStringView &operator=(const char *s)
+      {
+          mData = s;
+          mLength = Traits::length(s);
+          return *this;
+      }
+
+      template <size_t Length>
+      constexpr BasicStringView &operator=(const char str[Length])
+      {
+          mData = str;
+          mLength = Length;
+          return *this;
+      }
+
+      const Char &at(std::size_t pos) const
+      { return mData[pos]; }
+
+      const Char &operator[](std::size_t pos) const
+      { return mData[pos]; }
+
+      const Char *data() const
+      { return mData; }
+
+      const Char *begin() const
+      { return cbegin(); }
+
+      const Char *cbegin() const
+      { return mData; }
+
+      auto rbegin() const
+      { return crbegin(); }
+
+      auto crbegin() const
+      { return std::reverse_iterator<const Char *>(cbegin()); }
+
+      const Char *end() const
+      { return cend(); }
+
+      const Char *cend() const
+      { return mData + mLength; }
+
+      auto rend() const
+      { return crend(); }
+
+      auto crend() const
+      { return reverse_iterator_type(cend()); }
+
+      string_type to_string() const
+      { return string_type(mData, mLength); }
+
+      constexpr size_t length() const
+      { return mLength; }
+
+      bool operator==(const BasicStringView &rhs) const
+      { return (mLength == rhs.mLength) ? (Traits::compare(mData, rhs.mData, mLength) == 0) : false; };
+
+  private:
+      const Char *mData = nullptr;
+      std::size_t mLength = 0;
+  };
+
+  using StringView = BasicStringView<char>;
+}
+
+#endif //__KEX_STRINGVIEW__523920528

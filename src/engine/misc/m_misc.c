@@ -314,7 +314,7 @@ void M_ScreenShot(void) {
 
     // Get PNG image
 
-    image = Image_New_FromData(buff, video_width, video_height, PF_RGB);
+    image = Image_New_FromData(PF_RGB, video_width, video_height, buff);
     Image_Save(image, name, "png");
     Image_Free(image);
 
@@ -337,7 +337,7 @@ int M_CacheThumbNail(byte** data) {
     buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
     tbn = Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0);
 
-    image = Image_New_FromData(buff, video_width, video_height, PF_RGB);
+    image = Image_New_FromData(PF_RGB, video_width, video_height, buff);
     Image_Scale(image, 128, 128);
     dmemcpy(tbn, Image_GetData(image), 128 * 128 * 3);
     Image_Free(image);

@@ -26,48 +26,74 @@
 using namespace kex::gfx;
 
 namespace {
-  const pixel_traits traits[] = {
-      pixel_traits(),
-      static_pixel_traits<Index4>{},
-      static_pixel_traits<Index8>{},
-      static_pixel_traits<Rgb>{},
-      static_pixel_traits<Bgr>{},
-      static_pixel_traits<Rgba>{},
-      static_pixel_traits<Bgra>{}
-  };
-
-  size_t calc_length(const pixel_traits *traits, size_t count)
+  template <class T>
+  constexpr PixelInfo pi()
   {
-      return traits ? traits->bytes * count : 0;
+      using Traits = pixel_traits<T>;
+      return PixelInfo {
+          .format = Traits::format,
+          .color = Traits::color,
+          .bytes = Traits::bytes,
+          .alpha = Traits::alpha,
+          .pal_size = Traits::pal_size,
+          .pal_mask = Traits::pal_mask
+      };
   }
+
+  const PixelInfo traits[] = {
+      PixelInfo(),
+      pi<Index8>(),
+      pi<Rgb>(),
+      pi<Rgba>()
+  };
 }
 
-bad_pixel_format::bad_pixel_format():
-    std::logic_error("bad_pixel_format")
-{
-}
+PixelFormatError::PixelFormatError():
+    std::logic_error("PixelFormatError") {}
 
-const pixel_traits& kex::gfx::get_pixel_traits(pixel_format format)
+const PixelInfo &gfx::get_pixel_info(PixelFormat format)
 {
-    for (const auto &t : traits)
+    for (auto &t : traits)
         if (t.format == format)
             return t;
 
     return traits[0];
 }
 
-Palette::Palette(const Palette &other) noexcept:
-    mColors(other.mColors),
-    mTraits(other.mTraits),
-    mOffset(other.mOffset)
+Palette::Palette(const Palette &other):
+    Palette()
 {
+    *this = other;
 }
 
-Palette& Palette::operator=(const Palette &other) noexcept
+Palette::Palette(PixelFormat format, size_t count, std::unique_ptr<byte[]> data):
+    mTraits(&get_pixel_info(format)),
+    mCount(count)
 {
-    mTraits = other.mTraits;
-    mColors = other.mColors;
-    mOffset = other.mOffset;
+    if (!mTraits->color)
+        throw PixelFormatError("Can't create a palette of non-colors");
+
+    if (data) {
+        mData = std::move(data);
+    } else {
+        auto size = mTraits->bytes * mCount;
+        mData = std::make_unique<byte[]>(size);
+        std::fill_n(mData.get(), size, 0);
+    }
+}
+
+Palette& Palette::operator=(const Palette &other)
+{
+    if (other.empty()) {
+        reset();
+    } else {
+        mTraits = other.mTraits;
+        mCount  = other.mCount;
+
+        auto size = mTraits->bytes * mCount;
+        mData = std::make_unique<byte[]>(size);
+        std::copy_n(other.mData.get(), size, mData.get());
+    }
 
     return *this;
 }

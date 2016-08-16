@@ -46,11 +46,8 @@ set(PkgConfig_URL "http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pk
 
 set(GLib_URL "http://ftp.gnome.org/pub/GNOME/sources/glib/2.24/glib-2.24.2.tar.gz")
 set(GLib_MD5 "071b8e246197d334e20ab67956aef936")
-
-if(WIN32)
-  set(GLib_BIN_URL "http://ftp.gnome.org/pub/GNOME/binaries/win32/glib/2.24/glib_2.24.2-2_win32.zip")
-  set(GLib_DEV_URL "http://ftp.gnome.org/pub/GNOME/binaries/win32/glib/2.24/glib-dev_2.24.2-2_win32.zip")
-endif()
+set(GLib_BIN_URL "http://ftp.gnome.org/pub/GNOME/binaries/win32/glib/2.24/glib_2.24.2-2_win32.zip")
+set(GLib_DEV_URL "http://ftp.gnome.org/pub/GNOME/binaries/win31/glib/2.24/glib-dev_2.24.2-2_win32.zip")
 
 if(WIN32)
   set(proxy_libintl_URL "http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/proxy-libintl-dev_20090911_win32.zip")
@@ -82,6 +79,8 @@ ExternalProject_Add(SDL2
 
   # Video is for suckers
   CMAKE_ARGS -DVIDEO_WAYLAND=OFF -DVIDEO_MIR=OFF -DVIDEO_RPI=OFF -DVIDEO_OPENGLES=OFF -DDIRECTX=OFF
+
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   )
 
 ##------------------------------------------------------------------------------
@@ -219,6 +218,8 @@ ExternalProject_Add(FluidSynth
   
   # Fix Windows' stdio.h complaining about macro'd snprintf
   #PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/patched-config_win32.h <SOURCE_DIR>/src/config_win32.cmake
+
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_PREFIX_PATH=<INSTALL_DIR> -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON
   )
 
 ##------------------------------------------------------------------------------
@@ -230,6 +231,8 @@ ExternalProject_Add(zlib
   INSTALL_DIR ${INSTALL_DIR}
 
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   )
 
 ##------------------------------------------------------------------------------
@@ -243,4 +246,6 @@ ExternalProject_Add(libpng
 
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>  
   CMAKE_ARGS -DPNG_TESTS=OFF -DPNG_STATIC=OFF
+
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   )

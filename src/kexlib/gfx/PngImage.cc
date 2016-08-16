@@ -20,49 +20,59 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <cstring>
 #include <kex/gfx/Image>
 #include <png.h>
-#include <stdlib.h>
 
 using namespace kex::gfx;
 
 namespace {
-  struct PngImage : image_type {
-      const char *mimetype() const override;
-      bool detect(std::istream &) const override;
+  constexpr StringView magic = "\x89PNG\r\n\x1a\n";
+
+  struct PngImage : ImageFormatIO {
+      StringView mimetype() const override;
+      bool is_format(std::istream &) const override;
       Image load(std::istream &) const override;
       void save(std::ostream &, const Image &) const override;
   };
 
-  const char *PngImage::mimetype() const
+  StringView PngImage::mimetype() const
   { return "png"; }
 
-  bool PngImage::detect(std::istream &s) const
+  bool PngImage::is_format(std::istream &stream) const
   {
-      static auto magic = "\x89PNG\r\n\x1a\n";
-      char buf[sizeof(magic) + 1] = {};
+      char buf[magic.length()] = {};
 
-      s.read(buf, sizeof magic);
-      return std::strncmp(magic, buf, sizeof magic) == 0;
+      stream.read(buf, magic.length());
+      return magic == buf;
   }
 
   Image PngImage::load(std::istream &s) const
   {
-      png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-      if (png_ptr == nullptr)
-          throw image_load_error("Failed to create PNG read struct");
+      png_structp png_ptr = nullptr;
+      png_infop infop = nullptr;
+      auto _guard = make_guard([&png_ptr, &infop]()
+                               {
+                                   png_structpp png_ptrp = png_ptr ? &png_ptr : nullptr;
+                                   png_infopp infopp = infop ? &infop : nullptr;
+                                   png_destroy_read_struct(png_ptrp, infopp, nullptr);
+                               });
 
-      png_infop infop = png_create_info_struct(png_ptr);
+      png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+      if (png_ptr == nullptr)
+          throw ImageLoadError("Failed to create PNG read struct");
+
+      infop = png_create_info_struct(png_ptr);
       if (infop == nullptr)
       {
           png_destroy_read_struct(&png_ptr, nullptr, nullptr);
-          throw image_load_error("Failed to create PNG info struct");
+          throw ImageLoadError("Failed to create PNG info struct");
       }
 
       if (setjmp(png_jmpbuf(png_ptr)))
       {
           png_destroy_read_struct(&png_ptr, &infop, nullptr);
-          throw image_load_error("An error occurred in libpng");
+          throw ImageLoadError("An error occurred in libpng");
       }
 
       png_set_read_fn(png_ptr, &s,
@@ -78,8 +88,8 @@ namespace {
           if (std::strncmp((char*)chunk->name, "grAb", 4) == 0 && chunk->size >= 8) {
               auto offsets = reinterpret_cast<int*>(png_get_user_chunk_ptr(png_ptr));
               auto data = reinterpret_cast<int*>(chunk->data);
-              offsets[0] = kex::cpu::swap_be(data[0]);
-              offsets[1] = kex::cpu::swap_be(data[1]);
+              offsets[0] = swap_big_endian(data[0]);
+              offsets[1] = swap_big_endian(data[1]);
               return 1;
           }
 
@@ -91,6 +101,10 @@ namespace {
       int bitDepth, colorType, interlaceMethod;
       png_read_info(png_ptr, infop);
       png_get_IHDR(png_ptr, infop, &width, &height, &bitDepth, &colorType, &interlaceMethod, nullptr, nullptr);
+
+      png_uint_32 sizeLimit = std::numeric_limits<uint16>::max();
+      if (width < 1 || width > sizeLimit || height < 1 || height > sizeLimit)
+          throw ImageLoadError(fmt::format("Invalid image dimensions: {}x{}", width, height));
 
       png_set_strip_16(png_ptr);
       png_set_packing(png_ptr);
@@ -105,76 +119,79 @@ namespace {
       png_read_update_info(png_ptr, infop);
       png_get_IHDR(png_ptr, infop, &width, &height, &bitDepth, &colorType, &interlaceMethod, nullptr, nullptr);
 
-      pixel_format format;
+      PixelFormat format;
       switch (colorType) {
           case PNG_COLOR_TYPE_RGB:
-              format = pixel_format::rgb;
+              format = PixelFormat::rgb;
               break;
 
           case PNG_COLOR_TYPE_RGB_ALPHA:
-              format = pixel_format::rgba;
+              format = PixelFormat::rgba;
               break;
 
           case PNG_COLOR_TYPE_PALETTE:
               switch (bitDepth) {
               case 8:
-                  format = pixel_format::index8;
+                  format = PixelFormat::index8;
                   break;
 
               default:
-                  throw image_load_error(fmt::format("Invalid PNG bit depth: {}", bitDepth));
+                  throw ImageLoadError(fmt::format("Invalid PNG bit depth: {}", bitDepth));
               }
               break;
 
           default:
-              throw image_load_error(fmt::format("Unknown PNG image color type: {}", colorType));
+              throw ImageLoadError(fmt::format("Unknown PNG image color type: {}", colorType));
       }
 
-      Image retval(width, height, format);
-      png_bytep scanlines[height];
-      for (size_t i = 0; i < height; i++)
-          scanlines[i] = retval.scanline_ptr(i);
+      Image retval(format, static_cast<uint16>(width), static_cast<uint16>(height), noinit_tag());
 
       if (colorType == PNG_COLOR_TYPE_PALETTE)
       {
           if (png_get_valid(png_ptr, infop, PNG_INFO_tRNS))
           {
-              int palNum, transNum;
               png_bytep alpha;
               png_colorp colors;
+              int palNum, transNum;
               png_get_tRNS(png_ptr, infop, &alpha, &transNum, nullptr);
               png_get_PLTE(png_ptr, infop, &colors, &palNum);
+              Palette palette(PixelFormat::rgba, palNum, nullptr);
 
-              auto paldata = std::make_unique<Rgba[]>(palNum);
-
-              for (int i = 0; i < palNum; i++)
+              int i = 0;
+              for (auto &c : palette.map<Rgba>())
               {
-                  auto& c = paldata[i];
-                  c.red = colors[i].red;
+                  c.red   = colors[i].red;
                   c.green = colors[i].green;
-                  c.blue = colors[i].blue;
+                  c.blue  = colors[i].blue;
                   c.alpha = i < transNum ? alpha[i] : 0xff;
+
+                  i++;
               }
 
-              const auto &traits = get_pixel_traits(pixel_format::rgba);
-              std::unique_ptr<uint8_t[]> p(reinterpret_cast<uint8_t*>(paldata.release()));
-              retval.palette() = Palette(std::move(p), traits, traits.pal_mask, palNum);
+              retval.palette(std::move(palette));
           } else {
               png_colorp pal = nullptr;
-              int numPal = 0;
-              png_get_PLTE(png_ptr, infop, &pal, &numPal);
+              int palNum = 0;
+              png_get_PLTE(png_ptr, infop, &pal, &palNum);
+              Palette palette(PixelFormat::rgb, palNum, nullptr);
 
-              for (auto &&c : retval.palette().map<Rgb>())
+              for (auto &c : palette.map<Rgb>())
               {
                   auto p = *pal++;
                   c.red = p.red;
                   c.green = p.green;
                   c.blue = p.blue;
               }
+
+              retval.palette(std::move(palette));
           }
       }
 
       retval.offsets(offsets);
+
+      byte *scanlines[height];
+      for (size_t i = 0; i < height; i++)
+          scanlines[i] = retval.scanline_ptr(i);
 
       png_read_image(png_ptr, scanlines);
       png_read_end(png_ptr, infop);
@@ -186,19 +203,19 @@ namespace {
   {
       png_structp writep = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
       if (writep == nullptr)
-          throw image_save_error("Failed getting png_structp");
+          throw ImageSaveError("Failed getting png_structp");
 
       png_infop infop = png_create_info_struct(writep);
       if (infop == nullptr)
       {
           png_destroy_write_struct(&writep, nullptr);
-          throw image_save_error("Failed getting png_infop");
+          throw ImageSaveError("Failed getting png_infop");
       }
 
       if (setjmp(png_jmpbuf(writep)))
       {
           png_destroy_write_struct(&writep, &infop);
-          throw image_save_error("Error occurred in libpng");
+          throw ImageSaveError("Error occurred in libpng");
       }
 
       png_set_write_fn(writep, &s,
@@ -214,20 +231,16 @@ namespace {
 
       int format;
       switch (image.format()) {
-          case pixel_format::rgb:
-               [[fallthrough]];
-          case pixel_format::bgr:
+          case PixelFormat::rgb:
               format = PNG_COLOR_TYPE_RGB;
               break;
 
-          case pixel_format::rgba:
-               [[fallthrough]];
-          case pixel_format::bgra:
+          case PixelFormat::rgba:
               format = PNG_COLOR_TYPE_RGB_ALPHA;
               break;
 
           default:
-              throw image_save_error("Saving image with incompatible pixel format");
+              throw ImageSaveError("Saving image with incompatible pixel format");
       }
 
       png_set_IHDR(writep, infop, im->width(), im->height(), 8,
@@ -244,7 +257,7 @@ namespace {
   }
 }
 
-std::unique_ptr<image_type> __initialize_png()
+std::unique_ptr<ImageFormatIO> __initialize_png()
 {
     return std::make_unique<PngImage>();
 }

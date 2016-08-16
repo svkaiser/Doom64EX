@@ -268,7 +268,7 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
         wp = GL_PadTextureDims(*origwidth);
         hp = GL_PadTextureDims(*origheight);
 
-        image = Image_New_FromData(data, *origwidth, *origheight, format == GL_RGBA8 ? PF_RGBA : PF_RGB);
+        image = Image_New_FromData(format == GL_RGBA8 ? PF_RGBA : PF_RGB, *origwidth, *origheight, data);
         Image_Resize(image, wp, hp);
 
         *origwidth = wp;
