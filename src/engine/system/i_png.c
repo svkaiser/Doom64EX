@@ -100,8 +100,8 @@ Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha
 
     // look for offset chunk if specified
     if(offset) {
-        offset[0] = Image_GetOffsets(image)[0];
-        offset[1] = Image_GetOffsets(image)[1];
+        offset[0] = Image_GetOffsets(image).x;
+        offset[1] = Image_GetOffsets(image).y;
     }
 
     if (palindex && Image_IsIndexed(image))

@@ -47,6 +47,11 @@ typedef enum pixel_extrap {
     EXTRAP_NEAREST
 } pixel_extrap;
 
+typedef struct SpriteOffsets {
+    int x;
+    int y;
+} SpriteOffsets;
+
 Image* Image_New(uint16_t width, uint16_t height, pixel_format format);
 Image* Image_New_FromData(pixel_format format, uint16_t width, uint16_t height, char *data);
 Image* Image_New_FromMemory(char *data, long size);
@@ -57,7 +62,7 @@ uint16_t Image_GetWidth(Image*);
 uint16_t Image_GetHeight(Image*);
 void *Image_GetData(Image*);
 const Palette *Image_GetPalette(Image*);
-const int* Image_GetOffsets(Image*);
+SpriteOffsets Image_GetOffsets(Image*);
 int Image_IsIndexed(Image*);
 void Image_Convert(Image*, pixel_format);
 void Image_Scale(Image*, uint16_t new_width, uint16_t new_height);

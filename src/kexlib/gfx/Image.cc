@@ -69,12 +69,12 @@ namespace {
   template <class Src, class Dst>
   void convert_indexed_to_normal(const Image &src, Image &dst)
   {
-      assert(!src.palette().empty());
+      assert(src.palette() && !src.palette()->empty());
 
       auto srcMap = src.map<Index8>();
       auto srcIt = srcMap.cbegin();
       auto srcEnd = srcMap.cend();
-      auto srcPal = src.palette().map<Src>().cbegin();
+      auto srcPal = src.palette()->map<Src>().cbegin();
       auto dstIt = dst.map<Dst>().begin();
 
       for (; srcIt != srcEnd; ++srcIt, ++dstIt)
@@ -129,7 +129,7 @@ namespace {
       template <class Src>
       void index(const Image &src, Image &dst)
       {
-          process_pixel(convert_unknown_indexed_to_unknown(), src.palette().format(), src, dst);
+          process_pixel(convert_unknown_indexed_to_unknown(), src.palette()->format(), src, dst);
       }
   };
 
@@ -138,96 +138,55 @@ namespace {
       process_pixel(convert_unknown_to_unknown(), src.format(), src, dst);
   }
 
-  template <class Src, class Dst>
-  void resize_normal_to_normal(const Image &src, Image &dst)
-  {
-      int h = std::min(src.height(), dst.height());
-      int w = std::min(src.width(), dst.width());
-      auto srcLinePad = (src.width() < dst.width()) ? 0 : src.width() - w;
-      auto dstLinePad = (src.width() < dst.width()) ? dst.width() - w : 0;
-
-      auto srcIt = src.map<Src>().cbegin();
-      auto dstIt = dst.map<Dst>().begin();
-
-      for (int y = 0; y < h; y++)
-      {
-          for (int x = 0; x < w; x++)
-          {
-              *dstIt = convert_pixel(*srcIt, pixel_traits<Dst>::tag());
-              ++srcIt, ++dstIt;
-          }
-
-          srcIt += srcLinePad;
-          dstIt += dstLinePad;
-      }
-  };
-
-  template <class Src>
-  struct resize_normal_to_unknown : default_pixel_processor {
-      template <class Dst>
+  struct resize_processor : default_pixel_processor {
+      template <class T>
       void color(const Image &src, Image &dst)
       {
-          resize_normal_to_normal<Src, Dst>(src, dst);
+          int x, y;
+          int h = std::min(src.height(), dst.height());
+          int w = std::min(src.width(), dst.width());
+
+          auto srcIt = src.map<T>().cbegin();
+          auto dstIt = dst.map<T>().begin();
+
+          for (y = 0; y < h; y++)
+          {
+              for (x = 0; x < w; x++)
+                  *dstIt++ = convert_pixel(*srcIt++, pixel_traits<T>::tag());
+
+              for (; x < dst.width(); x++)
+                  *dstIt++ = { };
+          }
+
+          for (; y < dst.height(); y++)
+              for (x = 0; x < dst.width(); x++)
+                  *dstIt++ = { };
       }
   };
 
-  struct resize_unknown_to_unknown : default_pixel_processor {
-      template <class Src>
+  struct scale_processor : default_pixel_processor {
+      template <class T>
       void color(const Image &src, Image &dst)
       {
-          process_pixel(resize_normal_to_unknown<Src>(), dst.format(), src, dst);
-      }
-  };
+          auto srcWidth = src.width();
+          auto width = dst.width();
+          auto height = dst.height();
+          auto dx = static_cast<double>(src.width()) / width;
+          auto dy = static_cast<double>(src.height()) / height;
 
-  void tresize(const Image &src, Image &dst)
-  {
-      process_pixel(resize_unknown_to_unknown(), src.format(), src, dst);
-  }
+          auto srcIt = src.map<T>().cbegin();
+          auto dstIt = dst.map<T>().begin();
 
-  template <class Src, class Dst>
-  void scale_normal_to_normal(const Image &src, Image &dst)
-  {
-      auto srcWidth = src.width();
-      auto width = dst.width();
-      auto height = dst.height();
-      auto dx = static_cast<double>(src.width()) / width;
-      auto dy = static_cast<double>(src.height()) / height;
-
-      auto srcIt = src.map<Src>().cbegin();
-      auto dstIt = dst.map<Dst>().begin();
-
-      for (int y = 0; y < height; y++)
-      {
-          for (int x = 0; x < width; x++)
+          for (int y = 0; y < height; y++)
           {
-              size_t pos = static_cast<size_t>(dy * y) * srcWidth + static_cast<size_t>(dx * x);
-              copy_pixel(*(srcIt + pos), *dstIt);
-              ++dstIt;
+              for (int x = 0; x < width; x++)
+              {
+                  size_t pos = static_cast<size_t>(dy * y) * srcWidth + static_cast<size_t>(dx * x);
+                  *dstIt++ = convert_pixel(*(srcIt++ + pos), pixel_traits<T>::tag());
+              }
           }
       }
-  }
-
-  template <class Src>
-  struct scale_normal_to_unknown : default_pixel_processor {
-      template <class Dst>
-      void normal(const Image &src, Image &dst)
-      {
-          scale_normal_to_normal<Src, Dst>(src, dst);
-      }
   };
-
-  struct scale_unknown_to_unknown : default_pixel_processor {
-      template <class Src>
-      void normal(const Image &src, Image &dst)
-      {
-          process_pixel(scale_normal_to_unknown<Src>(), dst.format(), src, dst);
-      }
-  };
-
-  void tscale(const Image &src, Image &dst)
-  {
-      process_pixel(scale_unknown_to_unknown(), src.format(), src, dst);
-  }
 }
 
 Image::Image(PixelFormat format, uint16 width, uint16 height, byte *data):
@@ -249,7 +208,7 @@ Image::Image(PixelFormat format, uint16 width, uint16 height, byte *data):
     }
 
     if (!mTraits->color)
-        mPalette = Palette(PixelFormat::rgb, mTraits->pal_size, nullptr);
+        set_palette(Palette { PixelFormat::rgb, mTraits->pal_size, nullptr });
 }
 
 Image::Image(PixelFormat format, uint16 width, uint16 height, std::unique_ptr<byte[]> data):
@@ -270,7 +229,7 @@ Image::Image(PixelFormat format, uint16 width, uint16 height, std::unique_ptr<by
     }
 
     if (!mTraits->color)
-        mPalette = Palette(PixelFormat::rgb, mTraits->pal_size, nullptr);
+        set_palette(Palette { PixelFormat::rgb, mTraits->pal_size, nullptr });
 }
 
 Image::Image(PixelFormat format, uint16 width, uint16 height, noinit_tag):
@@ -311,7 +270,7 @@ Image &Image::convert(PixelFormat format)
 
     Image copy(format, mWidth, mHeight, noinit_tag());
     copy.mPalette = mPalette;
-    copy.offsets(offsets());
+    copy.mOffsets = mOffsets;
     tconvert(*this, copy);
 
     return (*this = std::move(copy));
@@ -323,10 +282,10 @@ Image& Image::resize(uint16 width, uint16 height)
         return *this;
 
     Image copy(mTraits->format, width, height, noinit_tag());
-    copy.palette(palette());
-    copy.offsets(offsets());
+    copy.mPalette = mPalette;
+    copy.mOffsets = mOffsets;
 
-    tresize(*this, copy);
+    process_pixel(resize_processor(), format(), *this, copy);
 
     return (*this = std::move(copy));
 }
@@ -338,9 +297,9 @@ Image& Image::scale(uint16 width, uint16 height)
 
     Image copy(mTraits->format, width, height, noinit_tag());
     copy.mPalette = mPalette;
-    copy.offsets(offsets());
+    copy.set_offsets(offsets());
 
-    tscale(*this, copy);
+    process_pixel(scale_processor(), format(), *this, copy);
 
     return (*this = std::move(copy));
 }
@@ -361,12 +320,11 @@ Image& Image::operator=(const Image &other)
     mWidth = other.mWidth;
     mHeight = other.mHeight;
     mPalette = other.mPalette;
+    mOffsets = other.mOffsets;
 
     auto length = calc_length(mTraits, mWidth, mHeight);
     mData = std::make_unique<byte[]>(length);
     std::copy_n(other.mData.get(), length, mData.get());
-
-    offsets(other.offsets());
 
     return *this;
 }

@@ -84,9 +84,9 @@ byte* Image_GetData(Image *image)
 { return image->data_ptr(); }
 
 const Palette* Image_GetPalette(Image *image)
-{ return &image->palette(); }
+{ return image->palette().get(); }
 
-const int* Image_GetOffsets(Image *image)
+SpriteOffsets Image_GetOffsets(Image *image)
 { return image->offsets(); }
 
 bool Image_IsIndexed(Image *image)

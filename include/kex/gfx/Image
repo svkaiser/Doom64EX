@@ -39,13 +39,6 @@ namespace kex {
     struct ImageSaveError: ImageError
     { using ImageError::ImageError; };
 
-    struct ImageInfo {
-        uint16 width = 0;
-        uint16 height = 0;
-        PixelFormat format = PixelFormat::none;
-        StringView mimetype = "";
-    };
-
     struct ImageFormatIO {
         virtual bool is_format(std::istream&) const = 0;
         virtual Image load(std::istream&) const = 0;
@@ -53,13 +46,24 @@ namespace kex {
         virtual StringView mimetype() const = 0;
     };
 
+    struct SpriteOffsets {
+        int x = 0;
+        int y = 0;
+    };
+
+    /**
+     * \brief A container type for images
+     */
     class Image {
         const PixelInfo* mTraits = nullptr;
         uint16 mWidth = 0;
         uint16 mHeight = 0;
         std::unique_ptr<byte[]> mData = nullptr;
-        Palette mPalette;
-        int mOffsets[2] = { };
+        std::shared_ptr<const Palette> mPalette = nullptr;
+        SpriteOffsets mOffsets;
+
+        constexpr size_t _area() const
+        { return mWidth * mHeight; }
 
     public:
         Image() = default;
@@ -96,44 +100,56 @@ namespace kex {
         void reset()
         { *this = Image(); }
 
-        byte *data_ptr()
+        byte* data_ptr()
         { return mData.get(); }
 
-        const byte *data_ptr() const
+        const byte* data_ptr() const
         { return mData.get(); }
 
-        uint8* scanline_ptr(uint16_t index);
+        byte* scanline_ptr(uint16 index);
 
-        const uint8* scanline_ptr(uint16_t index) const;
+        const byte* scanline_ptr(uint16 index) const;
 
-        uint8* pixel_ptr(uint16_t x, uint16_t y);
+        template <class SrcT, class DstT = SrcT>
+        PixelMap<SrcT, DstT> scanline_map(uint16 idx)
+        {
+            test_pixel_format<SrcT>(mTraits);
 
-        const uint8* pixel_ptr(uint16_t x, uint16_t y) const;
+            auto ptr = reinterpret_cast<SrcT*>(scanline_ptr(idx));
+            return { ptr, ptr + mWidth };
+        };
+
+        template <class SrcT, class DstT = SrcT>
+        PixelMap<const SrcT, const DstT> scanline_map(uint16 idx) const
+        {
+            test_pixel_format<SrcT>(mTraits);
+
+            auto ptr = reinterpret_cast<const SrcT*>(scanline_ptr(idx));
+            return { ptr, ptr + mWidth };
+        };
 
         Image& convert(PixelFormat);
 
-        Image& resize(uint16_t width, uint16_t height);
+        Image& resize(uint16 width, uint16 height);
 
-        Image& scale(uint16_t width, uint16_t height);
+        Image& scale(uint16 width, uint16 height);
 
-        template<class T, class U = T>
-        auto map()
+        template<class SrcT, class DstT = SrcT>
+        PixelMap<SrcT, DstT> map()
         {
-            test_pixel_format<T>(mTraits);
+            test_pixel_format<SrcT>(mTraits);
 
-            auto size = pixel_traits<std::decay_t<T>>::bytes * mWidth * mHeight;
-            return PixelMap<T, U>(reinterpret_cast<T*>(data_ptr()),
-                                  reinterpret_cast<T*>(data_ptr() + size));
+            auto ptr = reinterpret_cast<SrcT *>(data_ptr());
+            return { ptr, ptr + _area() };
         }
 
-        template<class T, class U = T>
-        auto map() const
+        template<class SrcT, class DstT = SrcT>
+        PixelMap<const SrcT, const DstT> map() const
         {
-            test_pixel_format<T>(mTraits);
+            test_pixel_format<SrcT>(mTraits);
 
-            auto size = pixel_traits<std::decay_t<T>>::bytes * mWidth * mHeight;
-            return PixelMap<const T, const U>(reinterpret_cast<const T*>(data_ptr()),
-                                              reinterpret_cast<const T*>(data_ptr() + size));
+            auto ptr = reinterpret_cast<const SrcT *>(data_ptr());
+            return { ptr, ptr + _area() };
         }
 
         const PixelInfo &traits() const
@@ -148,22 +164,21 @@ namespace kex {
         uint16 height() const
         { return mHeight; }
 
-        const Palette &palette() const
+        std::shared_ptr<const Palette> palette() const
         { return mPalette; }
 
-        void palette(const Palette& palette)
+        void set_palette(Palette palette)
+        { mPalette = std::make_shared<Palette>(std::move(palette)); }
+
+        void set_palette(const std::shared_ptr<const Palette> &palette)
         { mPalette = palette; }
 
-        void palette(Palette&& palette)
-        { mPalette = std::move(palette); }
-
-        const int *offsets() const
+        const SpriteOffsets &offsets() const
         { return mOffsets; }
 
-        void offsets(const int *vals)
+        void set_offsets(const SpriteOffsets &offsets)
         {
-            mOffsets[0] = vals[0];
-            mOffsets[1] = vals[1];
+            mOffsets = offsets;
         }
 
         bool is_indexed() const

@@ -24,22 +24,25 @@
 #define __KEX_PIXEL__13206666
 
 #include "kex/kexdef"
+#include "kex/util/PtrIterator"
 
-/*!
+/*
  * This header defines classes for low-level pixel operations,
  * as well as the Palette class.
  *
  * We distinguish pixel data into two groups: Color and Index.
  * Color pixels are pixels whose data is in-band. (ex: Rgb)
- * Index pixels are pixels whose color values can be found somewhere else. (ex: Index8)
+ * Index pixels are pixels whose color values can be found somewhere else, like a Palette. (ex: Index8)
  */
 
 namespace kex {
   namespace gfx {
     struct Palette;
 
-    class PixelFormatError : public std::logic_error {
-    public:
+    /**
+     * \brief Exception class for pixel format errors.
+     */
+    struct PixelFormatError : public std::logic_error {
         using std::logic_error::logic_error;
 
         PixelFormatError();
@@ -76,6 +79,22 @@ namespace kex {
         using type = Rgba;
     };
 
+    /**
+     * \brief Traits class for pixels
+     *
+     * When defining a new pixel, specialise this template with the following static constexpr variables:
+     * - `PixelFormat format`: The corresponding PixelFormat (eg. `pixel_traits<Rgb>::format == PixelFormat::rgb`)
+     * - `bool color`: True if `T` describes a colour (eg. Rgb), false otherwise (eg. Index8)
+     * - `size_t bytes`: Size of a single pixel in bytes
+     * - `bool alpha`: Always false if `color == false`. True if pixel has alpha-channel, false otherwise
+     * - `size_t pal_size`: Always 0 if `color == true`. Maximum number of colours that can be referenced
+     *
+     * ... as well as these types:
+     * - `tag_type`: The corresponding tag struct type (eg. `Rgb` has `struct rgb_tag`)
+     *
+     * ... and these static constexpr functions:
+     * - `<tag_type> tag()`: Convenience function that returns an instance of `tag_type`
+     */
     template <class T>
     struct pixel_traits;
 
@@ -87,7 +106,6 @@ namespace kex {
         static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 256;
-        static constexpr int pal_mask = 0xff;
 
         using tag_type = index8_tag;
         static constexpr auto tag() { return index8_tag(); }
@@ -101,7 +119,6 @@ namespace kex {
         static constexpr bool alpha = false;
 
         static constexpr size_t pal_size = 0;
-        static constexpr int pal_mask = 0;
 
         using tag_type = rgb_tag;
         static constexpr auto tag() { return rgb_tag();}
@@ -115,30 +132,48 @@ namespace kex {
         static constexpr bool alpha = true;
 
         static constexpr size_t pal_size = 0;
-        static constexpr int pal_mask = 0;
 
         using tag_type = rgba_tag;
         static constexpr auto tag() { return rgba_tag(); }
     };
 
+    /**
+     * \brief Determine if a type is a pixel
+     * \tparam T Type to identify
+     */
     template <class T>
     constexpr bool is_pixel = kex::is_any_same<T, Index8, Rgb, Rgba>;
 
     template <class T, class = void>
     struct __h_is_color_pixel : std::false_type {};
 
+    /*
+     * We use `kex::void_t` to determine whether `pixel_traits<T>` has a field named `color`
+     * before we attempt to grab its value.
+     */
     template <class T>
     struct __h_is_color_pixel<T, void_t<decltype(pixel_traits<T>::color)>> : bool_type<pixel_traits<T>::color> {};
 
+    /**
+     * \brief Determine if a type is a colour pixel
+     * \tparam T Type to identify
+     */
     template <class T>
     constexpr bool is_color_pixel = __h_is_color_pixel<T>::value;
 
+    /**
+     * \brief Determine if a type is an index pixel
+     * \tparam T Type to identify
+     */
     template <class T>
     constexpr bool is_index_pixel = is_pixel<T> && !is_color_pixel<T>;
 
-    template <class T, class = std::enable_if_t<is_pixel<T>>>
-    using get_traits_type = pixel_traits<T>;
-
+    /**
+     * \brief A version of pixel_traits that's available at runtime
+     *
+     * When adding a new static constexpr field to pixel_traits, add it here
+     * as well.
+     */
     struct PixelInfo {
         PixelFormat format = PixelFormat::none;
         bool color = false;
@@ -149,127 +184,217 @@ namespace kex {
         int pal_mask = 0;
     };
 
-    const PixelInfo& get_pixel_info(PixelFormat);
+    /**
+     * \brief Get an instance of PixelInfo based on PixelFormat
+     *
+     * \param format Find PixelInfo that has this format
+     *
+     * \return An instance of PixelInfo
+     *
+     * \exception PixelFormatError When PixelInfo isn't found
+     */
+    const PixelInfo& get_pixel_info(PixelFormat format);
 
-    template <class T>
-    inline void test_pixel_format(PixelFormat format)
-    {
-        if (pixel_traits<T>::format != format)
-            throw PixelFormatError();
-    }
-
+    /**
+     * \brief Check if T and traits have the same format
+     *
+     * \tparam T pixel type to compare
+     *
+     * \param traits PixelInfo to compare
+     *
+     * \exception PixelFormatError If T and traits don't have the same format
+     */
     template <class T>
     inline void test_pixel_format(const PixelInfo *traits)
     {
-        if (pixel_traits<T>::format != traits->format)
+        if (pixel_traits<std::decay_t<T>>::format != traits->format)
             throw PixelFormatError();
     }
 
-    template <class T, class U>
-    struct PixelIterator;
+    /**
+     * \brief A RandomAccessIterator pixels that supports conversions
+     *
+     * \tparam SrcT Type of pixels in the underlying contiguous array we're iterating over
+     * \tparam DstT Type of pixels to convert to
+     */
+    template <class SrcT, class DstT>
+    struct PixelIterator {
+        static_assert(std::is_const<DstT>::value, "Non-const destination pixel type is currently unsupported");
+        static_assert(pixel_traits<SrcT>::color, "Iterating over indexed pixels is currently unsupported");
+        static_assert(pixel_traits<DstT>::color, "Converting to indexed pixels is currently unsupported");
 
-    template <class T>
-    struct PixelIterator<T, T> {
-        PixelIterator(T *ptr):
-            mPtr(ptr) {}
+        SrcT *mPtr;
+        DstT mVal;
 
-        T& operator*()
-        { return *mPtr; }
+        constexpr void _convert()
+        { mVal = convert_pixel(*mPtr, pixel_traits<DstT>::tag()); }
 
-        const T& operator*() const
-        { return *mPtr; }
+    public:
+        using value_type = DstT;
+        using pointer = DstT*;
+        using const_pointer = const DstT*;
+        using reference = DstT&;
+        using const_reference = const DstT&;
+        using iterator = SrcT*;
+        using const_iterator = const SrcT*;
+        using difference_type = std::ptrdiff_t;
 
-        T* operator->()
-        { return mPtr; }
-
-        const T* operator->() const
-        { return mPtr; }
-
-        bool operator==(const PixelIterator &other) const
-        { return mPtr == other.mPtr; }
-
-        bool operator!=(const PixelIterator &other) const
-        { return mPtr != other.mPtr; }
-
-        PixelIterator& operator++()
+        constexpr PixelIterator(iterator ptr):
+            mPtr(ptr)
         {
-            ++mPtr;
+            _convert();
+        }
+
+        constexpr PixelIterator(const PixelIterator &other):
+            mPtr(other.mPtr),
+            mVal(other.mVal) {}
+
+        constexpr PixelIterator& operator=(const PixelIterator &other)
+        {
+            mPtr = other.mPtr;
+            mVal = other.mVal;
             return *this;
         }
 
-        PixelIterator operator++(int)
+        constexpr iterator get()
+        { return mPtr; }
+
+        constexpr const_iterator get() const
+        { return mPtr; }
+
+        constexpr reference operator*()
+        { return mVal; }
+
+        constexpr const_reference operator*() const
+        { return mVal; }
+
+        constexpr pointer operator->()
+        { return &mVal; }
+
+        constexpr const_pointer operator->() const
+        { return &mVal; }
+
+        constexpr PixelIterator& operator++()
         {
-            PixelIterator copy(*this);
             ++mPtr;
+            _convert();
+            return *this;
+        }
+
+        constexpr PixelIterator operator++(int)
+        {
+            auto copy = *this;
+            ++(*this);
             return copy;
         }
 
-        PixelIterator operator+(int idx) const
-        { return PixelIterator(mPtr + idx); }
+        constexpr PixelIterator& operator--()
+        {
+            --mPtr;
+            _convert();
+            return *this;
+        }
 
-        PixelIterator& operator+=(int idx)
+        constexpr PixelIterator operator--(int)
+        {
+            auto copy = *this;
+            --(*this);
+            return copy;
+        }
+
+        constexpr PixelIterator operator+(difference_type idx) const
+        {
+            auto copy = *this;
+            copy.mPtr += idx;
+            copy._convert();
+            return copy;
+        }
+
+        constexpr PixelIterator operator-(difference_type idx) const
+        {
+            auto copy = *this;
+            copy.mPtr -= idx;
+            copy._convert();
+            return copy;
+        }
+
+        constexpr PixelIterator& operator+=(difference_type idx)
         {
             mPtr += idx;
+            _convert();
             return *this;
         }
 
-        PixelIterator& operator--()
-        {
-            --mPtr;
-            return *this;
-        }
-
-        PixelIterator operator--(int)
-        {
-            PixelIterator copy(*this);
-            --mPtr;
-            return copy;
-        }
-
-        PixelIterator operator-(int idx) const
-        { return PixelIterator(mPtr - idx); }
-
-        PixelIterator& operator-=(int idx)
+        constexpr PixelIterator& operator-=(difference_type idx)
         {
             mPtr -= idx;
+            _convert();
             return *this;
         }
 
-    private:
-        T *mPtr;
+        void swap(PixelIterator &other)
+        {
+            std::swap(mPtr, other.mPtr);
+            std::swap(mVal, other.mVal);
+        }
     };
 
-    template <class T, class U>
-    class PixelMap {
-    public:
-        using iterator = PixelIterator<T, U>;
-        using const_iterator = PixelIterator<const T, const U>;
+#define __KEX_OPERATOR(Op) \
+    template <class SrcT, class DstT> \
+    constexpr bool operator Op(const PixelIterator<SrcT, DstT> &lhs, const PixelIterator<SrcT, DstT> &rhs) \
+    { return lhs.get() Op rhs.get(); }
 
-        PixelMap(T *begin, T *end):
+    __KEX_OPERATOR(==)
+    __KEX_OPERATOR(!=)
+    __KEX_OPERATOR(<)
+    __KEX_OPERATOR(<=)
+    __KEX_OPERATOR(>)
+    __KEX_OPERATOR(>=)
+
+#undef __KEX_OPERATOR
+
+    /**
+     * \brief Identity pixel iterator specialisation
+     *
+     * If SrcT is the same type as DstT, we can just interpret the memory as SrcT
+     */
+    template <class T>
+    struct PixelIterator<T, T> : PtrIterator<T>
+    { using PtrIterator<T>::PtrIterator; };
+
+    /**
+     * \brief A non-owning pixel container that maps between two pixel types
+     */
+    template <class SrcT, class DstT>
+    class PixelMap {
+        SrcT *mBegin;
+        SrcT *mEnd;
+
+    public:
+        using iterator = PixelIterator<SrcT, DstT>;
+        using const_iterator = PixelIterator<const SrcT, const DstT>;
+
+        PixelMap(SrcT *begin, SrcT *end):
             mBegin(begin),
             mEnd(end) {}
 
-        auto begin()
-        { return iterator(mBegin); }
+        iterator begin()
+        { return { mBegin }; }
 
-        auto begin() const
-        { return const_iterator(mBegin); }
+        const_iterator begin() const
+        { return { mBegin }; }
 
-        auto cbegin() const
-        { return const_iterator(mBegin); }
+        const_iterator cbegin() const
+        { return { mBegin }; }
 
-        auto end()
-        { return iterator(mEnd); }
+        iterator end()
+        { return { mEnd }; }
 
-        auto end() const
-        { return const_iterator(mEnd); }
+        const_iterator end() const
+        { return { mEnd }; }
 
-        auto cend() const
-        { return const_iterator(mEnd); }
-
-    private:
-        T *mBegin;
-        T *mEnd;
+        const_iterator cend() const
+        { return { mEnd }; }
     };
 
     class Palette {
@@ -308,33 +433,26 @@ namespace kex {
         const PixelInfo &traits() const
         { return *mTraits; }
 
-        uint8 count() const
+        size_t count() const
         { return mCount; }
 
-        const byte *color_ptr(uint8 index) const noexcept
-        { return &mData[index * mTraits->bytes]; }
-
-        template <class SrcT, class DstT>
-        DstT unsafe_color(uint8 index) const noexcept
-        { return convert_pixel(*reinterpret_cast<const SrcT *>(color_ptr(index)), pixel_traits<DstT>::tag); }
-
-        template <class T, class U = T>
-        auto map()
+        template <class SrcT, class DstT = SrcT>
+        PixelMap<SrcT, DstT> map()
         {
-            if (pixel_traits<std::decay_t<T>>::format != mTraits->format)
-                throw PixelFormatError();
+            test_pixel_format<SrcT>(mTraits);
 
-            return PixelMap<T, U>(reinterpret_cast<T *>(mData.get()),
-                                  reinterpret_cast<T *>(mData.get()) + mCount);
+
+            auto ptr = reinterpret_cast<SrcT*>(mData.get());
+            return { ptr, ptr + mCount };
         }
 
-        template <class T, class U = T>
-        auto map() const
+        template <class SrcT, class DstT = SrcT>
+        PixelMap<const SrcT, const DstT> map() const
         {
-            test_pixel_format<T>(mTraits);
+            test_pixel_format<SrcT>(mTraits);
 
-            return PixelMap<const T, const U>(reinterpret_cast<const T *>(mData.get()),
-                                              reinterpret_cast<const T *>(mData.get()) + mCount);
+            auto ptr = reinterpret_cast<const SrcT*>(mData.get());
+            return { ptr, ptr + mCount };
         }
     };
 
@@ -351,30 +469,30 @@ namespace kex {
     template <class Processor, class... Args>
     void process_pixel(Processor proc, PixelFormat fmt, Args&&... args)
     {
-#define CASE(fmt, type, func) \
-        case PixelFormat::fmt: \
-            proc.template func<type>(std::forward<Args>(args)...); \
+#define __KEX_CASE(Fmt, Type, Func) \
+        case PixelFormat::Fmt: \
+            proc.template Func<Type>(std::forward<Args>(args)...); \
             break;
 
         switch (fmt)
         {
-        CASE(index8, Index8, index)
-        CASE(rgb, Rgb, color)
-        CASE(rgba, Rgba, color)
+        __KEX_CASE(index8, Index8, index)
+        __KEX_CASE(rgb, Rgb, color)
+        __KEX_CASE(rgba, Rgba, color)
 
         default:
             throw PixelFormatError("process_pixel doesn't have a case for this pixel type");
         }
 
-#undef CASE
+#undef __KEX_CASE
     };
 
-    /* Identity copy_pixel */
+    /* Identity convert_pixel */
     template <class T>
     constexpr T convert_pixel(const T &src, typename pixel_traits<T>::tag_type) noexcept
     { return src; }
 
-    /* RGB copy_pixel */
+    /* RGB convert_pixel */
     constexpr Rgba convert_pixel(const Rgb &src, rgba_tag) noexcept
     { return { src.red, src.green, src.blue, 0xff }; }
 
@@ -382,7 +500,6 @@ namespace kex {
     constexpr Rgb convert_pixel(const Rgba &src, rgb_tag) noexcept
     { return { src.red, src.green, src.blue }; }
 
-    /*! These are sort of like unit tests */
     static_assert( is_pixel<Index8>, "");
     static_assert( is_pixel<Rgb>, "");
     static_assert( is_pixel<Rgba>, "");

@@ -35,8 +35,7 @@ namespace {
           .color = Traits::color,
           .bytes = Traits::bytes,
           .alpha = Traits::alpha,
-          .pal_size = Traits::pal_size,
-          .pal_mask = Traits::pal_mask
+          .pal_size = Traits::pal_size
       };
   }
 
@@ -57,7 +56,7 @@ const PixelInfo &gfx::get_pixel_info(PixelFormat format)
         if (t.format == format)
             return t;
 
-    return traits[0];
+    throw PixelFormatError("Couldn't find PixelInfo with this format");
 }
 
 Palette::Palette(const Palette &other):

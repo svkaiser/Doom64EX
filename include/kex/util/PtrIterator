@@ -1,0 +1,144 @@
+//
+// -*- mode: c++ -*-
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2016 Zohar Malamant
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+// 02111-1307, USA.
+//
+//-----------------------------------------------------------------------------
+
+#ifndef __KEX_PTRITERATOR__99499855
+#define __KEX_PTRITERATOR__99499855
+
+#include <type_traits>
+
+namespace kex {
+  /**
+   * \brief An iterator that acts a normal pointer iterator
+   *
+   * See PixelIterator<T, T> in <kex/gfx/Pixel> for an example of use
+   */
+  template <class T>
+  class PtrIterator {
+      T *mPtr;
+
+  public:
+      using value_type = T;
+      using pointer = std::add_pointer_t<T>;
+      using const_pointer = std::add_pointer_t<std::add_const_t<T>>;
+      using reference = std::add_lvalue_reference_t<T>;
+      using const_reference = std::add_lvalue_reference_t <std::add_const_t<T>>;
+      using size_type = std::size_t;
+      using difference_type = std::ptrdiff_t;
+
+      constexpr PtrIterator(pointer ptr):
+          mPtr(ptr) {}
+
+      constexpr PtrIterator(const PtrIterator &other):
+          mPtr(other.mPtr) {}
+
+      constexpr PtrIterator& operator=(const PtrIterator &other)
+      {
+          mPtr = other.mPtr;
+          return *this;
+      }
+
+      constexpr pointer get()
+      { return mPtr; }
+
+      constexpr const_pointer get() const
+      { return mPtr; }
+
+      constexpr reference operator*()
+      { return *mPtr; }
+
+      constexpr const_reference operator*() const
+      { return *mPtr; }
+
+      constexpr pointer operator->()
+      { return mPtr; }
+
+      constexpr const_pointer operator->() const
+      { return mPtr; }
+
+      constexpr PtrIterator& operator++()
+      {
+          ++mPtr;
+          return *this;
+      }
+
+      constexpr PtrIterator operator++(int)
+      {
+          T *ptr = mPtr;
+          ++mPtr;
+          return { ptr };
+      }
+
+      constexpr PtrIterator& operator--()
+      {
+          --mPtr;
+          return *this;
+      }
+
+      constexpr PtrIterator operator--(int)
+      {
+          T *ptr = mPtr;
+          --mPtr;
+          return { ptr };
+      }
+
+      constexpr PtrIterator operator+(difference_type idx) const
+      { return { mPtr + idx }; }
+
+      constexpr PtrIterator operator-(difference_type idx) const
+      { return { mPtr - idx }; }
+
+      constexpr PtrIterator& operator+=(difference_type idx)
+      {
+          mPtr += idx;
+          return *this;
+      }
+
+      constexpr PtrIterator& operator-=(difference_type idx)
+      {
+          mPtr -= idx;
+          return *this;
+      }
+
+      void swap(PtrIterator &other)
+      {
+          std::swap(mPtr, other.mPtr);
+      }
+  };
+
+#define __KEX_OPERATOR(Op) \
+  template <class T> \
+  constexpr bool operator Op(PtrIterator<T> lhs, PtrIterator<T> rhs) \
+  { return lhs.get() Op rhs.get(); }
+
+  __KEX_OPERATOR(==)
+  __KEX_OPERATOR(!=)
+  __KEX_OPERATOR(>)
+  __KEX_OPERATOR(>=)
+  __KEX_OPERATOR(<)
+  __KEX_OPERATOR(<=)
+
+#undef __KEX_OPERATOR
+
+}
+
+#endif //__KEX_PTRITERATOR__99499855

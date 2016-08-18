@@ -83,19 +83,19 @@ namespace {
 
       /* Grab offset information if available. This seems like a hack since this is
        * probably only used by Doom64EX and not a general thing as this file might imply. */
-      int offsets[2];
+      SpriteOffsets offsets;
       auto chunkFn = [](png_structp png_ptr, png_unknown_chunkp chunk) -> int {
           if (std::strncmp((char*)chunk->name, "grAb", 4) == 0 && chunk->size >= 8) {
-              auto offsets = reinterpret_cast<int*>(png_get_user_chunk_ptr(png_ptr));
+              auto offsets = reinterpret_cast<SpriteOffsets*>(png_get_user_chunk_ptr(png_ptr));
               auto data = reinterpret_cast<int*>(chunk->data);
-              offsets[0] = swap_big_endian(data[0]);
-              offsets[1] = swap_big_endian(data[1]);
+              offsets->x = swap_big_endian(data[0]);
+              offsets->y = swap_big_endian(data[1]);
               return 1;
           }
 
           return 0;
       };
-      png_set_read_user_chunk_fn(png_ptr, offsets, chunkFn);
+      png_set_read_user_chunk_fn(png_ptr, &offsets, chunkFn);
 
       png_uint_32 width, height;
       int bitDepth, colorType, interlaceMethod;
@@ -168,7 +168,7 @@ namespace {
                   i++;
               }
 
-              retval.palette(std::move(palette));
+              retval.set_palette(std::move(palette));
           } else {
               png_colorp pal = nullptr;
               int palNum = 0;
@@ -183,11 +183,11 @@ namespace {
                   c.blue = p.blue;
               }
 
-              retval.palette(std::move(palette));
+              retval.set_palette(std::move(palette));
           }
       }
 
-      retval.offsets(offsets);
+      retval.set_offsets(offsets);
 
       byte *scanlines[height];
       for (size_t i = 0; i < height; i++)
