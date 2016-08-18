@@ -278,7 +278,7 @@ namespace kex {
         std::unique_ptr<byte[]> mData = nullptr;
 
     public:
-        Palette() noexcept = default;
+        Palette() = default;
 
         Palette(Palette&&) noexcept = default;
 

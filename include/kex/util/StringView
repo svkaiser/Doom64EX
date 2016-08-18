@@ -91,7 +91,7 @@ namespace kex {
 
       static constexpr size_type npos = size_type(-1);
 
-      constexpr BasicStringView() noexcept = default;
+      constexpr BasicStringView() = default;
 
       constexpr BasicStringView(const BasicStringView &) noexcept = default;
 
