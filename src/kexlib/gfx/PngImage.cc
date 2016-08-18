@@ -27,7 +27,7 @@
 using namespace kex::gfx;
 
 namespace {
-  constexpr StringView magic = "\x89PNG\r\n\x1a\n";
+  constexpr const char magic[] = "\x89PNG\r\n\x1a\n";
 
   struct PngImage : ImageFormatIO {
       StringView mimetype() const override;
@@ -41,10 +41,10 @@ namespace {
 
   bool PngImage::is_format(std::istream &stream) const
   {
-      char buf[magic.length()] = {};
+      char buf[sizeof magic] = {};
 
-      stream.read(buf, magic.length());
-      return magic == buf;
+      stream.read(buf, sizeof magic);
+      return std::memcmp(magic, buf, sizeof magic) == 0;
   }
 
   Image PngImage::load(std::istream &s) const

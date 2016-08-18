@@ -24,114 +24,227 @@
 #define __KEX_STRINGVIEW__523920528
 
 #include <string>
-#include <experimental/string_view>
 
 namespace kex {
-  template <class Char>
-  constexpr size_t __h_strlen(const Char *s)
+  /**
+   * \brief A constexpr std::strlen
+   *
+   * The current implementations of std::char_traits<T>::length and std::char_traits<T>::compare
+   * aren't constexpr, so we create our own.
+   * This should be replaced when C++17 is fully supported by compilers.
+   */
+  template <class CharT>
+  constexpr size_t __h_constexpr_strlen(const CharT *str) noexcept
   {
       size_t len = 0;
-      while (s[len++]);
-      return len;
+      while (str[len++]);
+      return len ? len - 1 : 0; // We don't like '\0', so decrement
   }
 
-  template <class Char, class Traits = std::char_traits<Char>>
-  struct BasicStringView
+  /**
+   * \brief A constexpr std::strncmp
+   *
+   * Should be replaced when C++17 is out. See {\ref __h_constexpr_strlen}.
+   */
+  template <class CharT>
+  constexpr int __h_constexpr_strcmp(const CharT *lhs, const CharT *rhs, size_t len) noexcept
   {
-      using string_type = std::basic_string<Char, Traits>;
+      for (size_t i = 0; i < len; i++)
+      {
+          if (lhs[i] < rhs[i])
+              return -1;
+          else if (lhs[i] > rhs[i])
+              return 1;
+      }
+      return 0;
+  }
+
+  /**
+   * \class BasicStringView <kex/util/StringView>
+   * \brief A non-owning string container
+   *
+   * \tparam CharT Type of character
+   * \tparam Traits Traits for character type
+   *
+   * This is an implementation of C++17's std::basic_string_view for C++14.
+   * Currently it's missing copy, substr and find methods.
+   */
+  template <class CharT, class Traits = std::char_traits<CharT>>
+  class BasicStringView
+  {
+      const CharT *mData = nullptr;
+      std::size_t mLength = 0;
+
+  public:
       using traits_type = Traits;
+      using value_type = CharT;
+      using pointer = CharT*;
+      using const_pointer = const CharT*;
+      using reference = CharT&;
+      using const_reference = const CharT&;
+      using const_iterator = const_pointer;
+      using iterator = const_iterator;
+      using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+      using reverse_iterator = const_reverse_iterator;
+      using size_type = std::size_t;
+      using difference_type = std::ptrdiff_t;
+
+      static constexpr size_type npos = size_type(-1);
 
       constexpr BasicStringView() noexcept = default;
 
-      BasicStringView(const std::string &s) :
-          mData(s.data()),
-          mLength(s.size()) {}
+      constexpr BasicStringView(const BasicStringView &) noexcept = default;
 
-      constexpr BasicStringView(const char *s, std::size_t length) :
+      template <class Allocator>
+      BasicStringView(const std::basic_string<CharT, Traits, Allocator> &str) :
+          mData(str.data()),
+          mLength(str.size()) {}
+
+      constexpr BasicStringView(const CharT *s, size_type length) :
           mData(s),
           mLength(length) {}
 
-      constexpr BasicStringView(const char *str):
+      /*
+       * We're using our own strlen function instead of Traits::length, because ours is constexpr.
+       */
+      constexpr BasicStringView(const CharT *str) noexcept:
           mData(str),
-          mLength(__h_strlen(str)) {}
+          mLength(__h_constexpr_strlen(str)) {}
 
-      BasicStringView &operator=(std::nullptr_t)
-      {
-          mData = nullptr;
-          mLength = 0;
-          return *this;
-      }
+      BasicStringView &operator=(const BasicStringView &) = default;
 
-      BasicStringView &operator=(const std::string &s)
-      {
-          mData = s.data();
-          mLength = s.size();
-          return *this;
-      }
-
-      BasicStringView &operator=(const char *s)
-      {
-          mData = s;
-          mLength = Traits::length(s);
-          return *this;
-      }
-
-      template <size_t Length>
-      constexpr BasicStringView &operator=(const char str[Length])
-      {
-          mData = str;
-          mLength = Length;
-          return *this;
-      }
-
-      const Char &at(std::size_t pos) const
-      { return mData[pos]; }
-
-      const Char &operator[](std::size_t pos) const
-      { return mData[pos]; }
-
-      const Char *data() const
-      { return mData; }
-
-      const Char *begin() const
+      constexpr const_iterator begin() const noexcept
       { return cbegin(); }
 
-      const Char *cbegin() const
+      constexpr const_iterator cbegin() const noexcept
       { return mData; }
 
-      auto rbegin() const
+      constexpr const_reverse_iterator rbegin() const noexcept
       { return crbegin(); }
 
-      auto crbegin() const
-      { return std::reverse_iterator<const Char *>(cbegin()); }
+      constexpr const_reverse_iterator crbegin() const noexcept
+      { return const_reverse_iterator(cbegin()); }
 
-      const Char *end() const
+      constexpr const_iterator end() const noexcept
       { return cend(); }
 
-      const Char *cend() const
+      constexpr const_iterator cend() const noexcept
       { return mData + mLength; }
 
-      auto rend() const
+      constexpr const_reverse_iterator rend() const noexcept
       { return crend(); }
 
-      auto crend() const
-      { return reverse_iterator_type(cend()); }
+      constexpr const_reverse_iterator crend() const noexcept
+      { return const_reverse_iterator(cend()); }
 
-      string_type to_string() const
-      { return string_type(mData, mLength); }
+      constexpr const_reference operator[](size_type idx) const noexcept
+      { return mData[idx]; }
 
-      constexpr size_t length() const
+      constexpr const_reference at(size_type idx) const noexcept
+      { return mData[idx]; }
+
+      constexpr const_reference front() const noexcept
+      { return mData[0]; }
+
+      constexpr const_reference back() const noexcept
+      { return mData[mLength - 1]; }
+
+      constexpr const_pointer data() const noexcept
+      { return mData; }
+
+      constexpr size_type length() const noexcept
       { return mLength; }
 
-      bool operator==(const BasicStringView &rhs) const
-      { return (mLength == rhs.mLength) ? (Traits::compare(mData, rhs.mData, mLength) == 0) : false; };
+      constexpr bool empty() const noexcept
+      { return mLength == 0; }
 
-  private:
-      const Char *mData = nullptr;
-      std::size_t mLength = 0;
+      constexpr void remove_prefix(size_type n) noexcept
+      {
+          mData += n;
+          mLength -= n;
+      }
+
+      constexpr void remove_suffix(size_type n) noexcept
+      { mLength -= n; }
+
+      constexpr void swap(BasicStringView &other) noexcept
+      {
+          std::swap(mLength, other.mLength);
+          std::swap(mData, other.mData);
+      }
+
+      template <class Allocator = std::allocator<CharT>>
+      std::basic_string<CharT, Traits, Allocator> to_string(const Allocator &a = Allocator()) const
+      { return { mData, mLength, a }; }
+
+      template <class Allocator = std::allocator<CharT>>
+      explicit operator std::basic_string<CharT, Traits, Allocator>() const
+      { return { mData, mLength }; }
+
+      constexpr int compare(const BasicStringView &other) const
+      {
+          if (mLength < other.mLength)
+              return -1;
+          else if (mLength > other.mLength)
+              return 1;
+
+          return __h_constexpr_strcmp(mData, other.mData, mLength);
+      }
   };
 
+  template <class T = void>
+  struct __h_identity {
+      using type = T;
+  };
+
+  template <>
+  struct __h_identity<void>;
+
+  template <class T>
+  using __h_id = typename __h_identity<T>::type;
+
+#define __KEX_OPERATOR(Op) \
+  template <class CharT, class Traits> \
+  constexpr bool operator Op(BasicStringView<CharT, Traits> lhs, BasicStringView<CharT, Traits> rhs) \
+  { return lhs.compare(rhs) Op 0; } \
+  template <class CharT, class Traits> \
+  constexpr bool operator Op(__h_id<BasicStringView<CharT, Traits>> lhs, BasicStringView<CharT, Traits> rhs) \
+  { return lhs.compare(rhs) Op 0; } \
+  template <class CharT, class Traits> \
+  constexpr bool operator Op(BasicStringView<CharT, Traits> lhs, __h_id<BasicStringView<CharT, Traits>> rhs) \
+  { return lhs.compare(rhs) Op 0; }
+
+  __KEX_OPERATOR(==)
+  __KEX_OPERATOR(!=)
+  __KEX_OPERATOR(<)
+  __KEX_OPERATOR(<=)
+  __KEX_OPERATOR(>)
+  __KEX_OPERATOR(>=)
+
+#undef __KEX_OPERATOR
+
   using StringView = BasicStringView<char>;
+  using WStringView = BasicStringView<wchar_t>;
+  using U16StringView = BasicStringView<char16_t>;
+  using U32StringView = BasicStringView<char32_t>;
+
+  namespace string_view_literals {
+#define __KEX_STRING_LITERAL(CharT) \
+    constexpr BasicStringView<CharT> operator"" _sv(const CharT *str, size_t len) \
+    { return { str, len }; }
+
+    __KEX_STRING_LITERAL(char)
+    __KEX_STRING_LITERAL(char16_t)
+    __KEX_STRING_LITERAL(char32_t)
+    __KEX_STRING_LITERAL(wchar_t)
+
+#undef __KEX_STRING_LITERAL
+  }
 }
+
+#ifndef KEX_DONT_POLLUTE_GLOBAL_NAMESPACE
+using namespace kex::string_view_literals;
+#endif
+
 
 #endif //__KEX_STRINGVIEW__523920528

@@ -65,7 +65,9 @@ if (TESTING)
   find_package(GTest REQUIRED)
 
     set(TEST_SOURCES
-            lib_test.cc
+      lib_test.cc
+
+      util/StringView_test.cc
 
       gfx/Image_test.cc
       gfx/PngImage_test.cc gfx/Pixel_test.cc)

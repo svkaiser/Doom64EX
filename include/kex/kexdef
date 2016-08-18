@@ -136,10 +136,12 @@ namespace kex {
 
   struct noinit_tag {};
 
-  /*!
+  /**
    * \brief A generic RAII guard
+   *
+   * \tparam Deleter A Callable type that will be called in {\ref Guard::~Guard}
+   *
    * A generic RAII guard that calls the deleter on the Guard going out of scope
-   * \tparam Deleter A Callable type that will be called in {\ref ~Guard}
    */
   template <class Deleter>
   class Guard {
@@ -185,11 +187,8 @@ namespace kex {
   };
 }
 
-#ifdef KEX_DONT_POLLUTE
-# undef ALIAS_FN
-#else
+#ifndef KEX_DONT_POLLUTE_GLOBAL_NAMESPACE
 using namespace kex;
-
 #endif
 
 #endif //__KEX_DEF__
