@@ -45,6 +45,42 @@ namespace {
       pi<Rgb>(),
       pi<Rgba>()
   };
+
+  class CopyTransform : public DefaultPixelTransform<void> {
+      const Palette *mSrcPal;
+      const byte *mSrc;
+      const Palette *mDstPal;
+      byte *mDst;
+
+  public:
+      CopyTransform(const Palette *srcPal, const byte *src, const Palette *dstPal, byte *dst):
+          mSrcPal(srcPal),
+          mSrc(src),
+          mDstPal(dstPal),
+          mDst(dst) {}
+
+
+      template <class SrcT, class, class DstT, class>
+      void color_to_color()
+      {
+          auto& src = *reinterpret_cast<const SrcT*>(mSrc);
+          auto& dst = *reinterpret_cast<DstT*>(mDst);
+
+          dst = convert_pixel(src, pixel_traits<DstT>::tag());
+      };
+
+      template <class SrcT, class SrcPalT, class DstT, class>
+      void index_to_color()
+      {
+          assert(mSrcPal);
+
+          auto& srcIdx = *reinterpret_cast<const SrcT*>(mSrc);
+          auto& src = mSrcPal->color_unsafe<SrcPalT>(srcIdx.index);
+          auto& dst = *reinterpret_cast<DstT*>(mDst);
+
+          dst = convert_pixel(src, pixel_traits<DstT>::tag());
+      };
+  };
 }
 
 PixelFormatError::PixelFormatError():
@@ -95,4 +131,19 @@ Palette& Palette::operator=(const Palette &other)
     }
 
     return *this;
+}
+
+void kex::gfx::copy_pixel(PixelFormat srcFmt,
+                          const Palette *srcPal,
+                          const byte *src,
+                          PixelFormat dstFmt,
+                          const Palette *dstPal,
+                          byte *dst)
+{
+    CopyTransform ct(srcPal, src, dstPal, dst);
+
+    auto srcPalFmt = srcPal ? srcPal->format() : PixelFormat::none;
+    auto dstPalFmt = dstPal ? dstPal->format() : PixelFormat::none;
+
+    transform_pixel(srcFmt, srcPalFmt, dstFmt, dstPalFmt, ct);
 }

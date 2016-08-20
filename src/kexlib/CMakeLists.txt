@@ -79,5 +79,5 @@ if (TESTING)
 
   add_test(AllTestsInKexlib kexlib_test)
 
-  file(COPY "${DATA_DIR}/kexlib_test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data/")
+  file(COPY "${CMAKE_SOURCE_DIR}/testdata" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 endif()

@@ -60,11 +60,31 @@ namespace kex {
     };
 
     struct Rgb {
-        uint8 red, green, blue;
+        uint8 red = 0;
+        uint8 green = 0;
+        uint8 blue = 0;
+
+        constexpr Rgb() = default;
+
+        constexpr Rgb(uint8 pRed, uint8 pGreen, uint8 pBlue):
+            red(pRed),
+            green(pGreen),
+            blue(pBlue) {}
     };
 
     struct Rgba {
-        uint8 red, green, blue, alpha;
+        uint8 red = 0;
+        uint8 green = 0;
+        uint8 blue = 0;
+        uint8 alpha = 0;
+
+        constexpr Rgba() = default;
+
+        constexpr Rgba(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha):
+            red(pRed),
+            green(pGreen),
+            blue(pBlue),
+            alpha(pAlpha) {}
     };
 
     struct index8_tag {
@@ -99,6 +119,19 @@ namespace kex {
     struct pixel_traits;
 
     template <>
+    struct pixel_traits<void> {
+        static constexpr auto format = PixelFormat::none;
+        static constexpr bool color = false;
+        static constexpr size_t bytes = 0;
+        static constexpr bool alpha = false;
+
+        static constexpr size_t pal_size = 0;
+
+        struct tag_type {};
+        static constexpr auto tag() { return tag_type(); }
+    };
+
+    template <>
     struct pixel_traits<Index8> {
         static constexpr auto format = PixelFormat::index8;
         static constexpr bool color = false;
@@ -108,7 +141,7 @@ namespace kex {
         static constexpr size_t pal_size = 256;
 
         using tag_type = index8_tag;
-        static constexpr auto tag() { return index8_tag(); }
+        static constexpr auto tag() { return tag_type(); }
     };
 
     template <>
@@ -121,7 +154,7 @@ namespace kex {
         static constexpr size_t pal_size = 0;
 
         using tag_type = rgb_tag;
-        static constexpr auto tag() { return rgb_tag();}
+        static constexpr auto tag() { return tag_type(); }
     };
 
     template <>
@@ -134,7 +167,7 @@ namespace kex {
         static constexpr size_t pal_size = 0;
 
         using tag_type = rgba_tag;
-        static constexpr auto tag() { return rgba_tag(); }
+        static constexpr auto tag() { return tag_type(); }
     };
 
     /**
@@ -436,6 +469,14 @@ namespace kex {
         size_t count() const
         { return mCount; }
 
+        template<class T>
+        T& color_unsafe(size_t x)
+        { return *(reinterpret_cast<T*>(mData.get()) + x); }
+
+        template<class T>
+        const T& color_unsafe(size_t x) const
+        { return *(reinterpret_cast<const T*>(mData.get()) + x); }
+
         template <class SrcT, class DstT = SrcT>
         PixelMap<SrcT, DstT> map()
         {
@@ -456,36 +497,157 @@ namespace kex {
         }
     };
 
-    struct default_pixel_processor {
-        template <class, class... Args>
-        void color(Args&&...)
+    template <class RetT = void>
+    struct DefaultPixelProcessor {
+        template <class T, class, class... Args>
+        RetT color(Args&&...)
         { throw PixelFormatError("color pixel processor not implemented"); }
 
-        template <class, class... Args>
-        void index(Args&&...)
+        template <class T, class PalT, class... Args>
+        RetT index(Args&&...)
         { throw PixelFormatError("index pixel processor not implemented"); }
     };
 
-    template <class Processor, class... Args>
-    void process_pixel(Processor proc, PixelFormat fmt, Args&&... args)
+    template <class RetT = void>
+    struct DefaultPixelTransform {
+        template <class SrcT, class, class DstT, class, class... Args>
+        RetT color_to_color(Args&&...)
+        { throw PixelFormatError("color_to_color pixel processor not implemented"); }
+
+        template <class SrcT, class, class DstT, class DstPalT, class... Args>
+        RetT color_to_index(Args&&...)
+        { throw PixelFormatError("color_to_index pixel processor not implemented"); }
+
+        template <class SrcT, class SrcPalT, class DstT, class, class... Args>
+        RetT index_to_color(Args&&...)
+        { throw PixelFormatError("index_to_color pixel processor not implemented"); }
+
+        template <class SrcT, class SrcPalT, class DstT, class DstPalT, class... Args>
+        RetT index_to_index(Args&&...)
+        { throw PixelFormatError("index_to_index pixel processor not implemented"); }
+    };
+
+    constexpr int __h_process_pixel_id(PixelFormat srcFmt, PixelFormat srcPalFmt,
+                                       PixelFormat dstFmt = PixelFormat::none,
+                                       PixelFormat dstPalFmt = PixelFormat::none)
     {
-#define __KEX_CASE(Fmt, Type, Func) \
-        case PixelFormat::Fmt: \
-            proc.template Func<Type>(std::forward<Args>(args)...); \
+        return (static_cast<int>(srcFmt)) | (static_cast<int>(srcPalFmt) << 8) |
+            (static_cast<int>(dstFmt) << 16) | (static_cast<int>(dstPalFmt) << 24);
+    }
+
+    template <class Processor, class RetT = void>
+    RetT process_pixel(PixelFormat fmt, PixelFormat palFmt, Processor proc = Processor())
+    {
+        int id = __h_process_pixel_id(fmt, palFmt);
+
+#define __KEX_CASE(Type, PalType, Func) \
+        case __h_process_pixel_id(pixel_traits<Type>::format, pixel_traits<PalType>::format): \
+            return proc.template Func<Type, PalType>(); \
             break;
 
-        switch (fmt)
+#define __KEX_CASE_C(Type) \
+        __KEX_CASE(Type, void, color)
+
+#define __KEX_CASE_I(Type, PalType) \
+        __KEX_CASE(Type, PalType, index)
+
+        switch (id)
         {
-        __KEX_CASE(index8, Index8, index)
-        __KEX_CASE(rgb, Rgb, color)
-        __KEX_CASE(rgba, Rgba, color)
+        __KEX_CASE_C(Rgb)
+        __KEX_CASE_C(Rgba)
+        __KEX_CASE_I(Index8, Rgb)
+        __KEX_CASE_I(Index8, Rgba)
 
         default:
             throw PixelFormatError("process_pixel doesn't have a case for this pixel type");
         }
 
+#undef __KEX_CASE_C
+#undef __KEX_CASE_I
 #undef __KEX_CASE
     };
+
+    template <class Processor, class RetT = void>
+    RetT transform_pixel(PixelFormat srcFmt, PixelFormat srcPalFmt,
+                                 PixelFormat dstFmt, PixelFormat dstPalFmt, Processor &proc = Processor())
+    {
+        int id = __h_process_pixel_id(srcFmt, srcPalFmt, dstFmt, dstPalFmt);
+
+#define __KEX_CASE(Src, SrcPal, Dst, DstPal, Func) \
+        case __h_process_pixel_id(pixel_traits<Src>::format, pixel_traits<SrcPal>::format, \
+                                  pixel_traits<Dst>::format, pixel_traits<DstPal>::format): \
+            return proc.template Func<Src, SrcPal, Dst, DstPal>(); \
+            break;
+
+#define __KEX_CASE_CC(Src, Dst) \
+        __KEX_CASE(Src, void, Dst, void, color_to_color)
+
+#define __KEX_CASE_CI(Src, Dst, DstPal) \
+        __KEX_CASE(Src, void, Dst, DstPal, color_to_index)
+
+#define __KEX_CASE_IC(Src, SrcPal, Dst) \
+        __KEX_CASE(Src, SrcPal, Dst, void, index_to_color)
+
+#define __KEX_CASE_II(Src, SrcPal, Dst, DstPal) \
+        __KEX_CASE(Src, SrcPal, Dst, DstPal, index_to_index)
+
+        switch (id)
+        {
+
+        __KEX_CASE_CC(Rgb, Rgb)
+        __KEX_CASE_CC(Rgb, Rgba)
+        __KEX_CASE_CC(Rgba, Rgb)
+        __KEX_CASE_CC(Rgba, Rgba)
+
+        __KEX_CASE_CI(Rgb, Index8, Rgb)
+        __KEX_CASE_CI(Rgb, Index8, Rgba)
+        __KEX_CASE_CI(Rgba, Index8, Rgb)
+        __KEX_CASE_CI(Rgba, Index8, Rgba)
+
+        __KEX_CASE_IC(Index8, Rgb, Rgb)
+        __KEX_CASE_IC(Index8, Rgb, Rgba)
+        __KEX_CASE_IC(Index8, Rgba, Rgb)
+        __KEX_CASE_IC(Index8, Rgba, Rgba)
+
+        __KEX_CASE_II(Index8, Rgb, Index8, Rgb)
+        __KEX_CASE_II(Index8, Rgb, Index8, Rgba)
+        __KEX_CASE_II(Index8, Rgba, Index8, Rgb)
+        __KEX_CASE_II(Index8, Rgba, Index8, Rgba)
+
+        default:
+            throw PixelFormatError("process_pixel_transform doesn't have a case for this combination of pixel formats");
+        }
+
+#undef __KEX_CASE_CC
+#undef __KEX_CASE_CI
+#undef __KEX_CASE_IC
+#undef __KEX_CASE_II
+#undef __KEX_CASE
+    }
+
+    constexpr bool operator==(const Rgb &lhs, const Rgb &rhs)
+    { return lhs.red == rhs.red && lhs.green == rhs.green && lhs.blue == rhs.blue; }
+
+    constexpr bool operator!=(const Rgb &lhs, const Rgb &rhs)
+    { return !(lhs == rhs); }
+
+    constexpr bool operator==(const Rgb &lhs, const Rgba &rhs)
+    { return rhs.alpha == 0xff && lhs.red == rhs.red && lhs.green == rhs.green && lhs.blue == rhs.blue; }
+
+    constexpr bool operator!=(const Rgb &lhs, const Rgba &rhs)
+    { return !(lhs == rhs); }
+
+    constexpr bool operator==(const Rgba &lhs, const Rgb &rhs)
+    { return rhs == lhs; }
+
+    constexpr bool operator!=(const Rgba &lhs, const Rgb &rhs)
+    { return !(rhs == lhs); }
+
+    constexpr bool operator==(const Rgba &lhs, const Rgba &rhs)
+    { return lhs.red == rhs.red && lhs.green == rhs.green && lhs.blue == rhs.blue; }
+
+    constexpr bool operator!=(const Rgba &lhs, const Rgba &rhs)
+    { return !(lhs == rhs); }
 
     /* Identity convert_pixel */
     template <class T>
@@ -499,6 +661,10 @@ namespace kex {
     /* RGBA convert_pixel */
     constexpr Rgb convert_pixel(const Rgba &src, rgb_tag) noexcept
     { return { src.red, src.green, src.blue }; }
+
+    /* auto copy_pixel */
+    void copy_pixel(PixelFormat srcFmt, const Palette *srcPal, const byte *src,
+                    PixelFormat dstFmt, const Palette *dstPal, byte *dst);
 
     static_assert( is_pixel<Index8>, "");
     static_assert( is_pixel<Rgb>, "");

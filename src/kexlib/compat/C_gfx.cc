@@ -101,7 +101,7 @@ void Image_Scale(Image *image, uint16_t new_width, uint16_t new_height)
 byte *Palette_GetData(Palette *pal)
 { return pal->data_ptr(); }
 
-int Palette_GetCount(Palette *pal)
+size_t Palette_GetCount(Palette *pal)
 { return pal->count(); }
 
 int Palette_HasAlpha(Palette *pal)

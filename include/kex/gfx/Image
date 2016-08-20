@@ -62,7 +62,7 @@ namespace kex {
         std::shared_ptr<const Palette> mPalette = nullptr;
         SpriteOffsets mOffsets;
 
-        constexpr size_t _area() const
+        size_t _area() const
         { return mWidth * mHeight; }
 
     public:
@@ -128,6 +128,29 @@ namespace kex {
             return { ptr, ptr + mWidth };
         };
 
+        byte* pixel_ptr(uint16 x, uint16 y);
+
+        const byte* pixel_ptr(uint16 x, uint16 y) const;
+
+        template <class T = Rgb>
+        T pixel(uint16 x, uint16 y) const
+        {
+            auto ptr = pixel_ptr(x, y);
+            T px;
+            copy_pixel(format(), mPalette.get(), ptr,
+                       pixel_traits<T>::format, nullptr,
+                       reinterpret_cast<byte *>(&px));
+            return px;
+        }
+
+        template <class T = Rgb>
+        void set_pixel(uint16 x, uint16 y, const T &px)
+        {
+            auto ptr = pixel_ptr(x, y);
+            copy_pixel(pixel_traits<T>::format, nullptr, reinterpret_cast<const byte*>(&px),
+                       format(), mPalette.get(), ptr);
+        }
+
         Image& convert(PixelFormat);
 
         Image& resize(uint16 width, uint16 height);
@@ -167,6 +190,9 @@ namespace kex {
         std::shared_ptr<const Palette> palette() const
         { return mPalette; }
 
+        PixelFormat palette_format() const
+        { return mPalette ? mPalette->format() : PixelFormat::none; }
+
         void set_palette(Palette palette)
         { mPalette = std::make_shared<Palette>(std::move(palette)); }
 
@@ -184,6 +210,26 @@ namespace kex {
         bool is_indexed() const
         { return !mTraits->color; }
     };
+
+    /**
+     * \brief Equality operator for Image
+     *
+     * \return true if images are isomorphic, false otherwise
+     *
+     * Compares two Image classes. Only returns true if `lhs` is isomorphic to `rhs`.
+     * That is, if `lhs` can be losslessly converted to `rhs` and vice-versa.
+     */
+    bool operator==(const Image &lhs, const Image &rhs);
+
+    /**
+     * \brief Inequality operator for Image
+     *
+     * \return true if images are not isomorphic, false otherwise
+     *
+     * Compares two Image classes. Only returns false if `lhs` is isomorphic to `rhs`.
+     * That is, if `lhs` can be losslessly converted to `rhs` and vice-versa.
+     */
+    bool operator!=(const Image &lhs, const Image &rhs);
   }
 }
 

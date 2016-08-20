@@ -4,23 +4,67 @@
 
 using namespace kex::gfx;
 
-Rgb rgb_test_image[] = {
-    { 0x00, 0x00, 0x00 }, { 0x7f, 0x7f, 0x7f }, { 0xff, 0xff, 0xff },
-    { 0xff, 0x00, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0x00, 0xff },
-};
-
-TEST(PngImage, LoadTest)
+TEST(PngImage, load_rgb)
 {
-    std::ifstream file("./data/kexlib_test/rgb_test_image.png");
+    std::ifstream file("testdata/color.png");
     ASSERT_TRUE(file.is_open());
 
     Image image(file);
+    ASSERT_EQ(PixelFormat::rgb, image.format());
+    ASSERT_EQ(320, image.width());
+    ASSERT_EQ(240, image.height());
+    ASSERT_EQ(nullptr, image.palette());
 }
 
-TEST(PngImage, LoadIndexed)
+TEST(PngImage, load_rgba)
 {
-    std::ifstream file("./data/kexlib_test/fire.png");
+    std::ifstream file("testdata/color-alpha.png");
     ASSERT_TRUE(file.is_open());
 
     Image image(file);
+    ASSERT_EQ(PixelFormat::rgba, image.format());
+    ASSERT_EQ(320, image.width());
+    ASSERT_EQ(240, image.height());
+    ASSERT_EQ(nullptr, image.palette());
+}
+
+TEST(PngImage, load_index8_with_rgb_pal)
+{
+    std::ifstream file("testdata/index.png");
+    ASSERT_TRUE(file.is_open());
+
+    Image image(file);
+    ASSERT_EQ(PixelFormat::index8, image.format());
+    ASSERT_EQ(320, image.width());
+    ASSERT_EQ(240, image.height());
+    ASSERT_NE(nullptr, image.palette());
+    ASSERT_EQ(PixelFormat::rgb, image.palette()->format());
+}
+
+TEST(PngImage, load_index8_with_rgba_pal)
+{
+    std::ifstream file("testdata/index-alpha.png");
+    ASSERT_TRUE(file.is_open());
+
+    Image image(file);
+    ASSERT_EQ(PixelFormat::index8, image.format());
+    ASSERT_EQ(320, image.width());
+    ASSERT_EQ(240, image.height());
+    ASSERT_NE(nullptr, image.palette());
+    ASSERT_EQ(PixelFormat::rgba, image.palette()->format());
+}
+
+TEST(PngImage, resize_crop_rgb)
+{
+    std::ifstream file_expect("testdata/color-crop.png");
+    std::ifstream file("testdata/color.png");
+    ASSERT_TRUE(file_expect.is_open());
+    ASSERT_TRUE(file.is_open());
+
+    Image image_expect(file_expect);
+    Image image(file);
+
+    image.resize(image_expect.width(), image_expect.height());
+
+    ASSERT_EQ(image_expect, image);
 }
