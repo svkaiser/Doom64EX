@@ -129,7 +129,7 @@ namespace {
               for (int x = 0; x < width; x++)
               {
                   size_t pos = static_cast<size_t>(dy * y) * srcWidth + static_cast<size_t>(dx * x);
-                  *dstIt++ = convert_pixel(*(srcIt++ + pos), pixel_traits<T>::tag());
+                  *dstIt++ = convert_pixel(*(srcIt + pos), pixel_traits<T>::tag());
               }
           }
       }
