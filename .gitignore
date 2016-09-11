@@ -1,8 +1,10 @@
 # ignore CLion-specific project files
 /.idea/
 
-# ignore various build directories
-/build/
-/extern/build/
-/devenv
-temp/
+# extern
+/extern/
+!/extern/CMakeLists.txt
+!/extern/patched-config_win32.h
+
+# build dir
+/build
