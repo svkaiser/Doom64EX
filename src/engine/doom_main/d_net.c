@@ -261,12 +261,6 @@ static void D_NetWait(void) {
 
     I_Printf("---------------------------------------------\n\n");
 
-#ifndef USESYSCONSOLE
-	//I_NetWaitScreen();
-	I_Printf("Network play is currently disabled.\n");
-	I_Quit();
-#endif
-
     while(net_waiting_for_start) {
         CheckMD5Sums();
 
