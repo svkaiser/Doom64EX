@@ -8,6 +8,7 @@ clone_depth: 1
 
 cache:
 - i686-6.2.0-release-win32-dwarf-rt_v5-rev1.7z
+- mingw-w64-i686.7z
 
 environment:
   CTEST_OUTPUT_ON_FAILURE: 1
@@ -20,7 +21,7 @@ environment:
 
 install:
 - if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
-- if not exist "%EXTERN_ARCHIVE%" appveyor DownloadFile "%EXTERN_URL" -FileName "%EXTERN_ARCHIVE%"
+- if not exist "%EXTERN_ARCHIVE%" appveyor DownloadFile "%EXTERN_URL%" -FileName "%EXTERN_ARCHIVE%"
 - 7z x -y "%MINGW_ARCHIVE%" > nul
 - 7z x -y "%EXTERN_ARCHIVE%" -o.\extern > nul
 # CMake refuses to generate MinGW Makefiles if sh.exe is in the Path
