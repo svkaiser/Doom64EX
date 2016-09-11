@@ -1,0 +1,40 @@
+version: '{build}'
+
+branches:
+  except:
+    - /^travis.*$/
+
+clone_depth: 1
+
+cache:
+- i686-6.2.0-release-win32-dwarf-rt_v5-rev1.7z
+
+environment:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  matrix:
+  - MINGW_DIR: mingw32
+    MINGW_URL: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.2.0/threads-win32/dwarf/i686-6.2.0-release-win32-dwarf-rt_v5-rev1.7z/download
+    MINGW_ARCHIVE: i686-6.2.0-release-win32-dwarf-rt_v5-rev1.7z
+    EXTERN_URL: https://dl.dropboxusercontent.com/u/7122698/mingw-w64-i686.7z
+    EXTERN_ARCHIVE: mingw-w64-i686.7z
+
+install:
+- if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
+- if not exist "%EXTERN_ARCHIVE%" appveyor DownloadFile "%EXTERN_URL" -FileName "%EXTERN_ARCHIVE%"
+- 7z x -y "%MINGW_ARCHIVE%" > nul
+- 7z x -y "%EXTERN_ARCHIVE%" -o.\extern > nul
+# CMake refuses to generate MinGW Makefiles if sh.exe is in the Path
+- ps: Get-Command sh.exe -All | Remove-Item
+
+before_build:
+- set Path=%CD%\%MINGW_DIR%\bin;%Path%
+- g++ --version
+- mingw32-make --version
+- cmake --version
+- cmake -H. -Bbuild\mingw -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -DTESTING=ON
+
+build_script:
+- cmake --build build\mingw --use-stderr --target all -- -j%NUMBER_OF_PROCESSORS%
+
+after_build:
+- ctest

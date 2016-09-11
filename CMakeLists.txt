@@ -26,6 +26,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(doom64ex C CXX)
 
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
 
