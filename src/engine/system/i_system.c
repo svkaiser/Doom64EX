@@ -473,7 +473,7 @@ char *I_FindDataFile(const char *file) {
             return path;
     }
 
-#ifdef __LINUX__
+#if defined(__LINUX__) || defined(__OpenBSD__)
     {
         int i;
         const char *paths[] = {
