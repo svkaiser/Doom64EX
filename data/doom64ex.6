@@ -1,20 +1,20 @@
-.TH DOOM64EX "6" "January 2012" "Doom64EX" "Games"
+.TH DOOM64EX "6" "September 2016" "Doom64EX" "Games"
 .SH NAME
-doom64ex \- recreation of Midway's Doom64 for modern operating systems.
+doom64ex \- Recreation of Midway's Doom64 for modern operating systems.
 .SH SYNOPSIS
 .B doom64ex
 [\fIoptions...\fR]
 .P
-\fBdoom64ex\-wadgen\fR \fI<rom\-file>\fR
+\fBdoom64ex\fR \-wadgen \fI<rom\-file>\fR
 .SH DESCRIPTION
-Doom 64 is a unofficial sequel to Doom II for the Nintendo 64.
+Doom 64 is a Doom spin-off for the Nintendo 64.
 .P
-\fBdoom64ex\fR faithful recreation of the original game using the Doom source
-code as the base.
+\fBdoom64ex\fR is a faithful recreation of the original Nintendo 64 game using
+PC Doom's source code as the base.
 .P
-\fBdoom64ex\fR requires the data (aka WAD)
-files from the original game. These must be extracted from the Nintendo 64 ROM
-image, using the \fBdoom64ex\-wadgen\fR tool (see \fBDATA FILES\fR, below).
+\fBdoom64ex\fR requires the data files from the original game. These must be
+extracted from a Nintendo 64 ROM image, using the \fBdoom64ex\fR \-wadgen
+command (see \fBDATA FILES\fR, below).
 .SH OPTIONS
 .SS File Options
 .TP
@@ -26,7 +26,7 @@ Add a PWAD (patch WAD). Used for custom levels, music, etc.
 .TP
 \fB\-config\fR \fI<configfile>\fR
 Use \fIconfigfile\fR instead of the default config file (which is
-\fI~/.doom64ex/config.cfg\fR).
+\fI$XDG_DATA_HOME/doom64ex/config.cfg\fR).
 .SS Game Options
 .TP
 \fB\-warp\fR \fI<level>\fR
@@ -89,14 +89,10 @@ Record a demo. The demo will be saved in a file called \fI<lumpname>.lmp\fR. The
 is always added, so don't include it in the lump name.
 .TP
 \fB\-playdemo \fI<filename>\fR
-Play back a demo. If the filename has no extension, ".lmp" will be added. Press
-the space bar to stop the demo.
+Play back a demo. If the filename has no file
+extension, ".lmp" will be appended. Press the space bar to stop the demo.
 .SS Network Options
-Note that the networking support in \fBdoom64ex\fR is highly experimental, and
-likely to fail during use. Also, the official Doom 64 levels don't support
-multiplayer because they lack deathmatch and co\-op player starts. This is
-because the original
-game for the Nintendo 64 didn't support multiplayer at all.
+Note that the networking support in \fBdoom64ex\fR is experimental.
 .TP
 \fB\-server\fR
 Host a game. When one or more clients connects, press any
@@ -113,40 +109,28 @@ port is 2342.
 such as graphics and levels from a file known as an IWAD file. In
 addition, \fBdoom64ex\fR loads its sounds from a SoundFont file.
 .P
-Since Doom 64 is a Nintendo 64 game, the WAD and SF2 files must be generating
-by extracting the data from a Nintendo 64 ROM image. \fBdoom64ex\fR ships
-with a utility called \fBdoom64ex\-wadgen\fR which does this. Usage:
+The assets for Doom 64 must be extracted from a Nintendo 64 ROM image.
+\fBdoom64ex\fR includes a command to do this. Usage:
 .P
-\fBdoom64ex\-wadgen\fR \fI<rom\-file>\fR
+\fBdoom64ex\fR \-wadgen \fI<rom\-file>\fR
 .P
-\fI<rom\-file>\fR must be a Doom64 ROM image, in .z64 format. The files \fRDOOM64.WAD\fB
-and \fRDOOMSND.SF2\fR will be created in the current directory.
-.P
-The WAD file must be called \fRDOOM64.WAD\fR (all\-uppercase), and the sound font
-must be called \fRDOOMSND.SF2\fR. Both files must be
-found in \fI/usr/share/games/doom64\fR, \fI/usr/local/share/games/doom64\fR,
-or in the current directory where \fBdoom64ex\fR is started.
+\fI<rom\-file>\fR must be a Doom 64 ROM image, in .z64 format. The files \fBdoom64.wad\fR
+and \fBdoomsnd.sf2\fR will be written to \fI$XDG_DATA_HOME/doom64ex/\fR.
 .SH OTHER FILES
 .TP
-\fB~/.doom64ex/\fR
-Config file \fBconfig.cfg\fR is located here. Will be created if it
-doesn't already exist. Also, saved games are stored here, as \fBdoomsav\fR\fIn\fR\fB.dsg\fR,
-where \fIn\fR is the save slot, numbered 0 to 7.
-.SH SEE ALSO
-The main \fBdoom64ex\fR documentation is supplied with the source code, and is
-usually installed in /usr/share/doc/doom64ex on most Linux systems.
+\fI$XDG_DATA_HOME/doom64ex/\fR
+The config file (\fBconfig.cfg\fR) is located here.
+It will be created if it doesn't already exist. Saved games are also stored here
+as \fBdoomsav\fR\fIn\fR\fB.dsg\fR, where \fIn\fR is the save slot, numbered 0 to
+7.
 .SH AUTHORS
-Doom was originally written by id software; when playing with any id main
-wad file, you can see their list of credits, which includes the list of
-programmers. After some years, they released the source code, to allow
-others to work on improving the game.
-.P
-In October 1999, id Software re\-released the Doom source code under the
-GNU General Public License.
-.P
 Samuel 'Kaiser' Villarreal <svkaiser@gmail.com>
 .br
-Doom64 EX Author
+Doom64EX Author.
+.P
+Zohar 'dotfloat' Malamant <dotfloat@gmail.com>
+.br
+Current maintainer and developer of the project.
 .P
 Paul Brook
 .br
