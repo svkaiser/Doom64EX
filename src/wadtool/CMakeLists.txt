@@ -37,9 +37,9 @@ set(SOURCES
 add_executable(wadtool ${SOURCES})
 
 # Generate kex.wad
-add_custom_target(kexwad
+add_custom_target(kexwad ALL
   DEPENDS wadtool
-  COMMAND wadtool "${CMAKE_SOURCE_DIR}/data/kex" "${CMAKE_BINARY_DIR}/kex.wad"
+  COMMAND wadtool "${CMAKE_SOURCE_DIR}/distrib/kex" "${CMAKE_BINARY_DIR}/kex.wad"
   )
 
 ##------------------------------------------------------------------------------

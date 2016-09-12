@@ -295,10 +295,6 @@ add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(doom64ex ${LIBRARIES})
 
-if (KEXWAD)
-  add_dependencies(doom64ex kexwad)
-endif (KEXWAD)
-
 ##------------------------------------------------------------------------------
 ## Install target
 ##
