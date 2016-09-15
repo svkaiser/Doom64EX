@@ -71,7 +71,7 @@ ExternalProject_Add(SDL2
   INSTALL_DIR ${INSTALL_DIR}
 
   # Only compile the shared lib
-  CMAKE_ARGS -DSDL_STATIC=OFF -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  CMAKE_ARGS -SDL_SHARED=ON -DSDL_STATIC=OFF -DSDL_LDOPEN=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
 
   # Audio is for chumps
   CMAKE_ARGS -DOSS=OFF -DALSA=OFF -DPULSEAUDIO=OFF -DSNDIO=OFF -DDSOUND=OFF -DDISKAUDIO=OFF -DDUMMYAUDIO=OFF
@@ -80,49 +80,45 @@ ExternalProject_Add(SDL2
   # Video is for suckers
   CMAKE_ARGS -DVIDEO_WAYLAND=OFF -DVIDEO_MIR=OFF -DVIDEO_RPI=OFF -DVIDEO_OPENGLES=OFF -DDIRECTX=OFF
 
-  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-  )
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
 
 ##------------------------------------------------------------------------------
 ## SDL2_net
 ##
 
 if(WIN32)
-# SDL2_net doesn't have a CMakeLists.txt, so just download the binaries
+  # SDL2_net doesn't have a CMakeLists.txt, so just download the binaries
   if(MSVC)
-	ExternalProject_Add(SDL2_net
-	  URL ${SDL2_net_VC_URL}
-	  INSTALL_DIR ${INSTALL_DIR}
-	  
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
-	  INSTALL_COMMAND
-		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x86 <INSTALL_DIR>/lib
-		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
-	  )
+    ExternalProject_Add(SDL2_net
+      URL ${SDL2_net_VC_URL}
+      INSTALL_DIR ${INSTALL_DIR}
+
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND ""
+      INSTALL_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib/x86 <INSTALL_DIR>/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include)
   elseif(MINGW)
-	ExternalProject_Add(SDL2_net
-	  URL ${SDL2_net_MINGW_URL}
-	  INSTALL_DIR ${INSTALL_DIR}
-	  
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
-	  INSTALL_COMMAND
-		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/bin <INSTALL_DIR>/bin
-		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/lib <INSTALL_DIR>/lib
-		COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/include <INSTALL_DIR>/include
-	  )
+    ExternalProject_Add(SDL2_net
+      URL ${SDL2_net_MINGW_URL}
+      INSTALL_DIR ${INSTALL_DIR}
+
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND ""
+      INSTALL_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/bin <INSTALL_DIR>/bin
+      COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/lib <INSTALL_DIR>/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/i686-w64-mingw32/include <INSTALL_DIR>/include)
   endif()
 else()
-# Build using Autotools
-ExternalProject_Add(SDL2_net
-  URL ${SDL2_net_URL}
-  URL_MD5 ${SDL2_net_MD5}
-  DEPENDS SDL2
-  INSTALL_DIR ${INSTALL_DIR}
+  # Build using Autotools
+  ExternalProject_Add(SDL2_net
+    URL ${SDL2_net_URL}
+    URL_MD5 ${SDL2_net_MD5}
+    DEPENDS SDL2
+    INSTALL_DIR ${INSTALL_DIR}
 
-  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --with-sdl-prefix=<INSTALL_DIR>
-  )
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --with-sdl-prefix=<INSTALL_DIR>)
 endif()
 
 ##------------------------------------------------------------------------------
@@ -130,36 +126,33 @@ endif()
 ##
 
 if(WIN32)
-	ExternalProject_Add(GLib_DEV
-      URL ${GLib_DEV_URL}
-	  INSTALL_DIR ${INSTALL_DIR}
-	  
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
-	  INSTALL_COMMAND
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib <INSTALL_DIR>/lib
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
-	  )
-	  
-	ExternalProject_Add(GLib_BIN
-      URL ${GLib_BIN_URL}
-	  INSTALL_DIR ${INSTALL_DIR}
-	  
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
-	  INSTALL_COMMAND
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/bin <INSTALL_DIR>/bin
-	  )
-	
-	add_custom_target(GLib DEPENDS GLib_DEV GLib_BIN)
-elseif()
-	ExternalProject_Add(GLib
-	  URL ${GLib_URL}
-	  URL_MD5 ${GLib_MD5}
-	  INSTALL_DIR ${INSTALL_DIR}
+  ExternalProject_Add(GLib_DEV
+    URL ${GLib_DEV_URL}
+    INSTALL_DIR ${INSTALL_DIR}
 
-	  CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
-	  )
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib <INSTALL_DIR>/lib
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include)
+
+  ExternalProject_Add(GLib_BIN
+    URL ${GLib_BIN_URL}
+    INSTALL_DIR ${INSTALL_DIR}
+
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/bin <INSTALL_DIR>/bin)
+
+  add_custom_target(GLib DEPENDS GLib_DEV GLib_BIN)
+else()
+  ExternalProject_Add(GLib
+    URL ${GLib_URL}
+    URL_MD5 ${GLib_MD5}
+    INSTALL_DIR ${INSTALL_DIR}
+
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>)
 endif()
 
 ##------------------------------------------------------------------------------
@@ -167,16 +160,15 @@ endif()
 ##
 
 if(WIN32)
-	ExternalProject_Add(PkgConfig
-      URL ${PkgConfig_URL}
-	  DEPENDS GLib
-	  INSTALL_DIR ${INSTALL_DIR}
-	  
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
-	  INSTALL_COMMAND
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/bin <INSTALL_DIR>/bin
-	  )
+  ExternalProject_Add(PkgConfig
+    URL ${PkgConfig_URL}
+    DEPENDS GLib
+    INSTALL_DIR ${INSTALL_DIR}
+
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/bin <INSTALL_DIR>/bin)
 endif()
 
 ##------------------------------------------------------------------------------
@@ -184,16 +176,15 @@ endif()
 ##
 
 if(WIN32)
-	ExternalProject_Add(proxy_libintl
-      URL ${proxy_libintl_URL}
-	  INSTALL_DIR ${INSTALL_DIR}
-	  
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
-	  INSTALL_COMMAND
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib <INSTALL_DIR>/lib
-	  )
+  ExternalProject_Add(proxy_libintl
+    URL ${proxy_libintl_URL}
+    INSTALL_DIR ${INSTALL_DIR}
+
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <INSTALL_DIR>/include
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/lib <INSTALL_DIR>/lib)
 endif()
 
 ##------------------------------------------------------------------------------
@@ -202,7 +193,7 @@ endif()
 ExternalProject_Add(FluidSynth
   URL ${FluidSynth_URL}
   URL_MD5 ${FluidSynth_MD5}
-  DEPENDS GLib PkgConfig proxy_libintl
+  DEPENDS GLib # PkgConfig proxy_libintl
 
   INSTALL_DIR ${INSTALL_DIR}
 
@@ -215,12 +206,11 @@ ExternalProject_Add(FluidSynth
 
   # A MIDI synth with IPv6 support... sure...
   CMAKE_ARGS -Denable-readline=OFF -Denable-dbus=OFF -Denable-ipv6=OFF
-  
+
   # Fix Windows' stdio.h complaining about macro'd snprintf
   #PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/patched-config_win32.h <SOURCE_DIR>/src/config_win32.cmake
 
-  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_PREFIX_PATH=<INSTALL_DIR> -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON
-  )
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_PREFIX_PATH=<INSTALL_DIR> -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON)
 
 ##------------------------------------------------------------------------------
 ## zlib
@@ -232,8 +222,7 @@ ExternalProject_Add(zlib
 
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
 
-  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-  )
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
 
 ##------------------------------------------------------------------------------
 ## libpng
@@ -244,8 +233,7 @@ ExternalProject_Add(libpng
   DEPENDS zlib
   INSTALL_DIR ${INSTALL_DIR}
 
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>  
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
   CMAKE_ARGS -DPNG_TESTS=OFF -DPNG_STATIC=OFF
 
-  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-  )
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
