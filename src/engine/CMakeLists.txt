@@ -56,9 +56,14 @@ add_include_directories(${FLUIDSYNTH_INCLUDE_DIR})
 add_link_libraries(${FLUIDSYNTH_LIBRARIES})
 
 # OpenGL
-find_package(OpenGL REQUIRED)
-add_include_directories(${OPENGL_INCLUDE_DIRS})
-add_link_libraries(${OPENGL_LIBRARIES})
+if(FORCE_INCLUDE_OPENGL)
+  add_include_directories("/usr/include/GL/")
+  add_link_libraries("/usr/lib32/libGL.so")
+else()
+  find_package(OpenGL REQUIRED)
+  add_include_directories(${OPENGL_INCLUDE_DIRS})
+  add_link_libraries(${OPENGL_LIBRARIES})
+endif(FORCE_INCLUDE_OPENGL)
 
 ##------------------------------------------------------------------------------
 ## Configure "version.h"

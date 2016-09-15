@@ -26,16 +26,26 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(doom64ex C CXX)
 
+##------------------------------------------------------------------------------
+## Build Options
+##
+
+option(GENERATE_KEXWAD "Generate kex.wad" ON)
+option(BUILD_TESTS "Compile unit tests" ON)
+option(FORCE_INCLUDE_OPENGL "Include OpenGL without using find_package" OFF)
+
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
+set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
 
 ##------------------------------------------------------------------------------
-## Options
+## Compiler Options
 ##
 
-option(KEXWAD "Generate kex.wad" ON)
-option(TESTING "Build unit tests" OFF)
+if(MINGW)
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows")
+endif(MINGW)
 
 ##------------------------------------------------------------------------------
 ## CMake functions
@@ -67,12 +77,16 @@ function(add_link_libraries)
 endfunction()
 
 ##------------------------------------------------------------------------------
-## Include subprojects
+## Project-wide Dependencies
 ##
 
-if (TESTING)
-  enable_testing()
-endif()
+if(BUILD_TESTS)
+  find_package(GTest)
+endif(BUILD_TESTS)
+
+##------------------------------------------------------------------------------
+## Include subprojects
+##
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/kexlib")
