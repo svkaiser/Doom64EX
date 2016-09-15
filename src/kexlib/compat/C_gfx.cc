@@ -26,6 +26,28 @@
 
 using namespace kex::gfx;
 
+namespace {
+  Image error_image()
+  {
+      Image image(PixelFormat::rgb, 128, 128, nullptr);
+      auto it = image.map<Rgb>().begin();
+
+      for (int y = 0; y < 128; y++)
+          for (int x = 0; x < 128; x++)
+          {
+              auto d = ((x / 8 + y / 8) % 2 == 0) ? 0x7f : 0;
+              Rgb c;
+              c.red = d;
+              c.green = 0;
+              c.blue = d;
+
+              *(it + (y * 128) + x) = c;
+          }
+
+      return image;
+  }
+}
+
 extern "C" {
 
 Image* Image_New(PixelFormat format, uint16 width, uint16 height)
@@ -44,7 +66,7 @@ Image* Image_New_FromMemory(const char *data, size_t size)
         return new Image(ss);
     } catch (ImageError &e) {
         fmt::print("An exception occured when loading image: {}\n", e.what());
-        return nullptr;
+        return new Image(error_image());
     }
 }
 

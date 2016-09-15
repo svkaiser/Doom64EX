@@ -45,6 +45,7 @@ set(SOURCES
   format.cc
   gfx/Image.cc
   gfx/PngImage.cc
+  gfx/DoomImage.cc
   gfx/Pixel.cc
   compat/C_gfx.cc)
 

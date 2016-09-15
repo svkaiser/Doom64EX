@@ -252,6 +252,8 @@ void W_Init(void) {
             if ((filename = I_FindDataFile(myargv[p]))) {
                 W_MergeFile(filename);
                 free(filename);
+            } else {
+                W_MergeFile(myargv[p]);
             }
         }
     }
