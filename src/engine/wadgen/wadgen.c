@@ -213,7 +213,7 @@ void WGen_Printf(char *s, ...)
 	va_end(v);
 
 #ifdef _WIN32
-	MessageBox(NULL, msg, "Info", MB_OK | MB_ICONINFORMATION);
+	I_Printf("%s\n", msg); //Print to launcher console in Windows
 #else
 	printf("%s\n", msg);
 #endif
