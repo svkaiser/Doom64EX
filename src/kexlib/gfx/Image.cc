@@ -234,6 +234,7 @@ namespace {
       {
           assert(mSrc.palette() && !mSrc.palette()->empty());
 
+          auto trans = mSrc.trans();
           auto srcMap = mSrc.map<SrcT>();
           auto srcIt = srcMap.cbegin();
           auto srcEnd = srcMap.cend();
@@ -241,7 +242,18 @@ namespace {
           auto dstIt = mDst.map<DstT>().begin();
 
           for (; srcIt != srcEnd; ++srcIt, ++dstIt)
-              *dstIt = convert_pixel(*(srcPal + srcIt->index), pixel_traits<DstT>::tag());
+          {
+              auto index = srcIt->index;
+              if (index == trans)
+              {
+                  *dstIt = DstT();
+                  continue;
+              } else if (index > trans) {
+                  index--;
+              }
+
+              *dstIt = convert_pixel(*(srcPal + index), pixel_traits<DstT>::tag());
+          }
       };
   };
 }
@@ -423,8 +435,10 @@ bool kex::gfx::operator!=(const Image &lhs, const Image &rhs)
 { return !(lhs == rhs); }
 
 std::unique_ptr<ImageFormatIO> __initialize_png();
+std::unique_ptr<ImageFormatIO> __initialize_doom_image();
 
 void kex::lib::init_image()
 {
     image_formats.emplace_back(__initialize_png());
+    image_formats.emplace_back(__initialize_doom_image());
 }

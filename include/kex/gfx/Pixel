@@ -442,7 +442,13 @@ namespace kex {
 
         Palette(const Palette &);
 
-        Palette(PixelFormat format, size_t count, std::unique_ptr<byte[]> data);
+        Palette(PixelFormat format, size_t count, const byte* data);
+
+        explicit Palette(PixelFormat format, size_t count, std::unique_ptr<byte[]> data);
+
+        template <class T, size_t N>
+        Palette(T (&data)[N]):
+            Palette(pixel_traits<T>::format, N, reinterpret_cast<const byte*>(data)) {}
 
         Palette& operator=(Palette&&) noexcept = default;
 
@@ -482,7 +488,6 @@ namespace kex {
         {
             test_pixel_format<SrcT>(mTraits);
 
-
             auto ptr = reinterpret_cast<SrcT*>(mData.get());
             return { ptr, ptr + mCount };
         }
@@ -495,6 +500,10 @@ namespace kex {
             auto ptr = reinterpret_cast<const SrcT*>(mData.get());
             return { ptr, ptr + mCount };
         }
+
+        static std::shared_ptr<const Palette> black();
+
+        static std::shared_ptr<const Palette> playpal();
     };
 
     template <class RetT = void>

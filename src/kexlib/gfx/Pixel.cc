@@ -22,10 +22,12 @@
 
 #include <algorithm>
 #include <kex/gfx/Pixel>
+#include "Playpal.hh"
 
 using namespace kex::gfx;
 
 namespace {
+
   template <class T>
   constexpr PixelInfo pi()
   {
@@ -101,10 +103,29 @@ Palette::Palette(const Palette &other):
     *this = other;
 }
 
+Palette::Palette(PixelFormat format, size_t count, const byte* data):
+    mTraits(&get_pixel_info(format)),
+    mCount(count)
+{
+    if (!mTraits->color)
+        throw PixelFormatError("Can't create a palette of non-colors");
+
+    if (data) {
+        mData = std::make_unique<byte[]>(count * mTraits->bytes);
+        std::copy_n(data, count * mTraits->bytes, mData.get());
+    } else {
+        auto size = mTraits->bytes * mCount;
+        mData = std::make_unique<byte[]>(size);
+        std::fill_n(mData.get(), size, 0);
+    }
+}
+
 Palette::Palette(PixelFormat format, size_t count, std::unique_ptr<byte[]> data):
     mTraits(&get_pixel_info(format)),
     mCount(count)
 {
+    fmt::print(">> {}\n", static_cast<int>(format));
+
     if (!mTraits->color)
         throw PixelFormatError("Can't create a palette of non-colors");
 
@@ -146,4 +167,22 @@ void kex::gfx::copy_pixel(PixelFormat srcFmt,
     auto dstPalFmt = dstPal ? dstPal->format() : PixelFormat::none;
 
     transform_pixel(srcFmt, srcPalFmt, dstFmt, dstPalFmt, ct);
+}
+
+std::shared_ptr<const Palette> Palette::black()
+{
+    static std::shared_ptr<const Palette> palette = nullptr;
+    if (!palette)
+        palette = std::make_shared<const Palette>(PixelFormat::rgb, 256, nullptr);
+
+    return palette;
+}
+
+std::shared_ptr<const Palette> Palette::playpal()
+{
+    static std::shared_ptr<const Palette> palette = nullptr;
+    if (!palette)
+        palette = std::make_shared<const Palette>(::playpal);
+
+    return palette;
 }
