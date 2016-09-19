@@ -61,6 +61,7 @@ namespace kex {
         std::unique_ptr<byte[]> mData = nullptr;
         std::shared_ptr<const Palette> mPalette = nullptr;
         SpriteOffsets mOffsets;
+        uint16 mTransparentIdx = static_cast<uint16>(-1);
 
         size_t _area() const
         { return mWidth * mHeight; }
@@ -74,7 +75,7 @@ namespace kex {
 
         Image(PixelFormat format, uint16 width, uint16 height, byte *data);
 
-        Image(PixelFormat format, uint16 width, uint16 height, std::unique_ptr<byte[]> data);
+        explicit Image(PixelFormat format, uint16 width, uint16 height, std::unique_ptr<byte[]> data);
 
         explicit Image(PixelFormat format, uint16 width, uint16 height, noinit_tag);
 
@@ -198,6 +199,12 @@ namespace kex {
 
         void set_palette(const std::shared_ptr<const Palette> &palette)
         { mPalette = palette; }
+
+        uint16 trans() const
+        { return mTransparentIdx; }
+
+        void set_trans(uint16 idx)
+        { mTransparentIdx = idx; }
 
         const SpriteOffsets &offsets() const
         { return mOffsets; }

@@ -234,6 +234,7 @@ namespace {
       {
           assert(mSrc.palette() && !mSrc.palette()->empty());
 
+          auto trans = mSrc.trans();
           auto srcMap = mSrc.map<SrcT>();
           auto srcIt = srcMap.cbegin();
           auto srcEnd = srcMap.cend();
@@ -242,10 +243,16 @@ namespace {
 
           for (; srcIt != srcEnd; ++srcIt, ++dstIt)
           {
-              if (srcIt->index)
-                  *dstIt = convert_pixel(*(srcPal + srcIt->index), pixel_traits<DstT>::tag());
-              else
+              auto index = srcIt->index;
+              if (index == trans)
+              {
                   *dstIt = DstT();
+                  continue;
+              } else if (index > trans) {
+                  index--;
+              }
+
+              *dstIt = convert_pixel(*(srcPal + index), pixel_traits<DstT>::tag());
           }
       };
   };
