@@ -128,6 +128,7 @@ void Gfx_CreateEXLump(gfxEx_t * pcGfx, gfxRom_t * romGfx)
 	_PAD4(pcGfx->height);
 
 	pcGfx->data = malloc(pcGfx->width * pcGfx->height);
+    ZeroMemory(pcGfx->data, pcGfx->width * pcGfx->height);
 
 	for (h = 0; h < romGfx->header.height; h++) {
 		for (w = 0; w < romGfx->header.width; w++)
