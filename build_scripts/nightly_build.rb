@@ -10,6 +10,7 @@
 
 require 'git'
 require 'fileutils'
+require 'time'
 include FileUtils
 
 REPO = 'https://github.com/svkaiser/doom64ex'
@@ -25,17 +26,17 @@ targets =
    { compiler: 'gcc',
      os: 'linux32',
      binary: 'doom64ex',
-     extern: 'https://dl.dropboxusercontent.com/u/7122698/linux-x86.tar.gz',
-     extern_copy_libs: 'lib/*.so',
+     extern: 'http://pub.dotfloat.com/doom64ex/dependencies/linux-x86.tar.xz',
+     extern_copy_libs: 'lib/*.so.*',
      env: { CFLAGS: '-m32', CXXFLAGS: '-m32' },
-     defines: { CMAKE_SKIP_RPATH: 'ON' } },
+     defines: { CMAKE_INSTALL_RPATH: '$ORIGIN' } },
    { compiler: 'gcc',
      os: 'linux64',
      binary: 'doom64ex',
      kexwad: true,
-     extern: 'https://dl.dropboxusercontent.com/u/7122698/linux-x86_64.tar.gz',
-     extern_copy_libs: 'lib/*.so',
-     defines: { CMAKE_SKIP_RPATH: 'ON' } }]
+     extern: 'http://pub.dotfloat.com/doom64ex/dependencies/linux-x86_64.tar.xz',
+     extern_copy_libs: 'lib/*.so.*',
+     defines: { CMAKE_INSTALL_RPATH: '$ORIGIN' } }]
 
 install =
   [{ archive: 'doom64ex-win32.zip',
@@ -49,9 +50,14 @@ install =
 class Hash
   attr_accessor :logfile
   attr_accessor :built
+  attr :percent
 
   def system(args)
-    logfile.puts(%x[ #{args} ])
+    temp = %x[ #{args} 2>&1 ]
+    match = temp.scan(/(\d+)%/).last
+    @percent = match.last if match
+
+    logfile.puts(temp)
     raise RuntimeError if $? != 0
   end
 end
@@ -81,12 +87,15 @@ def build(target)
     elsif target[:extern].end_with? '.tar.gz'
       target.system("wget #{target[:extern]} -O #{source}/extern.tar.gz")
       target.system("tar xvf #{source}/extern.tar.gz -C #{source}/extern")
+    elsif target[:extern].end_with? '.tar.xz'
+      target.system("wget #{target[:extern]} -O #{source}/extern.tar.xz")
+      target.system("tar xvf #{source}/extern.tar.xz -C #{source}/extern")
     end
   end
 
   toolchain = target[:toolchain] ? "-DCMAKE_TOOLCHAIN_FILE=#{source}/build_scripts/#{target[:toolchain]}" : ''
   defines = target.fetch(:defines, []).map { |k,v| "-D#{k}=#{v} " }.join
-  env = target.fetch(:env, []).map { |k,v| "#{k}=#{v} " }.join
+  env = target.fetch(:env, []).map { |k,v| "#{k}=#{v} " }.join + "LD_LIBRARY_PATH=#{source}/extern/lib "
   target.system("env #{env} cmake #{toolchain} -H#{source} -B#{build} #{defines}")
   target.system("cmake --build #{build} --target doom64ex --config Release -- -j4")
 
@@ -106,7 +115,26 @@ targets.each do |t|
   next if ARGV.fetch(0, t[:os]) != t[:os]
   threads << Thread.new { build(t) }
 end
+
+while threads.any?(&:alive?)
+  print "Building targets "
+  targets.each do |t|
+    perc = t.percent || 0
+    perc = perc.to_s.rjust(3)
+    print "#{t[:os]}-#{t[:compiler]} #{perc}% "
+  end
+  print "\r"
+
+  sleep 1
+end
+
 threads.each { |t| t.join }
+
+ftproot = "/srv/ftp/doom64ex/nightly"
+ftpcommit = "#{ftproot}/by-commit/#{git.gcommit('HEAD').sha}"
+ftpdate = "#{ftproot}/by-date/#{Time.now.utc.iso8601}"
+mkdir_p ftpcommit
+ln_s ftpcommit, ftpdate
 
 install.each do |i|
   oslist = i[:build].keys.map { |x| x.to_s }
@@ -138,4 +166,9 @@ install.each do |i|
   elsif i[:archive].end_with? '.tar.gz'
     system("tar czf #{ROOT_DIR}/#{i[:archive]} *")
   end
+
+  cp "#{ROOT_DIR}/#{i[:archive]}", ftpcommit
 end
+
+rm_f "#{ftproot}/latest"
+ln_s ftpcommit, "#{ftproot}/latest"
