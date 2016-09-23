@@ -70,15 +70,16 @@ Image* Image_New_FromMemory(const char *data, size_t size)
     }
 }
 
-int Image_Save(Image *image, StringView filename, StringView format)
+int Image_Save(Image *image, const char *filename, const char *format)
 {
     try {
-        std::ofstream f(filename.data());
+        std::ofstream f(filename);
         if (!f.is_open())
             return -1;
 
         image->save(f, format);
-    } catch (...) {
+    } catch (std::exception &e) {
+        fmt::print("Error occured while saving image: {}\n", e.what());
         return -1;
     }
 
