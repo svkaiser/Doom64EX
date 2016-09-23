@@ -411,7 +411,11 @@ ticcmd_t* I_BaseTiccmd(void) {
  */
 
 char *I_GetUserDir(void) {
+#ifdef _WIN32
+    return I_GetBaseDir();
+#else
     return SDL_GetPrefPath("", "doom64ex");
+#endif
 }
 
 /**
