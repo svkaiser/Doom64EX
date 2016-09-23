@@ -1,11 +1,7 @@
 #ifndef _WADGEN_SNDFONT_H_
 #define _WADGEN_SNDFONT_H_
 
-#if defined(__GNUC__) || defined(__MINGW32__)
-#define PACKED_STRUCT struct __attribute__((packed))
-#elif defined(_MSC_VER)
-#define PACKED_STRUCT __pragma(pack(push, 1)) struct __pragma(pack(pop))
-#endif
+#pragma pack(push, 1)
 
 typedef enum {
 
@@ -143,7 +139,7 @@ typedef enum {
  * That is, raw structs that are to be written the final sf2.
  */
 
-typedef PACKED_STRUCT {
+typedef struct {
 	byte byLo;
 	byte byHi;
 } sd_sfrange_t;
@@ -154,7 +150,7 @@ typedef union {
 	uint16 wAmount;
 } sd_sfgen_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	uint16 wMajor;
 	uint16 wMinor;
 } sd_sfversion_t;
@@ -165,7 +161,7 @@ typedef struct {
 	char *name;
 } sfname_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char LIST[4];
 	uint listsize;
 	char sdta[4];
@@ -178,7 +174,7 @@ typedef struct {
 	byte *wavdata;
 } sfdata_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char achPresetName[20];
 	uint16 wPreset;
 	uint16 wBank;
@@ -188,7 +184,7 @@ typedef PACKED_STRUCT {
 	uint dwMorphology;
 } sd_sfpresetinfo_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char phdr[4];
 	uint size;
 } sd_sfpresetheader_t;
@@ -198,22 +194,22 @@ typedef struct {
 	sd_sfpresetinfo_t *presets;
 } sfpresetheader_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	uint16 wGenNdx;
 	uint16 wModNdx;
 } sd_sfpresetbag_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char pbag[4];
 	uint size;
 } sd_sfpresetbagheader_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
     sd_sfpresetbagheader_t sd;
 	sd_sfpresetbag_t *presetbags;
 } sfpresetbagheader_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char pmod[4];
 	uint size;
 	short sfModSrcOper;
@@ -223,12 +219,12 @@ typedef PACKED_STRUCT {
 	short sfModTransOper;
 } sd_sfpresetmod_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	uint16 sfGenOper;
 	sd_sfgen_t genAmount;
 } sd_sfpresetgen_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char pgen[4];
 	uint size;
 } sd_sfpresetgenheader_t;
@@ -245,12 +241,12 @@ typedef struct {
 	sfpresetgenheader_t gen;
 } sfpreset_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char achInstName[20];
 	uint16 wInstBagNdx;
 } sd_sfinstinfo_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char imod[4];
 	uint size;
 	short sfModSrcOper;
@@ -260,7 +256,7 @@ typedef PACKED_STRUCT {
 	short sfModTransOper;
 } sd_sfinstmod_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char inst[4];
 	uint size;
 } sd_sfinstheader_t;
@@ -270,12 +266,12 @@ typedef struct {
 	sd_sfinstinfo_t *instruments;
 } sfinstheader_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	uint16 wInstGenNdx;
 	uint16 wInstModNdx;
 } sd_sfinstbag_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char ibag[4];
 	uint size;
 } sd_sfinstbagheader_t;
@@ -285,12 +281,12 @@ typedef struct {
 	sd_sfinstbag_t *instbags;
 } sfinstbagheader_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	uint16 sfGenOper;
 	sd_sfgen_t genAmount;
 } sd_sfinstgen_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char igen[4];
 	uint size;
 } sd_sfinstgenheader_t;
@@ -307,7 +303,7 @@ typedef struct {
 	sfinstgenheader_t gen;
 } sfinst_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char LIST[4];
 	uint listsize;
 	char pdta[4];
@@ -330,7 +326,7 @@ typedef enum {
 	RomLinkedSample = 0x8008
 } sfsamplelink_e;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char achSampleName[20];
 	uint dwStart;
 	uint dwEnd;
@@ -343,7 +339,7 @@ typedef PACKED_STRUCT {
 	uint16 sfSampleType;
 } sd_sfsampleinfo_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char shdr[4];
 	uint size;
 } sd_sfsample_t;
@@ -353,7 +349,7 @@ typedef struct {
 	sd_sfsampleinfo_t *info;
 } sfsample_t;
 
-typedef PACKED_STRUCT {
+typedef struct {
 	char RIFF[4];
 	uint filesize;
 	char sfbk[4];
@@ -385,5 +381,7 @@ void SF_CreatePresets(patch_t * patch, int npatch, subpatch_t * subpatch,
 void SF_SetupModulators(void);
 void SF_FinalizeChunkSizes(void);
 void SF_WriteSoundFont(void);
+
+#pragma pack(pop)
 
 #endif
