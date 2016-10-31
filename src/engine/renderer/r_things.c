@@ -687,7 +687,7 @@ void R_DrawPSprite(pspdef_t *psp, sector_t* sector, player_t *player) {
     // setup texture environment for effects
     //
     if(r_texturecombiner.value) {
-        float f[4];
+        float f[4] = {0};
 
         f[0] = f[1] = f[2] = ((float)sector->lightlevel / 255.0f);
 

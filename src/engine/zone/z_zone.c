@@ -291,6 +291,7 @@ void *(Z_Malloc)(int size, int tag, void *user, const char *file, int line) {
 void *(Z_Realloc)(void *ptr, int size, int tag, void *user, const char *file, int line) {
     memblock_t *block;
     memblock_t *newblock;
+    int origsize;
     unsigned char *data;
     void *result;
 
@@ -321,6 +322,7 @@ void *(Z_Realloc)(void *ptr, int size, int tag, void *user, const char *file, in
 
     Z_RemoveBlock(block);
 
+    origsize = block->size;
     block->next = NULL;
     block->prev = NULL;
 
@@ -350,6 +352,11 @@ void *(Z_Realloc)(void *ptr, int size, int tag, void *user, const char *file, in
 
     if(user != NULL) {
         *newblock->user = result;
+    }
+
+    // zero out newly created memory
+    if (origsize < size) {
+        memset(result + origsize, 0, size - origsize);
     }
 
 #ifdef ZONEFILE
