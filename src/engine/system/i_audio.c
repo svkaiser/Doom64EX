@@ -49,52 +49,10 @@
 #include "i_swap.h"
 #include "con_console.h"    // for cvars
 
+#include "SDL.h"
+
 // 20120203 villsa - cvar for soundfont location
 CVAR(s_soundfont, DOOMSND.SF2);
-
-// 20120203 villsa - cvar for audio driver
-#ifdef _WIN32
-CVAR_CMD(s_driver, dsound)
-#elif __linux__
-CVAR_CMD(s_driver, pulseaudio)
-#elif __APPLE__
-CVAR_CMD(s_driver, coreaudio)
-#else
-CVAR_CMD(s_driver, sndio)
-#endif
-{
-    char* driver = cvar->string;
-
-    // this is absolutely horrible
-    if(!dstrcmp(cvar->defvalue, "default")) {
-        cvar->defvalue = DEFAULT_FLUID_DRIVER;
-    }
-
-    // same as above
-    if(!dstrcmp(driver, "default")) {
-        CON_CvarSet(cvar->name, DEFAULT_FLUID_DRIVER);
-        return;
-    }
-
-    if(!dstrcmp(driver, "jack")        ||
-            !dstrcmp(driver, "alsa")        ||
-            !dstrcmp(driver, "oss")         ||
-            !dstrcmp(driver, "pulseaudio")  ||
-            !dstrcmp(driver, "coreaudio")   ||
-            !dstrcmp(driver, "dsound")      ||
-            !dstrcmp(driver, "portaudio")   ||
-            !dstrcmp(driver, "sndio")       ||
-            !dstrcmp(driver, "sndman")      ||
-            !dstrcmp(driver, "dart")        ||
-            !dstrcmp(driver, "file")
-      ) {
-        return;
-    }
-
-    CON_Warnf("Invalid driver name\n");
-    CON_Warnf("Valid driver names: jack, alsa, oss, pulseaudio, coreaudio, dsound, portaudio, sndio, sndman, dart, file\n");
-    CON_CvarSet(cvar->name, DEFAULT_FLUID_DRIVER);
-}
 
 //
 // Mutex
@@ -277,6 +235,17 @@ static doomseq_t doomseq = {0};   // doom sequencer
 
 typedef void(*eventhandler)(doomseq_t*, channel_t*);
 typedef int(*signalhandler)(doomseq_t*);
+
+//
+// Audio_Play
+//
+// Callback for SDL
+//
+static void Audio_Play(void *user, Uint8 *stream, int len)
+{
+    fluid_synth_t *synth = (fluid_synth_t *) user;
+    fluid_synth_write_s16(synth, len / (2 * sizeof(short)) , stream, 0, 2, stream, 1, 2);
+}
 
 //
 // Seq_SetGain
@@ -1119,7 +1088,6 @@ static void Seq_Shutdown(doomseq_t* seq) {
     //
     // fluidsynth cleanup stuff
     //
-    delete_fluid_audio_driver(seq->driver);
     delete_fluid_synth(seq->synth);
     delete_fluid_settings(seq->settings);
 
@@ -1234,12 +1202,6 @@ void I_InitSequencer(void) {
     Seq_SetConfig(&doomseq, "synth.midi-channels", 0x10 + MIDI_CHANNELS);
     Seq_SetConfig(&doomseq, "synth.polyphony", 256);
 
-    // 20120105 bkw: On Linux, always use alsa (fluidsynth default is to use
-    // JACK, if it's compiled in. We don't want to start jackd for a game).
-    fluid_settings_setstr(doomseq.settings, "audio.driver", s_driver.string);
-
-    CON_DPrintf("Audio driver: %s\n", s_driver.string);
-
     //
     // init synth
     //
@@ -1248,19 +1210,6 @@ void I_InitSequencer(void) {
         CON_Warnf("I_InitSequencer: failed to create synthesizer");
         return;
     }
-
-    //
-    // init audio driver
-    //
-    doomseq.driver = new_fluid_audio_driver(doomseq.settings, doomseq.synth);
-    if(doomseq.driver == NULL) {
-        CON_Warnf("I_InitSequencer: failed to create audio driver");
-        return;
-    }
-
-    //
-    // load soundfont
-    //
 
     sffound = false;
     if (s_soundfont.string[0]) {
@@ -1314,6 +1263,24 @@ void I_InitSequencer(void) {
     }
 
     Song_ClearPlaylist();
+
+    if (!SDL_WasInit(0))
+        SDL_Init(0);
+
+    if (!SDL_WasInit(SDL_INIT_AUDIO))
+        SDL_InitSubSystem(SDL_INIT_AUDIO);
+
+    SDL_AudioSpec spec;
+
+    spec.format = AUDIO_S16;
+    spec.freq = 48000;
+    spec.samples = 4096;
+    spec.channels = 2;
+    spec.callback = Audio_Play;
+    spec.userdata = doomseq.synth;
+
+    SDL_OpenAudio(&spec, NULL);
+    SDL_PauseAudio(SDL_FALSE);
 
     // 20120205 villsa - sequencer is now ready
     seqready = true;

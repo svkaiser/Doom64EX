@@ -1,5 +1,6 @@
 # ignore CLion-specific project files
 /.idea/
+/cmake-build-*/
 
 # extern
 /extern/
