@@ -1,5 +1,5 @@
 language: c++
-dist: precise
+dist: trusty
 sudo: required 
 
 matrix:
