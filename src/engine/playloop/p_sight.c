@@ -371,7 +371,7 @@ void P_ScanSights(void) {
         }
 
         // must have longer tics
-        if(mobj->tics == 1) {
+        if(mobj->tics != 1) {
             continue;
         }
 
