@@ -38,8 +38,6 @@
 
 #define MAX_ARGS 256
 char *ArgBuffer[MAX_ARGS + 1];
-int myargc = 0;
-char **myargv;
 
 void WGen_ShutDownApplication(void);
 

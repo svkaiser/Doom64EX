@@ -161,7 +161,7 @@ add_sources(misc
   m_fixed.c
   m_keys.c
   m_menu.c
-  m_misc.c
+  m_misc.cc
   m_password.c
   m_random.c
   m_shift.c
@@ -187,7 +187,7 @@ add_sources(opengl
   dgl.c
   gl_draw.c
   gl_main.c
-  gl_texture.c
+  gl_texture.cc
   )
 
 # src/parser
@@ -249,7 +249,7 @@ add_sources(statusbar
 add_sources(system
   i_audio.c
   i_main.c
-  i_png.c
+  i_png.cc
   i_swap.h
   i_system.c
   i_video.c
@@ -299,6 +299,7 @@ add_sources(zone
 add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(doom64ex ${LIBRARIES})
+set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
 
 ##------------------------------------------------------------------------------
 ## Install target

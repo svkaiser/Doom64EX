@@ -25,9 +25,7 @@
 
 #include "doomtype.h"
 
-#include <kex/compat/gfx.h>
-
-Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
+void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex);
 
 #endif // __I_PNG_H__

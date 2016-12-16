@@ -25,19 +25,20 @@
 //
 //-----------------------------------------------------------------------------
 
+extern "C" {
+
 #include <math.h>
 #include <w_wad.h>
 
 #include "doomdef.h"
-#include "doomtype.h"
-#include "i_system.h"
 #include "i_swap.h"
-#include "m_fixed.h"
 #include "z_zone.h"
-#include "w_wad.h"
 #include "gl_texture.h"
 #include "con_console.h"
-#include "i_png.h"
+}
+
+#include <kex/gfx/Image>
+#include <sstream>
 
 CVAR_CMD(i_gamma, 0) {
     GL_DumpTextures();
@@ -70,84 +71,93 @@ d_inline static byte I_GetRGBGamma(int c) {
 // Increases the palette RGB based on gamma settings
 //
 
-static void I_TranslatePalette(byte *dest, size_t color_size) {
+static void I_TranslatePalette(gfx::Palette &dest) {
     int i = 0;
 
-    for(i = 0; i < 256; i += color_size) {
-        dest[i * color_size + 0] = I_GetRGBGamma(dest[i * color_size + 0]);
-        dest[i * color_size + 1] = I_GetRGBGamma(dest[i * color_size + 1]);
-        dest[i * color_size + 2] = I_GetRGBGamma(dest[i * color_size + 2]);
+    if (i_gamma.value == 0)
+        return;
+
+    auto color_count = dest.count();
+    auto color_size = dest.traits().bytes;
+
+    for(i = 0; i < color_count; i += color_size) {
+        dest.data_ptr()[i * color_size + 0] = I_GetRGBGamma(dest.data_ptr()[i * color_size + 0]);
+        dest.data_ptr()[i * color_size + 1] = I_GetRGBGamma(dest.data_ptr()[i * color_size + 1]);
+        dest.data_ptr()[i * color_size + 2] = I_GetRGBGamma(dest.data_ptr()[i * color_size + 2]);
     }
 }
 
 //
 // I_PNGReadData
 //
-
-Image *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
+extern "C"
+void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex) {
-    Image *image;
-    void *lcache;
+    char *lcache;
     int lsize;
     int i;
 
     // get lump data
-    lcache = W_CacheLumpNum(lump, PU_STATIC);
+    lcache = reinterpret_cast<char*>(W_CacheLumpNum(lump, PU_STATIC));
     lsize = W_LumpLength(lump);
 
-    image = Image_New_FromMemory(lcache, lsize);
-    assert(image);
+    std::istringstream ss(std::string(lcache, lsize));
+    gfx::Image image {ss}; //= Image_New_FromMemory(lcache, lsize);
 
     // look for offset chunk if specified
     if(offset) {
-        offset[0] = Image_GetOffsets(image).x;
-        offset[1] = Image_GetOffsets(image).y;
+        offset[0] = image.offsets().x;
+        offset[1] = image.offsets().y;
     }
 
-    if (palindex && Image_IsIndexed(image))
+    if (palindex && image.is_indexed())
     {
-        Palette *palette;
         int pal_bytes;
-        int pal_count;
-        byte *pal;
+        size_t pal_count;
+        const byte *oldpal;
 
-        palette = Image_GetPalette(image);
-        pal = Palette_GetData(palette);
-        pal_bytes = Palette_HasAlpha(palette) ? 4 : 3;
-        pal_count = Palette_GetCount(palette);
+        auto pal = image.palette();
+        oldpal = pal->data_ptr();
+        pal_bytes = pal->traits().alpha ? 4 : 3;
+        pal_count = pal->count();
 
         char palname[9];
         snprintf(palname, sizeof(palname), "PAL%4.4s%d", lumpinfo[lump].name, palindex);
 
+        gfx::Palette newpal;
         if (W_CheckNumForName(palname) != -1)
         {
-            byte *pallump = W_CacheLumpName(palname, PU_STATIC);
+            gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(W_CacheLumpName(palname, PU_STATIC));
+            newpal = gfx::Palette {gfx::PixelFormat::rgb, pal_count, nullptr};
 
             // swap out current palette with the new one
-            for (i = 0; i < pal_count; i++)
-            {
-                pal[i * pal_bytes + 0] = pallump[i * 3 + 0];
-                pal[i * pal_bytes + 1] = pallump[i * 3 + 1];
-                pal[i * pal_bytes + 2] = pallump[i * 3 + 2];
+            for (auto& c : newpal.map<gfx::Rgb>()) {
+                c = *pallump++;
             }
 
-            Z_Free(pallump);
+            free(pallump);
         } else {
-            dmemcpy(pal, pal + (16 * palindex) * pal_bytes, 16 * pal_bytes);
+            newpal = gfx::Palette { pal->format(), 16, pal->data_ptr() + (16 * palindex) * pal->traits().bytes };
+            pal_count = 16;
         }
 
-        I_TranslatePalette(pal, pal_bytes);
+        I_TranslatePalette(newpal);
+        image.set_palette(newpal);
     }
 
     if (!palette)
-        Image_Convert(image, alpha ? PF_RGBA : PF_RGB);
+        image.convert(alpha ? gfx::PixelFormat::rgba : gfx::PixelFormat::rgb);
 
     if(w) {
-        *w = Image_GetWidth(image);
+        *w = image.width();
     }
     if(h) {
-        *h = Image_GetHeight(image);
+        *h = image.height();
     }
 
-    return image;
+    auto length = image.traits().bytes * image.width() * image.height();
+    auto retval = reinterpret_cast<byte*>(malloc(length));
+    std::copy_n(image.data_ptr(), length, retval);
+
+    return retval;
 }

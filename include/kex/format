@@ -3094,16 +3094,6 @@ FMT_API void report_windows_error(int error_code,
 
 #endif
 
-enum Color { BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE };
-
-/**
-  Formats a string and prints it to stdout using ANSI escape sequences
-  to specify color (experimental).
-  Example:
-    print_colored(fmt::RED, "Elapsed time: {0:.2f} seconds", 1.23);
- */
-FMT_API void print_colored(Color c, CStringRef format, ArgList args);
-
 /**
   \rst
   Formats arguments and returns the result as a string.
@@ -3463,7 +3453,6 @@ FMT_VARIADIC_W(std::wstring, format, WCStringRef)
 FMT_VARIADIC(void, print, CStringRef)
 FMT_VARIADIC(void, print, std::FILE *, CStringRef)
 
-FMT_VARIADIC(void, print_colored, Color, CStringRef)
 FMT_VARIADIC(std::string, sprintf, CStringRef)
 FMT_VARIADIC_W(std::wstring, sprintf, WCStringRef)
 FMT_VARIADIC(int, printf, CStringRef)

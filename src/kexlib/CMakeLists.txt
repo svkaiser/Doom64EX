@@ -46,8 +46,7 @@ set(SOURCES
   gfx/Image.cc
   gfx/PngImage.cc
   gfx/DoomImage.cc
-  gfx/Pixel.cc
-  compat/C_gfx.cc)
+  gfx/Pixel.cc)
 
 ##------------------------------------------------------------------------------
 ## Build target

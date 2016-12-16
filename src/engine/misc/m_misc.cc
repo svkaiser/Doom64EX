@@ -32,27 +32,30 @@
 
 #ifdef _WIN32
 #include <io.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <errno.h>
-//#include <GL/glu.h>
+
+#include <fstream>
+#include <algorithm>
+#include <kex/gfx/Image>
+
+extern "C" {
 
 #include "doomstat.h"
 #include "m_misc.h"
 #include "z_zone.h"
 #include "g_local.h"
-#include "st_stuff.h"
-#include "i_png.h"
-#include "gl_texture.h"
 #include "p_saveg.h"
 
 int        myargc;
 char**    myargv;
 
+}
 
 //
 // M_CheckParm
@@ -170,7 +173,7 @@ int M_ReadFile(char const* name, byte** buffer) {
         length = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        *buffer = Z_Malloc(length, PU_STATIC, 0);
+        *buffer = reinterpret_cast<byte*>(malloc(length));
 
         if(fread(*buffer, 1, length, fp) == length) {
             fclose(fp);
@@ -290,22 +293,19 @@ void M_ScreenShot(void) {
     char    name[13];
     int     shotnum=0;
     byte    *buff;
-    Image   *image;
     int     size;
+    std::ofstream file;
 
     while(shotnum < 1000) {
-        sprintf(name, "sshot%03d.png", shotnum);
-        if(access(name, 0) != 0) {
+        file.open(fmt::format("sshot{:03d}.png", shotnum));
+
+        if (file.is_open())
             break;
-        }
+
         shotnum++;
     }
 
     if(shotnum >= 1000) {
-        return;
-    }
-
-    if((video_height % 2)) {  // height must be power of 2
         return;
     }
 
@@ -314,13 +314,12 @@ void M_ScreenShot(void) {
 
     // Get PNG image
 
-    image = Image_New_FromData(PF_RGB, video_width, video_height, buff);
-    Image_Save(image, name, "png");
-    Image_Free(image);
+    gfx::Image image {gfx::PixelFormat::rgb, video_width, video_height, buff};
+    image.save(file, "png");
 
     Z_Free(buff);
 
-    I_Printf("Saved Screenshot %s\n", name);
+    fmt::print("Saved Screenshot {}\n", name);
 }
 
 //
@@ -332,15 +331,13 @@ void M_ScreenShot(void) {
 int M_CacheThumbNail(byte** data) {
     byte* buff;
     byte* tbn;
-    Image* image;
 
     buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
-    tbn = Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0);
+    tbn = reinterpret_cast<byte*>(Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0));
 
-    image = Image_New_FromData(PF_RGB, video_width, video_height, buff);
-    Image_Scale(image, 128, 128);
-    dmemcpy(tbn, Image_GetData(image), 128 * 128 * 3);
-    Image_Free(image);
+    gfx::Image image {gfx::PixelFormat::rgb, video_width, video_height, buff};
+    image.scale(128, 128);
+    std::copy_n(image.data_ptr(), SAVEGAMETBSIZE, tbn);
 
     Z_Free(buff);
 

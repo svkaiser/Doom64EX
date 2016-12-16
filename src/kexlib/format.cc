@@ -875,14 +875,6 @@ FMT_FUNC void fmt::print(CStringRef format_str, ArgList args) {
   print(stdout, format_str, args);
 }
 
-FMT_FUNC void fmt::print_colored(Color c, CStringRef format, ArgList args) {
-  char escape[] = "\x1b[30m";
-  escape[3] = static_cast<char>('0' + c);
-  std::fputs(escape, stdout);
-  print(format, args);
-  std::fputs(RESET_COLOR, stdout);
-}
-
 FMT_FUNC int fmt::fprintf(std::FILE *f, CStringRef format, ArgList args) {
   MemoryWriter w;
   printf(w, format, args);
