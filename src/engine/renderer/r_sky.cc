@@ -28,6 +28,8 @@
 
 #include <stdlib.h>
 
+extern "C" {
+
 #include "doomstat.h"
 #include "r_lights.h"
 #include "r_sky.h"
@@ -44,6 +46,8 @@
 #include "gl_draw.h"
 #include "r_drawlist.h"
 
+}
+
 skydef_t*   sky;
 int         skypicnum = -1;
 int         skybackdropnum = -1;
@@ -53,7 +57,7 @@ int         lightningCounter = 0;
 int         thundertic = 1;
 dboolean    skyfadeback = false;
 int         fireLump = -1;
-Image*      fireImage = NULL;
+gfx::Image  fireImage {};
 
 static word CloudOffsetY = 0;
 static word CloudOffsetX = 0;
@@ -598,7 +602,6 @@ static void R_SpreadFire(byte* src1, byte* src2, int pixel, int counter, int* ra
 //
 
 static void R_Fire() {
-#if 0
     int counter = 0;
     int rand = 0;
     int step = 0;
@@ -607,7 +610,7 @@ static void R_Fire() {
     byte *srcoffset;
 
     rand = (M_Random() & 0xff);
-    src = Image_GetData(fireImage);
+    src = fireImage.data_ptr();
     counter = 0;
     src += FIRESKY_WIDTH;
 
@@ -645,7 +648,6 @@ static void R_Fire() {
 
     }
     while(counter < FIRESKY_WIDTH);
-#endif
 }
 
 //
@@ -655,25 +657,23 @@ static void R_Fire() {
 static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
-#if 0
     int i;
     byte *pixdata;
-    byte *paldata;
 
     fireLump = W_GetNumForName("FIRE") - g_start;
-    fireImage = I_PNGReadData(g_start + fireLump, true, true, false, 0, 0, 0, 0);
+    fireImage = I_ReadImage(g_start + fireLump, true, true, false, 0);
 
-    pixdata = Image_GetData(fireImage);
+    pixdata = fireImage.data_ptr();
     for (i = 0; i < 4096; i++)
         pixdata[i] >>= 4;
 
-    paldata = Palette_GetData(Image_GetPalette(fireImage));
-    for(i = 0; i < 16; i++) {
-        paldata[i * 3 + 0] = 16 * i;
-        paldata[i * 3 + 1] = 16 * i;
-        paldata[i * 3 + 2] = 16 * i;
+    uint8 j = 0;
+    gfx::Palette paldata { gfx::PixelFormat::rgba, 16, nullptr };
+    for(auto& c : paldata.map<gfx::Rgba>()) {
+        c = gfx::Rgba { j, j, j, 0xff };
+        j += 16;
     }
-#endif
+    fireImage.set_palette(paldata);
 }
 
 //
@@ -691,13 +691,12 @@ static void R_FireTicker(void) {
 //
 
 static void R_DrawFire(void) {
-#if 0
     float pos1;
     vtx_t v[4];
     dtexture t = gfxptr[fireLump];
     int i;
-    byte *fireBuffer;
-    dPalette_t *firePal16;
+    const byte *fireBuffer;
+    const byte *firePal16;
 
     /* I'm currently lazy as hell. All of this will eventually (well, hopefully) be ported
        to C++. When that happens, we'll be able to easily and safely convert the fire
@@ -705,8 +704,8 @@ static void R_DrawFire(void) {
        But right now I can't be arsed. Talk to me in 2030 when I still haven't done it.
        -dotfloat
        TODO: Rewrite this */
-    firePal16 = Palette_GetData(Image_GetPalette(fireImage));
-    fireBuffer = Image_GetData(fireImage);
+    firePal16 = fireImage.palette()->data_ptr();
+    fireBuffer = fireImage.data_ptr();
 
     //
     // copy fire pixel data to texture data array
@@ -715,9 +714,9 @@ static void R_DrawFire(void) {
     for(i = 0; i < FIRESKY_WIDTH * FIRESKY_HEIGHT; i++) {
         byte rgb[3];
 
-        rgb[0] = firePal16[fireBuffer[i]].r;
-        rgb[1] = firePal16[fireBuffer[i]].g;
-        rgb[2] = firePal16[fireBuffer[i]].b;
+        rgb[0] = firePal16[4 * fireBuffer[i] + 0];
+        rgb[1] = firePal16[4 * fireBuffer[i] + 1];
+        rgb[2] = firePal16[4 * fireBuffer[i] + 2];
 
         firetexture[i] = D_RGBA(rgb[2], rgb[1], rgb[0], 0xff);
     }
@@ -787,7 +786,6 @@ static void R_DrawFire(void) {
         R_DrawSkyDome(16, 1, 1024, 4096, -896, 0.0075f,
                       sky->skycolor[0], sky->skycolor[1]);
     }
-#endif
 }
 
 //

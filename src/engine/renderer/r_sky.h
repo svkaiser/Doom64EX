@@ -42,7 +42,7 @@ extern dboolean     skyfadeback;
 extern int          skyflatnum;
 
 extern int          fireLump;
-extern Image*       fireImage;
+// extern Image*       fireImage;
 
 void R_SkyTicker(void);
 void R_DrawSky(void);

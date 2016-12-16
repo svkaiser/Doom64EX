@@ -87,12 +87,8 @@ static void I_TranslatePalette(gfx::Palette &dest) {
     }
 }
 
-//
-// I_PNGReadData
-//
-extern "C"
-void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
-                    int* w, int* h, int* offset, int palindex) {
+gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
+{
     char *lcache;
     int lsize;
     int i;
@@ -103,12 +99,6 @@ void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
 
     std::istringstream ss(std::string(lcache, lsize));
     gfx::Image image {ss}; //= Image_New_FromMemory(lcache, lsize);
-
-    // look for offset chunk if specified
-    if(offset) {
-        offset[0] = image.offsets().x;
-        offset[1] = image.offsets().y;
-    }
 
     if (palindex && image.is_indexed())
     {
@@ -146,6 +136,24 @@ void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
 
     if (!palette)
         image.convert(alpha ? gfx::PixelFormat::rgba : gfx::PixelFormat::rgb);
+
+    return image;
+}
+
+//
+// I_PNGReadData
+//
+extern "C"
+void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
+                    int* w, int* h, int* offset, int palindex)
+{
+    auto image = I_ReadImage(lump, palette, nopack, alpha, palindex);
+
+    // look for offset chunk if specified
+    if(offset) {
+        offset[0] = image.offsets().x;
+        offset[1] = image.offsets().y;
+    }
 
     if(w) {
         *w = image.width();

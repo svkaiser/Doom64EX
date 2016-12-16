@@ -230,7 +230,7 @@ add_sources(renderer
   r_local.h
   r_main.c
   r_scene.c
-  r_sky.c
+  r_sky.cc
   r_things.c
   r_wipe.c
   )
