@@ -5417,7 +5417,7 @@ void M_Ticker(void) {
     //
     // hide anisotropic option if not supported on video card
     //
-    if(!has_GL_EXT_texture_filter_anisotropic) {
+    if(!GLAD_GL_EXT_texture_filter_anisotropic) {
         VideoMenu[anisotropic].status = -3;
     }
 

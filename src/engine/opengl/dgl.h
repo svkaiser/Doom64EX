@@ -25,8 +25,8 @@
 
 #include <math.h>
 
-#include "SDL_opengl.h"
 #include "gl_main.h"
+#include "glad.h"
 #include "i_system.h"
 
 //#define LOG_GLFUNC_CALLS
@@ -3419,153 +3419,43 @@ d_inline static void glViewport_DEBUG(GLint x, GLint y, GLsizei width, GLsizei h
 //
 // GL_ARB_multitexture
 //
-extern dboolean has_GL_ARB_multitexture;
-
-extern PFNGLACTIVETEXTUREARBPROC _glActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC _glClientActiveTextureARB;
-extern PFNGLMULTITEXCOORD1DARBPROC _glMultiTexCoord1dARB;
-extern PFNGLMULTITEXCOORD1DVARBPROC _glMultiTexCoord1dvARB;
-extern PFNGLMULTITEXCOORD1FARBPROC _glMultiTexCoord1fARB;
-extern PFNGLMULTITEXCOORD1FVARBPROC _glMultiTexCoord1fvARB;
-extern PFNGLMULTITEXCOORD1IARBPROC _glMultiTexCoord1iARB;
-extern PFNGLMULTITEXCOORD1IVARBPROC _glMultiTexCoord1ivARB;
-extern PFNGLMULTITEXCOORD1SARBPROC _glMultiTexCoord1sARB;
-extern PFNGLMULTITEXCOORD1SVARBPROC _glMultiTexCoord1svARB;
-extern PFNGLMULTITEXCOORD2DARBPROC _glMultiTexCoord2dARB;
-extern PFNGLMULTITEXCOORD2DVARBPROC _glMultiTexCoord2dvARB;
-extern PFNGLMULTITEXCOORD2FARBPROC _glMultiTexCoord2fARB;
-extern PFNGLMULTITEXCOORD2FVARBPROC _glMultiTexCoord2fvARB;
-extern PFNGLMULTITEXCOORD2IARBPROC _glMultiTexCoord2iARB;
-extern PFNGLMULTITEXCOORD2IVARBPROC _glMultiTexCoord2ivARB;
-extern PFNGLMULTITEXCOORD2SARBPROC _glMultiTexCoord2sARB;
-extern PFNGLMULTITEXCOORD2SVARBPROC _glMultiTexCoord2svARB;
-extern PFNGLMULTITEXCOORD3DARBPROC _glMultiTexCoord3dARB;
-extern PFNGLMULTITEXCOORD3DVARBPROC _glMultiTexCoord3dvARB;
-extern PFNGLMULTITEXCOORD3FARBPROC _glMultiTexCoord3fARB;
-extern PFNGLMULTITEXCOORD3FVARBPROC _glMultiTexCoord3fvARB;
-extern PFNGLMULTITEXCOORD3IARBPROC _glMultiTexCoord3iARB;
-extern PFNGLMULTITEXCOORD3IVARBPROC _glMultiTexCoord3ivARB;
-extern PFNGLMULTITEXCOORD3SARBPROC _glMultiTexCoord3sARB;
-extern PFNGLMULTITEXCOORD3SVARBPROC _glMultiTexCoord3svARB;
-extern PFNGLMULTITEXCOORD4DARBPROC _glMultiTexCoord4dARB;
-extern PFNGLMULTITEXCOORD4DVARBPROC _glMultiTexCoord4dvARB;
-extern PFNGLMULTITEXCOORD4FARBPROC _glMultiTexCoord4fARB;
-extern PFNGLMULTITEXCOORD4FVARBPROC _glMultiTexCoord4fvARB;
-extern PFNGLMULTITEXCOORD4IARBPROC _glMultiTexCoord4iARB;
-extern PFNGLMULTITEXCOORD4IVARBPROC _glMultiTexCoord4ivARB;
-extern PFNGLMULTITEXCOORD4SARBPROC _glMultiTexCoord4sARB;
-extern PFNGLMULTITEXCOORD4SVARBPROC _glMultiTexCoord4svARB;
-
-#define GL_ARB_multitexture_Define() \
-dboolean has_GL_ARB_multitexture = false; \
-PFNGLACTIVETEXTUREARBPROC _glActiveTextureARB = NULL; \
-PFNGLCLIENTACTIVETEXTUREARBPROC _glClientActiveTextureARB = NULL; \
-PFNGLMULTITEXCOORD1DARBPROC _glMultiTexCoord1dARB = NULL; \
-PFNGLMULTITEXCOORD1DVARBPROC _glMultiTexCoord1dvARB = NULL; \
-PFNGLMULTITEXCOORD1FARBPROC _glMultiTexCoord1fARB = NULL; \
-PFNGLMULTITEXCOORD1FVARBPROC _glMultiTexCoord1fvARB = NULL; \
-PFNGLMULTITEXCOORD1IARBPROC _glMultiTexCoord1iARB = NULL; \
-PFNGLMULTITEXCOORD1IVARBPROC _glMultiTexCoord1ivARB = NULL; \
-PFNGLMULTITEXCOORD1SARBPROC _glMultiTexCoord1sARB = NULL; \
-PFNGLMULTITEXCOORD1SVARBPROC _glMultiTexCoord1svARB = NULL; \
-PFNGLMULTITEXCOORD2DARBPROC _glMultiTexCoord2dARB = NULL; \
-PFNGLMULTITEXCOORD2DVARBPROC _glMultiTexCoord2dvARB = NULL; \
-PFNGLMULTITEXCOORD2FARBPROC _glMultiTexCoord2fARB = NULL; \
-PFNGLMULTITEXCOORD2FVARBPROC _glMultiTexCoord2fvARB = NULL; \
-PFNGLMULTITEXCOORD2IARBPROC _glMultiTexCoord2iARB = NULL; \
-PFNGLMULTITEXCOORD2IVARBPROC _glMultiTexCoord2ivARB = NULL; \
-PFNGLMULTITEXCOORD2SARBPROC _glMultiTexCoord2sARB = NULL; \
-PFNGLMULTITEXCOORD2SVARBPROC _glMultiTexCoord2svARB = NULL; \
-PFNGLMULTITEXCOORD3DARBPROC _glMultiTexCoord3dARB = NULL; \
-PFNGLMULTITEXCOORD3DVARBPROC _glMultiTexCoord3dvARB = NULL; \
-PFNGLMULTITEXCOORD3FARBPROC _glMultiTexCoord3fARB = NULL; \
-PFNGLMULTITEXCOORD3FVARBPROC _glMultiTexCoord3fvARB = NULL; \
-PFNGLMULTITEXCOORD3IARBPROC _glMultiTexCoord3iARB = NULL; \
-PFNGLMULTITEXCOORD3IVARBPROC _glMultiTexCoord3ivARB = NULL; \
-PFNGLMULTITEXCOORD3SARBPROC _glMultiTexCoord3sARB = NULL; \
-PFNGLMULTITEXCOORD3SVARBPROC _glMultiTexCoord3svARB = NULL; \
-PFNGLMULTITEXCOORD4DARBPROC _glMultiTexCoord4dARB = NULL; \
-PFNGLMULTITEXCOORD4DVARBPROC _glMultiTexCoord4dvARB = NULL; \
-PFNGLMULTITEXCOORD4FARBPROC _glMultiTexCoord4fARB = NULL; \
-PFNGLMULTITEXCOORD4FVARBPROC _glMultiTexCoord4fvARB = NULL; \
-PFNGLMULTITEXCOORD4IARBPROC _glMultiTexCoord4iARB = NULL; \
-PFNGLMULTITEXCOORD4IVARBPROC _glMultiTexCoord4ivARB = NULL; \
-PFNGLMULTITEXCOORD4SARBPROC _glMultiTexCoord4sARB = NULL; \
-PFNGLMULTITEXCOORD4SVARBPROC _glMultiTexCoord4svARB = NULL
-
-#define GL_ARB_multitexture_Init() \
-has_GL_ARB_multitexture = GL_CheckExtension("GL_ARB_multitexture"); \
-_glActiveTextureARB = GL_RegisterProc("glActiveTextureARB"); \
-_glClientActiveTextureARB = GL_RegisterProc("glClientActiveTextureARB"); \
-_glMultiTexCoord1dARB = GL_RegisterProc("glMultiTexCoord1dARB"); \
-_glMultiTexCoord1dvARB = GL_RegisterProc("glMultiTexCoord1dvARB"); \
-_glMultiTexCoord1fARB = GL_RegisterProc("glMultiTexCoord1fARB"); \
-_glMultiTexCoord1fvARB = GL_RegisterProc("glMultiTexCoord1fvARB"); \
-_glMultiTexCoord1iARB = GL_RegisterProc("glMultiTexCoord1iARB"); \
-_glMultiTexCoord1ivARB = GL_RegisterProc("glMultiTexCoord1ivARB"); \
-_glMultiTexCoord1sARB = GL_RegisterProc("glMultiTexCoord1sARB"); \
-_glMultiTexCoord1svARB = GL_RegisterProc("glMultiTexCoord1svARB"); \
-_glMultiTexCoord2dARB = GL_RegisterProc("glMultiTexCoord2dARB"); \
-_glMultiTexCoord2dvARB = GL_RegisterProc("glMultiTexCoord2dvARB"); \
-_glMultiTexCoord2fARB = GL_RegisterProc("glMultiTexCoord2fARB"); \
-_glMultiTexCoord2fvARB = GL_RegisterProc("glMultiTexCoord2fvARB"); \
-_glMultiTexCoord2iARB = GL_RegisterProc("glMultiTexCoord2iARB"); \
-_glMultiTexCoord2ivARB = GL_RegisterProc("glMultiTexCoord2ivARB"); \
-_glMultiTexCoord2sARB = GL_RegisterProc("glMultiTexCoord2sARB"); \
-_glMultiTexCoord2svARB = GL_RegisterProc("glMultiTexCoord2svARB"); \
-_glMultiTexCoord3dARB = GL_RegisterProc("glMultiTexCoord3dARB"); \
-_glMultiTexCoord3dvARB = GL_RegisterProc("glMultiTexCoord3dvARB"); \
-_glMultiTexCoord3fARB = GL_RegisterProc("glMultiTexCoord3fARB"); \
-_glMultiTexCoord3fvARB = GL_RegisterProc("glMultiTexCoord3fvARB"); \
-_glMultiTexCoord3iARB = GL_RegisterProc("glMultiTexCoord3iARB"); \
-_glMultiTexCoord3ivARB = GL_RegisterProc("glMultiTexCoord3ivARB"); \
-_glMultiTexCoord3sARB = GL_RegisterProc("glMultiTexCoord3sARB"); \
-_glMultiTexCoord3svARB = GL_RegisterProc("glMultiTexCoord3svARB"); \
-_glMultiTexCoord4dARB = GL_RegisterProc("glMultiTexCoord4dARB"); \
-_glMultiTexCoord4dvARB = GL_RegisterProc("glMultiTexCoord4dvARB"); \
-_glMultiTexCoord4fARB = GL_RegisterProc("glMultiTexCoord4fARB"); \
-_glMultiTexCoord4fvARB = GL_RegisterProc("glMultiTexCoord4fvARB"); \
-_glMultiTexCoord4iARB = GL_RegisterProc("glMultiTexCoord4iARB"); \
-_glMultiTexCoord4ivARB = GL_RegisterProc("glMultiTexCoord4ivARB"); \
-_glMultiTexCoord4sARB = GL_RegisterProc("glMultiTexCoord4sARB"); \
-_glMultiTexCoord4svARB = GL_RegisterProc("glMultiTexCoord4svARB")
 
 #ifndef USE_DEBUG_GLFUNCS
 
-#define dglActiveTextureARB(texture) _glActiveTextureARB(texture)
-#define dglClientActiveTextureARB(texture) _glClientActiveTextureARB(texture)
-#define dglMultiTexCoord1dARB(target, s) _glMultiTexCoord1dARB(target, s)
-#define dglMultiTexCoord1dvARB(target, v) _glMultiTexCoord1dvARB(target, v)
-#define dglMultiTexCoord1fARB(target, s) _glMultiTexCoord1fARB(target, s)
-#define dglMultiTexCoord1fvARB(target, v) _glMultiTexCoord1fvARB(target, v)
-#define dglMultiTexCoord1iARB(target, s) _glMultiTexCoord1iARB(target, s)
-#define dglMultiTexCoord1ivARB(target, v) _glMultiTexCoord1ivARB(target, v)
-#define dglMultiTexCoord1sARB(target, s) _glMultiTexCoord1sARB(target, s)
-#define dglMultiTexCoord1svARB(target, v) _glMultiTexCoord1svARB(target, v)
-#define dglMultiTexCoord2dARB(target, s, t) _glMultiTexCoord2dARB(target, s, t)
-#define dglMultiTexCoord2dvARB(target, v) _glMultiTexCoord2dvARB(target, v)
-#define dglMultiTexCoord2fARB(target, s, t) _glMultiTexCoord2fARB(target, s, t)
-#define dglMultiTexCoord2fvARB(target, v) _glMultiTexCoord2fvARB(target, v)
-#define dglMultiTexCoord2iARB(target, s, t) _glMultiTexCoord2iARB(target, s, t)
-#define dglMultiTexCoord2ivARB(target, v) _glMultiTexCoord2ivARB(target, v)
-#define dglMultiTexCoord2sARB(target, s, t) _glMultiTexCoord2sARB(target, s, t)
-#define dglMultiTexCoord2svARB(target, v) _glMultiTexCoord2svARB(target, v)
-#define dglMultiTexCoord3dARB(target, s, t, r) _glMultiTexCoord3dARB(target, s, t, r)
-#define dglMultiTexCoord3dvARB(target, v) _glMultiTexCoord3dvARB(target, v)
-#define dglMultiTexCoord3fARB(target, s, t, r) _glMultiTexCoord3fARB(target, s, t, r)
-#define dglMultiTexCoord3fvARB(target, v) _glMultiTexCoord3fvARB(target, v)
-#define dglMultiTexCoord3iARB(target, s, t, r) _glMultiTexCoord3iARB(target, s, t, r)
-#define dglMultiTexCoord3ivARB(target, v) _glMultiTexCoord3ivARB(target, v)
-#define dglMultiTexCoord3sARB(target, s, t, r) _glMultiTexCoord3sARB(target, s, t, r)
-#define dglMultiTexCoord3svARB(target, v) _glMultiTexCoord3svARB(target, v)
-#define dglMultiTexCoord4dARB(target, s, t, r, q) _glMultiTexCoord4dARB(target, s, t, r, q)
-#define dglMultiTexCoord4dvARB(target, v) _glMultiTexCoord4dvARB(target, v)
-#define dglMultiTexCoord4fARB(target, s, t, r, q) _glMultiTexCoord4fARB(target, s, t, r, q)
-#define dglMultiTexCoord4fvARB(target, v) _glMultiTexCoord4fvARB(target, v)
-#define dglMultiTexCoord4iARB(target, s, t, r, q) _glMultiTexCoord4iARB(target, s, t, r, q)
-#define dglMultiTexCoord4ivARB(target, v) _glMultiTexCoord4ivARB(target, v)
-#define dglMultiTexCoord4sARB(target, s, t, r, q) _glMultiTexCoord4sARB(target, s, t, r, q)
-#define dglMultiTexCoord4svARB(target, v) _glMultiTexCoord4svARB(target, v)
+#define dglActiveTextureARB(texture) glActiveTextureARB(texture)
+#define dglClientActiveTextureARB(texture) glClientActiveTextureARB(texture)
+#define dglMultiTexCoord1dARB(target, s) glMultiTexCoord1dARB(target, s)
+#define dglMultiTexCoord1dvARB(target, v) glMultiTexCoord1dvARB(target, v)
+#define dglMultiTexCoord1fARB(target, s) glMultiTexCoord1fARB(target, s)
+#define dglMultiTexCoord1fvARB(target, v) glMultiTexCoord1fvARB(target, v)
+#define dglMultiTexCoord1iARB(target, s) glMultiTexCoord1iARB(target, s)
+#define dglMultiTexCoord1ivARB(target, v) glMultiTexCoord1ivARB(target, v)
+#define dglMultiTexCoord1sARB(target, s) glMultiTexCoord1sARB(target, s)
+#define dglMultiTexCoord1svARB(target, v) glMultiTexCoord1svARB(target, v)
+#define dglMultiTexCoord2dARB(target, s, t) glMultiTexCoord2dARB(target, s, t)
+#define dglMultiTexCoord2dvARB(target, v) glMultiTexCoord2dvARB(target, v)
+#define dglMultiTexCoord2fARB(target, s, t) glMultiTexCoord2fARB(target, s, t)
+#define dglMultiTexCoord2fvARB(target, v) glMultiTexCoord2fvARB(target, v)
+#define dglMultiTexCoord2iARB(target, s, t) glMultiTexCoord2iARB(target, s, t)
+#define dglMultiTexCoord2ivARB(target, v) glMultiTexCoord2ivARB(target, v)
+#define dglMultiTexCoord2sARB(target, s, t) glMultiTexCoord2sARB(target, s, t)
+#define dglMultiTexCoord2svARB(target, v) glMultiTexCoord2svARB(target, v)
+#define dglMultiTexCoord3dARB(target, s, t, r) glMultiTexCoord3dARB(target, s, t, r)
+#define dglMultiTexCoord3dvARB(target, v) glMultiTexCoord3dvARB(target, v)
+#define dglMultiTexCoord3fARB(target, s, t, r) glMultiTexCoord3fARB(target, s, t, r)
+#define dglMultiTexCoord3fvARB(target, v) glMultiTexCoord3fvARB(target, v)
+#define dglMultiTexCoord3iARB(target, s, t, r) glMultiTexCoord3iARB(target, s, t, r)
+#define dglMultiTexCoord3ivARB(target, v) glMultiTexCoord3ivARB(target, v)
+#define dglMultiTexCoord3sARB(target, s, t, r) glMultiTexCoord3sARB(target, s, t, r)
+#define dglMultiTexCoord3svARB(target, v) glMultiTexCoord3svARB(target, v)
+#define dglMultiTexCoord4dARB(target, s, t, r, q) glMultiTexCoord4dARB(target, s, t, r, q)
+#define dglMultiTexCoord4dvARB(target, v) glMultiTexCoord4dvARB(target, v)
+#define dglMultiTexCoord4fARB(target, s, t, r, q) glMultiTexCoord4fARB(target, s, t, r, q)
+#define dglMultiTexCoord4fvARB(target, v) glMultiTexCoord4fvARB(target, v)
+#define dglMultiTexCoord4iARB(target, s, t, r, q) glMultiTexCoord4iARB(target, s, t, r, q)
+#define dglMultiTexCoord4ivARB(target, v) glMultiTexCoord4ivARB(target, v)
+#define dglMultiTexCoord4sARB(target, s, t, r, q) glMultiTexCoord4sARB(target, s, t, r, q)
+#define dglMultiTexCoord4svARB(target, v) glMultiTexCoord4svARB(target, v)
 
 #else
 
@@ -3573,7 +3463,7 @@ d_inline static void glActiveTextureARB_DEBUG(GLenum texture, const char* file, 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glActiveTextureARB(texture=0x%x)\n", file, line, texture);
 #endif
-    _glActiveTextureARB(texture);
+    glActiveTextureARB(texture);
     dglLogError("glActiveTextureARB", file, line);
 }
 
@@ -3581,7 +3471,7 @@ d_inline static void glClientActiveTextureARB_DEBUG(GLenum texture, const char* 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glClientActiveTextureARB(texture=0x%x)\n", file, line, texture);
 #endif
-    _glClientActiveTextureARB(texture);
+    glClientActiveTextureARB(texture);
     dglLogError("glClientActiveTextureARB", file, line);
 }
 
@@ -3589,7 +3479,7 @@ d_inline static void glMultiTexCoord1dARB_DEBUG(GLenum target, GLdouble s, const
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1dARB(target=0x%x, s=%f)\n", file, line, target, s);
 #endif
-    _glMultiTexCoord1dARB(target, s);
+    glMultiTexCoord1dARB(target, s);
     dglLogError("glMultiTexCoord1dARB", file, line);
 }
 
@@ -3597,7 +3487,7 @@ d_inline static void glMultiTexCoord1dvARB_DEBUG(GLenum target, GLdouble* v, con
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1dvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord1dvARB(target, v);
+    glMultiTexCoord1dvARB(target, v);
     dglLogError("glMultiTexCoord1dvARB", file, line);
 }
 
@@ -3605,7 +3495,7 @@ d_inline static void glMultiTexCoord1fARB_DEBUG(GLenum target, GLfloat s, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1fARB(target=0x%x, s=%f)\n", file, line, target, s);
 #endif
-    _glMultiTexCoord1fARB(target, s);
+    glMultiTexCoord1fARB(target, s);
     dglLogError("glMultiTexCoord1fARB", file, line);
 }
 
@@ -3613,7 +3503,7 @@ d_inline static void glMultiTexCoord1fvARB_DEBUG(GLenum target, GLfloat* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1fvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord1fvARB(target, v);
+    glMultiTexCoord1fvARB(target, v);
     dglLogError("glMultiTexCoord1fvARB", file, line);
 }
 
@@ -3621,7 +3511,7 @@ d_inline static void glMultiTexCoord1iARB_DEBUG(GLenum target, GLint s, const ch
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1iARB(target=0x%x, s=%i)\n", file, line, target, s);
 #endif
-    _glMultiTexCoord1iARB(target, s);
+    glMultiTexCoord1iARB(target, s);
     dglLogError("glMultiTexCoord1iARB", file, line);
 }
 
@@ -3629,7 +3519,7 @@ d_inline static void glMultiTexCoord1ivARB_DEBUG(GLenum target, GLint* v, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1ivARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord1ivARB(target, v);
+    glMultiTexCoord1ivARB(target, v);
     dglLogError("glMultiTexCoord1ivARB", file, line);
 }
 
@@ -3637,7 +3527,7 @@ d_inline static void glMultiTexCoord1sARB_DEBUG(GLenum target, GLshort s, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1sARB(target=0x%x, s=%i)\n", file, line, target, s);
 #endif
-    _glMultiTexCoord1sARB(target, s);
+    glMultiTexCoord1sARB(target, s);
     dglLogError("glMultiTexCoord1sARB", file, line);
 }
 
@@ -3645,7 +3535,7 @@ d_inline static void glMultiTexCoord1svARB_DEBUG(GLenum target, GLshort* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord1svARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord1svARB(target, v);
+    glMultiTexCoord1svARB(target, v);
     dglLogError("glMultiTexCoord1svARB", file, line);
 }
 
@@ -3653,7 +3543,7 @@ d_inline static void glMultiTexCoord2dARB_DEBUG(GLenum target, GLdouble s, GLdou
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2dARB(target=0x%x, s=%f, t=%f)\n", file, line, target, s, t);
 #endif
-    _glMultiTexCoord2dARB(target, s, t);
+    glMultiTexCoord2dARB(target, s, t);
     dglLogError("glMultiTexCoord2dARB", file, line);
 }
 
@@ -3661,7 +3551,7 @@ d_inline static void glMultiTexCoord2dvARB_DEBUG(GLenum target, GLdouble* v, con
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2dvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord2dvARB(target, v);
+    glMultiTexCoord2dvARB(target, v);
     dglLogError("glMultiTexCoord2dvARB", file, line);
 }
 
@@ -3669,7 +3559,7 @@ d_inline static void glMultiTexCoord2fARB_DEBUG(GLenum target, GLfloat s, GLfloa
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2fARB(target=0x%x, s=%f, t=%f)\n", file, line, target, s, t);
 #endif
-    _glMultiTexCoord2fARB(target, s, t);
+    glMultiTexCoord2fARB(target, s, t);
     dglLogError("glMultiTexCoord2fARB", file, line);
 }
 
@@ -3677,7 +3567,7 @@ d_inline static void glMultiTexCoord2fvARB_DEBUG(GLenum target, GLfloat* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2fvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord2fvARB(target, v);
+    glMultiTexCoord2fvARB(target, v);
     dglLogError("glMultiTexCoord2fvARB", file, line);
 }
 
@@ -3685,7 +3575,7 @@ d_inline static void glMultiTexCoord2iARB_DEBUG(GLenum target, GLint s, GLint t,
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2iARB(target=0x%x, s=%i, t=%i)\n", file, line, target, s, t);
 #endif
-    _glMultiTexCoord2iARB(target, s, t);
+    glMultiTexCoord2iARB(target, s, t);
     dglLogError("glMultiTexCoord2iARB", file, line);
 }
 
@@ -3693,7 +3583,7 @@ d_inline static void glMultiTexCoord2ivARB_DEBUG(GLenum target, GLint* v, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2ivARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord2ivARB(target, v);
+    glMultiTexCoord2ivARB(target, v);
     dglLogError("glMultiTexCoord2ivARB", file, line);
 }
 
@@ -3701,7 +3591,7 @@ d_inline static void glMultiTexCoord2sARB_DEBUG(GLenum target, GLshort s, GLshor
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2sARB(target=0x%x, s=%i, t=%i)\n", file, line, target, s, t);
 #endif
-    _glMultiTexCoord2sARB(target, s, t);
+    glMultiTexCoord2sARB(target, s, t);
     dglLogError("glMultiTexCoord2sARB", file, line);
 }
 
@@ -3709,7 +3599,7 @@ d_inline static void glMultiTexCoord2svARB_DEBUG(GLenum target, GLshort* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord2svARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord2svARB(target, v);
+    glMultiTexCoord2svARB(target, v);
     dglLogError("glMultiTexCoord2svARB", file, line);
 }
 
@@ -3717,7 +3607,7 @@ d_inline static void glMultiTexCoord3dARB_DEBUG(GLenum target, GLdouble s, GLdou
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3dARB(target=0x%x, s=%f, t=%f, r=%f)\n", file, line, target, s, t, r);
 #endif
-    _glMultiTexCoord3dARB(target, s, t, r);
+    glMultiTexCoord3dARB(target, s, t, r);
     dglLogError("glMultiTexCoord3dARB", file, line);
 }
 
@@ -3725,7 +3615,7 @@ d_inline static void glMultiTexCoord3dvARB_DEBUG(GLenum target, GLdouble* v, con
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3dvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord3dvARB(target, v);
+    glMultiTexCoord3dvARB(target, v);
     dglLogError("glMultiTexCoord3dvARB", file, line);
 }
 
@@ -3733,7 +3623,7 @@ d_inline static void glMultiTexCoord3fARB_DEBUG(GLenum target, GLfloat s, GLfloa
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3fARB(target=0x%x, s=%f, t=%f, r=%f)\n", file, line, target, s, t, r);
 #endif
-    _glMultiTexCoord3fARB(target, s, t, r);
+    glMultiTexCoord3fARB(target, s, t, r);
     dglLogError("glMultiTexCoord3fARB", file, line);
 }
 
@@ -3741,7 +3631,7 @@ d_inline static void glMultiTexCoord3fvARB_DEBUG(GLenum target, GLfloat* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3fvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord3fvARB(target, v);
+    glMultiTexCoord3fvARB(target, v);
     dglLogError("glMultiTexCoord3fvARB", file, line);
 }
 
@@ -3749,7 +3639,7 @@ d_inline static void glMultiTexCoord3iARB_DEBUG(GLenum target, GLint s, GLint t,
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3iARB(target=0x%x, s=%i, t=%i, r=%i)\n", file, line, target, s, t, r);
 #endif
-    _glMultiTexCoord3iARB(target, s, t, r);
+    glMultiTexCoord3iARB(target, s, t, r);
     dglLogError("glMultiTexCoord3iARB", file, line);
 }
 
@@ -3757,7 +3647,7 @@ d_inline static void glMultiTexCoord3ivARB_DEBUG(GLenum target, GLint* v, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3ivARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord3ivARB(target, v);
+    glMultiTexCoord3ivARB(target, v);
     dglLogError("glMultiTexCoord3ivARB", file, line);
 }
 
@@ -3765,7 +3655,7 @@ d_inline static void glMultiTexCoord3sARB_DEBUG(GLenum target, GLshort s, GLshor
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3sARB(target=0x%x, s=%i, t=%i, r=%i)\n", file, line, target, s, t, r);
 #endif
-    _glMultiTexCoord3sARB(target, s, t, r);
+    glMultiTexCoord3sARB(target, s, t, r);
     dglLogError("glMultiTexCoord3sARB", file, line);
 }
 
@@ -3773,7 +3663,7 @@ d_inline static void glMultiTexCoord3svARB_DEBUG(GLenum target, GLshort* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord3svARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord3svARB(target, v);
+    glMultiTexCoord3svARB(target, v);
     dglLogError("glMultiTexCoord3svARB", file, line);
 }
 
@@ -3781,7 +3671,7 @@ d_inline static void glMultiTexCoord4dARB_DEBUG(GLenum target, GLdouble s, GLdou
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4dARB(target=0x%x, s=%f, t=%f, r=%f, q=%f)\n", file, line, target, s, t, r, q);
 #endif
-    _glMultiTexCoord4dARB(target, s, t, r, q);
+    glMultiTexCoord4dARB(target, s, t, r, q);
     dglLogError("glMultiTexCoord4dARB", file, line);
 }
 
@@ -3789,7 +3679,7 @@ d_inline static void glMultiTexCoord4dvARB_DEBUG(GLenum target, GLdouble* v, con
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4dvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord4dvARB(target, v);
+    glMultiTexCoord4dvARB(target, v);
     dglLogError("glMultiTexCoord4dvARB", file, line);
 }
 
@@ -3797,7 +3687,7 @@ d_inline static void glMultiTexCoord4fARB_DEBUG(GLenum target, GLfloat s, GLfloa
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4fARB(target=0x%x, s=%f, t=%f, r=%f, q=%f)\n", file, line, target, s, t, r, q);
 #endif
-    _glMultiTexCoord4fARB(target, s, t, r, q);
+    glMultiTexCoord4fARB(target, s, t, r, q);
     dglLogError("glMultiTexCoord4fARB", file, line);
 }
 
@@ -3805,7 +3695,7 @@ d_inline static void glMultiTexCoord4fvARB_DEBUG(GLenum target, GLfloat* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4fvARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord4fvARB(target, v);
+    glMultiTexCoord4fvARB(target, v);
     dglLogError("glMultiTexCoord4fvARB", file, line);
 }
 
@@ -3813,7 +3703,7 @@ d_inline static void glMultiTexCoord4iARB_DEBUG(GLenum target, GLint s, GLint t,
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4iARB(target=0x%x, s=%i, t=%i, r=%i, q=%i)\n", file, line, target, s, t, r, q);
 #endif
-    _glMultiTexCoord4iARB(target, s, t, r, q);
+    glMultiTexCoord4iARB(target, s, t, r, q);
     dglLogError("glMultiTexCoord4iARB", file, line);
 }
 
@@ -3821,7 +3711,7 @@ d_inline static void glMultiTexCoord4ivARB_DEBUG(GLenum target, GLint* v, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4ivARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord4ivARB(target, v);
+    glMultiTexCoord4ivARB(target, v);
     dglLogError("glMultiTexCoord4ivARB", file, line);
 }
 
@@ -3829,7 +3719,7 @@ d_inline static void glMultiTexCoord4sARB_DEBUG(GLenum target, GLshort s, GLshor
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4sARB(target=0x%x, s=%i, t=%i, r=%i, q=%i)\n", file, line, target, s, t, r, q);
 #endif
-    _glMultiTexCoord4sARB(target, s, t, r, q);
+    glMultiTexCoord4sARB(target, s, t, r, q);
     dglLogError("glMultiTexCoord4sARB", file, line);
 }
 
@@ -3837,7 +3727,7 @@ d_inline static void glMultiTexCoord4svARB_DEBUG(GLenum target, GLshort* v, cons
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiTexCoord4svARB(target=0x%x, v=%p)\n", file, line, target, v);
 #endif
-    _glMultiTexCoord4svARB(target, v);
+    glMultiTexCoord4svARB(target, v);
     dglLogError("glMultiTexCoord4svARB", file, line);
 }
 
@@ -3882,25 +3772,11 @@ d_inline static void glMultiTexCoord4svARB_DEBUG(GLenum target, GLshort* v, cons
 //
 // GL_EXT_compiled_vertex_array
 //
-extern dboolean has_GL_EXT_compiled_vertex_array;
-
-extern PFNGLLOCKARRAYSEXTPROC _glLockArraysEXT;
-extern PFNGLUNLOCKARRAYSEXTPROC _glUnlockArraysEXT;
-
-#define GL_EXT_compiled_vertex_array_Define() \
-dboolean has_GL_EXT_compiled_vertex_array = false; \
-PFNGLLOCKARRAYSEXTPROC _glLockArraysEXT = NULL; \
-PFNGLUNLOCKARRAYSEXTPROC _glUnlockArraysEXT = NULL
-
-#define GL_EXT_compiled_vertex_array_Init() \
-has_GL_EXT_compiled_vertex_array = GL_CheckExtension("GL_EXT_compiled_vertex_array"); \
-_glLockArraysEXT = GL_RegisterProc("glLockArraysEXT"); \
-_glUnlockArraysEXT = GL_RegisterProc("glUnlockArraysEXT")
 
 #ifndef USE_DEBUG_GLFUNCS
 
-#define dglLockArraysEXT(first, count) _glLockArraysEXT(first, count)
-#define dglUnlockArraysEXT() _glUnlockArraysEXT()
+#define dglLockArraysEXT(first, count) glLockArraysEXT(first, count)
+#define dglUnlockArraysEXT() glUnlockArraysEXT()
 
 #else
 
@@ -3908,7 +3784,7 @@ d_inline static void glLockArraysEXT_DEBUG(GLint first, GLsizei count, const cha
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glLockArraysEXT(first=%i, count=0x%x)\n", file, line, first, count);
 #endif
-    _glLockArraysEXT(first, count);
+    glLockArraysEXT(first, count);
     dglLogError("glLockArraysEXT", file, line);
 }
 
@@ -3916,7 +3792,7 @@ d_inline static void glUnlockArraysEXT_DEBUG(const char* file, int line) {
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glUnlockArraysEXT()\n", file, line);
 #endif
-    _glUnlockArraysEXT();
+    glUnlockArraysEXT();
     dglLogError("glUnlockArraysEXT", file, line);
 }
 
@@ -3929,25 +3805,11 @@ d_inline static void glUnlockArraysEXT_DEBUG(const char* file, int line) {
 //
 // GL_EXT_multi_draw_arrays
 //
-extern dboolean has_GL_EXT_multi_draw_arrays;
-
-extern PFNGLMULTIDRAWARRAYSEXTPROC _glMultiDrawArraysEXT;
-extern PFNGLMULTIDRAWELEMENTSEXTPROC _glMultiDrawElementsEXT;
-
-#define GL_EXT_multi_draw_arrays_Define() \
-dboolean has_GL_EXT_multi_draw_arrays = false; \
-PFNGLMULTIDRAWARRAYSEXTPROC _glMultiDrawArraysEXT = NULL; \
-PFNGLMULTIDRAWELEMENTSEXTPROC _glMultiDrawElementsEXT = NULL
-
-#define GL_EXT_multi_draw_arrays_Init() \
-has_GL_EXT_multi_draw_arrays = GL_CheckExtension("GL_EXT_multi_draw_arrays"); \
-_glMultiDrawArraysEXT = GL_RegisterProc("glMultiDrawArraysEXT"); \
-_glMultiDrawElementsEXT = GL_RegisterProc("glMultiDrawElementsEXT")
 
 #ifndef USE_DEBUG_GLFUNCS
 
-#define dglMultiDrawArraysEXT(mode, first, count, primcount) _glMultiDrawArraysEXT(mode, first, count, primcount)
-#define dglMultiDrawElementsEXT(mode, count, type, indices, primcount) _glMultiDrawElementsEXT(mode, count, type, indices, primcount)
+#define dglMultiDrawArraysEXT(mode, first, count, primcount) glMultiDrawArraysEXT(mode, first, count, primcount)
+#define dglMultiDrawElementsEXT(mode, count, type, indices, primcount) glMultiDrawElementsEXT(mode, count, type, indices, primcount)
 
 #else
 
@@ -3955,7 +3817,7 @@ d_inline static void glMultiDrawArraysEXT_DEBUG(GLenum mode, GLint* first, GLsiz
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiDrawArraysEXT(mode=0x%x, first=%p, count=%p, primcount=0x%x)\n", file, line, mode, first, count, primcount);
 #endif
-    _glMultiDrawArraysEXT(mode, first, count, primcount);
+    glMultiDrawArraysEXT(mode, first, count, primcount);
     dglLogError("glMultiDrawArraysEXT", file, line);
 }
 
@@ -3963,7 +3825,7 @@ d_inline static void glMultiDrawElementsEXT_DEBUG(GLenum mode, GLsizei* count, G
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMultiDrawElementsEXT(mode=0x%x, count=%p, type=0x%x, indices=%p, primcount=0x%x)\n", file, line, mode, count, type, indices, primcount);
 #endif
-    _glMultiDrawElementsEXT(mode, count, type, indices, primcount);
+    glMultiDrawElementsEXT(mode, count, type, indices, primcount);
     dglLogError("glMultiDrawElementsEXT", file, line);
 }
 
@@ -3976,37 +3838,14 @@ d_inline static void glMultiDrawElementsEXT_DEBUG(GLenum mode, GLsizei* count, G
 //
 // GL_EXT_fog_coord
 //
-extern dboolean has_GL_EXT_fog_coord;
-
-extern PFNGLFOGCOORDFEXTPROC _glFogCoordfEXT;
-extern PFNGLFOGCOORDFVEXTPROC _glFogCoordfvEXT;
-extern PFNGLFOGCOORDDEXTPROC _glFogCoorddEXT;
-extern PFNGLFOGCOORDDVEXTPROC _glFogCoorddvEXT;
-extern PFNGLFOGCOORDPOINTEREXTPROC _glFogCoordPointerEXT;
-
-#define GL_EXT_fog_coord_Define() \
-dboolean has_GL_EXT_fog_coord = false; \
-PFNGLFOGCOORDFEXTPROC _glFogCoordfEXT = NULL; \
-PFNGLFOGCOORDFVEXTPROC _glFogCoordfvEXT = NULL; \
-PFNGLFOGCOORDDEXTPROC _glFogCoorddEXT = NULL; \
-PFNGLFOGCOORDDVEXTPROC _glFogCoorddvEXT = NULL; \
-PFNGLFOGCOORDPOINTEREXTPROC _glFogCoordPointerEXT = NULL
-
-#define GL_EXT_fog_coord_Init() \
-has_GL_EXT_fog_coord = GL_CheckExtension("GL_EXT_fog_coord"); \
-_glFogCoordfEXT = GL_RegisterProc("glFogCoordfEXT"); \
-_glFogCoordfvEXT = GL_RegisterProc("glFogCoordfvEXT"); \
-_glFogCoorddEXT = GL_RegisterProc("glFogCoorddEXT"); \
-_glFogCoorddvEXT = GL_RegisterProc("glFogCoorddvEXT"); \
-_glFogCoordPointerEXT = GL_RegisterProc("glFogCoordPointerEXT")
 
 #ifndef USE_DEBUG_GLFUNCS
 
-#define dglFogCoordfEXT(coord) _glFogCoordfEXT(coord)
-#define dglFogCoordfvEXT(coord) _glFogCoordfvEXT(coord)
-#define dglFogCoorddEXT(coord) _glFogCoorddEXT(coord)
-#define dglFogCoorddvEXT(coord) _glFogCoorddvEXT(coord)
-#define dglFogCoordPointerEXT(type, stride, pointer) _glFogCoordPointerEXT(type, stride, pointer)
+#define dglFogCoordfEXT(coord) glFogCoordfEXT(coord)
+#define dglFogCoordfvEXT(coord) glFogCoordfvEXT(coord)
+#define dglFogCoorddEXT(coord) glFogCoorddEXT(coord)
+#define dglFogCoorddvEXT(coord) glFogCoorddvEXT(coord)
+#define dglFogCoordPointerEXT(type, stride, pointer) glFogCoordPointerEXT(type, stride, pointer)
 
 #else
 
@@ -4014,7 +3853,7 @@ d_inline static void glFogCoordfEXT_DEBUG(GLfloat coord, const char* file, int l
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glFogCoordfEXT(coord=%f)\n", file, line, coord);
 #endif
-    _glFogCoordfEXT(coord);
+    glFogCoordfEXT(coord);
     dglLogError("glFogCoordfEXT", file, line);
 }
 
@@ -4022,7 +3861,7 @@ d_inline static void glFogCoordfvEXT_DEBUG(GLfloat* coord, const char* file, int
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glFogCoordfvEXT(coord=%p)\n", file, line, coord);
 #endif
-    _glFogCoordfvEXT(coord);
+    glFogCoordfvEXT(coord);
     dglLogError("glFogCoordfvEXT", file, line);
 }
 
@@ -4030,7 +3869,7 @@ d_inline static void glFogCoorddEXT_DEBUG(GLdouble coord, const char* file, int 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glFogCoorddEXT(coord=%f)\n", file, line, coord);
 #endif
-    _glFogCoorddEXT(coord);
+    glFogCoorddEXT(coord);
     dglLogError("glFogCoorddEXT", file, line);
 }
 
@@ -4038,7 +3877,7 @@ d_inline static void glFogCoorddvEXT_DEBUG(GLdouble* coord, const char* file, in
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glFogCoorddvEXT(coord=%p)\n", file, line, coord);
 #endif
-    _glFogCoorddvEXT(coord);
+    glFogCoorddvEXT(coord);
     dglLogError("glFogCoorddvEXT", file, line);
 }
 
@@ -4046,7 +3885,7 @@ d_inline static void glFogCoordPointerEXT_DEBUG(GLenum type, GLsizei stride, GLv
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glFogCoordPointerEXT(type=0x%x, stride=0x%x, pointer=%p)\n", file, line, type, stride, pointer);
 #endif
-    _glFogCoordPointerEXT(type, stride, pointer);
+    glFogCoordPointerEXT(type, stride, pointer);
     dglLogError("glFogCoordPointerEXT", file, line);
 }
 
@@ -4062,61 +3901,20 @@ d_inline static void glFogCoordPointerEXT_DEBUG(GLenum type, GLsizei stride, GLv
 //
 // GL_ARB_vertex_buffer_object
 //
-extern dboolean has_GL_ARB_vertex_buffer_object;
-
-extern PFNGLBINDBUFFERARBPROC _glBindBufferARB;
-extern PFNGLDELETEBUFFERSARBPROC _glDeleteBuffersARB;
-extern PFNGLGENBUFFERSARBPROC _glGenBuffersARB;
-extern PFNGLISBUFFERARBPROC _glIsBufferARB;
-extern PFNGLBUFFERDATAARBPROC _glBufferDataARB;
-extern PFNGLBUFFERSUBDATAARBPROC _glBufferSubDataARB;
-extern PFNGLGETBUFFERSUBDATAARBPROC _glGetBufferSubDataARB;
-extern PFNGLMAPBUFFERARBPROC _glMapBufferARB;
-extern PFNGLUNMAPBUFFERARBPROC _glUnmapBufferARB;
-extern PFNGLGETBUFFERPARAMETERIVARBPROC _glGetBufferParameterivARB;
-extern PFNGLGETBUFFERPOINTERVARBPROC _glGetBufferPointervARB;
-
-#define GL_ARB_vertex_buffer_object_Define() \
-dboolean has_GL_ARB_vertex_buffer_object = false; \
-PFNGLBINDBUFFERARBPROC _glBindBufferARB = NULL; \
-PFNGLDELETEBUFFERSARBPROC _glDeleteBuffersARB = NULL; \
-PFNGLGENBUFFERSARBPROC _glGenBuffersARB = NULL; \
-PFNGLISBUFFERARBPROC _glIsBufferARB = NULL; \
-PFNGLBUFFERDATAARBPROC _glBufferDataARB = NULL; \
-PFNGLBUFFERSUBDATAARBPROC _glBufferSubDataARB = NULL; \
-PFNGLGETBUFFERSUBDATAARBPROC _glGetBufferSubDataARB = NULL; \
-PFNGLMAPBUFFERARBPROC _glMapBufferARB = NULL; \
-PFNGLUNMAPBUFFERARBPROC _glUnmapBufferARB = NULL; \
-PFNGLGETBUFFERPARAMETERIVARBPROC _glGetBufferParameterivARB = NULL; \
-PFNGLGETBUFFERPOINTERVARBPROC _glGetBufferPointervARB = NULL
-
-#define GL_ARB_vertex_buffer_object_Init() \
-has_GL_ARB_vertex_buffer_object = GL_CheckExtension("GL_ARB_vertex_buffer_object"); \
-_glBindBufferARB = GL_RegisterProc("glBindBufferARB"); \
-_glDeleteBuffersARB = GL_RegisterProc("glDeleteBuffersARB"); \
-_glGenBuffersARB = GL_RegisterProc("glGenBuffersARB"); \
-_glIsBufferARB = GL_RegisterProc("glIsBufferARB"); \
-_glBufferDataARB = GL_RegisterProc("glBufferDataARB"); \
-_glBufferSubDataARB = GL_RegisterProc("glBufferSubDataARB"); \
-_glGetBufferSubDataARB = GL_RegisterProc("glGetBufferSubDataARB"); \
-_glMapBufferARB = GL_RegisterProc("glMapBufferARB"); \
-_glUnmapBufferARB = GL_RegisterProc("glUnmapBufferARB"); \
-_glGetBufferParameterivARB = GL_RegisterProc("glGetBufferParameterivARB"); \
-_glGetBufferPointervARB = GL_RegisterProc("glGetBufferPointervARB")
 
 #ifndef USE_DEBUG_GLFUNCS
 
-#define dglBindBufferARB(target, buffer) _glBindBufferARB(target, buffer)
-#define dglDeleteBuffersARB(n, buffers) _glDeleteBuffersARB(n, buffers)
-#define dglGenBuffersARB(n, buffers) _glGenBuffersARB(n, buffers)
-#define dglIsBufferARB(buffer) _glIsBufferARB(buffer)
-#define dglBufferDataARB(target, size, data, usage) _glBufferDataARB(target, size, data, usage)
-#define dglBufferSubDataARB(target, offset, size, data) _glBufferSubDataARB(target, offset, size, data)
-#define dglGetBufferSubDataARB(target, offset, size, data) _glGetBufferSubDataARB(target, offset, size, data)
-#define dglMapBufferARB(target, access) _glMapBufferARB(target, access)
-#define dglUnmapBufferARB(target) _glUnmapBufferARB(target)
-#define dglGetBufferParameterivARB(target, pname, params) _glGetBufferParameterivARB(target, pname, params)
-#define dglGetBufferPointervARB(target, pname, params) _glGetBufferPointervARB(target, pname, params)
+#define dglBindBufferARB(target, buffer) glBindBufferARB(target, buffer)
+#define dglDeleteBuffersARB(n, buffers) glDeleteBuffersARB(n, buffers)
+#define dglGenBuffersARB(n, buffers) glGenBuffersARB(n, buffers)
+#define dglIsBufferARB(buffer) glIsBufferARB(buffer)
+#define dglBufferDataARB(target, size, data, usage) glBufferDataARB(target, size, data, usage)
+#define dglBufferSubDataARB(target, offset, size, data) glBufferSubDataARB(target, offset, size, data)
+#define dglGetBufferSubDataARB(target, offset, size, data) glGetBufferSubDataARB(target, offset, size, data)
+#define dglMapBufferARB(target, access) glMapBufferARB(target, access)
+#define dglUnmapBufferARB(target) glUnmapBufferARB(target)
+#define dglGetBufferParameterivARB(target, pname, params) glGetBufferParameterivARB(target, pname, params)
+#define dglGetBufferPointervARB(target, pname, params) glGetBufferPointervARB(target, pname, params)
 
 #else
 
@@ -4124,7 +3922,7 @@ d_inline static void glBindBufferARB_DEBUG(GLenum target, GLuint buffer, const c
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glBindBufferARB(target=0x%x, buffer=%i)\n", file, line, target, buffer);
 #endif
-    _glBindBufferARB(target, buffer);
+    glBindBufferARB(target, buffer);
     dglLogError("glBindBufferARB", file, line);
 }
 
@@ -4132,7 +3930,7 @@ d_inline static void glDeleteBuffersARB_DEBUG(GLsizei n, GLuint* buffers, const 
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glDeleteBuffersARB(n=0x%x, buffers=%p)\n", file, line, n, buffers);
 #endif
-    _glDeleteBuffersARB(n, buffers);
+    glDeleteBuffersARB(n, buffers);
     dglLogError("glDeleteBuffersARB", file, line);
 }
 
@@ -4140,7 +3938,7 @@ d_inline static void glGenBuffersARB_DEBUG(GLsizei n, GLuint* buffers, const cha
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glGenBuffersARB(n=0x%x, buffers=%p)\n", file, line, n, buffers);
 #endif
-    _glGenBuffersARB(n, buffers);
+    glGenBuffersARB(n, buffers);
     dglLogError("glGenBuffersARB", file, line);
 }
 
@@ -4148,7 +3946,7 @@ d_inline static GLboolean glIsBufferARB_DEBUG(GLuint buffer, const char* file, i
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glIsBufferARB(buffer=%i)\n", file, line, buffer);
 #endif
-    _glIsBufferARB(buffer);
+    glIsBufferARB(buffer);
     dglLogError("glIsBufferARB", file, line);
 }
 
@@ -4156,7 +3954,7 @@ d_inline static void glBufferDataARB_DEBUG(GLenum target, GLsizeiptrARB size, GL
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glBufferDataARB(target=0x%x, size=, data=%p, usage=0x%x)\n", file, line, target, size, data, usage);
 #endif
-    _glBufferDataARB(target, size, data, usage);
+    glBufferDataARB(target, size, data, usage);
     dglLogError("glBufferDataARB", file, line);
 }
 
@@ -4164,7 +3962,7 @@ d_inline static void glBufferSubDataARB_DEBUG(GLenum target, GLintptrARB offset,
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glBufferSubDataARB(target=0x%x, offset=, size=, data=%p)\n", file, line, target, offset, size, data);
 #endif
-    _glBufferSubDataARB(target, offset, size, data);
+    glBufferSubDataARB(target, offset, size, data);
     dglLogError("glBufferSubDataARB", file, line);
 }
 
@@ -4172,7 +3970,7 @@ d_inline static void glGetBufferSubDataARB_DEBUG(GLenum target, GLintptrARB offs
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glGetBufferSubDataARB(target=0x%x, offset=, size=, data=%p)\n", file, line, target, offset, size, data);
 #endif
-    _glGetBufferSubDataARB(target, offset, size, data);
+    glGetBufferSubDataARB(target, offset, size, data);
     dglLogError("glGetBufferSubDataARB", file, line);
 }
 
@@ -4180,7 +3978,7 @@ d_inline static void glMapBufferARB_DEBUG(GLenum target, GLenum access, const ch
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glMapBufferARB(target=0x%x, access=0x%x)\n", file, line, target, access);
 #endif
-    _glMapBufferARB(target, access);
+    glMapBufferARB(target, access);
     dglLogError("glMapBufferARB", file, line);
 }
 
@@ -4188,7 +3986,7 @@ d_inline static GLboolean glUnmapBufferARB_DEBUG(GLenum target, const char* file
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glUnmapBufferARB(target=0x%x)\n", file, line, target);
 #endif
-    _glUnmapBufferARB(target);
+    glUnmapBufferARB(target);
     dglLogError("glUnmapBufferARB", file, line);
 }
 
@@ -4196,7 +3994,7 @@ d_inline static void glGetBufferParameterivARB_DEBUG(GLenum target, GLenum pname
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glGetBufferParameterivARB(target=0x%x, pname=0x%x, params=%p)\n", file, line, target, pname, params);
 #endif
-    _glGetBufferParameterivARB(target, pname, params);
+    glGetBufferParameterivARB(target, pname, params);
     dglLogError("glGetBufferParameterivARB", file, line);
 }
 
@@ -4204,7 +4002,7 @@ d_inline static void glGetBufferPointervARB_DEBUG(GLenum target, GLenum pname, v
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("file = %s, line = %i, glGetBufferPointervARB(target=0x%x, pname=0x%x, params=%p)\n", file, line, target, pname, params);
 #endif
-    _glGetBufferPointervARB(target, pname, params);
+    glGetBufferPointervARB(target, pname, params);
     dglLogError("glGetBufferPointervARB", file, line);
 }
 
@@ -4222,50 +4020,6 @@ d_inline static void glGetBufferPointervARB_DEBUG(GLenum target, GLenum pname, v
 #define dglGetBufferPointervARB(target, pname, params) glGetBufferPointervARB_DEBUG(target, pname, params, __FILE__, __LINE__)
 
 #endif // USE_DEBUG_GLFUNCS
-
-//
-// GL_ARB_texture_non_power_of_two
-//
-extern dboolean has_GL_ARB_texture_non_power_of_two;
-
-#define GL_ARB_texture_non_power_of_two_Define() \
-dboolean has_GL_ARB_texture_non_power_of_two = false;
-
-#define GL_ARB_texture_non_power_of_two_Init() \
-has_GL_ARB_texture_non_power_of_two = GL_CheckExtension("GL_ARB_texture_non_power_of_two");
-
-//
-// GL_ARB_texture_env_combine
-//
-extern dboolean has_GL_ARB_texture_env_combine;
-
-#define GL_ARB_texture_env_combine_Define() \
-dboolean has_GL_ARB_texture_env_combine = false;
-
-#define GL_ARB_texture_env_combine_Init() \
-has_GL_ARB_texture_env_combine = GL_CheckExtension("GL_ARB_texture_env_combine");
-
-//
-// GL_EXT_texture_env_combine
-//
-extern dboolean has_GL_EXT_texture_env_combine;
-
-#define GL_EXT_texture_env_combine_Define() \
-dboolean has_GL_EXT_texture_env_combine = false;
-
-#define GL_EXT_texture_env_combine_Init() \
-has_GL_EXT_texture_env_combine = GL_CheckExtension("GL_EXT_texture_env_combine");
-
-//
-// GL_EXT_texture_filter_anisotropic
-//
-extern dboolean has_GL_EXT_texture_filter_anisotropic;
-
-#define GL_EXT_texture_filter_anisotropic_Define() \
-dboolean has_GL_EXT_texture_filter_anisotropic = false;
-
-#define GL_EXT_texture_filter_anisotropic_Init() \
-has_GL_EXT_texture_filter_anisotropic = GL_CheckExtension("GL_EXT_texture_filter_anisotropic");
 
 #endif // __DGL_H__
 

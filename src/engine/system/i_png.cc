@@ -134,8 +134,6 @@ void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
             for (auto& c : newpal.map<gfx::Rgb>()) {
                 c = *pallump++;
             }
-
-            free(pallump);
         } else {
             newpal = gfx::Palette { pal->format(), 16, pal->data_ptr() + (16 * palindex) * pal->traits().bytes };
             pal_count = 16;

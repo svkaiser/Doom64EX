@@ -24,7 +24,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "SDL_opengl.h"
 #include "doomdef.h"
 #include "doomstat.h"
 #include "gl_main.h"
@@ -131,13 +130,13 @@ d_inline void dglDrawGeometry(dword count, vtx_t *vtx) {
     I_Printf("dglDrawGeometry(count=0x%x, vtx=0x%p)\n", count, vtx);
 #endif
 
-    if(has_GL_EXT_compiled_vertex_array) {
+    if(GLAD_GL_EXT_compiled_vertex_array) {
         dglLockArraysEXT(0, count);
     }
 
     dglDrawElements(GL_TRIANGLES, indicecnt, GL_UNSIGNED_SHORT, drawIndices);
 
-    if(has_GL_EXT_compiled_vertex_array) {
+    if(GLAD_GL_EXT_compiled_vertex_array) {
         dglUnlockArraysEXT();
     }
 
@@ -163,13 +162,13 @@ d_inline void dglDrawGeometry(dword count, vtx_t *vtx) {
         dglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         dglDepthRange(0.0f, 0.0f);
 
-        if(has_GL_EXT_compiled_vertex_array) {
+        if(GLAD_GL_EXT_compiled_vertex_array) {
             dglLockArraysEXT(0, count);
         }
 
         dglDrawElements(GL_TRIANGLES, indicecnt, GL_UNSIGNED_SHORT, drawIndices);
 
-        if(has_GL_EXT_compiled_vertex_array) {
+        if(GLAD_GL_EXT_compiled_vertex_array) {
             dglUnlockArraysEXT();
         }
 

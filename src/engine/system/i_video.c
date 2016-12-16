@@ -31,7 +31,6 @@
 #include <math.h>
 
 #include "SDL.h"
-#include "SDL_opengl.h"
 
 #include "m_misc.h"
 #include "doomdef.h"

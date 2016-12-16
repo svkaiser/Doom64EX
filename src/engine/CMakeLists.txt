@@ -187,7 +187,8 @@ add_sources(opengl
   dgl.c
   gl_draw.c
   gl_main.c
-  gl_texture.cc
+  gl_texture.c
+  glad.c
   )
 
 # src/parser

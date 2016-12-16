@@ -598,6 +598,7 @@ static void R_SpreadFire(byte* src1, byte* src2, int pixel, int counter, int* ra
 //
 
 static void R_Fire() {
+#if 0
     int counter = 0;
     int rand = 0;
     int step = 0;
@@ -644,6 +645,7 @@ static void R_Fire() {
 
     }
     while(counter < FIRESKY_WIDTH);
+#endif
 }
 
 //
@@ -653,6 +655,7 @@ static void R_Fire() {
 static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
+#if 0
     int i;
     byte *pixdata;
     byte *paldata;
@@ -670,6 +673,7 @@ void R_InitFire(void) {
         paldata[i * 3 + 1] = 16 * i;
         paldata[i * 3 + 2] = 16 * i;
     }
+#endif
 }
 
 //
@@ -687,6 +691,7 @@ static void R_FireTicker(void) {
 //
 
 static void R_DrawFire(void) {
+#if 0
     float pos1;
     vtx_t v[4];
     dtexture t = gfxptr[fireLump];
@@ -782,6 +787,7 @@ static void R_DrawFire(void) {
         R_DrawSkyDome(16, 1, 1024, 4096, -896, 0.0075f,
                       sky->skycolor[0], sky->skycolor[1]);
     }
+#endif
 }
 
 //

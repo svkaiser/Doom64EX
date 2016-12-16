@@ -27,7 +27,6 @@
 #include <math.h>
 
 #include "SDL.h"
-#include "SDL_opengl.h"
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -91,18 +90,6 @@ static CMD(DumpGLExtensions) {
     M_WriteTextFile("GL_EXTENSIONS.TXT", string, len);
     CON_Printf(WHITE, "Written GL_EXTENSIONS.TXT\n");
 }
-
-// ======================== OGL Extensions ===================================
-
-GL_ARB_multitexture_Define();
-GL_EXT_compiled_vertex_array_Define();
-//GL_EXT_multi_draw_arrays_Define();
-//GL_EXT_fog_coord_Define();
-//GL_ARB_vertex_buffer_object_Define();
-GL_ARB_texture_non_power_of_two_Define();
-GL_ARB_texture_env_combine_Define();
-GL_EXT_texture_env_combine_Define();
-GL_EXT_texture_filter_anisotropic_Define();
 
 //
 // FindExtension
@@ -310,7 +297,7 @@ void GL_SetTextureFilter(void) {
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (int)r_filter.value == 0 ? GL_LINEAR : GL_NEAREST);
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (int)r_filter.value == 0 ? GL_LINEAR : GL_NEAREST);
 
-    if(has_GL_EXT_texture_filter_anisotropic) {
+    if(GLAD_GL_EXT_texture_filter_anisotropic) {
         if(r_anisotropic.value) {
             dglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_anisotropic);
         }
@@ -329,7 +316,7 @@ void GL_SetDefaultCombiner(void) {
         return;
     }
 
-    if(has_GL_ARB_multitexture) {
+    if(GLAD_GL_ARB_multitexture) {
         GL_SetTextureUnit(1, false);
         GL_SetTextureUnit(2, false);
         GL_SetTextureUnit(3, false);
@@ -597,6 +584,8 @@ static int GetVersionInt(const char* version) {
 //
 
 void GL_Init(void) {
+    gladLoadGLLoader(SDL_GL_GetProcAddress);
+
     gl_vendor = dglGetString(GL_VENDOR);
     I_Printf("GL_VENDOR: %s\n", gl_vendor);
     gl_renderer = dglGetString(GL_RENDERER);
@@ -634,18 +623,11 @@ void GL_Init(void) {
 
     r_fillmode.value = 1.0f;
 
-    GL_ARB_multitexture_Init();
-    GL_EXT_compiled_vertex_array_Init();
-    GL_ARB_texture_non_power_of_two_Init();
-    GL_ARB_texture_env_combine_Init();
-    GL_EXT_texture_env_combine_Init();
-    GL_EXT_texture_filter_anisotropic_Init();
-
-    if(!has_GL_ARB_multitexture) {
+    if(!GLAD_GL_ARB_multitexture) {
         CON_Warnf("GL_ARB_multitexture not supported...\n");
     }
 
-    gl_has_combiner = (has_GL_ARB_texture_env_combine | has_GL_EXT_texture_env_combine);
+    gl_has_combiner = (GLAD_GL_ARB_texture_env_combine | GLAD_GL_EXT_texture_env_combine);
 
     if(!gl_has_combiner) {
         CON_Warnf("Texture combiners not supported...\n");
@@ -661,7 +643,7 @@ void GL_Init(void) {
 
     glScaleFactor = 1.0f;
 
-    if(has_GL_EXT_texture_filter_anisotropic) {
+    if(GLAD_GL_EXT_texture_filter_anisotropic) {
         dglGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropic);
     }
 
