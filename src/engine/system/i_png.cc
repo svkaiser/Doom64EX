@@ -128,11 +128,12 @@ void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
         if (W_CheckNumForName(palname) != -1)
         {
             gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(W_CacheLumpName(palname, PU_STATIC));
-            newpal = gfx::Palette {gfx::PixelFormat::rgb, pal_count, nullptr};
+            newpal = *pal;
 
             // swap out current palette with the new one
-            for (auto& c : newpal.map<gfx::Rgb>()) {
-                c = *pallump++;
+            for (auto& c : newpal.map<gfx::Rgba>()) {
+                c = gfx::Rgba { pallump->red, pallump->green, pallump->blue, c.alpha };
+                pallump++;
             }
         } else {
             newpal = gfx::Palette { pal->format(), 16, pal->data_ptr() + (16 * palindex) * pal->traits().bytes };
