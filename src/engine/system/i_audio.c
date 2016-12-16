@@ -1273,7 +1273,7 @@ void I_InitSequencer(void) {
     SDL_AudioSpec spec;
 
     spec.format = AUDIO_S16;
-    spec.freq = 48000;
+    spec.freq = 44100;
     spec.samples = 4096;
     spec.channels = 2;
     spec.callback = Audio_Play;
