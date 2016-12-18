@@ -44,8 +44,6 @@
 #include <algorithm>
 #include <kex/gfx/Image>
 
-extern "C" {
-
 #include "doomstat.h"
 #include "m_misc.h"
 #include "z_zone.h"
@@ -54,8 +52,6 @@ extern "C" {
 
 int        myargc;
 char**    myargv;
-
-}
 
 //
 // M_CheckParm

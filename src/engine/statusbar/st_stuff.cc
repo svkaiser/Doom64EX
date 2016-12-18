@@ -1116,7 +1116,7 @@ void ST_Init(void) {
 // ST_AddChatMsg
 //
 
-void ST_AddChatMsg(char *msg, int player) {
+void ST_AddChatMsg(const char *msg, int player) {
     char str[MAXCHATSIZE];
 
     sprintf(str, "%s: %s", player_names[player], msg);
@@ -1136,7 +1136,7 @@ void ST_AddChatMsg(char *msg, int player) {
 // Broadcast message to all clients
 //
 
-void ST_Notification(char *msg) {
+void ST_Notification(const char *msg) {
     int i;
 
     for(i = 0; i < MAXPLAYERS; i++) {

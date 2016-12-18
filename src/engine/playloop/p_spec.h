@@ -501,6 +501,7 @@ typedef struct {
 
 //thinkers
 
+extern "C" {
 void T_LightMorph(void* lt);
 void T_CountdownTimer(void* timer);
 void T_MobjExplode(void* mexp);
@@ -509,5 +510,6 @@ void T_MovingCamera(void* camera);
 void T_MobjFadeThinker(void* mobjfade);
 void T_Quake(void* quake);
 void T_TraceDrawer(void* tdrawer);
+} // extern "C"
 
 #endif

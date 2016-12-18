@@ -121,11 +121,12 @@ typedef struct {
     laser_t*    laser;
 } laserthinker_t;
 
+extern "C" {
 void P_SetupPsprites(void* curplayer);
 void P_MovePsprites(void* curplayer);
 void P_DropWeapon(void* player);
 void T_LaserThinker(void* laser);
-
+}
 
 //
 // P_USER
@@ -170,6 +171,7 @@ mobj_t*     P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
 //
 // P_ENEMY
 //
+extern "C"
 void P_NoiseAlert(mobj_t* target, mobj_t* emmiter);
 
 

@@ -71,6 +71,8 @@ weaponinfo_t    weaponinfo[NUMWEAPONS] = {
 
 static int laserCells = 1;
 
+extern "C" {
+
 void A_FadeAlpha(mobj_t *mobj);
 
 
@@ -1196,4 +1198,4 @@ void P_MovePsprites(void *data) {
     player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;
 }
 
-
+} // extern "C"

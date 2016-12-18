@@ -964,13 +964,14 @@ static int D_CheckDemo(void) {
 // D_DoomMain
 //
 
+extern "C"
+void Kexlib_Init();
 void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
 
     // init subsystems
 
     I_Printf("Kexlib_Init: Init kexlib\n");
-    void Kexlib_Init();
     Kexlib_Init();
 
     I_Printf("Z_Init: Init Zone Memory Allocator\n");

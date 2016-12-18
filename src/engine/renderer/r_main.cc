@@ -665,7 +665,7 @@ static void R_DrawRayTrace(void) {
 //
 
 extern line_t* contextline; // from p_map.c
-dboolean R_GenerateSwitchPlane(seg_t *line, vtx_t *v); // from r_bsp.c
+dboolean R_GenerateSwitchPlane(void *line, vtx_t *v); // from r_bsp.c
 
 static vertex_t* TraverseVertex(vertex_t* vertex, line_t* line) {
     int i;

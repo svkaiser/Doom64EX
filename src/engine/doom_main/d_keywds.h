@@ -39,13 +39,7 @@
 // definition in SDL, so it needs to be factored out into a
 // custom macro definition
 
-#if defined(__GNUC__)
-#define d_inline __inline__
-#elif defined(_MSC_VER)
-#define d_inline __inline
-#else
-#define d_inline
-#endif
+#define d_inline inline
 
 //
 // Non-standard function availability defines

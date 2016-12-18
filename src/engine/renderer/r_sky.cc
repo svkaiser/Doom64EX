@@ -28,8 +28,6 @@
 
 #include <stdlib.h>
 
-extern "C" {
-
 #include "doomstat.h"
 #include "r_lights.h"
 #include "r_sky.h"
@@ -45,8 +43,6 @@ extern "C" {
 #include "gl_texture.h"
 #include "gl_draw.h"
 #include "r_drawlist.h"
-
-}
 
 skydef_t*   sky;
 int         skypicnum = -1;

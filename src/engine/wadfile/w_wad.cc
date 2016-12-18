@@ -88,7 +88,7 @@ typedef struct {
 #define MAX_MEMLUMPS    16
 
 // Location of each lump on disk.
-lumpinfo_t*    lumpinfo;
+extern lumpinfo_t*    lumpinfo;
 int            numlumps;
 
 #define CopyLumps(dest, src, count) dmemcpy(dest, src, (count)*sizeof(lumpinfo_t))

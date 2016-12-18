@@ -33,12 +33,36 @@
 #include "sounds.h"
 #include "m_fixed.h"
 
-#ifdef __GNUG__
-#pragma implementation "info.h"
-#endif
 #include "info.h"
 
 #include "p_mobj.h"
+
+// g++ doesn't want correctly link these constructors when they're defined
+// inline in d_think.h, so instead I just put them here. We should get rid of
+// them at some point. -dotfloat
+
+actionf_t::actionf_t()
+{
+}
+
+actionf_t::actionf_t(decltype(nullptr))
+{
+}
+
+actionf_t::actionf_t(actionf_v f):
+    acv(f)
+{
+}
+
+actionf_t::actionf_t(actionf_p1 f):
+    acp1(f)
+{
+}
+
+actionf_t::actionf_t(actionf_p2 f):
+    acp2(f)
+{
+}
 
 const char *sprnames[NUMSPRITES+1] = {  //0x5FA30
     "SPOT", "PLAY", "SARG", "FATT", "POSS", "TROO", "HEAD", "BOSS",

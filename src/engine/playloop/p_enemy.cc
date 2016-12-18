@@ -76,7 +76,7 @@ dirtype_t diags[] = {
     DI_NORTHWEST, DI_NORTHEAST, DI_SOUTHWEST, DI_SOUTHEAST
 };
 
-
+extern "C" {
 
 void A_Fall(mobj_t *actor);
 
@@ -1857,3 +1857,4 @@ void A_TargetCamera(mobj_t* actor) {
     }
 }
 
+} // extern "C"

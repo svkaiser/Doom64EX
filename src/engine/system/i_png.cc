@@ -25,8 +25,6 @@
 //
 //-----------------------------------------------------------------------------
 
-extern "C" {
-
 #include <math.h>
 #include <w_wad.h>
 
@@ -35,7 +33,6 @@ extern "C" {
 #include "z_zone.h"
 #include "gl_texture.h"
 #include "con_console.h"
-}
 
 #include <kex/gfx/Image>
 #include <sstream>
@@ -143,7 +140,6 @@ gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha
 //
 // I_PNGReadData
 //
-extern "C"
 void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex)
 {

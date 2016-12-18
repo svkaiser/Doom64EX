@@ -38,6 +38,7 @@
 static float envcolor[4] = { 0, 0, 0, 0 };
 
 drawlist_t drawlist[NUMDRAWLISTS];
+vtx_t drawVertex[MAXDLDRAWCOUNT];
 
 CVAR_EXTERNAL(r_texturecombiner);
 

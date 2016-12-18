@@ -264,7 +264,7 @@ void *(Z_Malloc)(int size, int tag, void *user, const char *file, int line) {
 
     newblock->tag = tag;
     newblock->id = ZONEID;
-    newblock->user = &user;
+    newblock->user = (void**) user;
     newblock->size = size;
 
     Z_InsertBlock(newblock);
@@ -342,7 +342,7 @@ void *(Z_Realloc)(void *ptr, int size, int tag, void *user, const char *file, in
 
     newblock->tag = tag;
     newblock->id = ZONEID;
-    newblock->user = &user;
+    newblock->user = (void**) user;
     newblock->size = size;
 
     Z_InsertBlock(newblock);
