@@ -60,7 +60,7 @@ static CMD(ListCvars) {
 // CON_CvarGet
 //
 
-cvar_t *CON_CvarGet(char *name) {
+cvar_t *CON_CvarGet(const char *name) {
     cvar_t *var;
 
     for(var = cvarcap; var; var = var->next) {
@@ -109,7 +109,7 @@ char *CON_CvarString(char *name) {
 void CON_CvarAutoComplete(char *partial) {
     cvar_t*     cvar;
     int         len;
-    char*       name = NULL;
+    const char* name = NULL;
     int         spacinglength;
     dboolean    match = false;
     char*       spacing = NULL;
@@ -154,7 +154,7 @@ void CON_CvarAutoComplete(char *partial) {
 // CON_CvarSet
 //
 
-void CON_CvarSet(char *var_name, char *value) {
+void CON_CvarSet(const char *var_name, char *value) {
     cvar_t *var;
     dboolean changed;
 
@@ -182,7 +182,7 @@ void CON_CvarSet(char *var_name, char *value) {
 // CON_CvarSetValue
 //
 
-void CON_CvarSetValue(char *var_name, float value) {
+void CON_CvarSetValue(const char *var_name, float value) {
     char val[32];
 
     sprintf(val, "%f",value);

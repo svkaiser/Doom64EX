@@ -69,7 +69,7 @@ int         dsprintf(char *buf, const char *format, ...);
 int         dsnprintf(char *src, size_t n, const char *str, ...);
 
 int D_abs(int x);
-float D_fabs(float x);
+extern float D_fabs(float x);
 
 #define dcos(angle) finecosine[(angle) >> ANGLETOFINESHIFT]
 #define dsin(angle) finesine[(angle) >> ANGLETOFINESHIFT]

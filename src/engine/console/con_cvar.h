@@ -29,7 +29,7 @@
 typedef struct cvar_s cvar_t;
 
 struct cvar_s {
-    char*           name;
+    const char*     name;
     char*           string;
     dboolean        nonclient;
     void (*callback)(cvar_t*);
@@ -83,10 +83,10 @@ extern cvar_t*  cvarcap;
 
 void CON_CvarInit(void);
 void CON_CvarRegister(cvar_t *variable);
-void CON_CvarSet(char *var_name, char *value);
-void CON_CvarSetValue(char *var_name, float value);
+void CON_CvarSet(const char *var_name, char *value);
+void CON_CvarSetValue(const char *var_name, float value);
 void CON_CvarAutoComplete(char *partial);
-cvar_t *CON_CvarGet(char *name);
+cvar_t *CON_CvarGet(const char *name);
 
 #endif
 
