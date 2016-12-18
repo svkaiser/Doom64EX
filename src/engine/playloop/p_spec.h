@@ -175,11 +175,12 @@ int         P_DoSectorLightChange(line_t* line, short tag);
 void        P_FadeInBrightness(void);
 
 
-typedef enum {
+typedef int bwhere_e;
+enum {
     top,
     middle,
     bottom
-} bwhere_e;
+};
 
 
 typedef struct {
@@ -210,16 +211,16 @@ void P_ChangeSwitchTexture(line_t* line, int useAgain);
 //
 // P_PLATS
 //
-typedef enum {
+typedef int plat_e;
+enum {
     up,
     down,
     waiting,
     in_stasis
-} plat_e;
+};
 
-
-
-typedef enum {
+typedef int plattype_e;
+enum {
     perpetualRaise,
     downWaitUpStay,
     raiseAndChange,
@@ -231,7 +232,7 @@ typedef enum {
     customDownUpFast,
     customUpDown,
     customUpDownFast
-} plattype_e;
+};
 
 
 
@@ -273,7 +274,8 @@ void    P_ActivateInStasis(int tag);
 // P_DOORS
 //
 
-typedef enum {
+typedef int vldoor_e;
+enum {
     normal,
     close30ThenOpen,
     doorclose,
@@ -282,9 +284,7 @@ typedef enum {
     blazeRaise,
     blazeOpen,
     blazeClose
-} vldoor_e;
-
-
+};
 
 typedef struct {
     thinker_t   thinker;
@@ -322,7 +322,8 @@ void    T_VerticalDoor(void* door);
 //
 // P_CEILNG
 //
-typedef enum {
+typedef int ceiling_e;
+enum {
     lowerToFloor,
     raiseToHighest,
     lowerAndCrush,
@@ -332,9 +333,7 @@ typedef enum {
     customCeiling,
     crushAndRaiseOnce,
     customCeilingToHeight
-} ceiling_e;
-
-
+};
 
 typedef struct {
     thinker_t    thinker;
@@ -371,7 +370,8 @@ void    P_ActivateInStasisCeiling(void* line);
 //
 // P_FLOOR
 //
-typedef enum {
+typedef int floor_e;
+enum {
     lowerFloor,             // lower floor to highest surrounding floor
     lowerFloorToLowest,     // lower floor to lowest surrounding floor
     turboLower,             // lower floor to highest surrounding floor VERY FAST
@@ -383,17 +383,13 @@ typedef enum {
     raiseFloorCrush,
     customFloor,
     customFloorToHeight
-} floor_e;
+};
 
-
-
-
-typedef enum {
+typedef int stair_e;
+enum {
     build8, // slowly build by 8
     turbo16 // quickly build by 16
-} stair_e;
-
-
+};
 
 typedef struct {
     thinker_t    thinker;
@@ -417,17 +413,15 @@ typedef struct {
     int          flrdir;
 } splitmove_t;
 
-
-
 #define FLOORSPEED FRACUNIT * 3
 
-typedef enum {
+typedef int result_e;
+enum {
     ok,
     crushed,
     pastdest,
     stop
-
-} result_e;
+};
 
 result_e T_MovePlane(sector_t* sector, fixed_t speed, fixed_t dest,
                      dboolean crush, int floorOrCeiling, int direction);

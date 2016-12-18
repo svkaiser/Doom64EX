@@ -88,11 +88,11 @@ if (WIN32)
     )
 
   add_sources(system
-    i_cpu.c
+    i_cpu.cc
     )
 else ()
   add_sources(system
-    i_cpu_posix.c
+    i_cpu_posix.cc
     )
 
   add_link_libraries(m) # math lib
@@ -104,8 +104,8 @@ endif ()
 
 # src/automap
 add_sources(automap
-  am_draw.c
-  am_map.c
+  am_draw.cc
+  am_map.cc
   )
 
 # src/common
@@ -114,25 +114,25 @@ add_sources(common
   doomdef.h
   doomstat.h
   doomtype.h
-  info.c
-  md5.c
-  tables.c
+  info.cc
+  md5.cc
+  tables.cc
   )
 
 # src/console
 add_sources(console
-  con_console.c
-  con_cvar.c
+  con_console.cc
+  con_cvar.cc
   )
 
 # src/doom_main
 add_sources(doom_main
-  d_devstat.c
+  d_devstat.cc
   d_englsh.h
   d_event.h
   d_keywds.h
-  d_main.c
-  d_net.c
+  d_main.cc
+  d_net.cc
   d_player.h
   d_think.h
   d_ticcmd.h
@@ -140,161 +140,161 @@ add_sources(doom_main
 
 # src/finale
 add_sources(finale
-  f_finale.c
-  in_stuff.c
+  f_finale.cc
+  in_stuff.cc
   )
 
 # src/game
 add_sources(game
-  g_actions.c
+  g_actions.cc
   g_controls.h
-  g_demo.c
-  g_game.c
+  g_demo.cc
+  g_game.cc
   g_local.h
-  g_settings.c
+  g_settings.cc
   )
 
 # src/intermission
 add_sources(intermission
-  wi_stuff.c
+  wi_stuff.cc
   )
 
 # src/misc
 add_sources(misc
-  m_cheat.c
-  m_fixed.c
-  m_keys.c
-  m_menu.c
+  m_cheat.cc
+  m_fixed.cc
+  m_keys.cc
+  m_menu.cc
   m_misc.cc
-  m_password.c
-  m_random.c
-  m_shift.c
+  m_password.cc
+  m_random.cc
+  m_shift.cc
   )
 
 # src/net
 add_sources(net
-  net_client.c
-  net_common.c
-  net_dedicated.c
+  net_client.cc
+  net_common.cc
+  net_dedicated.cc
   net_defs.h
-  net_io.c
-  net_loop.c
-  net_packet.c
-  net_query.c
-  net_sdl.c
-  net_server.c
-  net_structrw.c
+  net_io.cc
+  net_loop.cc
+  net_packet.cc
+  net_query.cc
+  net_sdl.cc
+  net_server.cc
+  net_structrw.cc
   )
 
 # src/opengl
 add_sources(opengl
-  dgl.c
-  gl_draw.c
-  gl_main.c
-  gl_texture.c
-  glad.c
+  dgl.cc
+  gl_draw.cc
+  gl_main.cc
+  gl_texture.cc
+  glad.cc
   )
 
 # src/parser
 add_sources(parser
-  sc_main.c
+  sc_main.cc
   )
 
 # src/playloop
 add_sources(playloop
-  p_ceilng.c
-  p_doors.c
-  p_enemy.c
-  p_floor.c
-  p_inter.c
-  p_lights.c
+  p_ceilng.cc
+  p_doors.cc
+  p_enemy.cc
+  p_floor.cc
+  p_inter.cc
+  p_lights.cc
   p_local.h
-  p_macros.c
-  p_map.c
-  p_maputl.c
-  p_mobj.c
-  p_plats.c
-  p_pspr.c
-  p_saveg.c
-  p_setup.c
-  p_sight.c
-  p_spec.c
-  p_switch.c
-  p_telept.c
-  p_tick.c
-  p_user.c
+  p_macros.cc
+  p_map.cc
+  p_maputl.cc
+  p_mobj.cc
+  p_plats.cc
+  p_pspr.cc
+  p_saveg.cc
+  p_setup.cc
+  p_sight.cc
+  p_spec.cc
+  p_switch.cc
+  p_telept.cc
+  p_tick.cc
+  p_user.cc
   )
 
 # src/renderer
 add_sources(renderer
-  r_bsp.c
-  r_clipper.c
-  r_drawlist.c
-  r_lights.c
+  r_bsp.cc
+  r_clipper.cc
+  r_drawlist.cc
+  r_lights.cc
   r_local.h
-  r_main.c
-  r_scene.c
+  r_main.cc
+  r_scene.cc
   r_sky.cc
-  r_things.c
-  r_wipe.c
+  r_things.cc
+  r_wipe.cc
   )
 
 # src/sound
 add_sources(sound
   sounds.h
-  s_sound.c
+  s_sound.cc
   )
 
 # src/statusbar
 add_sources(statusbar
-  st_stuff.c
+  st_stuff.cc
   )
 
 # src/system
 add_sources(system
-  i_audio.c
-  i_main.c
+  i_audio.cc
+  i_main.cc
   i_png.cc
   i_swap.h
-  i_system.c
-  i_video.c
+  i_system.cc
+  i_video.cc
   )
 
 # src/wadfile
 add_sources(wadfile
-  w_file.c
-  w_merge.c
-  w_wad.c
+  w_file.cc
+  w_merge.cc
+  w_wad.cc
   )
 
 # src/wadgen
 add_sources(wadgen
-  deflate-N64.c
+  deflate-N64.cc
   deflate-N64.h
-  gfx.c
+  gfx.cc
   gfx.h
-  level.c
+  level.cc
   level.h
-  png.c
-  rom.c
+  png.cc
+  rom.cc
   rom.h
-  sndfont.c
+  sndfont.cc
   sndfont.h
-  sound.c
+  sound.cc
   sound.h
-  sprite.c
+  sprite.cc
   sprite.h
-  texture.c
+  texture.cc
   texture.h
-  wad.c
+  wad.cc
   wad.h
-  wadgen.c
+  wadgen.cc
   wadgen.h
   )
 
 # src/zone
 add_sources(zone
-  z_zone.c
+  z_zone.cc
   )
 
 ##------------------------------------------------------------------------------

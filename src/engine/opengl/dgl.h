@@ -36,7 +36,7 @@
 void dglLogError(const char *message, const char *file, int line);
 #endif
 
-#define dglGetString(name)  glGetString(name)
+#define dglGetString(name)  ((const char *)glGetString(name))
 
 //
 // CUSTOM ROUTINES

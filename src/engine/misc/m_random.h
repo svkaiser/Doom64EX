@@ -29,7 +29,8 @@
 #include "doomtype.h"
 #include "d_keywds.h"
 
-typedef enum {
+typedef int pr_class_t;
+enum {
     pr_skullfly,                // #1
     pr_damage,                  // #2
     pr_crush,                   // #3
@@ -85,7 +86,7 @@ typedef enum {
 
     // End of new entries
     NUMPRCLASS               // MUST be last item in list
-} pr_class_t;
+};
 
 // The random number generator's state.
 typedef struct {

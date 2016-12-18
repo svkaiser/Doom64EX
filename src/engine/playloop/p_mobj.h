@@ -107,8 +107,8 @@
 //
 // Misc. mobj flags
 //
-
-typedef enum {
+typedef int mobjflag_t;
+enum {
     MF_SPECIAL              = 1,            // Call P_SpecialThing when touched.
     MF_SOLID                = 2,            // Blocks.
     MF_SHOOTABLE            = 4,            // Can be hit.
@@ -141,15 +141,14 @@ typedef enum {
     MF_TRIGDEATH            = 0x20000000,   // [d64] Trigger line special on death
     MF_SHADOW               = 0x40000000,   // temporary player invisibility powerup.
     MF_NOINFIGHTING         = 0x80000000    // [d64] Do not switch targets
+};
 
-} mobjflag_t;
-
-typedef enum {
+typedef int mobjblockflag_t;
+enum {
     BF_MOBJSTAND        = 1,    // Standing on top of thing?
     BF_MOBJPASS         = 2,    // Able to pass under thing?
     BF_MIDPOINTONLY     = 4     // Only check sector where mobj's midpoint is inside
-
-} mobjblockflag_t;
+};
 
 // Map Object definition
 

@@ -38,7 +38,7 @@ typedef struct {
     float   z;
 } visspritelist_t;
 
-void R_InitSprites(char** namelist);
+void R_InitSprites(const char** namelist);
 void R_AddSprites(subsector_t *sub);
 void R_SetupSprites(void);
 void R_ClearSprites(void);

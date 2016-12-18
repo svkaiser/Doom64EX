@@ -52,8 +52,8 @@ typedef struct {
     int         data4;        // misc data
 } event_t;
 
-
-typedef enum {
+typedef int gameaction_t;
+enum {
     ga_nothing,
     ga_loadlevel,
     ga_newgame,
@@ -66,7 +66,7 @@ typedef enum {
     ga_warplevel,
     ga_warpquick,
     ga_title
-} gameaction_t;
+};
 
 
 //

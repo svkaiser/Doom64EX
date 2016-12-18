@@ -33,8 +33,8 @@ typedef struct {
 } rom_t;
 
 typedef struct {
-	char *name;
-	char *countryID;	// E = US, J = Japan, P = PAL/Europe, X = US (v1.1)
+	const char *name;
+	const char *countryID;	// E = US, J = Japan, P = PAL/Europe, X = US (v1.1)
 } romLumpSpecial_t;
 
 extern rom_t RomFile;

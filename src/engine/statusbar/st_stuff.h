@@ -48,7 +48,7 @@ void ST_Start(void);
 // Called by startup code.
 void ST_Init(void);
 void ST_AddChatMsg(char *msg, int player);
-void ST_Notification(char *msg);
+void ST_Notification(const char *msg);
 void ST_Drawer(void);
 void ST_FlashingScreen(byte r, byte g, byte b, byte a);
 char ST_DequeueChatChar(void);

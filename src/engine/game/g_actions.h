@@ -32,7 +32,7 @@ typedef void (*actionproc_t)(int64 data, char **param);
 
 void        G_InitActions(void);
 dboolean    G_ActionResponder(event_t *ev);
-void        G_AddCommand(char *name, actionproc_t proc, int64 data);
+void        G_AddCommand(const char *name, actionproc_t proc, int64 data);
 void        G_ActionTicker(void);
 void        G_ExecuteCommand(char *action);
 void        G_BindActionByName(char *key, char *action);

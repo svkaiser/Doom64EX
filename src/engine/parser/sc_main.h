@@ -35,7 +35,7 @@ typedef struct {
     int     buffsize;
     void (*open)(char*);
     void (*close)(void);
-    void (*compare)(char*);
+    void (*compare)(const char*);
     int (*find)(dboolean);
     char(*fgetchar)(void);
     void (*rewind)(void);
@@ -43,7 +43,7 @@ typedef struct {
     int (*getint)(void);
     int (*setdata)(void*, void*);
     int (*readtokens)(void);
-    void (*error)(char*);
+    void (*error)(const char*);
 } scparser_t;
 
 extern scparser_t sc_parser;

@@ -27,7 +27,8 @@
 #include "net_defs.h"
 #include "net_packet.h"
 
-typedef enum 
+typedef int net_connstate_t;
+enum 
 {
     // sending syn packets, waiting for an ACK reply 
     // (client side)
@@ -59,11 +60,12 @@ typedef enum
 
     NET_CONN_STATE_DISCONNECTED_SLEEP,
 
-} net_connstate_t;
+};
 
 // Reason a connection was terminated
 
-typedef enum
+typedef int net_disconnect_reason_t;
+enum
 {
     // As the result of a local disconnect request
 
@@ -77,7 +79,7 @@ typedef enum
 
     NET_DISCONNECT_TIMEOUT,
 
-} net_disconnect_reason_t;
+};
 
 #define MAX_RETRIES 5
 
