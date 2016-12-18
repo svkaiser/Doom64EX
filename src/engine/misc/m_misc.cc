@@ -314,7 +314,7 @@ void M_ScreenShot(void) {
 
     // Get PNG image
 
-    gfx::Image image {gfx::PixelFormat::rgb, video_width, video_height, buff};
+    gfx::Image image(gfx::PixelFormat::rgb, video_width, video_height, buff);
     image.save(file, "png");
 
     Z_Free(buff);
@@ -335,7 +335,7 @@ int M_CacheThumbNail(byte** data) {
     buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
     tbn = reinterpret_cast<byte*>(Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0));
 
-    gfx::Image image {gfx::PixelFormat::rgb, video_width, video_height, buff};
+    gfx::Image image(gfx::PixelFormat::rgb, video_width, video_height, buff);
     image.scale(128, 128);
     std::copy_n(image.data_ptr(), SAVEGAMETBSIZE, tbn);
 

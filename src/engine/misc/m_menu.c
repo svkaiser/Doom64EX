@@ -29,6 +29,8 @@
 
 #ifdef _WIN32
 #include <io.h>
+#else
+#include <unistd.h>
 #endif
 
 #ifdef _MSC_VER
@@ -358,8 +360,7 @@ enum {
     quityes = 0,
     quitno,
     quitend
-};
-quitprompt_e;
+} quitprompt_e;
 
 menuitem_t QuitGameMenu[]= {
     {1,"Yes",M_QuitGame,'y'},
@@ -409,8 +410,7 @@ enum {
     quit2yes = 0,
     quit2no,
     quit2end
-};
-quit2prompt_e;
+} quit2prompt_e;
 
 menuitem_t QuitGameMenu2[]= {
     {1,"Yes",M_QuitGame2,'y'},
@@ -516,8 +516,7 @@ enum {
     RMainYes = 0,
     RMainNo,
     RMain_end
-};
-rlprompt_e;
+} rlprompt_e;
 
 menuitem_t RestartConfirmMain[]= {
     {1,"Yes",M_RestartLevel,'y'},
@@ -569,8 +568,7 @@ void M_NewGameNotifyResponse(int choice);
 enum {
     SNN_Ok = 0,
     SNN_End
-};
-startnewnotify_e;
+} startnewnotify_e;
 
 menuitem_t StartNewNotify[]= {
     {1,"Ok",M_NewGameNotifyResponse,'o'}
@@ -3192,8 +3190,7 @@ void M_DrawQuickSaveConfirm(void);
 enum {
     QS_Ok = 0,
     QS_End
-};
-qsconfirm_e;
+} qsconfirm_e;
 
 menuitem_t QuickSaveConfirm[]= {
     {1,"Ok",M_ReturnToOptions,'o'}
@@ -3233,8 +3230,7 @@ void M_DrawNetLoadNotify(void);
 enum {
     NLN_Ok = 0,
     NLN_End
-};
-netloadnotify_e;
+} netloadnotify_e;
 
 menuitem_t NetLoadNotify[]= {
     {1,"Ok",M_ReturnToOptions,'o'}
@@ -3274,8 +3270,7 @@ void M_DrawSaveDeadNotify(void);
 enum {
     SDN_Ok = 0,
     SDN_End
-};
-savedeadnotify_e;
+} savedeadnotify_e;
 
 menuitem_t SaveDeadNotify[]= {
     {1,"Ok",M_ReturnToOptions,'o'}
@@ -3562,8 +3557,7 @@ enum {
     QSP_Yes = 0,
     QSP_No,
     QSP_End
-};
-quicksaveprompt_e;
+} quicksaveprompt_e;
 
 menuitem_t QuickSavePrompt[]= {
     {1,"Yes",M_QuickSaveResponse,'y'},
@@ -3604,8 +3598,7 @@ enum {
     QLP_Yes = 0,
     QLP_No,
     QLP_End
-};
-quickloadprompt_e;
+} quickloadprompt_e;
 
 menuitem_t QuickLoadPrompt[]= {
     {1,"Yes",M_QuickLoadResponse,'y'},
@@ -4565,7 +4558,7 @@ dboolean M_Responder(event_t* ev) {
         ch = KEY_DEL;
         break;
     }
-#endif HAVE_XINPUT
+#endif //HAVE_XINPUT
 
     if(MenuBindActive == true) { //key Bindings
         if(ch == KEY_ESCAPE) {

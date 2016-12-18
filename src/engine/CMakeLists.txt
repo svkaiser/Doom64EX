@@ -24,6 +24,10 @@
 
 set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
+if (CMAKE_VERSION VERSION_LESS 3.1.3)
+  add_definitions(-std=c++14)
+endif ()
+
 ##------------------------------------------------------------------------------
 ## Set up external dependencies
 ##
