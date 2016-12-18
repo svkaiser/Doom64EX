@@ -179,7 +179,8 @@ static void AddSwitchQuad(seg_t *line) {
 // R_GenerateSwitchPlane
 //
 
-dboolean R_GenerateSwitchPlane(seg_t *line, vtx_t *v) {
+dboolean R_GenerateSwitchPlane(void *data, vtx_t *v) {
+    seg_t *line = (seg_t *) data;
     fixed_t     bottom = 0;
     fixed_t     top = 0;
     int         offset = 0;
@@ -297,7 +298,8 @@ d_inline static void GetSideTopBottom(sector_t* sector, rfloat *top, rfloat *bot
 // R_GenerateLowerSegPlane
 //
 
-static dboolean R_GenerateLowerSegPlane(seg_t *line, vtx_t* v) {
+static dboolean R_GenerateLowerSegPlane(void *data, vtx_t* v) {
+    seg_t *line = (seg_t *) data;
     line_t*     linedef;
     side_t*     sidedef;
     rfloat      top;
@@ -367,7 +369,8 @@ static dboolean R_GenerateLowerSegPlane(seg_t *line, vtx_t* v) {
 // R_GenerateUpperSegPlane
 //
 
-static dboolean R_GenerateUpperSegPlane(seg_t *line, vtx_t* v) {
+static dboolean R_GenerateUpperSegPlane(void *data, vtx_t* v) {
+    seg_t *line = (seg_t *) data;
     line_t*     linedef;
     side_t*     sidedef;
     rfloat      top;
@@ -441,7 +444,8 @@ static dboolean R_GenerateUpperSegPlane(seg_t *line, vtx_t* v) {
 // R_GenerateMiddleSegPlane
 //
 
-static dboolean R_GenerateMiddleSegPlane(seg_t *line, vtx_t* v) {
+static dboolean R_GenerateMiddleSegPlane(void *data, vtx_t* v) {
+    seg_t *line = (seg_t *) data;
     line_t*     linedef;
     side_t*     sidedef;
     rfloat      top;

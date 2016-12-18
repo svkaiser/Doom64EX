@@ -756,7 +756,8 @@ int P_RandomLineTrigger(line_t* line, mobj_t* thing, int side) {
 // T_CountdownTimer
 //
 
-void T_CountdownTimer(delay_t* timer) {
+void T_CountdownTimer(void *data) {
+    delay_t* timer = (delay_t*) data;
     if(!timer->tics--) {
         if(timer->finishfunc) {
             timer->finishfunc();
@@ -785,7 +786,8 @@ void P_SpawnDelayTimer(line_t* line, void (*func)(void)) {
 // T_Quake
 //
 
-void T_Quake(quake_t* quake) { // 0x8000EDE8
+void T_Quake(void *data) { // 0x8000EDE8
+    quake_t* quake = (quake_t*) data;
     if(!quake->tics--) {
         P_RemoveThinker(&quake->thinker);
         quakeviewx = 0;
@@ -802,7 +804,8 @@ void T_Quake(quake_t* quake) { // 0x8000EDE8
 // P_SpawnQuake
 //
 
-static void P_SpawnQuake(line_t* line) {
+static void P_SpawnQuake(void *data) {
+    line_t* line = (line_t*) data;
     quake_t* quake;
 
     quake = Z_Malloc(sizeof(*quake), PU_LEVSPEC, 0);
@@ -881,7 +884,8 @@ static void P_AlertTaggedMobj(mobj_t *activator, int tid) {
 
 #define CAMAIMANGLE     ANG5
 
-void T_LookAtCamera(aimcamera_t* camera) {
+void T_LookAtCamera(void *data) {
+    aimcamera_t* camera = (aimcamera_t*) data;
     mobj_t* camtarget;
     player_t* player;
 
@@ -959,7 +963,8 @@ int P_SetAimCamera(player_t* player, line_t* line, dboolean aim) {
 #define CAMMOVESPEED    164
 #define    CAMTRACEANGLE   ANG1
 
-void T_MovingCamera(movecamera_t* camera) {
+void T_MovingCamera(void *data) {
+    movecamera_t* camera = (movecamera_t*) data;
     int dist;
     mobj_t* mo;
     mobj_t* camtarget;

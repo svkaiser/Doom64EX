@@ -168,7 +168,8 @@ result_e T_MovePlane(sector_t* sector, fixed_t speed, fixed_t dest,
 // MOVE A FLOOR TO IT'S DESTINATION (UP OR DOWN)
 //
 
-void T_MoveFloor(floormove_t* floor) {
+void T_MoveFloor(void *data) {
+    floormove_t* floor = (floormove_t*) data;
     result_e    res;
 
     res = T_MovePlane(floor->sector,
@@ -458,7 +459,8 @@ int EV_BuildStairs(line_t* line, stair_e type) {
 // T_MoveSplitPlane
 //
 
-void T_MoveSplitPlane(splitmove_t *split) {
+void T_MoveSplitPlane(void *data) {
+    splitmove_t *split = (splitmove_t *) data;
     sector_t *sector    = split->sector;
     fixed_t lastceilpos = 0;
     fixed_t lastflrpos  = 0;

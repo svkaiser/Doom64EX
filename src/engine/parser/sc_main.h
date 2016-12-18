@@ -26,16 +26,16 @@
 
 typedef struct {
     char    token[512];
-    char*   buffer;
+    byte*   buffer;
     char*   pointer_start;
     char*   pointer_end;
     int     linepos;
     int     rowpos;
     int     buffpos;
     int     buffsize;
-    void (*open)(void*);
+    void (*open)(char*);
     void (*close)(void);
-    void (*compare)(void*);
+    void (*compare)(char*);
     int (*find)(dboolean);
     char(*fgetchar)(void);
     void (*rewind)(void);
@@ -43,7 +43,7 @@ typedef struct {
     int (*getint)(void);
     int (*setdata)(void*, void*);
     int (*readtokens)(void);
-    void (*error)(void*);
+    void (*error)(char*);
 } scparser_t;
 
 extern scparser_t sc_parser;

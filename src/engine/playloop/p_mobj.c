@@ -785,7 +785,8 @@ void P_SpawnPlayer(mapthing_t* mthing) {
 // T_MobjFadeThinker
 //
 
-void T_MobjFadeThinker(mobjfade_t* mobjfade) {
+void T_MobjFadeThinker(void *data) {
+    mobjfade_t* mobjfade = (mobjfade_t*) data;
     mobj_t *mobj = mobjfade->mobj;
 
     if(mobj->alpha == mobjfade->destAlpha) {

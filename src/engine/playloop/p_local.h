@@ -82,10 +82,10 @@ extern    thinker_t    thinkercap;
 extern    mobj_t        mobjhead;
 
 void P_InitThinkers(void);
-void P_AddThinker(thinker_t* thinker);
-void P_RemoveThinker(thinker_t* thinker);
-void P_LinkMobj(mobj_t* mobj);
-void P_UnlinkMobj(mobj_t* mobj);
+void P_AddThinker(void* thinker);
+void P_RemoveThinker(void* thinker);
+void P_LinkMobj(void* mobj);
+void P_UnlinkMobj(void* mobj);
 
 extern angle_t frame_angle;
 extern angle_t frame_pitch;
@@ -121,10 +121,10 @@ typedef struct {
     laser_t*    laser;
 } laserthinker_t;
 
-void P_SetupPsprites(player_t* curplayer);
-void P_MovePsprites(player_t* curplayer);
-void P_DropWeapon(player_t* player);
-void T_LaserThinker(laserthinker_t *laser);
+void P_SetupPsprites(void* curplayer);
+void P_MovePsprites(void* curplayer);
+void P_DropWeapon(void* player);
+void T_LaserThinker(void* laser);
 
 
 //

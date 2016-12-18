@@ -41,7 +41,8 @@ plat_t* activeplats[MAXPLATS];
 //
 // Move a plat up and down
 //
-void T_PlatRaise(plat_t* plat) {
+void T_PlatRaise(void *data) {
+    plat_t* plat = (plat_t*) data;
     result_e res;
 
     switch(plat->status) {
@@ -338,7 +339,8 @@ void P_ActivateInStasis(int tag) {
         }
 }
 
-void EV_StopPlat(line_t* line) {
+void EV_StopPlat(void *data) {
+    line_t* line = (line_t*) data;
     int        j;
 
     for(j = 0; j < MAXPLATS; j++)
@@ -351,7 +353,8 @@ void EV_StopPlat(line_t* line) {
         }
 }
 
-void P_AddActivePlat(plat_t* plat) {
+void P_AddActivePlat(void *data) {
+    plat_t* plat = (plat_t*) data;
     int        i;
 
     for(i = 0; i < MAXPLATS; i++)
@@ -362,7 +365,8 @@ void P_AddActivePlat(plat_t* plat) {
     I_Error("P_AddActivePlat: no more plats!");
 }
 
-void P_RemoveActivePlat(plat_t* plat) {
+void P_RemoveActivePlat(void *data) {
+    plat_t* plat = (plat_t*) data;
     int        i;
     for(i = 0; i < MAXPLATS; i++)
         if(plat == activeplats[i]) {

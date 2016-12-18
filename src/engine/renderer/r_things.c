@@ -332,7 +332,8 @@ static void R_AddVisSprite(visspritelist_t* vissprite) {
 // R_GenerateSpritePlane
 //
 
-static dboolean R_GenerateSpritePlane(visspritelist_t* vissprite, vtx_t* vertex) {
+static dboolean R_GenerateSpritePlane(void *data, vtx_t* vertex) {
+    visspritelist_t* vissprite = (visspritelist_t*) data;
     float           x;
     float           y;
     float           z;
@@ -466,7 +467,8 @@ static dboolean R_GenerateSpritePlane(visspritelist_t* vissprite, vtx_t* vertex)
 // R_GenerateLaserPlane
 //
 
-static dboolean R_GenerateLaserPlane(visspritelist_t* vissprite, vtx_t* vertex) {
+static dboolean R_GenerateLaserPlane(void *data, vtx_t* vertex) {
+    visspritelist_t* vissprite = (visspritelist_t*) data;
     float           x;
     float           y;
     float           z;

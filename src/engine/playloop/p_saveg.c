@@ -588,7 +588,8 @@ static void saveg_read_player_t(player_t* p) {
 // ceiling_t
 //
 
-static void saveg_write_ceiling_t(ceiling_t* ceiling) {
+static void saveg_write_ceiling_t(void* data) {
+    ceiling_t *ceiling = (ceiling_t *) data;
     saveg_write32(ceiling->type);
     saveg_write32(ceiling->sector - sectors);
     saveg_write32(ceiling->bottomheight);
@@ -602,7 +603,8 @@ static void saveg_write_ceiling_t(ceiling_t* ceiling) {
     saveg_write32(ceiling->thinker.function.acp1 != NULL ? 1 : 0);
 }
 
-static void saveg_read_ceiling_t(ceiling_t* ceiling) {
+static void saveg_read_ceiling_t(void* data) {
+    ceiling_t* ceiling = (ceiling_t*) data;
     ceiling->type           = saveg_read32();
     ceiling->sector         = &sectors[saveg_read32()];
     ceiling->bottomheight   = saveg_read32();
@@ -621,7 +623,8 @@ static void saveg_read_ceiling_t(ceiling_t* ceiling) {
 // vldoor_t
 //
 
-static void saveg_write_vldoor_t(vldoor_t* door) {
+static void saveg_write_vldoor_t(void* data) {
+    vldoor_t* door = (vldoor_t*) data;
     saveg_write32(door->type);
     saveg_write32(door->sector - sectors);
     saveg_write32(door->topheight);
@@ -633,7 +636,8 @@ static void saveg_write_vldoor_t(vldoor_t* door) {
     saveg_write32(door->topcountdown);
 }
 
-static void saveg_read_vldoor_t(vldoor_t* door) {
+static void saveg_read_vldoor_t(void* data) {
+    vldoor_t* door = (vldoor_t*) data;
     door->type          = saveg_read32();
     door->sector        = &sectors[saveg_read32()];
     door->topheight     = saveg_read32();
@@ -651,7 +655,8 @@ static void saveg_read_vldoor_t(vldoor_t* door) {
 // floormove_t
 //
 
-static void saveg_write_floormove_t(floormove_t* floor) {
+static void saveg_write_floormove_t(void* data) {
+    floormove_t* floor = (floormove_t*) data;
     saveg_write32(floor->type);
     saveg_write32(floor->crush);
     saveg_write32(floor->sector - sectors);
@@ -663,7 +668,8 @@ static void saveg_write_floormove_t(floormove_t* floor) {
     saveg_write32(floor->instant);
 }
 
-static void saveg_read_floormove_t(floormove_t* floor) {
+static void saveg_read_floormove_t(void* data) {
+    floormove_t* floor = (floormove_t*) data;
     floor->type             = saveg_read32();
     floor->crush            = saveg_read32();
     floor->sector           = &sectors[saveg_read32()];
@@ -681,7 +687,8 @@ static void saveg_read_floormove_t(floormove_t* floor) {
 // splitmove_t
 //
 
-static void saveg_write_splitmove_t(splitmove_t* split) {
+static void saveg_write_splitmove_t(void* data) {
+    splitmove_t* split = (splitmove_t*) data;
     saveg_write32(split->sector - sectors);
     saveg_write32(split->ceildest);
     saveg_write32(split->flrdest);
@@ -689,7 +696,8 @@ static void saveg_write_splitmove_t(splitmove_t* split) {
     saveg_write32(split->flrdir);
 }
 
-static void saveg_read_splitmove_t(splitmove_t* split) {
+static void saveg_read_splitmove_t(void* data) {
+    splitmove_t* split = (splitmove_t*) data;
     split->sector   = &sectors[saveg_read32()];
     split->ceildest = saveg_read32();
     split->flrdest  = saveg_read32();
@@ -703,7 +711,8 @@ static void saveg_read_splitmove_t(splitmove_t* split) {
 // plat_t
 //
 
-static void saveg_write_plat_t(plat_t* plat) {
+static void saveg_write_plat_t(void* data) {
+    plat_t* plat = (plat_t*) data;
     saveg_write32(plat->sector - sectors);
     saveg_write32(plat->speed);
     saveg_write32(plat->low);
@@ -718,7 +727,8 @@ static void saveg_write_plat_t(plat_t* plat) {
     saveg_write32(plat->thinker.function.acp1 != NULL ? 1 : 0);
 }
 
-static void saveg_read_plat_t(plat_t* plat) {
+static void saveg_read_plat_t(void* data) {
+    plat_t* plat = (plat_t*) data;
     plat->sector    = &sectors[saveg_read32()];
     plat->speed     = saveg_read32();
     plat->low       = saveg_read32();
@@ -738,13 +748,15 @@ static void saveg_read_plat_t(plat_t* plat) {
 // lightflash_t
 //
 
-static void saveg_write_lightflash_t(lightflash_t* lf) {
+static void saveg_write_lightflash_t(void* data) {
+    lightflash_t* lf = (lightflash_t*) data;
     saveg_write32(lf->sector - sectors);
     saveg_write32(lf->count);
     saveg_write32(lf->special);
 }
 
-static void saveg_read_lightflash_t(lightflash_t* lf) {
+static void saveg_read_lightflash_t(void* data) {
+    lightflash_t* lf = (lightflash_t*) data;
     lf->sector  = &sectors[saveg_read32()];
     lf->count   = saveg_read32();
     lf->special = saveg_read32();
@@ -754,7 +766,8 @@ static void saveg_read_lightflash_t(lightflash_t* lf) {
 // strobe_t
 //
 
-static void saveg_write_strobe_t(strobe_t* strobe) {
+static void saveg_write_strobe_t(void* data) {
+    strobe_t* strobe = (strobe_t*) data;
     saveg_write32(strobe->sector - sectors);
     saveg_write32(strobe->count);
     saveg_write32(strobe->maxlight);
@@ -763,7 +776,8 @@ static void saveg_write_strobe_t(strobe_t* strobe) {
     saveg_write32(strobe->special);
 }
 
-static void saveg_read_strobe_t(strobe_t* strobe) {
+static void saveg_read_strobe_t(void* data) {
+    strobe_t* strobe = (strobe_t*) data;
     strobe->sector      = &sectors[saveg_read32()];
     strobe->count       = saveg_read32();
     strobe->maxlight    = saveg_read32();
@@ -776,7 +790,8 @@ static void saveg_read_strobe_t(strobe_t* strobe) {
 // glow_t
 //
 
-static void saveg_write_glow_t(glow_t* glow) {
+static void saveg_write_glow_t(void* data) {
+    glow_t* glow = (glow_t*) data;
     saveg_write32(glow->sector - sectors);
     saveg_write32(glow->type);
     saveg_write32(glow->count);
@@ -786,7 +801,8 @@ static void saveg_write_glow_t(glow_t* glow) {
     saveg_write32(glow->special);
 }
 
-static void saveg_read_glow_t(glow_t* glow) {
+static void saveg_read_glow_t(void* data) {
+    glow_t* glow = (glow_t*) data;
     glow->sector    = &sectors[saveg_read32()];
     glow->type      = saveg_read32();
     glow->count     = saveg_read32();
@@ -800,13 +816,15 @@ static void saveg_read_glow_t(glow_t* glow) {
 // fireflicker_t
 //
 
-static void saveg_write_fireflicker_t(fireflicker_t* ff) {
+static void saveg_write_fireflicker_t(void *data) {
+    fireflicker_t* ff = (fireflicker_t*) data;
     saveg_write32(ff->sector - sectors);
     saveg_write32(ff->count);
     saveg_write32(ff->special);
 }
 
-static void saveg_read_fireflicker_t(fireflicker_t* ff) {
+static void saveg_read_fireflicker_t(void *data) {
+    fireflicker_t* ff = (fireflicker_t*) data;
     ff->sector  = &sectors[saveg_read32()];
     ff->count   = saveg_read32();
     ff->special = saveg_read32();
@@ -816,7 +834,8 @@ static void saveg_read_fireflicker_t(fireflicker_t* ff) {
 // sequenceGlow_t
 //
 
-static void saveg_write_sequenceGlow_t(sequenceGlow_t* seq) {
+static void saveg_write_sequenceGlow_t(void *data) {
+    sequenceGlow_t* seq = (sequenceGlow_t*) data;
     saveg_write32(seq->sector - sectors);
     saveg_write32(seq->headsector ? (seq->headsector - sectors) + 1 : 0);
     saveg_write32(seq->count);
@@ -825,7 +844,8 @@ static void saveg_write_sequenceGlow_t(sequenceGlow_t* seq) {
     saveg_write32(seq->special);
 }
 
-static void saveg_read_sequenceGlow_t(sequenceGlow_t* seq) {
+static void saveg_read_sequenceGlow_t(void *data) {
+    sequenceGlow_t* seq = (sequenceGlow_t*) data;
     seq->sector         = &sectors[saveg_read32()];
     seq->headsector     = &sectors[saveg_read32() - 1];
     seq->count          = saveg_read32();
@@ -838,11 +858,13 @@ static void saveg_read_sequenceGlow_t(sequenceGlow_t* seq) {
 // combine_t
 //
 
-static void saveg_write_combine_t(combine_t* combine) {
+static void saveg_write_combine_t(void *data) {
+    combine_t* combine = (combine_t*) data;
     saveg_write32(combine->sector - sectors);
 }
 
-static void saveg_read_combine_t(combine_t* combine) {
+static void saveg_read_combine_t(void *data) {
+    combine_t* combine = (combine_t*) data;
     combine->sector = &sectors[saveg_read32()];
 }
 
@@ -850,7 +872,8 @@ static void saveg_read_combine_t(combine_t* combine) {
 // lightmorph_t
 //
 
-static void saveg_write_lightmorph_t(lightmorph_t* morph) {
+static void saveg_write_lightmorph_t(void *data) {
+    lightmorph_t* morph = (lightmorph_t*) data;
     saveg_write32(morph->dest - lights);
     saveg_write32(morph->src - lights);
     saveg_write32(morph->r);
@@ -859,7 +882,8 @@ static void saveg_write_lightmorph_t(lightmorph_t* morph) {
     saveg_write32(morph->inc);
 }
 
-static void saveg_read_lightmorph_t(lightmorph_t* morph) {
+static void saveg_read_lightmorph_t(void *data) {
+    lightmorph_t* morph = (lightmorph_t*) data;
     morph->dest = &lights[saveg_read32()];
     morph->src  = &lights[saveg_read32()];
     morph->r    = saveg_read32();
@@ -872,12 +896,14 @@ static void saveg_read_lightmorph_t(lightmorph_t* morph) {
 // delay_t
 //
 
-static void saveg_write_delay_t(delay_t* delay) {
+static void saveg_write_delay_t(void *data) {
+    delay_t* delay = (delay_t*) data;
     saveg_write32(delay->tics);
     saveg_write32(delay->finishfunc ? 1 : 0);
 }
 
-static void saveg_read_delay_t(delay_t* delay) {
+static void saveg_read_delay_t(void *data) {
+    delay_t* delay = (delay_t*) data;
     int func;
 
     delay->tics         = saveg_read32();
@@ -889,12 +915,14 @@ static void saveg_read_delay_t(delay_t* delay) {
 // aimcamera_t
 //
 
-static void saveg_write_aimcamera_t(aimcamera_t* cam) {
+static void saveg_write_aimcamera_t(void *data) {
+    aimcamera_t* cam = (aimcamera_t*) data;
     saveg_write_mobjindex(cam->viewmobj);
     saveg_write32(cam->activator ? cam->activator - players + 1 : 0);
 }
 
-static void saveg_read_aimcamera_t(aimcamera_t* cam) {
+static void saveg_read_aimcamera_t(void *data) {
+    aimcamera_t* cam = (aimcamera_t*) data;
     int pl;
 
     cam->viewmobj   = saveg_read_mobjindex();
@@ -906,7 +934,8 @@ static void saveg_read_aimcamera_t(aimcamera_t* cam) {
 // movecamera_t
 //
 
-static void saveg_write_movecamera_t(movecamera_t* cam) {
+static void saveg_write_movecamera_t(void *data) {
+    movecamera_t* cam = (movecamera_t*) data;
     saveg_write32(cam->x);
     saveg_write32(cam->y);
     saveg_write32(cam->z);
@@ -918,7 +947,8 @@ static void saveg_write_movecamera_t(movecamera_t* cam) {
     saveg_write32(cam->tic);
 }
 
-static void saveg_read_movecamera_t(movecamera_t* cam) {
+static void saveg_read_movecamera_t(void *data) {
+    movecamera_t* cam = (movecamera_t*) data;
     int pl;
 
     cam->x          = saveg_read32();
@@ -937,14 +967,16 @@ static void saveg_read_movecamera_t(movecamera_t* cam) {
 // mobjfade_t
 //
 
-static void saveg_write_mobjfade_t(mobjfade_t* fade) {
+static void saveg_write_mobjfade_t(void *data) {
+    mobjfade_t* fade = (mobjfade_t*) data;
     saveg_write_mobjindex(fade->mobj);
     saveg_write32(fade->amount);
     saveg_write32(fade->destAlpha);
     saveg_write32(fade->flagReserve);
 }
 
-static void saveg_read_mobjfade_t(mobjfade_t* fade) {
+static void saveg_read_mobjfade_t(void *data) {
+    mobjfade_t* fade = (mobjfade_t*) data;
     saveg_set_mobjtarget(&fade->mobj, saveg_read_mobjindex());
 
     fade->amount        = saveg_read32();
@@ -956,14 +988,16 @@ static void saveg_read_mobjfade_t(mobjfade_t* fade) {
 // mobjexp_t
 //
 
-static void saveg_write_mobjexp_t(mobjexp_t* exp) {
+static void saveg_write_mobjexp_t(void *data) {
+    mobjexp_t* exp = (mobjexp_t*) data;
     saveg_write32(exp->delay);
     saveg_write32(exp->lifetime);
     saveg_write32(exp->delaymax);
     saveg_write_mobjindex(exp->mobj);
 }
 
-static void saveg_read_mobjexp_t(mobjexp_t* exp) {
+static void saveg_read_mobjexp_t(void *data) {
+    mobjexp_t* exp = (mobjexp_t*) data;
     exp->delay      = saveg_read32();
     exp->lifetime   = saveg_read32();
     exp->delaymax   = saveg_read32();
@@ -975,11 +1009,13 @@ static void saveg_read_mobjexp_t(mobjexp_t* exp) {
 // quake_t
 //
 
-static void saveg_write_quake_t(quake_t* quake) {
+static void saveg_write_quake_t(void *data) {
+    quake_t* quake = (quake_t*) data;
     saveg_write32(quake->tics);
 }
 
-static void saveg_read_quake_t(quake_t* quake) {
+static void saveg_read_quake_t(void *data) {
+    quake_t* quake = (quake_t*) data;
     quake->tics = saveg_read32();
 }
 
@@ -987,7 +1023,8 @@ static void saveg_read_quake_t(quake_t* quake) {
 // laserthinker_t
 //
 
-static void saveg_write_laserthinker_t(laserthinker_t* laserthinker) {
+static void saveg_write_laserthinker_t(void *data) {
+    laserthinker_t* laserthinker = (laserthinker_t*) data;
     laser_t* l;
 
     saveg_write_mobjindex(laserthinker->dest);
@@ -1010,7 +1047,8 @@ static void saveg_write_laserthinker_t(laserthinker_t* laserthinker) {
     }
 }
 
-static void saveg_read_laserthinker_t(laserthinker_t* laserthinker) {
+static void saveg_read_laserthinker_t(void *data) {
+    laserthinker_t* laserthinker = (laserthinker_t*) data;
     laser_t* l = NULL;
     int next;
     dboolean head = true;
@@ -1578,7 +1616,7 @@ enum {
 } specials_e;
 
 struct {
-    think_t function;
+    actionf_p1 function;
     int     type;
     void (*writefunc)(void* th);
     void (*readfunc)(void* th);
@@ -1770,7 +1808,7 @@ void P_ArchiveSpecials(void) {
         }
 
         for(i = 0; saveg_specials[i].type != tc_endthinkers; i++) {
-            if(th->function.acp1 == (actionf_p1)saveg_specials[i].function.acp1) {
+            if(th->function.acp1 == (actionf_p1)saveg_specials[i].function) {
                 saveg_write8(saveg_specials[i].type);
                 saveg_write_pad();
                 saveg_specials[i].writefunc(th);
@@ -1824,7 +1862,7 @@ void P_UnArchiveSpecials(void) {
                 thinker = Z_Malloc(saveg_specials[i].structsize, PU_LEVEL, NULL);
                 saveg_specials[i].readfunc(thinker);
 
-                ((thinker_t*)thinker)->function.acp1 = (actionf_p1)saveg_specials[i].function.acp1;
+                ((thinker_t*)thinker)->function.acp1 = saveg_specials[i].function;
                 P_AddThinker(thinker);
 
                 // handle special cases

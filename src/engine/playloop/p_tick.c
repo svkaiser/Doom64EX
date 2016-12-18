@@ -82,7 +82,8 @@ void P_InitThinkers(void) {
 // Adds a new thinker at the end of the list.
 //
 
-void P_AddThinker(thinker_t* thinker) {
+void P_AddThinker(void *data) {
+    thinker_t* thinker = (thinker_t*) data;
     thinkercap.prev->next = thinker;
     thinker->next = &thinkercap;
     thinker->prev = thinkercap.prev;
@@ -93,7 +94,8 @@ void P_AddThinker(thinker_t* thinker) {
 // P_UnlinkThinker
 //
 
-static void P_UnlinkThinker(thinker_t* thinker) {
+static void P_UnlinkThinker(void *data) {
+    thinker_t* thinker = (thinker_t*) data;
     thinker_t* next = currentthinker->next;
     (next->prev = currentthinker = thinker->prev)->next = next;
 
@@ -106,7 +108,8 @@ static void P_UnlinkThinker(thinker_t* thinker) {
 // until its thinking turn comes up.
 //
 
-void P_RemoveThinker(thinker_t* thinker) {
+void P_RemoveThinker(void *data) {
+    thinker_t* thinker = (thinker_t*) data;
     thinker->function.acp1 = P_UnlinkThinker;
     P_MacroDetachThinker(thinker);
 }
@@ -115,7 +118,8 @@ void P_RemoveThinker(thinker_t* thinker) {
 // P_LinkMobj
 //
 
-void P_LinkMobj(mobj_t* mobj) {
+void P_LinkMobj(void *data) {
+    mobj_t* mobj = (mobj_t*) data;
     mobjhead.prev->next = mobj;
     mobj->next = &mobjhead;
     mobj->prev = mobjhead.prev;
@@ -126,7 +130,8 @@ void P_LinkMobj(mobj_t* mobj) {
 // P_UnlinkMobj
 //
 
-void P_UnlinkMobj(mobj_t* mobj) {
+void P_UnlinkMobj(void *data) {
+    mobj_t* mobj = (mobj_t*) data;
     /* Remove from main mobj list */
     mobj_t* next = currentmobj->next;
 

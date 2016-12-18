@@ -46,7 +46,8 @@
 // T_FireFlicker
 //
 
-void T_FireFlicker(fireflicker_t* flick) {
+void T_FireFlicker(void *data) {
+    fireflicker_t* flick = (fireflicker_t*) data;
     int    amount;
 
     if(--flick->count) {
@@ -68,7 +69,8 @@ void T_FireFlicker(fireflicker_t* flick) {
 // P_SpawnFireFlicker
 //
 
-void P_SpawnFireFlicker(sector_t* sector) {
+void P_SpawnFireFlicker(void *data) {
+    sector_t* sector = (sector_t*) data;
     fireflicker_t*    flick;
 
     flick = Z_Malloc(sizeof(*flick), PU_LEVSPEC, 0);
@@ -92,7 +94,8 @@ void P_SpawnFireFlicker(sector_t* sector) {
 // Do flashing lights.
 //
 
-void T_LightFlash(lightflash_t* flash) {
+void T_LightFlash(void *data) {
+    lightflash_t* flash = (lightflash_t*) data;
     if(--flash->count) {
         return;
     }
@@ -119,7 +122,8 @@ void T_LightFlash(lightflash_t* flash) {
 // After the map has been loaded, scan each sector
 // for specials that spawn thinkers
 //
-void P_SpawnLightFlash(sector_t* sector) {
+void P_SpawnLightFlash(void *data) {
+    sector_t* sector = (sector_t*) data;
     lightflash_t*    flash;
 
     flash = Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0);
@@ -144,7 +148,8 @@ void P_SpawnLightFlash(sector_t* sector) {
 //
 
 
-void T_StrobeFlash(strobe_t* flash) {
+void T_StrobeFlash(void *data) {
+    strobe_t* flash = (strobe_t*) data;
     if(--flash->count) {
         return;
     }
@@ -215,7 +220,8 @@ void P_SpawnStrobeAltFlash(sector_t* sector, int speed) {      // 0x80015C44
 // Start strobing lights (usually from a trigger)
 //
 
-void EV_StartLightStrobing(line_t* line) {
+void EV_StartLightStrobing(void *data) {
+    line_t* line = (line_t*) data;
     int            secnum;
     sector_t*    sec;
 
@@ -240,7 +246,8 @@ void EV_StartLightStrobing(line_t* line) {
 // T_Glow
 //
 
-void T_Glow(glow_t*    g) {
+void T_Glow(void *data) {
+    glow_t *g = (glow_t*) data;
     sector_t *sector;
 
     if(--g->count) {
@@ -329,7 +336,8 @@ void P_SpawnGlowingLight(sector_t*    sector, byte type) {
 // T_Sequence
 //
 
-void T_Sequence(sequenceGlow_t* seq) {
+void T_Sequence(void *data) {
+    sequenceGlow_t* seq = (sequenceGlow_t*) data;
     sector_t *sector;
 
     if(--seq->count) {
@@ -461,7 +469,8 @@ void P_SpawnSequenceLight(sector_t* sector, dboolean first) {
 // T_Combine
 //
 
-void T_Combine(combine_t *combine) {
+void T_Combine(void *data) {
+    combine_t *combine = (combine_t *) data;
     sector_t *sector;
 
     sector = combine->sector;
@@ -480,7 +489,8 @@ void T_Combine(combine_t *combine) {
 // P_CombineLightSpecials
 //
 
-void P_CombineLightSpecials(sector_t *sector) {
+void P_CombineLightSpecials(void *data) {
+    sector_t *sector = (sector_t *) data;
     actionf_p1 func;
     thinker_t *thinker;
     combine_t *combine;
@@ -543,7 +553,8 @@ int P_FindSectorFromTag(int tag);
 // Interpolates one light_t's RGB to another light_t's RGB
 //
 
-void T_LightMorph(lightmorph_t *lt) {
+void T_LightMorph(void *data) {
+    lightmorph_t *lt = (lightmorph_t *) data;
     lt->inc += 4;
 
     if(lt->inc > 256) {

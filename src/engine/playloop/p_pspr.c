@@ -116,7 +116,8 @@ static void P_SetPsprite(player_t *player, int position, statenum_t stnum) {
 
 static dboolean pls_buzzing = false;    // [kex] for keeping track when the buzzing is playing
 
-void P_BringUpWeapon(player_t* player) {
+void P_BringUpWeapon(void *data) {
+    player_t* player = (player_t*) data;
     statenum_t    newstate;
 
     if(player->pendingweapon == wp_nochange) {
@@ -156,7 +157,8 @@ void P_BringUpWeapon(player_t* player) {
 // P_DropWeapon
 // Player died, so put the weapon away.
 //
-void P_DropWeapon(player_t* player) {
+void P_DropWeapon(void *data) {
+    player_t* player = (player_t*) data;
     P_SetPsprite(player,
                  ps_weapon,
                  weaponinfo[player->readyweapon].downstate);
@@ -168,7 +170,8 @@ void P_DropWeapon(player_t* player) {
 // If not, selects the next weapon to use.
 //
 
-dboolean P_CheckAmmo(player_t* player) {
+dboolean P_CheckAmmo(void *data) {
+    player_t* player = (player_t*) data;
     ammotype_t ammo;
     int count;
 
@@ -249,7 +252,8 @@ dboolean P_CheckAmmo(player_t* player) {
 //
 // P_FireWeapon.
 //
-void P_FireWeapon(player_t* player) {
+void P_FireWeapon(void *data) {
+    player_t* player = (player_t*) data;
     statenum_t    newstate;
     pspdef_t*    psp;
 
@@ -938,7 +942,8 @@ static void P_LaserCrossBSP(int bspnum, laser_t* laser) {
 // T_LaserThinker
 //
 
-void T_LaserThinker(laserthinker_t* laserthinker) {
+void T_LaserThinker(void *data) {
+    laserthinker_t* laserthinker = (laserthinker_t*) data;
     laser_t* laser = laserthinker->laser;
 
     laser->dist += 64;
@@ -1141,7 +1146,8 @@ void A_FireLaser(player_t *player, pspdef_t *psp) {
 // Called at start of level for each player.
 //
 
-void P_SetupPsprites(player_t* player) {
+void P_SetupPsprites(void *data) {
+    player_t* player = (player_t*) data;
     int i;
 
     // remove all psprites
@@ -1162,7 +1168,8 @@ void P_SetupPsprites(player_t* player) {
 // Called every tic by player thinking routine.
 //
 
-void P_MovePsprites(player_t* player) {
+void P_MovePsprites(void *data) {
+    player_t* player = (player_t*) data;
     int         i;
     pspdef_t*    psp;
     state_t*    state;

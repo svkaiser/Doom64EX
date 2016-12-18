@@ -719,7 +719,8 @@ P_TraverseIntercepts
 // T_TraceDrawer
 //
 
-void T_TraceDrawer(tracedrawer_t* tdrawer) {
+void T_TraceDrawer(void *data) {
+    tracedrawer_t* tdrawer = (tracedrawer_t*) data;
     if(gametic > tdrawer->tic) {
         P_RemoveThinker(&tdrawer->thinker);
     }

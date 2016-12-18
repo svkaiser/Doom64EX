@@ -86,9 +86,9 @@ static int SortDrawList(const void *a, const void *b) {
 // SortSprites
 //
 
-static int SortSprites(const vtxlist_t *a, const vtxlist_t *b) {
-    visspritelist_t *xa = (visspritelist_t *)a->data;
-    visspritelist_t *xb = (visspritelist_t *)b->data;
+static int SortSprites(const void *a, const void *b) {
+    visspritelist_t *xa = (visspritelist_t *)((const vtxlist_t *)a)->data;
+    visspritelist_t *xb = (visspritelist_t *)((const vtxlist_t *)b)->data;
 
     return xb->dist - xa->dist;
 }

@@ -331,7 +331,8 @@ static mobj_t *P_MissileAttack(mobj_t *actor, int direction) {
 // T_MobjExplode
 //
 
-void T_MobjExplode(mobjexp_t *mexp) {
+void T_MobjExplode(void *data) {
+    mobjexp_t *mexp = (mobjexp_t *) data;
     fixed_t x;
     fixed_t y;
     fixed_t z;

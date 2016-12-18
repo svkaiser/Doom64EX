@@ -43,7 +43,8 @@
 //
 // T_VerticalDoor
 //
-void T_VerticalDoor(vldoor_t* door) {
+void T_VerticalDoor(void *data) {
+    vldoor_t* door = (vldoor_t*) data;
     result_e res1;
     result_e res2;
 
