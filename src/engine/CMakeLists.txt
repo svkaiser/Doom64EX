@@ -32,38 +32,40 @@ endif ()
 ## Set up external dependencies
 ##
 
-# SDL2
-find_package(SDL2 REQUIRED)
-add_include_directories(${SDL2_INCLUDE_DIRS})
-add_link_libraries(${SDL2_LIBRARIES})
+if (NOT USE_CONAN)
+  # SDL2
+  find_package(SDL2 REQUIRED)
+  add_include_directories(${SDL2_INCLUDE_DIRS})
+  add_link_libraries(${SDL2_LIBRARIES})
 
-# SDL2_Net
-find_package(SDL2_net REQUIRED)
-add_include_directories(${SDL2_NET_INCLUDE_DIRS})
-add_link_libraries(${SDL2_NET_LIBRARIES})
+  # SDL2_Net
+  find_package(SDL2_net REQUIRED)
+  add_include_directories(${SDL2_NET_INCLUDE_DIRS})
+  add_link_libraries(${SDL2_NET_LIBRARIES})
 
-# zlib
-find_package(ZLIB REQUIRED)
+  # zlib
+  find_package(ZLIB REQUIRED)
 
-# libpng
-find_package(PNG REQUIRED)
-add_include_directories(${PNG_INCLUDE_DIRS})
-add_link_libraries(${PNG_LIBRARIES})
+  # libpng
+  find_package(PNG REQUIRED)
+  add_include_directories(${PNG_INCLUDE_DIRS})
+  add_link_libraries(${PNG_LIBRARIES})
 
-# FluidSynth
-find_package(FluidSynth REQUIRED)
-add_include_directories(${FLUIDSYNTH_INCLUDE_DIR})
-add_link_libraries(${FLUIDSYNTH_LIBRARIES})
+  # FluidSynth
+  find_package(FluidSynth REQUIRED)
+  add_include_directories(${FLUIDSYNTH_INCLUDE_DIR})
+  add_link_libraries(${FLUIDSYNTH_LIBRARIES})
 
-# OpenGL
-if(FORCE_INCLUDE_OPENGL)
-  add_include_directories("/usr/include/GL/")
-  add_link_libraries("/usr/lib32/libGL.so")
-else()
-  find_package(OpenGL REQUIRED)
-  add_include_directories(${OPENGL_INCLUDE_DIRS})
-  add_link_libraries(${OPENGL_LIBRARIES})
-endif(FORCE_INCLUDE_OPENGL)
+  # OpenGL
+  if(FORCE_INCLUDE_OPENGL)
+    add_include_directories("/usr/include/GL/")
+    add_link_libraries("/usr/lib32/libGL.so")
+  else()
+    find_package(OpenGL REQUIRED)
+    add_include_directories(${OPENGL_INCLUDE_DIRS})
+    add_link_libraries(${OPENGL_LIBRARIES})
+  endif(FORCE_INCLUDE_OPENGL)
+endif(NOT USE_CONAN)
 
 ##------------------------------------------------------------------------------
 ## Configure "version.h"
@@ -308,7 +310,7 @@ set(KEXLIB_SOURCES
 
 add_executable(doom64ex MACOSX_BUNDLE ${SOURCES} ${KEXLIB_SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include")
-target_link_libraries(doom64ex ${LIBRARIES})
+target_link_libraries(doom64ex ${LIBRARIES} ${CONAN_LIBS})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
 
 ##------------------------------------------------------------------------------

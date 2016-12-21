@@ -1,0 +1,15 @@
+[requires]
+# Stable
+libpng/1.6.23@lasote/stable
+zlib/1.2.8@lasote/stable
+SDL2/2.0.5@lasote/stable
+
+# Testing
+fmt/3.0.0@memsharded/testing
+
+# dotfloat's
+SDL2_net/2.0.1@dotfloat/testing
+fluidsynth-lite/1.1.6@dotfloat/testing
+
+[generators]
+cmake

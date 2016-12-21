@@ -9,3 +9,7 @@
 
 # build dir
 /build
+
+# conan
+conanbuildinfo.cmake
+conaninfo.txt

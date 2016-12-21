@@ -39,6 +39,14 @@ set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
 
+if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+  set(USE_CONAN ON)
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup()
+else()
+  set(USE_CONAN OFF)
+endif()
+
 ##------------------------------------------------------------------------------
 ## Compiler Options
 ##
