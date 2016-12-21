@@ -32,10 +32,6 @@ endif ()
 ## Set up external dependencies
 ##
 
-# kexlib
-add_include_directories("${CMAKE_SOURCE_DIR}/include/kexlib")
-add_link_libraries(kexlib)
-
 # SDL2
 find_package(SDL2 REQUIRED)
 add_include_directories(${SDL2_INCLUDE_DIRS})
@@ -297,11 +293,20 @@ add_sources(zone
   z_zone.cc
   )
 
+# kexlib
+set(KEXLIB_SOURCES
+  lib.cc
+  format.cc
+  gfx/Image.cc
+  gfx/PngImage.cc
+  gfx/DoomImage.cc
+  gfx/Pixel.cc)
+
 ##------------------------------------------------------------------------------
 ## Build target
 ##
 
-add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
+add_executable(doom64ex MACOSX_BUNDLE ${SOURCES} ${KEXLIB_SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(doom64ex ${LIBRARIES})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)

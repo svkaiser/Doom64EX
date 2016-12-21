@@ -89,5 +89,4 @@ endif(BUILD_TESTS)
 ##
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/wadtool")
-add_subdirectory("${CMAKE_SOURCE_DIR}/src/kexlib")
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
