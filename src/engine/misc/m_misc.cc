@@ -169,7 +169,7 @@ int M_ReadFile(char const* name, byte** buffer) {
         length = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        *buffer = reinterpret_cast<byte*>(malloc(length));
+        *buffer = reinterpret_cast<byte*>(Z_Malloc(length, PU_STATIC, 0));
 
         if(fread(*buffer, 1, length, fp) == length) {
             fclose(fp);
