@@ -20,12 +20,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __KEX_STRINGVIEW__523920528
-#define __KEX_STRINGVIEW__523920528
+#ifndef __IMP_STRINGVIEW__523920528
+#define __IMP_STRINGVIEW__523920528
 
 #include <string>
+#include "MurmurHash3"
 
-namespace kex {
+namespace imp {
   /**
    * \brief A constexpr std::strlen
    *
@@ -60,7 +61,7 @@ namespace kex {
   }
 
   /**
-   * \class BasicStringView <kex/util/StringView>
+   * \class BasicStringView <imp/util/StringView>
    * \brief A non-owning string container
    *
    * \tparam CharT Type of character
@@ -72,8 +73,16 @@ namespace kex {
   template <class CharT, class Traits = std::char_traits<CharT>>
   class BasicStringView
   {
-      const CharT *mData = nullptr;
-      std::size_t mLength = 0;
+      static constexpr auto sso_maxsize = 24; // Including one element at the end for size
+
+      const CharT *mData { nullptr };
+      std::size_t mLength { 0 };
+      std::size_t mHash { 0 };
+
+      static constexpr std::size_t calc_hash(const CharT *data, std::size_t length) noexcept
+      {
+          return hashing::murmur3_32(data, length);
+      }
 
   public:
       using traits_type = Traits;
@@ -93,23 +102,33 @@ namespace kex {
 
       constexpr BasicStringView() = default;
 
-      constexpr BasicStringView(const BasicStringView &) noexcept = default;
+      constexpr BasicStringView(const BasicStringView &) = default;
 
       template <class Allocator>
-      BasicStringView(const std::basic_string<CharT, Traits, Allocator> &str) :
+      BasicStringView(const std::basic_string<CharT, Traits, Allocator> &str) noexcept:
           mData(str.data()),
-          mLength(str.size()) {}
+          mLength(str.size()),
+          mHash(calc_hash(mData, mLength))
+      {
+      }
 
-      constexpr BasicStringView(const CharT *s, size_type length) :
+
+      constexpr BasicStringView(const CharT *s, size_type length) noexcept:
           mData(s),
-          mLength(length) {}
+          mLength(length),
+          mHash(calc_hash(mData, mLength))
+      {
+      }
 
       /*
        * We're using our own strlen function instead of Traits::length, because ours is constexpr.
        */
       constexpr BasicStringView(const CharT *str) noexcept:
           mData(str),
-          mLength(__h_constexpr_strlen(str)) {}
+          mLength(__h_constexpr_strlen(str)),
+          mHash(calc_hash(mData, mLength))
+      {
+      }
 
       BasicStringView &operator=(const BasicStringView &) = default;
 
@@ -167,10 +186,21 @@ namespace kex {
       constexpr void remove_suffix(size_type n) noexcept
       { mLength -= n; }
 
+      constexpr BasicStringView substr(size_type len) noexcept
+      {
+          return { mData, len };
+      }
+
+      constexpr BasicStringView substr(size_type off, size_type len) noexcept
+      {
+          return { mData + off, len };
+      }
+
       constexpr void swap(BasicStringView &other) noexcept
       {
           std::swap(mLength, other.mLength);
           std::swap(mData, other.mData);
+          std::swap(mHash, other.mHash);
       }
 
       template <class Allocator = std::allocator<CharT>>
@@ -178,7 +208,7 @@ namespace kex {
       { return { mData, mLength, a }; }
 
       template <class Allocator = std::allocator<CharT>>
-      explicit operator std::basic_string<CharT, Traits, Allocator>() const
+      operator std::basic_string<CharT, Traits, Allocator>() const
       { return { mData, mLength }; }
 
       constexpr int compare(const BasicStringView &other) const
@@ -189,6 +219,11 @@ namespace kex {
               return 1;
 
           return __h_constexpr_strcmp(mData, other.mData, mLength);
+      }
+
+      constexpr std::size_t hash() const noexcept
+      {
+          return mHash;
       }
   };
 
@@ -203,25 +238,25 @@ namespace kex {
   template <class T>
   using __h_id = typename __h_identity<T>::type;
 
-#define __KEX_OPERATOR(Op) \
-  template <class CharT, class Traits> \
+#define __IMP_OPERATOR(Op)                                              \
+  template <class CharT, class Traits>                                  \
   constexpr bool operator Op(BasicStringView<CharT, Traits> lhs, BasicStringView<CharT, Traits> rhs) \
-  { return lhs.compare(rhs) Op 0; } \
-  template <class CharT, class Traits> \
+  { return lhs.compare(rhs) Op 0; }                                     \
+  template <class CharT, class Traits>                                  \
   constexpr bool operator Op(__h_id<BasicStringView<CharT, Traits>> lhs, BasicStringView<CharT, Traits> rhs) \
-  { return lhs.compare(rhs) Op 0; } \
-  template <class CharT, class Traits> \
+  { return lhs.compare(rhs) Op 0; }                                     \
+  template <class CharT, class Traits>                                  \
   constexpr bool operator Op(BasicStringView<CharT, Traits> lhs, __h_id<BasicStringView<CharT, Traits>> rhs) \
   { return lhs.compare(rhs) Op 0; }
 
-  __KEX_OPERATOR(==)
-  __KEX_OPERATOR(!=)
-  __KEX_OPERATOR(<)
-  __KEX_OPERATOR(<=)
-  __KEX_OPERATOR(>)
-  __KEX_OPERATOR(>=)
+  __IMP_OPERATOR(==)
+  __IMP_OPERATOR(!=)
+  __IMP_OPERATOR(<)
+  __IMP_OPERATOR(<=)
+  __IMP_OPERATOR(>)
+  __IMP_OPERATOR(>=)
 
-#undef __KEX_OPERATOR
+#undef __IMP_OPERATOR
 
   using StringView = BasicStringView<char>;
   using WStringView = BasicStringView<wchar_t>;
@@ -229,22 +264,31 @@ namespace kex {
   using U32StringView = BasicStringView<char32_t>;
 
   namespace string_view_literals {
-#define __KEX_STRING_LITERAL(CharT) \
+#define __IMP_STRING_LITERAL(CharT)                                     \
     constexpr BasicStringView<CharT> operator"" _sv(const CharT *str, size_t len) \
     { return { str, len }; }
 
-    __KEX_STRING_LITERAL(char)
-    __KEX_STRING_LITERAL(char16_t)
-    __KEX_STRING_LITERAL(char32_t)
-    __KEX_STRING_LITERAL(wchar_t)
+    __IMP_STRING_LITERAL(char)
+    __IMP_STRING_LITERAL(char16_t)
+    __IMP_STRING_LITERAL(char32_t)
+    __IMP_STRING_LITERAL(wchar_t)
 
-#undef __KEX_STRING_LITERAL
+#undef __IMP_STRING_LITERAL
   }
 }
 
-#ifndef KEX_DONT_POLLUTE_GLOBAL_NAMESPACE
-using namespace kex::string_view_literals;
+namespace std {
+  template <class CharT, class Traits>
+  struct hash<::imp::BasicStringView<CharT, Traits>> {
+      std::size_t operator()(::imp::BasicStringView<CharT, Traits> sv) const noexcept
+      {
+          return sv.hash();
+      }
+  };
+}
+
+#ifndef IMP_DONT_POLLUTE_GLOBAL_NAMESPACE
+using namespace imp::string_view_literals;
 #endif
 
-
-#endif //__KEX_STRINGVIEW__523920528
+#endif //__IMP_STRINGVIEW__523920528

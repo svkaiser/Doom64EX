@@ -20,13 +20,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __KEX_IMAGE__96112498
-#define __KEX_IMAGE__96112498
+#ifndef __IMP_IMAGE__96112498
+#define __IMP_IMAGE__96112498
 
 #include <istream>
 #include "Pixel"
 
-namespace kex {
+namespace imp {
   namespace gfx {
     class Image;
 
@@ -240,4 +240,4 @@ namespace kex {
   }
 }
 
-#endif //__KEX_IMAGE__96112498
+#endif //__IMP_IMAGE__96112498

@@ -20,9 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <kex/gfx/Image>
-
-using namespace kex::gfx;
+#include <imp/Image>
 
 namespace {
 
@@ -101,5 +99,5 @@ namespace {
   { throw ImageSaveError("Saving isn't implemented for Doom Pictures"); }
 }
 
-std::unique_ptr<ImageFormatIO> __initialize_doom_image()
+UniquePtr<ImageFormatIO> __initialize_doom_image()
 { return std::make_unique<DoomImage>(); }

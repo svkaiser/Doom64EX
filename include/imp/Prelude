@@ -1,0 +1,108 @@
+// -*- mode: c++ -*-
+#ifndef __IMP_PRELUDE__56107413
+#define __IMP_PRELUDE__56107413
+
+#include <chrono>
+#include <memory>
+#include <string>
+#include <cstdint>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+
+// Include standard utilities
+#include "util/Types"
+#include "util/ArrayView"
+#include "util/StringView"
+#include "util/Guard"
+
+namespace fmt {
+  inline void println(CStringRef fmt, ArgList args)
+  {
+      print(fmt, args);
+      print("\n");
+  }
+
+  FMT_VARIADIC(void, println, CStringRef)
+
+  template <class T>
+  inline void print(const T &x)
+  {
+      print("{}", x);
+  }
+
+  template <class T>
+  inline void println(const T &x)
+  {
+      println("{}", x);
+  }
+}
+
+namespace imp {
+  using String = std::string;
+  template <class T, class Deleter = std::default_delete<T>>
+  using UniquePtr = std::unique_ptr<T, Deleter>;
+  template <class T>
+  using SharedPtr = std::shared_ptr<T>;
+  template <class T>
+  using WeakPtr = std::weak_ptr<T>;
+  template <class T>
+  using List = std::vector<T>;
+
+  template <class T, class... Args>
+  UniquePtr<T> unique(Args&&... args)
+  {
+      return std::make_unique<T>(std::forward<Args>(args)...);
+  }
+
+  template <class T, class... Args>
+  SharedPtr<T> shared(Args&&... args)
+  {
+      return std::make_shared<T>(std::forward<Args>(args)...);
+  }
+
+  template <class T>
+  decltype(auto) move(T&& x)
+  {
+      return std::move(std::forward<T>(x));
+  }
+
+  // Initialisation for various parts of the engine
+  void init_image();
+}
+
+inline std::ostream& operator<<(std::ostream& s, imp::StringView sv)
+{
+    return s.write(sv.data(), sv.length());
+}
+
+template <class T, class Deleter>
+inline std::ostream& operator<<(std::ostream& s, const std::unique_ptr<T, Deleter>& ptr)
+{
+    return s << static_cast<void*>(ptr.get());
+}
+
+template <class T>
+inline std::ostream& operator<<(std::ostream& s, const std::shared_ptr<T>& ptr)
+{
+    return s << static_cast<void*>(ptr.get());
+}
+
+template <class T>
+inline std::ostream& operator<<(std::ostream& s, const std::weak_ptr<T>& ptr)
+{
+    if (ptr.expired()) {
+        return s << "(expired)";
+    } else {
+        auto shared = ptr.lock();
+        return s << shared;
+    }
+}
+
+#ifndef IMP_DONT_POLLUTE_GLOBAL_NAMESPACE
+using namespace std::string_literals;
+using namespace std::chrono_literals;
+using namespace fmt;
+using namespace imp;
+#endif
+
+#endif //__IMP_PRELUDE__56107413

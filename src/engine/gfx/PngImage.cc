@@ -21,10 +21,9 @@
 //-----------------------------------------------------------------------------
 
 #include <cstring>
-#include <kex/gfx/Image>
+#include <imp/Image>
+#include <imp/util/Endian>
 #include <png.h>
-
-using namespace kex::gfx;
 
 namespace {
   constexpr const char magic[] = "\x89PNG\r\n\x1a\n";
@@ -88,8 +87,8 @@ namespace {
           if (std::strncmp((char*)chunk->name, "grAb", 4) == 0 && chunk->size >= 8) {
               auto offsets = reinterpret_cast<SpriteOffsets*>(png_get_user_chunk_ptr(png_ptr));
               auto data = reinterpret_cast<int*>(chunk->data);
-              offsets->x = swap_big_endian(data[0]);
-              offsets->y = swap_big_endian(data[1]);
+              offsets->x = big_endian(data[0]);
+              offsets->y = big_endian(data[1]);
               return 1;
           }
 

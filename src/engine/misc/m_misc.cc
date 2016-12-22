@@ -42,7 +42,7 @@
 
 #include <fstream>
 #include <algorithm>
-#include <kex/gfx/Image>
+#include <imp/Image>
 
 #include "doomstat.h"
 #include "m_misc.h"

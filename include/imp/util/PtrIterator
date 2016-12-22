@@ -1,4 +1,3 @@
-//
 // -*- mode: c++ -*-
 //-----------------------------------------------------------------------------
 //
@@ -21,16 +20,16 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __KEX_PTRITERATOR__99499855
-#define __KEX_PTRITERATOR__99499855
+#ifndef __IMP_PTRITERATOR__99499855
+#define __IMP_PTRITERATOR__99499855
 
 #include <type_traits>
 
-namespace kex {
+namespace imp {
   /**
    * \brief An iterator that acts a normal pointer iterator
    *
-   * See PixelIterator<T, T> in <kex/gfx/Pixel> for an example of use
+   * See PixelIterator<T, T> in <imp/gfx/Pixel> for an example of use
    */
   template <class T>
   class PtrIterator {
@@ -125,20 +124,20 @@ namespace kex {
       }
   };
 
-#define __KEX_OPERATOR(Op) \
+#define __IMP_OPERATOR(Op) \
   template <class T> \
   constexpr bool operator Op(PtrIterator<T> lhs, PtrIterator<T> rhs) \
   { return lhs.get() Op rhs.get(); }
 
-  __KEX_OPERATOR(==)
-  __KEX_OPERATOR(!=)
-  __KEX_OPERATOR(>)
-  __KEX_OPERATOR(>=)
-  __KEX_OPERATOR(<)
-  __KEX_OPERATOR(<=)
+  __IMP_OPERATOR(==)
+  __IMP_OPERATOR(!=)
+  __IMP_OPERATOR(>)
+  __IMP_OPERATOR(>=)
+  __IMP_OPERATOR(<)
+  __IMP_OPERATOR(<=)
 
-#undef __KEX_OPERATOR
+#undef __IMP_OPERATOR
 
 }
 
-#endif //__KEX_PTRITERATOR__99499855
+#endif //__IMP_PTRITERATOR__99499855

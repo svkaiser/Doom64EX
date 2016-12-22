@@ -25,6 +25,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <algorithm>
 #include <math.h>
 #include <w_wad.h>
 
@@ -34,7 +35,7 @@
 #include "gl_texture.h"
 #include "con_console.h"
 
-#include <kex/gfx/Image>
+#include <imp/Image>
 #include <sstream>
 
 CVAR_CMD(i_gamma, 0) {

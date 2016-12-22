@@ -33,6 +33,11 @@ endif ()
 ##
 
 if (NOT USE_CONAN)
+  # fmt
+  find_package(Fmt REQUIRED)
+  add_include_directories(${Fmt_INCLUDE_DIR})
+  add_link_libraries(${Fmt_LIBRARY})
+
   # SDL2
   find_package(SDL2 REQUIRED)
   add_include_directories(${SDL2_INCLUDE_DIRS})
@@ -297,8 +302,6 @@ add_sources(zone
 
 # kexlib
 set(KEXLIB_SOURCES
-  lib.cc
-  format.cc
   gfx/Image.cc
   gfx/PngImage.cc
   gfx/DoomImage.cc

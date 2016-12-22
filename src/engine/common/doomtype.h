@@ -25,34 +25,16 @@
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
 
+#include <imp/Prelude>
+
 #ifdef _WIN32
 #include "SDL_config.h"
 #endif
 
-#include <stdint.h>
-
-#define false 0
-#define true (!false)
-
 typedef int             dboolean;
-typedef unsigned char   byte;
 typedef unsigned short  word;  // TODO: Rename every instance of 'word' to 'uint16'.
                                // 'Word' isn't the correct term unless you're writing for 16-bit systems, which we're not.
 typedef unsigned int    dword; // TODO: ditto, but 'dword' -> 'uint32'
-typedef int8_t          int8;
-typedef uint8_t         uint8;
-typedef int16_t         int16;
-typedef uint16_t        uint16;
-typedef int32_t         int32;
-typedef uint32_t        uint32;
-
-#ifndef _MSC_VER
-typedef signed long long int64;
-typedef unsigned long long uint64;
-#else
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
-#endif
 
 #include <limits.h>
 #define D_MININT INT_MIN

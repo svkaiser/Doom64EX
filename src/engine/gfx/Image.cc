@@ -24,10 +24,7 @@
 #include <vector>
 #include <cstring>
 
-#include <kex/lib>
-#include <kex/gfx/Image>
-
-using namespace kex::gfx;
+#include <imp/Image>
 
 namespace {
   std::vector<std::unique_ptr<ImageFormatIO>> image_formats;
@@ -417,7 +414,7 @@ Image& Image::operator=(const Image &other)
     return *this;
 }
 
-bool kex::gfx::operator==(const Image &lhs, const Image &rhs)
+bool imp::gfx::operator==(const Image &lhs, const Image &rhs)
 {
     if (&lhs == &rhs)
         return true;
@@ -431,13 +428,13 @@ bool kex::gfx::operator==(const Image &lhs, const Image &rhs)
                                  rhs.format(), rhs.palette_format(), ct);
 }
 
-bool kex::gfx::operator!=(const Image &lhs, const Image &rhs)
+bool imp::gfx::operator!=(const Image &lhs, const Image &rhs)
 { return !(lhs == rhs); }
 
-std::unique_ptr<ImageFormatIO> __initialize_png();
-std::unique_ptr<ImageFormatIO> __initialize_doom_image();
+UniquePtr<ImageFormatIO> __initialize_png();
+UniquePtr<ImageFormatIO> __initialize_doom_image();
 
-void kex::lib::init_image()
+void imp::init_image()
 {
     image_formats.emplace_back(__initialize_png());
     image_formats.emplace_back(__initialize_doom_image());

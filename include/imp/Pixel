@@ -20,11 +20,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __KEX_PIXEL__13206666
-#define __KEX_PIXEL__13206666
+#ifndef __IMP_PIXEL__13206666
+#define __IMP_PIXEL__13206666
 
-#include "kex/kexdef"
-#include "kex/util/PtrIterator"
+#include "Prelude"
+#include "util/PtrIterator"
 
 /*
  * This header defines classes for low-level pixel operations,
@@ -35,7 +35,7 @@
  * Index pixels are pixels whose color values can be found somewhere else, like a Palette. (ex: Index8)
  */
 
-namespace kex {
+namespace imp {
   namespace gfx {
     struct Palette;
 
@@ -175,13 +175,13 @@ namespace kex {
      * \tparam T Type to identify
      */
     template <class T>
-    constexpr bool is_pixel = kex::is_any_same<T, Index8, Rgb, Rgba>;
+    constexpr bool is_pixel = imp::is_any_same<T, Index8, Rgb, Rgba>;
 
     template <class T, class = void>
     struct __h_is_color_pixel : std::false_type {};
 
     /*
-     * We use `kex::void_t` to determine whether `pixel_traits<T>` has a field named `color`
+     * We use `imp::void_t` to determine whether `pixel_traits<T>` has a field named `color`
      * before we attempt to grab its value.
      */
     template <class T>
@@ -372,19 +372,19 @@ namespace kex {
         }
     };
 
-#define __KEX_OPERATOR(Op) \
+#define __IMP_OPERATOR(Op) \
     template <class SrcT, class DstT> \
     constexpr bool operator Op(const PixelIterator<SrcT, DstT> &lhs, const PixelIterator<SrcT, DstT> &rhs) \
     { return lhs.get() Op rhs.get(); }
 
-    __KEX_OPERATOR(==)
-    __KEX_OPERATOR(!=)
-    __KEX_OPERATOR(<)
-    __KEX_OPERATOR(<=)
-    __KEX_OPERATOR(>)
-    __KEX_OPERATOR(>=)
+    __IMP_OPERATOR(==)
+    __IMP_OPERATOR(!=)
+    __IMP_OPERATOR(<)
+    __IMP_OPERATOR(<=)
+    __IMP_OPERATOR(>)
+    __IMP_OPERATOR(>=)
 
-#undef __KEX_OPERATOR
+#undef __IMP_OPERATOR
 
     /**
      * \brief Identity pixel iterator specialisation
@@ -549,31 +549,31 @@ namespace kex {
     {
         int id = __h_process_pixel_id(fmt, palFmt);
 
-#define __KEX_CASE(Type, PalType, Func) \
+#define __IMP_CASE(Type, PalType, Func) \
         case __h_process_pixel_id(pixel_traits<Type>::format, pixel_traits<PalType>::format): \
             return proc.template Func<Type, PalType>(); \
             break;
 
-#define __KEX_CASE_C(Type) \
-        __KEX_CASE(Type, void, color)
+#define __IMP_CASE_C(Type) \
+        __IMP_CASE(Type, void, color)
 
-#define __KEX_CASE_I(Type, PalType) \
-        __KEX_CASE(Type, PalType, index)
+#define __IMP_CASE_I(Type, PalType) \
+        __IMP_CASE(Type, PalType, index)
 
         switch (id)
         {
-        __KEX_CASE_C(Rgb)
-        __KEX_CASE_C(Rgba)
-        __KEX_CASE_I(Index8, Rgb)
-        __KEX_CASE_I(Index8, Rgba)
+        __IMP_CASE_C(Rgb)
+        __IMP_CASE_C(Rgba)
+        __IMP_CASE_I(Index8, Rgb)
+        __IMP_CASE_I(Index8, Rgba)
 
         default:
             throw PixelFormatError("process_pixel doesn't have a case for this pixel type");
         }
 
-#undef __KEX_CASE_C
-#undef __KEX_CASE_I
-#undef __KEX_CASE
+#undef __IMP_CASE_C
+#undef __IMP_CASE_I
+#undef __IMP_CASE
     };
 
     template <class Processor, class RetT = void>
@@ -582,56 +582,56 @@ namespace kex {
     {
         int id = __h_process_pixel_id(srcFmt, srcPalFmt, dstFmt, dstPalFmt);
 
-#define __KEX_CASE(Src, SrcPal, Dst, DstPal, Func) \
+#define __IMP_CASE(Src, SrcPal, Dst, DstPal, Func) \
         case __h_process_pixel_id(pixel_traits<Src>::format, pixel_traits<SrcPal>::format, \
                                   pixel_traits<Dst>::format, pixel_traits<DstPal>::format): \
             return proc.template Func<Src, SrcPal, Dst, DstPal>(); \
             break;
 
-#define __KEX_CASE_CC(Src, Dst) \
-        __KEX_CASE(Src, void, Dst, void, color_to_color)
+#define __IMP_CASE_CC(Src, Dst) \
+        __IMP_CASE(Src, void, Dst, void, color_to_color)
 
-#define __KEX_CASE_CI(Src, Dst, DstPal) \
-        __KEX_CASE(Src, void, Dst, DstPal, color_to_index)
+#define __IMP_CASE_CI(Src, Dst, DstPal) \
+        __IMP_CASE(Src, void, Dst, DstPal, color_to_index)
 
-#define __KEX_CASE_IC(Src, SrcPal, Dst) \
-        __KEX_CASE(Src, SrcPal, Dst, void, index_to_color)
+#define __IMP_CASE_IC(Src, SrcPal, Dst) \
+        __IMP_CASE(Src, SrcPal, Dst, void, index_to_color)
 
-#define __KEX_CASE_II(Src, SrcPal, Dst, DstPal) \
-        __KEX_CASE(Src, SrcPal, Dst, DstPal, index_to_index)
+#define __IMP_CASE_II(Src, SrcPal, Dst, DstPal) \
+        __IMP_CASE(Src, SrcPal, Dst, DstPal, index_to_index)
 
         switch (id)
         {
 
-        __KEX_CASE_CC(Rgb, Rgb)
-        __KEX_CASE_CC(Rgb, Rgba)
-        __KEX_CASE_CC(Rgba, Rgb)
-        __KEX_CASE_CC(Rgba, Rgba)
+        __IMP_CASE_CC(Rgb, Rgb)
+        __IMP_CASE_CC(Rgb, Rgba)
+        __IMP_CASE_CC(Rgba, Rgb)
+        __IMP_CASE_CC(Rgba, Rgba)
 
-        __KEX_CASE_CI(Rgb, Index8, Rgb)
-        __KEX_CASE_CI(Rgb, Index8, Rgba)
-        __KEX_CASE_CI(Rgba, Index8, Rgb)
-        __KEX_CASE_CI(Rgba, Index8, Rgba)
+        __IMP_CASE_CI(Rgb, Index8, Rgb)
+        __IMP_CASE_CI(Rgb, Index8, Rgba)
+        __IMP_CASE_CI(Rgba, Index8, Rgb)
+        __IMP_CASE_CI(Rgba, Index8, Rgba)
 
-        __KEX_CASE_IC(Index8, Rgb, Rgb)
-        __KEX_CASE_IC(Index8, Rgb, Rgba)
-        __KEX_CASE_IC(Index8, Rgba, Rgb)
-        __KEX_CASE_IC(Index8, Rgba, Rgba)
+        __IMP_CASE_IC(Index8, Rgb, Rgb)
+        __IMP_CASE_IC(Index8, Rgb, Rgba)
+        __IMP_CASE_IC(Index8, Rgba, Rgb)
+        __IMP_CASE_IC(Index8, Rgba, Rgba)
 
-        __KEX_CASE_II(Index8, Rgb, Index8, Rgb)
-        __KEX_CASE_II(Index8, Rgb, Index8, Rgba)
-        __KEX_CASE_II(Index8, Rgba, Index8, Rgb)
-        __KEX_CASE_II(Index8, Rgba, Index8, Rgba)
+        __IMP_CASE_II(Index8, Rgb, Index8, Rgb)
+        __IMP_CASE_II(Index8, Rgb, Index8, Rgba)
+        __IMP_CASE_II(Index8, Rgba, Index8, Rgb)
+        __IMP_CASE_II(Index8, Rgba, Index8, Rgba)
 
         default:
             throw PixelFormatError("process_pixel_transform doesn't have a case for this combination of pixel formats");
         }
 
-#undef __KEX_CASE_CC
-#undef __KEX_CASE_CI
-#undef __KEX_CASE_IC
-#undef __KEX_CASE_II
-#undef __KEX_CASE
+#undef __IMP_CASE_CC
+#undef __IMP_CASE_CI
+#undef __IMP_CASE_IC
+#undef __IMP_CASE_II
+#undef __IMP_CASE
     }
 
     constexpr bool operator==(const Rgb &lhs, const Rgb &rhs)
@@ -692,4 +692,8 @@ namespace kex {
   }
 }
 
-#endif //__KEX_PIXEL__13206666
+#ifndef IMP_DONT_POLLUTE_GLOBAL_NAMESPACE
+using namespace imp::gfx;
+#endif
+
+#endif //__IMP_PIXEL__13206666

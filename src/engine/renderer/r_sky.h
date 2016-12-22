@@ -27,8 +27,6 @@
 
 #include "p_setup.h"
 
-typedef struct Image Image; // to avoid including "kex/compat/gfx.h"
-
 extern skydef_t*    sky;
 extern int          skypicnum;
 extern int          skybackdropnum;
@@ -42,7 +40,6 @@ extern dboolean     skyfadeback;
 extern int          skyflatnum;
 
 extern int          fireLump;
-// extern Image*       fireImage;
 
 void R_SkyTicker(void);
 void R_DrawSky(void);

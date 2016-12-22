@@ -21,10 +21,8 @@
 //-----------------------------------------------------------------------------
 
 #include <algorithm>
-#include <kex/gfx/Pixel>
+#include <imp/Pixel>
 #include "Playpal.hh"
-
-using namespace kex::gfx;
 
 namespace {
 
@@ -154,7 +152,7 @@ Palette& Palette::operator=(const Palette &other)
     return *this;
 }
 
-void kex::gfx::copy_pixel(PixelFormat srcFmt,
+void imp::gfx::copy_pixel(PixelFormat srcFmt,
                           const Palette *srcPal,
                           const byte *src,
                           PixelFormat dstFmt,
