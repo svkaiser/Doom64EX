@@ -1,0 +1,37 @@
+// -*- mode: c++ -*-
+#ifndef __IMP_CONVERT__63784703
+#define __IMP_CONVERT__63784703
+
+#include <string>
+#include "Types"
+
+namespace imp {
+  template <class T>
+  T from_string(const std::string&);
+
+  template <>
+  inline std::string from_string<std::string>(const std::string &str)
+  { return str; }
+
+  template <>
+  inline int32 from_string<int32>(const std::string &str)
+  { return std::stoi(str); }
+
+  template <>
+  inline bool from_string<bool>(const std::string &str)
+  { return std::stoi(str) > 0; }
+
+  template <>
+  inline int64 from_string<int64>(const std::string &str)
+  { return std::stoll(str); }
+
+  template <>
+  inline float from_string<float>(const std::string &str)
+  { return std::stof(str); }
+
+  template <>
+  inline double from_string<double>(const std::string &str)
+  { return std::stod(str); }
+}
+
+#endif //__IMP_CONVERT__63784703

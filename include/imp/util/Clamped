@@ -1,0 +1,96 @@
+// -*- mode: c++ -*-
+#ifndef __IMP_CLAMPED__34482255
+#define __IMP_CLAMPED__34482255
+
+#include "Types"
+
+namespace imp {
+  template <class T>
+  constexpr T clamp(const T x, const T min, const T max)
+  { return x > min ? (x < max ? x : max ) : min; }
+
+  template <class T>
+  class Clamped {
+      T mValue;
+      T mMin;
+      T mMax;
+
+  public:
+      constexpr Clamped(const Clamped&) = default;
+
+      constexpr Clamped(T min, T max):
+          mValue(min),
+          mMin(min),
+          mMax(max) {}
+
+      constexpr Clamped(T value, T min, T max):
+          mValue(clamp(value, min, max)),
+          mMin(min),
+          mMax(max) {}
+
+      constexpr Clamped& operator=(const Clamped& other)
+      {
+          mMin = std::max(mMin, other.mMin);
+          mMax = std::min(mMax, other.mMax);
+
+          if (mMin > mMax)
+              std::swap(mMin, mMax);
+
+          mValue = clamp(other.mValue, mMin, mMax);
+          return *this;
+      }
+
+      template <class U>
+      constexpr Clamped& operator=(const U& other)
+      {
+          mValue = clamp(other, mMin, mMax);
+          return *this;
+      }
+
+#define ORD_OP(Op)                                 \
+      constexpr Clamped& operator Op##=(T x) \
+      {                                            \
+          mValue = clamp(mValue Op x, mMin, mMax); \
+          return *this;                            \
+      }                                            \
+      constexpr Clamped& operator Op##=(Clamped x) \
+      {                                                           \
+          mValue = clamp(mValue Op x.mValue, mMin, mMax);        \
+          return *this;                                           \
+      }                                                           \
+          template <class U>                                  \
+          friend constexpr Clamped<U> operator Op(Clamped<U> l, Clamped<U> r); \
+          template <class U>                                  \
+          friend constexpr Clamped<U> operator Op(Clamped<U> l, U r); \
+          template <class U>                            \
+          friend constexpr Clamped<U> operator Op(U l, Clamped<U> r);
+
+      ORD_OP(+)
+      ORD_OP(-)
+      ORD_OP(*)
+      ORD_OP(/)
+#undef ORD_OP
+
+      constexpr const T &value() const
+      { return mValue; }
+
+      constexpr operator const T &() const
+      { return mValue; }
+  };
+}
+
+#define __IMP_CLAMPED_COMPARISON_OPERATORS(Op) \
+template <class T, class U> constexpr bool operator Op(const imp::Clamped<T> &l, const imp::Clamped<U> &r) { return l.value() Op static_cast<T>(r.value()); } \
+template <class T, class U> constexpr bool operator Op(const imp::Clamped<T> &l, const U &r) { return l.value() Op static_cast<T>(r); } \
+template <class T, class U> constexpr bool operator Op(const T &l, const imp::Clamped<U> &r) { return l Op static_cast<T>(r.value()); }
+
+__IMP_CLAMPED_COMPARISON_OPERATORS(==)
+__IMP_CLAMPED_COMPARISON_OPERATORS(!=)
+__IMP_CLAMPED_COMPARISON_OPERATORS(<)
+__IMP_CLAMPED_COMPARISON_OPERATORS(>)
+__IMP_CLAMPED_COMPARISON_OPERATORS(<=)
+__IMP_CLAMPED_COMPARISON_OPERATORS(>=)
+
+#undef __IMP_CLAMPED_COMPARISON_OPERATORS
+
+#endif //__IMP_CLAMPED__34482255
