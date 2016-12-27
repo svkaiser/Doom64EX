@@ -63,8 +63,8 @@ static float sky_cloudpan2 = 0;
 #define FIRESKY_WIDTH   64
 #define FIRESKY_HEIGHT  64
 
-CVAR_EXTERNAL(r_texturecombiner);
-CVAR_EXTERNAL(r_skybox);
+extern BoolProperty r_texturecombiner;
+extern BoolProperty r_skybox;
 
 #define SKYVIEWPOS(angle, amount, x) x = -(angle / (float)ANG90 * amount); while(x < 1.0f) x += 1.0f
 
@@ -116,7 +116,7 @@ static void R_CloudTicker(void) {
     CloudOffsetX -= (dcos(viewangle) >> 10);
     CloudOffsetY += (dsin(viewangle) >> 9);
 
-    if(r_skybox.value) {
+    if(r_skybox) {
         sky_cloudpan1 += 0.00225f;
         sky_cloudpan2 += 0.00075f;
     }
@@ -170,7 +170,7 @@ static void R_DrawSkyDome(int tiles, float rows, int height,
     //
     dglMatrixMode(GL_PROJECTION);
     dglLoadIdentity();
-    dglViewFrustum(video_width, video_height, r_fov.value, 0.1f);
+    dglViewFrustum(video_width, video_height, r_fov, 0.1f);
     dglMatrixMode(GL_MODELVIEW);
     dglLoadIdentity();
     dglPushMatrix();
@@ -286,7 +286,7 @@ static void R_DrawSkyboxCloud(void) {
     //
     dglMatrixMode(GL_PROJECTION);
     dglLoadIdentity();
-    dglViewFrustum(video_width, video_height, r_fov.value, 0.1f);
+    dglViewFrustum(video_width, video_height, r_fov, 0.1f);
     dglMatrixMode(GL_MODELVIEW);
     dglLoadIdentity();
     dglPushMatrix();
@@ -507,7 +507,7 @@ static void R_DrawClouds(void) {
 
     dglSetVertex(v);
 
-    if(r_texturecombiner.value > 0 && gl_max_texture_units > 2) {
+    if(r_texturecombiner && gl_max_texture_units > 2) {
         dglSetVertexColor(&v[0], sky->skycolor[0], 2);
         dglSetVertexColor(&v[2], sky->skycolor[1], 2);
 
@@ -763,7 +763,7 @@ static void R_DrawFire(void) {
         );
     }
 
-    if(r_skybox.value <= 0) {
+    if(!r_skybox) {
         SKYVIEWPOS(viewangle, 4, pos1);
 
         //
@@ -798,7 +798,7 @@ void R_DrawSky(void) {
     }
     else if(skypicnum >= 0) {
         if(sky->flags & SKF_CLOUD) {
-            if(r_skybox.value <= 0) {
+            if (!r_skybox) {
                 R_DrawClouds();
             }
             else {
@@ -806,7 +806,7 @@ void R_DrawSky(void) {
             }
         }
         else {
-            if(r_skybox.value <= 0) {
+            if (!r_skybox) {
                 R_DrawSimpleSky(skypicnum, 128);
             }
             else {
@@ -832,7 +832,7 @@ void R_DrawSky(void) {
             R_DrawTitleSky();
         }
         else if(sky->flags & SKF_BACKGROUND) {
-            if(r_skybox.value <= 0) {
+            if (!r_skybox) {
                 R_DrawSimpleSky(skybackdropnum, 170);
             }
             else {

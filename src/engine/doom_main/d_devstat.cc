@@ -42,9 +42,9 @@ static dboolean showstats = true;
 
 extern word statindice;
 
-CVAR_EXTERNAL(v_mlook);
-CVAR_EXTERNAL(v_mlookinvert);
-CVAR_EXTERNAL(sv_lockmonsters);
+extern BoolProperty v_mlook;
+extern BoolProperty v_mlookinvert;
+extern BoolProperty sv_lockmonsters;
 
 //
 // ST_DrawFPS
@@ -224,12 +224,12 @@ void D_BoyISuck(void) {
 // Special debug actions when pressing the F## keys
 //
 
-static dboolean freelook = false;
+static bool freelook = false;
 dboolean D_DevKeyResponder(event_t* ev) {
     if(ev->type == ev_keydown) {
         switch(ev->data1) {
         case KEY_F7:    // toggle wireframe
-            R_DrawWireframe(r_fillmode.value?1:0);
+            R_DrawWireframe(r_fillmode ? 1 : 0);
             return true;
 
         case KEY_F9:    // toggle display stats
@@ -251,8 +251,8 @@ dboolean D_DevKeyResponder(event_t* ev) {
                     players[consoleplayer].cheats |= CF_SPECTATOR;
                     players[consoleplayer].message = "Spectator Mode On";
 
-                    freelook = (int)v_mlook.value;
-                    CON_CvarSetValue(v_mlook.name, 1);
+                    freelook = (int)v_mlook;
+                    v_mlook = true;
 
                     players[consoleplayer].mo->flags |= MF_FLOAT;
                     players[consoleplayer].mo->flags |= MF_NOCLIP;
@@ -262,7 +262,7 @@ dboolean D_DevKeyResponder(event_t* ev) {
                     players[consoleplayer].cheats &= ~CF_SPECTATOR;
                     players[consoleplayer].message = "Spectator Mode Off";
 
-                    CON_CvarSetValue(v_mlook.name, (float)freelook);
+                    v_mlook = freelook;
                     freelook = false;
 
                     players[consoleplayer].mo->flags &= ~MF_FLOAT;
@@ -272,8 +272,8 @@ dboolean D_DevKeyResponder(event_t* ev) {
                 return true;
 
             case KEY_F3:    // freeze all mobj thinkers
-                CON_CvarSetValue(sv_lockmonsters.name, (float)((int)sv_lockmonsters.value ^ 1));
-                players[consoleplayer].message = sv_lockmonsters.value?"Lock Monsters On":"Lock Monsters Off";
+                sv_lockmonsters = !sv_lockmonsters;
+                players[consoleplayer].message = sv_lockmonsters ? "Lock Monsters On" : "Lock Monsters Off";
                 return true;
 
             case KEY_F4:    // kill everything

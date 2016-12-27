@@ -148,14 +148,14 @@ typedef struct {
 } menuitem_t;
 
 typedef struct {
-    cvar_t* mitem;
+    Property *mitem;
     float    mdefault;
 } menudefault_t;
 
 typedef struct {
     int item;
     float width;
-    cvar_t *mitem;
+    Property *mitem;
 } menuthermobar_t;
 
 typedef struct menu_s {
@@ -173,13 +173,13 @@ typedef struct menu_s {
     short               numpageitems;       // number of items to display per page
     short               menupageoffset;
     float               scale;
-    char                **hints;
+    const char          **hints;
     menuthermobar_t     *thermobars;
 } menu_t;
 
 typedef struct {
-    char    *name;
-    char    *action;
+    const char    *name;
+    const char    *action;
 } menuaction_t;
 
 short           itemOn;                 // menu item skull is on
@@ -215,8 +215,11 @@ static void M_DrawThermo(int x, int y, int thermWidth, float thermDot);
 static void M_DoDefaults(int choice);
 static void M_Return(int choice);
 static void M_ReturnToOptions(int choice);
-static void M_SetCvar(cvar_t *cvar, float value);
-static void M_SetOptionValue(int choice, float min, float max, float inc, cvar_t *cvar);
+template <class T, class U>
+static void M_SetCvar(TypedProperty<T> &property, const U &value);
+template <class T, class U>
+static void M_SetOptionValue(int choice, U min, U max, U inc, TypedProperty<T> &cvar);
+static void M_SetOptionValue(int choice, BoolProperty &cvar);
 static void M_DrawSmbString(const char* text, menu_t* menu, int item);
 static void M_DrawSaveGameFrontend(menu_t* def);
 static void M_SetInputString(char* string, int len);
@@ -224,33 +227,28 @@ static void M_Scroll(menu_t* menu, dboolean up);
 
 static dboolean M_SetThumbnail(int which);
 
-CVAR(m_regionblood, 0);
-CVAR_CMD(m_menufadetime, 0) {
-    if(cvar->value < 0) {
-        cvar->value = 0;
-    }
+IntProperty m_regionblood("m_regionblood", "");
 
-    if(cvar->value > 80) {
-        cvar->value = 80;
-    }
-}
+FloatProperty m_menufadetime("m_menufadetime", "", 0.0f, 0,
+                             [](const FloatProperty &, float x)
+                             {
+                                 return clamp(x, 0.0f, 80.0f);
+                             });
 
-CVAR_CMD(m_menumouse, 1) {
-    SDL_ShowCursor(cvar->value < 1);
-    if(cvar->value <= 0) {
-        itemSelected = -1;
-    }
-}
+BoolProperty m_menumouse("m_menumouse", "", true, 0,
+                         [](const BoolProperty &, bool new_value) {
+                             SDL_ShowCursor(new_value ? SDL_FALSE : SDL_TRUE);
+                             if(!new_value) {
+                                 itemSelected = -1;
+                             }
+                             return new_value;
+                         });
 
-CVAR_CMD(m_cursorscale, 8) {
-    if(cvar->value < 0) {
-        cvar->value = 0;
-    }
-
-    if(cvar->value > 50) {
-        cvar->value = 50;
-    }
-}
+FloatProperty m_cursorscale("m_cursorscale", "", 8.0f, 0,
+                            [](const FloatProperty &, float x)
+                            {
+                                return clamp(x, 0.0f, 50.0f);
+                            });
 
 //------------------------------------------------------------------------
 //
@@ -703,7 +701,7 @@ menuitem_t OptionsMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-char* OptionHints[opt_end]= {
+const char* OptionHints[opt_end]= {
     "control configuration",
     "miscellaneous options for gameplay and other features",
     "adjust sound volume",
@@ -755,9 +753,9 @@ void M_DrawOptions(void) {
 void M_RegionChoice(int choice);
 void M_DrawRegion(void);
 
-CVAR_EXTERNAL(st_regionmsg);
-CVAR_EXTERNAL(m_regionblood);
-CVAR_EXTERNAL(p_regionmode);
+extern IntProperty st_regionmsg;
+extern IntProperty m_regionblood;
+extern IntProperty p_regionmode;
 
 enum {
     region_mode,
@@ -783,7 +781,7 @@ menudefault_t RegionDefault[] = {
     { NULL, -1 }
 };
 
-char* RegionHints[region_end]= {
+const char* RegionHints[region_end]= {
     "affects the legal screen",
     "change language for hud messages",
     "changes color for blood",
@@ -825,7 +823,7 @@ void M_RegionChoice(int choice) {
             return;
         }
 
-        M_SetOptionValue(choice, 0, 2, 1, &p_regionmode);
+        M_SetOptionValue(choice, 0, 2, 1, p_regionmode);
         break;
 
     case region_lang:
@@ -836,7 +834,7 @@ void M_RegionChoice(int choice) {
             return;
         }
 
-        M_SetOptionValue(choice, 0, 1, 1, &st_regionmsg);
+        M_SetOptionValue(choice, 0, 1, 1, st_regionmsg);
         break;
 
     case region_blood:
@@ -847,9 +845,9 @@ void M_RegionChoice(int choice) {
             return;
         }
 
-        M_SetOptionValue(choice, 0, 1, 1, &m_regionblood);
+        M_SetOptionValue(choice, 0, 1, 1, m_regionblood);
 
-        lump = (int)m_regionblood.value;
+        lump = m_regionblood;
 
         if(lump > 1) {
             lump = 1;
@@ -871,7 +869,7 @@ void M_DrawRegion(void) {
     static const char* bloodcolor[2]    = { "Red", "Green" };
     static const char* language[2]      = { "English", "Japanese" };
     static const char* regionmode[3]    = { "NTSC", "PAL", "NTSC-Japan" };
-    char* string;
+    const char* string;
     rcolor color;
 
     if(RegionMenu[region_mode].status == 1) {
@@ -880,7 +878,7 @@ void M_DrawRegion(void) {
     }
     else {
         color = MENUCOLORRED;
-        string = (char*)regionmode[(int)p_regionmode.value];
+        string = (char*)regionmode[p_regionmode];
     }
 
     Draw_BigText(RegionDef.x + 136, RegionDef.y + LINEHEIGHT * region_mode, color, string);
@@ -891,7 +889,7 @@ void M_DrawRegion(void) {
     }
     else {
         color = MENUCOLORRED;
-        string = (char*)language[(int)st_regionmsg.value];
+        string = language[st_regionmsg];
     }
 
     Draw_BigText(RegionDef.x + 136, RegionDef.y + LINEHEIGHT * region_lang, color, string);
@@ -902,7 +900,7 @@ void M_DrawRegion(void) {
     }
     else {
         color = MENUCOLORRED;
-        string = (char*)bloodcolor[(int)m_regionblood.value];
+        string = bloodcolor[m_regionblood];
     }
 
     Draw_BigText(RegionDef.x + 136, RegionDef.y + LINEHEIGHT * region_blood, color, string);
@@ -924,16 +922,16 @@ void M_NetworkChoice(int choice);
 void M_PlayerSetName(int choice);
 void M_DrawNetwork(void);
 
-CVAR_EXTERNAL(m_playername);
-CVAR_EXTERNAL(p_allowjump);
-CVAR_EXTERNAL(p_autoaim);
-CVAR_EXTERNAL(sv_nomonsters);
-CVAR_EXTERNAL(sv_fastmonsters);
-CVAR_EXTERNAL(sv_respawnitems);
-CVAR_EXTERNAL(sv_respawn);
-CVAR_EXTERNAL(sv_allowcheats);
-CVAR_EXTERNAL(sv_friendlyfire);
-CVAR_EXTERNAL(sv_keepitems);
+extern StringProperty m_playername;
+extern BoolProperty p_allowjump;
+extern BoolProperty p_autoaim;
+extern BoolProperty sv_nomonsters;
+extern BoolProperty sv_fastmonsters;
+extern IntProperty sv_respawnitems;
+extern BoolProperty sv_respawn;
+extern BoolProperty sv_allowcheats;
+extern BoolProperty sv_friendlyfire;
+extern BoolProperty sv_keepitems;
 
 enum {
     network_header1,
@@ -985,7 +983,7 @@ menudefault_t NetworkDefault[] = {
     { NULL, -1 }
 };
 
-char* NetworkHints[network_end]= {
+const char* NetworkHints[network_end]= {
     NULL,
     "set a name for yourself",
     NULL,
@@ -1023,41 +1021,43 @@ menu_t NetworkDef = {
 
 void M_Network(int choice) {
     M_SetupNextMenu(&NetworkDef);
-    dstrcpy(inputString, m_playername.string);
+    dstrcpy(inputString, static_cast<String>(m_playername).c_str());
 }
 
 void M_PlayerSetName(int choice) {
-    M_SetInputString(m_playername.string, 16);
+    // FIXME: Allow inputting player name
+    char string[16] = "DUMMY TEXT";
+    M_SetInputString(string, 16);
 }
 
 void M_NetworkChoice(int choice) {
     switch(itemOn) {
     case network_allowcheats:
-        M_SetOptionValue(choice, 0, 1, 1, &sv_allowcheats);
+        M_SetOptionValue(choice, sv_allowcheats);
         break;
     case network_friendlyfire:
-        M_SetOptionValue(choice, 0, 1, 1, &sv_friendlyfire);
+        M_SetOptionValue(choice, sv_friendlyfire);
         break;
     case network_keepitems:
-        M_SetOptionValue(choice, 0, 1, 1, &sv_keepitems);
+        M_SetOptionValue(choice, sv_keepitems);
         break;
     case network_allowjump:
-        M_SetOptionValue(choice, 0, 1, 1, &p_allowjump);
+        M_SetOptionValue(choice, p_allowjump);
         break;
     case network_allowautoaim:
-        M_SetOptionValue(choice, 0, 1, 1, &p_autoaim);
+        M_SetOptionValue(choice, p_autoaim);
         break;
     case network_nomonsters:
-        M_SetOptionValue(choice, 0, 1, 1, &sv_nomonsters);
+        M_SetOptionValue(choice, sv_nomonsters);
         break;
     case network_fastmonsters:
-        M_SetOptionValue(choice, 0, 1, 1, &sv_fastmonsters);
+        M_SetOptionValue(choice, sv_fastmonsters);
         break;
     case network_respawnmonsters:
-        M_SetOptionValue(choice, 0, 1, 1, &sv_respawn);
+        M_SetOptionValue(choice, sv_respawn);
         break;
     case network_respawnitems:
-        M_SetOptionValue(choice, 0, 10, 1, &sv_respawnitems);
+        M_SetOptionValue(choice, 0, 10, 1, sv_respawnitems);
         break;
     }
 }
@@ -1094,15 +1094,15 @@ void M_DrawNetwork(void) {
     }
 
     DRAWNETWORKITEM(network_playername, 0, &inputString);
-    DRAWNETWORKITEM(network_allowcheats, sv_allowcheats.value, msgNames);
-    DRAWNETWORKITEM(network_friendlyfire, sv_friendlyfire.value, msgNames);
-    DRAWNETWORKITEM(network_keepitems, sv_keepitems.value, msgNames);
-    DRAWNETWORKITEM(network_allowjump, p_allowjump.value, msgNames);
-    DRAWNETWORKITEM(network_allowautoaim, p_autoaim.value, msgNames);
-    DRAWNETWORKITEM(network_nomonsters, sv_nomonsters.value, msgNames);
-    DRAWNETWORKITEM(network_fastmonsters, sv_fastmonsters.value, msgNames);
-    DRAWNETWORKITEM(network_respawnmonsters, sv_respawn.value, msgNames);
-    DRAWNETWORKITEM(network_respawnitems, sv_respawnitems.value, respawnitemstrings);
+    DRAWNETWORKITEM(network_allowcheats, sv_allowcheats, msgNames);
+    DRAWNETWORKITEM(network_friendlyfire, sv_friendlyfire, msgNames);
+    DRAWNETWORKITEM(network_keepitems, sv_keepitems, msgNames);
+    DRAWNETWORKITEM(network_allowjump, p_allowjump, msgNames);
+    DRAWNETWORKITEM(network_allowautoaim, p_autoaim, msgNames);
+    DRAWNETWORKITEM(network_nomonsters, sv_nomonsters, msgNames);
+    DRAWNETWORKITEM(network_fastmonsters, sv_fastmonsters, msgNames);
+    DRAWNETWORKITEM(network_respawnmonsters, sv_respawn, msgNames);
+    DRAWNETWORKITEM(network_respawnitems, sv_respawnitems, respawnitemstrings);
 
 #undef DRAWNETWORKITEM
 
@@ -1130,22 +1130,22 @@ void M_DrawNetwork(void) {
 void M_MiscChoice(int choice);
 void M_DrawMisc(void);
 
-CVAR_EXTERNAL(am_showkeymarkers);
-CVAR_EXTERNAL(am_showkeycolors);
-CVAR_EXTERNAL(am_drawobjects);
-CVAR_EXTERNAL(am_overlay);
-CVAR_EXTERNAL(r_skybox);
-CVAR_EXTERNAL(r_texnonpowresize);
-CVAR_EXTERNAL(i_interpolateframes);
-CVAR_EXTERNAL(p_usecontext);
-CVAR_EXTERNAL(compat_collision);
-CVAR_EXTERNAL(compat_limitpain);
-CVAR_EXTERNAL(compat_mobjpass);
-CVAR_EXTERNAL(compat_grabitems);
-CVAR_EXTERNAL(r_wipe);
-CVAR_EXTERNAL(r_rendersprites);
-CVAR_EXTERNAL(r_texturecombiner);
-CVAR_EXTERNAL(r_colorscale);
+extern BoolProperty am_showkeymarkers;
+extern BoolProperty am_showkeycolors;
+extern IntProperty am_drawobjects;
+extern BoolProperty am_overlay;
+extern BoolProperty r_skybox;
+extern IntProperty r_texnonpowresize;
+extern BoolProperty i_interpolateframes;
+extern BoolProperty p_usecontext;
+extern BoolProperty compat_collision;
+extern BoolProperty compat_limitpain;
+extern BoolProperty compat_mobjpass;
+extern BoolProperty compat_grabitems;
+extern BoolProperty r_wipe;
+extern IntProperty r_rendersprites;
+extern BoolProperty r_texturecombiner;
+extern IntProperty r_colorscale;
 
 enum {
     misc_header1,
@@ -1214,7 +1214,7 @@ menuitem_t MiscMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-char* MiscHints[misc_end]= {
+const char* MiscHints[misc_end]= {
     NULL,
     "change transition speeds between switching menus",
     NULL,
@@ -1304,116 +1304,116 @@ void M_MiscChoice(int choice) {
     switch(itemOn) {
     case misc_menufade:
         if(choice) {
-            if(m_menufadetime.value < 80.0f) {
-                M_SetCvar(&m_menufadetime, m_menufadetime.value + 0.8f);
+            if(m_menufadetime < 80.0f) {
+                M_SetCvar(m_menufadetime, m_menufadetime + 0.8f);
             }
             else {
-                CON_CvarSetValue(m_menufadetime.name, 80);
+                m_menufadetime = 80.0f;
             }
         }
         else {
-            if(m_menufadetime.value > 0.0f) {
-                M_SetCvar(&m_menufadetime, m_menufadetime.value - 0.8f);
+            if(m_menufadetime > 0.0f) {
+                M_SetCvar(m_menufadetime, m_menufadetime - 0.8f);
             }
             else {
-                CON_CvarSetValue(m_menufadetime.name, 0);
+                m_menufadetime = 0.0f;
             }
         }
         break;
 
     case misc_cursorsize:
         if(choice) {
-            if(m_cursorscale.value < 50) {
-                M_SetCvar(&m_cursorscale, m_cursorscale.value + 0.5f);
+            if(m_cursorscale < 50.0f) {
+                M_SetCvar(m_cursorscale, m_cursorscale + 0.5f);
             }
             else {
-                CON_CvarSetValue(m_cursorscale.name, 50);
+                m_cursorscale = 50.0f;
             }
         }
         else {
-            if(m_cursorscale.value > 0.0f) {
-                M_SetCvar(&m_cursorscale, m_cursorscale.value - 0.5f);
+            if(m_cursorscale > 0.0f) {
+                M_SetCvar(m_cursorscale, m_cursorscale - 0.5f);
             }
             else {
-                CON_CvarSetValue(m_cursorscale.name, 0);
+                m_cursorscale = 0;
             }
         }
         break;
 
     case misc_menumouse:
-        M_SetOptionValue(choice, 0, 1, 1, &m_menumouse);
+        M_SetOptionValue(choice, m_menumouse);
         break;
 
     case misc_aim:
-        M_SetOptionValue(choice, 0, 1, 1, &p_autoaim);
+        M_SetOptionValue(choice, p_autoaim);
         break;
 
     case misc_jump:
-        M_SetOptionValue(choice, 0, 1, 1, &p_allowjump);
+        M_SetOptionValue(choice, p_allowjump);
         break;
 
     case misc_context:
-        M_SetOptionValue(choice, 0, 1, 1, &p_usecontext);
+        M_SetOptionValue(choice, p_usecontext);
         break;
 
     case misc_wipe:
-        M_SetOptionValue(choice, 0, 1, 1, &r_wipe);
+        M_SetOptionValue(choice, r_wipe);
         break;
 
     case misc_texresize:
-        M_SetOptionValue(choice, 0, 2, 1, &r_texnonpowresize);
+        M_SetOptionValue(choice, 0, 2, 1, r_texnonpowresize);
         break;
 
     case misc_frame:
-        M_SetOptionValue(choice, 0, 1, 1, &i_interpolateframes);
+        M_SetOptionValue(choice, i_interpolateframes);
         break;
 
     case misc_combine:
-        M_SetOptionValue(choice, 0, 1, 1, &r_texturecombiner);
+        M_SetOptionValue(choice, r_texturecombiner);
         break;
 
     case misc_sprites:
-        M_SetOptionValue(choice, 1, 2, 1, &r_rendersprites);
+        M_SetOptionValue(choice, 1, 2, 1, r_rendersprites);
         break;
 
     case misc_skybox:
-        M_SetOptionValue(choice, 0, 1, 1, &r_skybox);
+        M_SetOptionValue(choice, r_skybox);
         break;
 
     case misc_rgbscale:
-        M_SetOptionValue(choice, 0, 2, 1, &r_colorscale);
+        M_SetOptionValue(choice, 0, 2, 1, r_colorscale);
         break;
 
     case misc_showkey:
-        M_SetOptionValue(choice, 0, 1, 1, &am_showkeymarkers);
+        M_SetOptionValue(choice, am_showkeymarkers);
         break;
 
     case misc_showlocks:
-        M_SetOptionValue(choice, 0, 1, 1, &am_showkeycolors);
+        M_SetOptionValue(choice, am_showkeycolors);
         break;
 
     case misc_amobjects:
-        M_SetOptionValue(choice, 0, 2, 1, &am_drawobjects);
+        M_SetOptionValue(choice, 0, 2, 1, am_drawobjects);
         break;
 
     case misc_amoverlay:
-        M_SetOptionValue(choice, 0, 1, 1, &am_overlay);
+        M_SetOptionValue(choice, am_overlay);
         break;
 
     case misc_comp_collision:
-        M_SetOptionValue(choice, 0, 1, 1, &compat_collision);
+        M_SetOptionValue(choice, compat_collision);
         break;
 
     case misc_comp_pain:
-        M_SetOptionValue(choice, 0, 1, 1, &compat_limitpain);
+        M_SetOptionValue(choice, compat_limitpain);
         break;
 
     case misc_comp_pass:
-        M_SetOptionValue(choice, 0, 1, 1, &compat_mobjpass);
+        M_SetOptionValue(choice, compat_mobjpass);
         break;
 
     case misc_comp_grab:
-        M_SetOptionValue(choice, 0, 1, 1, &compat_grabitems);
+        M_SetOptionValue(choice, compat_grabitems);
         break;
     }
 }
@@ -1429,13 +1429,13 @@ void M_DrawMisc(void) {
     if(currentMenu->menupageoffset <= misc_menufade+1 &&
             (misc_menufade+1) - currentMenu->menupageoffset < currentMenu->numpageitems) {
         y = misc_menufade - currentMenu->menupageoffset;
-        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 80, m_menufadetime.value);
+        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 80, m_menufadetime);
     }
 
     if(currentMenu->menupageoffset <= misc_cursorsize+1 &&
             (misc_cursorsize+1) - currentMenu->menupageoffset < currentMenu->numpageitems) {
         y = misc_cursorsize - currentMenu->menupageoffset;
-        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 50, m_cursorscale.value);
+        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 50, m_cursorscale);
     }
 
 #define DRAWMISCITEM(a, b, c) \
@@ -1447,25 +1447,25 @@ void M_DrawMisc(void) {
             c[(int)b]); \
     }
 
-    DRAWMISCITEM(misc_menumouse, m_menumouse.value, msgNames);
-    DRAWMISCITEM(misc_aim, p_autoaim.value, msgNames);
-    DRAWMISCITEM(misc_jump, p_allowjump.value, msgNames);
-    DRAWMISCITEM(misc_context, p_usecontext.value, mapdisplaytype);
-    DRAWMISCITEM(misc_wipe, r_wipe.value, msgNames);
-    DRAWMISCITEM(misc_texresize, r_texnonpowresize.value, texresizetype);
-    DRAWMISCITEM(misc_frame, i_interpolateframes.value, frametype);
-    DRAWMISCITEM(misc_combine, r_texturecombiner.value, msgNames);
-    DRAWMISCITEM(misc_sprites, r_rendersprites.value - 1, msgNames);
-    DRAWMISCITEM(misc_skybox, r_skybox.value, msgNames);
-    DRAWMISCITEM(misc_rgbscale, r_colorscale.value, rgbscaletype);
-    DRAWMISCITEM(misc_showkey, am_showkeymarkers.value, mapdisplaytype);
-    DRAWMISCITEM(misc_showlocks, am_showkeycolors.value, mapdisplaytype);
-    DRAWMISCITEM(misc_amobjects, am_drawobjects.value, objectdrawtype);
-    DRAWMISCITEM(misc_amoverlay, am_overlay.value, msgNames);
-    DRAWMISCITEM(misc_comp_collision, compat_collision.value, msgNames);
-    DRAWMISCITEM(misc_comp_pain, compat_limitpain.value, msgNames);
-    DRAWMISCITEM(misc_comp_pass, !compat_mobjpass.value, msgNames);
-    DRAWMISCITEM(misc_comp_grab, compat_grabitems.value, msgNames);
+    DRAWMISCITEM(misc_menumouse, m_menumouse, msgNames);
+    DRAWMISCITEM(misc_aim, p_autoaim, msgNames);
+    DRAWMISCITEM(misc_jump, p_allowjump, msgNames);
+    DRAWMISCITEM(misc_context, p_usecontext, mapdisplaytype);
+    DRAWMISCITEM(misc_wipe, r_wipe, msgNames);
+    DRAWMISCITEM(misc_texresize, r_texnonpowresize, texresizetype);
+    DRAWMISCITEM(misc_frame, i_interpolateframes, frametype);
+    DRAWMISCITEM(misc_combine, r_texturecombiner, msgNames);
+    DRAWMISCITEM(misc_sprites, r_rendersprites - 1, msgNames);
+    DRAWMISCITEM(misc_skybox, r_skybox, msgNames);
+    DRAWMISCITEM(misc_rgbscale, r_colorscale, rgbscaletype);
+    DRAWMISCITEM(misc_showkey, am_showkeymarkers, mapdisplaytype);
+    DRAWMISCITEM(misc_showlocks, am_showkeycolors, mapdisplaytype);
+    DRAWMISCITEM(misc_amobjects, am_drawobjects, objectdrawtype);
+    DRAWMISCITEM(misc_amoverlay, am_overlay, msgNames);
+    DRAWMISCITEM(misc_comp_collision, compat_collision, msgNames);
+    DRAWMISCITEM(misc_comp_pain, compat_limitpain, msgNames);
+    DRAWMISCITEM(misc_comp_pass, !compat_mobjpass, msgNames);
+    DRAWMISCITEM(misc_comp_grab, compat_grabitems, msgNames);
 
 #undef DRAWMISCITEM
 
@@ -1489,12 +1489,12 @@ void M_ChangeMouseInvert(int choice);
 void M_ChangeYAxisMove(int choice);
 void M_DrawMouse(void);
 
-CVAR_EXTERNAL(v_msensitivityx);
-CVAR_EXTERNAL(v_msensitivityy);
-CVAR_EXTERNAL(v_mlook);
-CVAR_EXTERNAL(v_mlookinvert);
-CVAR_EXTERNAL(v_yaxismove);
-CVAR_EXTERNAL(v_macceleration);
+extern IntProperty v_msensitivityx;
+extern IntProperty v_msensitivityy;
+extern BoolProperty v_mlook;
+extern BoolProperty v_mlookinvert;
+extern BoolProperty v_yaxismove;
+extern IntProperty v_macceleration;
 
 enum {
     mouse_sensx,
@@ -1561,17 +1561,17 @@ menu_t MouseDef = {
 };
 
 void M_DrawMouse(void) {
-    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensx+1),MAXSENSITIVITY, v_msensitivityx.value);
-    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensy+1),MAXSENSITIVITY, v_msensitivityy.value);
+    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensx+1),MAXSENSITIVITY, v_msensitivityx);
+    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensy+1),MAXSENSITIVITY, v_msensitivityy);
 
-    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_accel+1),20, v_macceleration.value);
+    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_accel+1),20, v_macceleration);
 
     Draw_BigText(MouseDef.x + 144, MouseDef.y+LINEHEIGHT*mouse_look, MENUCOLORRED,
-                 msgNames[(int)v_mlook.value]);
+                 msgNames[(int)v_mlook]);
     Draw_BigText(MouseDef.x + 144, MouseDef.y+LINEHEIGHT*mouse_invert, MENUCOLORRED,
-                 msgNames[(int)v_mlookinvert.value]);
+                 msgNames[(int)v_mlookinvert]);
     Draw_BigText(MouseDef.x + 144, MouseDef.y+LINEHEIGHT*mouse_yaxismove, MENUCOLORRED,
-                 msgNames[(int)v_yaxismove.value]);
+                 msgNames[(int)v_yaxismove]);
 }
 
 void M_ChangeSensitivity(int choice) {
@@ -1580,19 +1580,19 @@ void M_ChangeSensitivity(int choice) {
     case 0:
         switch(itemOn) {
         case mouse_sensx:
-            if(v_msensitivityx.value > 0.0f) {
-                M_SetCvar(&v_msensitivityx, v_msensitivityx.value - slope);
+            if(v_msensitivityx > 0.0f) {
+                M_SetCvar(v_msensitivityx, v_msensitivityx - slope);
             }
             else {
-                CON_CvarSetValue(v_msensitivityx.name, 0);
+                v_msensitivityx = 0.0f;
             }
             break;
         case mouse_sensy:
-            if(v_msensitivityy.value > 0.0f) {
-                M_SetCvar(&v_msensitivityy, v_msensitivityy.value - slope);
+            if(v_msensitivityy > 0.0f) {
+                M_SetCvar(v_msensitivityy, v_msensitivityy - slope);
             }
             else {
-                CON_CvarSetValue(v_msensitivityy.name, 0);
+                v_msensitivityy = 0.0f;
             }
             break;
         }
@@ -1600,19 +1600,19 @@ void M_ChangeSensitivity(int choice) {
     case 1:
         switch(itemOn) {
         case mouse_sensx:
-            if(v_msensitivityx.value < (float)MAXSENSITIVITY) {
-                M_SetCvar(&v_msensitivityx, v_msensitivityx.value + slope);
+            if(v_msensitivityx < (float)MAXSENSITIVITY) {
+                M_SetCvar(v_msensitivityx, v_msensitivityx + slope);
             }
             else {
-                CON_CvarSetValue(v_msensitivityx.name, (float)MAXSENSITIVITY);
+                v_msensitivityx = (float)MAXSENSITIVITY;
             }
             break;
         case mouse_sensy:
-            if(v_msensitivityy.value < (float)MAXSENSITIVITY) {
-                M_SetCvar(&v_msensitivityy, v_msensitivityy.value + slope);
+            if(v_msensitivityy < (float)MAXSENSITIVITY) {
+                M_SetCvar(v_msensitivityy, v_msensitivityy + slope);
             }
             else {
-                CON_CvarSetValue(v_msensitivityy.name, (float)MAXSENSITIVITY);
+                v_msensitivityy = (float)MAXSENSITIVITY;
             }
             break;
         }
@@ -1624,19 +1624,19 @@ void M_ChangeMouseAccel(int choice) {
     float slope = 20.0f / 100.0f;
     switch(choice) {
     case 0:
-        if(v_macceleration.value > 0.0f) {
-            M_SetCvar(&v_macceleration, v_macceleration.value - slope);
+        if(v_macceleration > 0.0f) {
+            M_SetCvar(v_macceleration, v_macceleration - slope);
         }
         else {
-            CON_CvarSetValue(v_macceleration.name, 0);
+            v_macceleration = 0;
         }
         break;
     case 1:
-        if(v_macceleration.value < 20.0f) {
-            M_SetCvar(&v_macceleration, v_macceleration.value + slope);
+        if(v_macceleration < 20.0f) {
+            M_SetCvar(v_macceleration, v_macceleration + slope);
         }
         else {
-            CON_CvarSetValue(v_macceleration.name, 20);
+            v_macceleration = 20.0f;
         }
         break;
     }
@@ -1644,15 +1644,15 @@ void M_ChangeMouseAccel(int choice) {
 }
 
 void M_ChangeMouseLook(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &v_mlook);
+    M_SetOptionValue(choice, v_mlook);
 }
 
 void M_ChangeMouseInvert(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &v_mlookinvert);
+    M_SetOptionValue(choice, v_mlookinvert);
 }
 
 void M_ChangeYAxisMove(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &v_yaxismove);
+    M_SetOptionValue(choice, v_yaxismove);
 }
 
 //------------------------------------------------------------------------
@@ -1672,15 +1672,15 @@ void M_ChangeCrosshair(int choice);
 void M_ChangeOpacity(int choice);
 void M_DrawDisplay(void);
 
-CVAR_EXTERNAL(st_drawhud);
-CVAR_EXTERNAL(st_crosshair);
-CVAR_EXTERNAL(st_crosshairopacity);
-CVAR_EXTERNAL(st_flashoverlay);
-CVAR_EXTERNAL(st_showpendingweapon);
-CVAR_EXTERNAL(st_showstats);
-CVAR_EXTERNAL(i_brightness);
-CVAR_EXTERNAL(m_messages);
-CVAR_EXTERNAL(p_damageindicator);
+extern IntProperty st_drawhud;
+extern IntProperty st_crosshair;
+extern FloatProperty st_crosshairopacity;
+extern BoolProperty st_flashoverlay;
+extern BoolProperty st_showpendingweapon;
+extern BoolProperty st_showstats;
+extern FloatProperty i_brightness;
+extern BoolProperty m_messages;
+extern BoolProperty p_damageindicator;
 
 enum {
     dbrightness,
@@ -1715,7 +1715,7 @@ menuitem_t DisplayMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-char* DisplayHints[display_end]= {
+const char* DisplayHints[display_end]= {
     "change light color intensity",
     NULL,
     "toggle messages displaying on hud",
@@ -1775,31 +1775,31 @@ void M_DrawDisplay(void) {
     static const char* hudtype[3] = { "Off", "Classic", "Arranged" };
     static const char* flashtype[2] = { "Environment", "Overlay" };
 
-    M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(dbrightness+1), MAXBRIGHTNESS, i_brightness.value);
+    M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(dbrightness+1), MAXBRIGHTNESS, i_brightness);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*messages, MENUCOLORRED,
-                 msgNames[(int)m_messages.value]);
+                 msgNames[(int)m_messages]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*statusbar, MENUCOLORRED,
-                 hudtype[(int)st_drawhud.value]);
+                 hudtype[(int)st_drawhud]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_flash, MENUCOLORRED,
-                 flashtype[(int)st_flashoverlay.value]);
+                 flashtype[(int)st_flashoverlay]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_damage, MENUCOLORRED,
-                 msgNames[(int)p_damageindicator.value]);
+                 msgNames[(int)p_damageindicator]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_weapon, MENUCOLORRED,
-                 msgNames[(int)st_showpendingweapon.value]);
+                 msgNames[(int)st_showpendingweapon]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_stats, MENUCOLORRED,
-                 msgNames[(int)st_showstats.value]);
+                 msgNames[(int)st_showstats]);
 
-    if(st_crosshair.value <= 0) {
+    if(st_crosshair <= 0) {
         Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_crosshair, MENUCOLORRED,
                      msgNames[0]);
     }
     else {
         ST_DrawCrosshair(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_crosshair,
-                         (int)st_crosshair.value, 1, MENUCOLORWHITE);
+                         (int)st_crosshair, 1, MENUCOLORWHITE);
     }
 
     M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(display_opacity+1),
-                 255, st_crosshairopacity.value);
+                 255, st_crosshairopacity);
 
     if(DisplayDef.hints[itemOn] != NULL) {
         GL_SetOrthoScale(0.5f);
@@ -1811,19 +1811,19 @@ void M_DrawDisplay(void) {
 void M_ChangeBrightness(int choice) {
     switch(choice) {
     case 0:
-        if(i_brightness.value > 0.0f) {
-            M_SetCvar(&i_brightness, i_brightness.value - 1);
+        if(i_brightness > 0.0f) {
+            M_SetCvar(i_brightness, i_brightness - 1);
         }
         else {
-            i_brightness.value = 0;
+            i_brightness = 0;
         }
         break;
     case 1:
-        if(i_brightness.value < (int)MAXBRIGHTNESS) {
-            M_SetCvar(&i_brightness, i_brightness.value + 1);
+        if(i_brightness < (int)MAXBRIGHTNESS) {
+            M_SetCvar(i_brightness, i_brightness + 1);
         }
         else {
-            i_brightness.value = (int)MAXBRIGHTNESS;
+            i_brightness = (int)MAXBRIGHTNESS;
         }
         break;
     }
@@ -1832,7 +1832,7 @@ void M_ChangeBrightness(int choice) {
 }
 
 void M_ChangeMessages(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &m_messages);
+    M_SetOptionValue(choice, m_messages);
 
     if(choice) {
         players[consoleplayer].message = MSGON;
@@ -1843,46 +1843,46 @@ void M_ChangeMessages(int choice) {
 }
 
 void M_ToggleHudDraw(int choice) {
-    M_SetOptionValue(choice, 0, 2, 1, &st_drawhud);
+    M_SetOptionValue(choice, 0, 2, 1, st_drawhud);
 }
 
 void M_ToggleDamageHud(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &p_damageindicator);
+    M_SetOptionValue(choice, p_damageindicator);
 }
 
 void M_ToggleWpnDisplay(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &st_showpendingweapon);
+    M_SetOptionValue(choice, st_showpendingweapon);
 }
 
 void M_ToggleShowStats(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &st_showstats);
+    M_SetOptionValue(choice, st_showstats);
 }
 
 void M_ToggleFlashOverlay(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &st_flashoverlay);
+    M_SetOptionValue(choice, st_flashoverlay);
 }
 
 void M_ChangeCrosshair(int choice) {
-    M_SetOptionValue(choice, 0, (float)st_crosshairs, 1, &st_crosshair);
+    M_SetOptionValue(choice, 0, st_crosshairs, 1, st_crosshair);
 }
 
 void M_ChangeOpacity(int choice) {
     float slope = 255.0f / 100.0f;
 
     if(choice) {
-        if(st_crosshairopacity.value < 255.0f) {
-            M_SetCvar(&st_crosshairopacity, st_crosshairopacity.value + slope);
+        if(st_crosshairopacity < 255.0f) {
+            M_SetCvar(st_crosshairopacity, st_crosshairopacity + slope);
         }
         else {
-            CON_CvarSetValue(st_crosshairopacity.name, 255);
+            st_crosshairopacity = 255.0f;
         }
     }
     else {
-        if(st_crosshairopacity.value > 0.0f) {
-            M_SetCvar(&st_crosshairopacity, st_crosshairopacity.value - slope);
+        if(st_crosshairopacity > 0.0f) {
+            M_SetCvar(st_crosshairopacity, st_crosshairopacity - slope);
         }
         else {
-            CON_CvarSetValue(st_crosshairopacity.name, 0);
+            st_crosshairopacity = 0.0f;
         }
     }
 }
@@ -1904,16 +1904,16 @@ void M_ChangeBufferSize(int choice);
 void M_ChangeAnisotropic(int choice);
 void M_DrawVideo(void);
 
-CVAR_EXTERNAL(v_width);
-CVAR_EXTERNAL(v_height);
-CVAR_EXTERNAL(v_windowed);
-CVAR_EXTERNAL(v_vsync);
-CVAR_EXTERNAL(v_depthsize);
-CVAR_EXTERNAL(v_buffersize);
-CVAR_EXTERNAL(i_gamma);
-CVAR_EXTERNAL(i_brightness);
-CVAR_EXTERNAL(r_filter);
-CVAR_EXTERNAL(r_anisotropic);
+extern IntProperty v_width;
+extern IntProperty v_height;
+extern BoolProperty v_windowed;
+extern BoolProperty v_vsync;
+extern IntProperty v_depthsize;
+extern IntProperty v_buffersize;
+extern FloatProperty i_gamma;
+extern FloatProperty i_brightness;
+extern BoolProperty r_filter;
+extern BoolProperty r_anisotropic;
 
 enum {
     video_dgamma,
@@ -2057,7 +2057,7 @@ void M_Video(int choice) {
 
     M_SetupNextMenu(&VideoDef);
 
-    checkratio = v_width.value / v_height.value;
+    checkratio = static_cast<float>(v_width) / static_cast<float>(v_height);
 
     if(dfcmp(checkratio, ratioVal[2])) {
         m_aspectRatio = 2;
@@ -2072,7 +2072,7 @@ void M_Video(int choice) {
     switch(m_aspectRatio) {
     case 0:
         for(i = 0; i < MAX_RES4_3; i++) {
-            if((int)v_width.value == Resolution4_3[i][0]) {
+            if(v_width == Resolution4_3[i][0]) {
                 m_ScreenSize = i;
                 return;
             }
@@ -2080,7 +2080,7 @@ void M_Video(int choice) {
         break;
     case 1:
         for(i = 0; i < MAX_RES16_9; i++) {
-            if((int)v_width.value == Resolution16_9[i][0]) {
+            if(v_width == Resolution16_9[i][0]) {
                 m_ScreenSize = i;
                 return;
             }
@@ -2088,7 +2088,7 @@ void M_Video(int choice) {
         break;
     case 2:
         for(i = 0; i < MAX_RES16_10; i++) {
-            if((int)v_width.value == Resolution16_10[i][0]) {
+            if(v_width == Resolution16_10[i][0]) {
                 m_ScreenSize = i;
                 return;
             }
@@ -2109,7 +2109,7 @@ void M_DrawVideo(void) {
     if(currentMenu->menupageoffset <= video_dgamma + 1 &&
             (video_dgamma+1) - currentMenu->menupageoffset < currentMenu->numpageitems) {
         y = video_dgamma - currentMenu->menupageoffset;
-        M_DrawThermo(VideoDef.x, VideoDef.y + LINEHEIGHT*(y + 1), 20, i_gamma.value);
+        M_DrawThermo(VideoDef.x, VideoDef.y + LINEHEIGHT*(y + 1), 20, i_gamma);
     }
 
 #define DRAWVIDEOITEM(a, b) \
@@ -2122,25 +2122,25 @@ void M_DrawVideo(void) {
 
 #define DRAWVIDEOITEM2(a, b, c) DRAWVIDEOITEM(a, c[(int)b])
 
-    DRAWVIDEOITEM2(filter, r_filter.value, filterType);
-    DRAWVIDEOITEM2(anisotropic, r_anisotropic.value, msgNames);
-    DRAWVIDEOITEM2(windowed, v_windowed.value, msgNames);
+    DRAWVIDEOITEM2(filter, r_filter, filterType);
+    DRAWVIDEOITEM2(anisotropic, r_anisotropic, msgNames);
+    DRAWVIDEOITEM2(windowed, v_windowed, msgNames);
     DRAWVIDEOITEM2(ratio, m_aspectRatio, ratioName);
 
-    sprintf(res, "%ix%i", (int)v_width.value, (int)v_height.value);
+    sprintf(res, "%ix%i", (int)v_width, (int)v_height);
     DRAWVIDEOITEM(resolution, res);
 
-    DRAWVIDEOITEM2(vsync, v_vsync.value, msgNames);
+    DRAWVIDEOITEM2(vsync, v_vsync, msgNames);
 
     if(currentMenu->menupageoffset <= depth &&
             depth - currentMenu->menupageoffset < currentMenu->numpageitems) {
-        if(v_depthsize.value == 8) {
+        if(v_depthsize == 8) {
             dsnprintf(bitValue, 1, "8");
         }
-        else if(v_depthsize.value == 16) {
+        else if(v_depthsize == 16) {
             dsnprintf(bitValue, 2, "16");
         }
-        else if(v_depthsize.value == 24) {
+        else if(v_depthsize == 24) {
             dsnprintf(bitValue, 2, "24");
         }
         else {
@@ -2153,16 +2153,16 @@ void M_DrawVideo(void) {
 
     if(currentMenu->menupageoffset <= buffer &&
             buffer - currentMenu->menupageoffset < currentMenu->numpageitems) {
-        if(v_buffersize.value == 8) {
+        if(v_buffersize == 8) {
             dsnprintf(bitValue, 1, "8");
         }
-        else if(v_buffersize.value == 16) {
+        else if(v_buffersize == 16) {
             dsnprintf(bitValue, 2, "16");
         }
-        else if(v_buffersize.value == 24) {
+        else if(v_buffersize == 24) {
             dsnprintf(bitValue, 2, "24");
         }
-        else if(v_buffersize.value == 32) {
+        else if(v_buffersize == 32) {
             dsnprintf(bitValue, 2, "32");
         }
         else {
@@ -2186,44 +2186,44 @@ void M_ChangeGammaLevel(int choice) {
     float slope = 20.0f / 100.0f;
     switch(choice) {
     case 0:
-        if(i_gamma.value > 0.0f) {
-            M_SetCvar(&i_gamma, i_gamma.value - slope);
+        if(i_gamma > 0.0f) {
+            M_SetCvar(i_gamma, i_gamma - slope);
         }
         else {
-            CON_CvarSetValue(i_gamma.name, 0);
+            i_gamma = 0;
         }
         break;
     case 1:
-        if(i_gamma.value < 20.0f) {
-            M_SetCvar(&i_gamma, i_gamma.value + slope);
+        if(i_gamma < 20.0f) {
+            M_SetCvar(i_gamma, i_gamma + slope);
         }
         else {
-            CON_CvarSetValue(i_gamma.name, 20);
+            i_gamma = 20.0f;
         }
         break;
     case 2:
-        if(i_gamma.value >= 20) {
-            CON_CvarSetValue(i_gamma.name, 0);
+        if(i_gamma >= 20) {
+            i_gamma = 0.0f;
         }
         else {
-            CON_CvarSetValue(i_gamma.name, i_gamma.value + 1);
+            i_gamma = i_gamma + 1;
         }
 
-        players[consoleplayer].message = gammamsg[(int)i_gamma.value];
+        players[consoleplayer].message = gammamsg[(int)i_gamma];
         break;
     }
 }
 
 void M_ChangeFilter(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &r_filter);
+    M_SetOptionValue(choice, r_filter);
 }
 
 void M_ChangeAnisotropic(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &r_anisotropic);
+    M_SetOptionValue(choice, r_anisotropic);
 }
 
 void M_ChangeWindowed(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &v_windowed);
+    M_SetOptionValue(choice, v_windowed);
 }
 
 static void M_SetResolution(void) {
@@ -2245,8 +2245,8 @@ static void M_SetResolution(void) {
         break;
     }
 
-    M_SetCvar(&v_width, (float)width);
-    M_SetCvar(&v_height, (float)height);
+    M_SetCvar(v_width, width);
+    M_SetCvar(v_height, height);
 }
 
 void M_ChangeRatio(int choice) {
@@ -2316,15 +2316,15 @@ void M_ChangeResolution(int choice) {
 }
 
 void M_ChangeVSync(int choice) {
-    M_SetOptionValue(choice, 0, 1, 1, &v_vsync);
+    M_SetOptionValue(choice, v_vsync);
 }
 
 void M_ChangeDepthSize(int choice) {
-    M_SetOptionValue(choice, 8, 24, 8, &v_depthsize);
+    M_SetOptionValue(choice, 8, 24, 8, v_depthsize);
 }
 
 void M_ChangeBufferSize(int choice) {
-    M_SetOptionValue(choice, 8, 32, 8, &v_buffersize);
+    M_SetOptionValue(choice, 8, 32, 8, v_buffersize);
 }
 
 //------------------------------------------------------------------------
@@ -2481,9 +2481,9 @@ void M_MusicVol(int choice);
 void M_GainOutput(int choice);
 void M_DrawSound(void);
 
-CVAR_EXTERNAL(s_sfxvol);
-CVAR_EXTERNAL(s_musvol);
-CVAR_EXTERNAL(s_gain);
+extern FloatProperty s_sfxvol;
+extern FloatProperty s_musvol;
+extern FloatProperty s_gain;
 
 enum {
     sfx_vol,
@@ -2545,28 +2545,28 @@ void M_Sound(int choice) {
 }
 
 void M_DrawSound(void) {
-    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(sfx_vol+1), 100, s_sfxvol.value);
-    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(music_vol+1), 100, s_musvol.value);
-    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(gain+1), 2, s_gain.value);
+    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(sfx_vol+1), 100, s_sfxvol);
+    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(music_vol+1), 100, s_musvol);
+    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(gain+1), 2, s_gain);
 }
 
 void M_SfxVol(int choice) {
     float slope = 1.0f;
     switch(choice) {
     case 0:
-        if(s_sfxvol.value > 0.0f) {
-            M_SetCvar(&s_sfxvol, s_sfxvol.value - slope);
+        if(s_sfxvol > 0.0f) {
+            M_SetCvar(s_sfxvol, s_sfxvol - slope);
         }
         else {
-            CON_CvarSetValue(s_sfxvol.name, 0);
+            s_sfxvol = 0.0f;
         }
         break;
     case 1:
-        if(s_sfxvol.value < 100.0f) {
-            M_SetCvar(&s_sfxvol, s_sfxvol.value + slope);
+        if(s_sfxvol < 100.0f) {
+            M_SetCvar(s_sfxvol, s_sfxvol + slope);
         }
         else {
-            CON_CvarSetValue(s_sfxvol.name, 100);
+            s_sfxvol = 100.0f;
         }
         break;
     }
@@ -2576,19 +2576,19 @@ void M_MusicVol(int choice) {
     float slope = 1.0f;
     switch(choice) {
     case 0:
-        if(s_musvol.value > 0.0f) {
-            M_SetCvar(&s_musvol, s_musvol.value - slope);
+        if(s_musvol > 0.0f) {
+            M_SetCvar(s_musvol, s_musvol - slope);
         }
         else {
-            CON_CvarSetValue(s_musvol.name, 0);
+            s_musvol = 0.0f;
         }
         break;
     case 1:
-        if(s_musvol.value < 100.0f) {
-            M_SetCvar(&s_musvol, s_musvol.value + slope);
+        if(s_musvol < 100.0f) {
+            M_SetCvar(s_musvol, s_musvol + slope);
         }
         else {
-            CON_CvarSetValue(s_musvol.name, 100);
+            s_musvol = 100.0f;
         }
         break;
     }
@@ -2598,19 +2598,19 @@ void M_GainOutput(int choice) {
     float slope = 2.0f / 100.0f;
     switch(choice) {
     case 0:
-        if(s_gain.value > 0.0f) {
-            M_SetCvar(&s_gain, s_gain.value - slope);
+        if(s_gain > 0.0f) {
+            M_SetCvar(s_gain, s_gain - slope);
         }
         else {
-            CON_CvarSetValue(s_gain.name, 0);
+            s_gain = 0.0f;
         }
         break;
     case 1:
-        if(s_gain.value < 2.0f) {
-            M_SetCvar(&s_gain, s_gain.value + slope);
+        if(s_gain < 2.0f) {
+            M_SetCvar(s_gain, s_gain + slope);
         }
         else {
-            CON_CvarSetValue(s_gain.name, 2);
+            s_gain = 2.0f;
         }
         break;
     }
@@ -2625,7 +2625,7 @@ void M_GainOutput(int choice) {
 void M_DoFeature(int choice);
 void M_DrawFeaturesMenu(void);
 
-CVAR_EXTERNAL(sv_lockmonsters);
+extern BoolProperty sv_lockmonsters;
 
 enum {
     features_levels = 0,
@@ -2687,7 +2687,7 @@ void M_DrawFeaturesMenu(void) {
     M_DrawSmbString(map->mapname, &featuresDef, features_levels);
 
     /*Lock Monsters Mode*/
-    M_DrawSmbString(msgNames[(int)sv_lockmonsters.value], &featuresDef, features_lockmonsters);
+    M_DrawSmbString(msgNames[(int)sv_lockmonsters], &featuresDef, features_lockmonsters);
 
     /*Wireframe Mode*/
     M_DrawSmbString(msgNames[wireframeon], &featuresDef, features_wireframe);
@@ -2807,12 +2807,7 @@ void M_DoFeature(int choice) {
         break;
 
     case features_lockmonsters:
-        if(choice) {
-            CON_CvarSetValue(sv_lockmonsters.name, 1);
-        }
-        else {
-            CON_CvarSetValue(sv_lockmonsters.name, 0);
-        }
+        sv_lockmonsters = choice;
         break;
 
     case features_wireframe:
@@ -3127,7 +3122,7 @@ menuitem_t ControlsMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-char* ControlsHints[controls_end]= {
+const char* ControlsHints[controls_end]= {
     "configure bindings",
     "configure mouse functionality",
 #ifdef _USE_XINPUT  // XINPUT
@@ -3638,8 +3633,9 @@ void M_QuickLoadResponse(int ch) {
 //
 
 static int prevtic = 0; // hack - check for overlapping sounds
-static void M_SetCvar(cvar_t *cvar, float value) {
-    if(cvar->value == value) {
+template <class T, class U>
+static void M_SetCvar(TypedProperty<T> &property, const U &value) {
+    if(property.native_value() == value) {
         return;
     }
 
@@ -3650,34 +3646,40 @@ static void M_SetCvar(cvar_t *cvar, float value) {
         prevtic = gametic;
     }
 
-    CON_CvarSetValue(cvar->name, value);
+    property = value;
 }
 
 //
 // M_SetOptionValue
 //
 
-static void M_SetOptionValue(int choice, float min, float max, float inc, cvar_t *cvar) {
+static void M_SetOptionValue(int choice, BoolProperty &property)
+{
+    M_SetCvar(property, !property);
+}
+
+template <class T, class U>
+static void M_SetOptionValue(int choice, U min, U max, U inc, TypedProperty<T> &cvar) {
     if(choice) {
-        if(cvar->value < max) {
-            M_SetCvar(cvar, cvar->value + inc);
+        if(cvar < max) {
+            M_SetCvar(cvar, cvar + inc);
         }
         else if(choice == 2) {
             M_SetCvar(cvar, min);
         }
         else {
-            CON_CvarSetValue(cvar->name, max);
+            cvar = max;
         }
     }
     else {
-        if(cvar->value > min) {
-            M_SetCvar(cvar, cvar->value - inc);
+        if(cvar > min) {
+            M_SetCvar(cvar, cvar - inc);
         }
         else if(choice == 2) {
             M_SetCvar(cvar, max);
         }
         else {
-            CON_CvarSetValue(cvar->name, min);
+            cvar = min;
         }
     }
 }
@@ -3687,10 +3689,12 @@ static void M_SetOptionValue(int choice, float min, float max, float inc, cvar_t
 //
 
 static void M_DoDefaults(int choice) {
+    // FIXME: Allow defaults
+#if 0
     int i = 0;
 
     for(i = 0; currentMenu->defaultitems[i].mitem != NULL; i++) {
-        CON_CvarSetValue(currentMenu->defaultitems[i].mitem->name, currentMenu->defaultitems[i].mdefault);
+        currentMenu->defaultitems[i].mitem->name, currentMenu->defaultitems[i].mdefault);
     }
 
     if(currentMenu == &DisplayDef) {
@@ -3704,6 +3708,7 @@ static void M_DoDefaults(int choice) {
         GL_DumpTextures();
         GL_SetTextureFilter();
     }
+#endif
 
     S_StartSound(NULL, sfx_switch2);
 }
@@ -3970,21 +3975,21 @@ static void M_CheckDragThermoBar(event_t* ev, menu_t* menu) {
             if(my >= scrny) {
                 // dragged all the way to the left?
                 if(mx < startx) {
-                    CON_CvarSetValue(bar[i].mitem->name, 0);
+//                    CON_CvarSetValue(bar[i].mitem->name, 0);
                     return;
                 }
 
                 // dragged all the way to the right?
                 if(mx > width) {
-                    CON_CvarSetValue(bar[i].mitem->name, bar[i].width);
+//                    CON_CvarSetValue(bar[i].mitem->name, bar[i].width);
                     return;
                 }
 
                 // convert mouse x coordinate into thermo bar position
                 // set cvar as well
                 value = (mx / scalex) - x;
-                CON_CvarSetValue(bar[i].mitem->name,
-                                 value * (bar[i].width / 100.0f));
+//                CON_CvarSetValue(bar[i].mitem->name,
+//                                 value * (bar[i].width / 100.0f));
 
                 return;
             }
@@ -4522,7 +4527,7 @@ dboolean M_Responder(event_t* ev) {
     }
     else if(ev->type == ev_mouse && (ev->data2 | ev->data3)) {
         // handle mouse-over selection
-        if(m_menumouse.value) {
+        if(m_menumouse) {
             M_CheckDragThermoBar(ev, currentMenu);
             if(M_CursorHighlightItem(currentMenu)) {
                 itemOn = itemSelected;
@@ -4590,9 +4595,9 @@ dboolean M_Responder(event_t* ev) {
         case KEY_ENTER:
             inputEnter = false;
             if(currentMenu == &NetworkDef) {
-                CON_CvarSet(m_playername.name, inputString);
+                m_playername = inputString;
                 if(netgame) {
-                    NET_SV_UpdateCvars(&m_playername);
+                    NET_SV_UpdateCvars(m_playername);
                 }
             }
             else {
@@ -4988,12 +4993,12 @@ static void M_DrawMenuSkull(int x, int y) {
 //
 
 static void M_DrawCursor(int x, int y) {
-    if(m_menumouse.value) {
+    if(m_menumouse) {
         int gfxIdx;
         float factor;
         float scale;
 
-        scale = ((m_cursorscale.value + 25.0f) / 100.0f);
+        scale = ((m_cursorscale + 25.0f) / 100.0f);
         gfxIdx = GL_BindGfxTexture("CURSOR", true);
         factor = (((float)SCREENHEIGHT * video_ratio) / (float)video_width) / scale;
 
@@ -5318,7 +5323,7 @@ void M_SetupNextMenu(menu_t *menudef) {
 //
 
 void M_MenuFadeIn(void) {
-    int fadetime = (int)(m_menufadetime.value + 20);
+    int fadetime = (int)(m_menufadetime + 20.0f);
 
     if((menualphacolor + fadetime) < 0xff) {
         menualphacolor += fadetime;
@@ -5337,7 +5342,7 @@ void M_MenuFadeIn(void) {
 //
 
 void M_MenuFadeOut(void) {
-    int fadetime = (int)(m_menufadetime.value + 20);
+    int fadetime = (int)(m_menufadetime + 20.0f);
 
     if(menualphacolor > fadetime) {
         menualphacolor -= fadetime;
@@ -5363,7 +5368,7 @@ void M_MenuFadeOut(void) {
 // M_Ticker
 //
 
-CVAR_EXTERNAL(p_features);
+extern BoolProperty p_features;
 
 void M_Ticker(void) {
     mainmenuactive = (currentMenu == &MainDef) ? true : false;
@@ -5388,14 +5393,14 @@ void M_Ticker(void) {
     // hidden features menu
     //
     if(currentMenu == &PauseDef) {
-        currentMenu->menuitems[pause_features].status = p_features.value ? 1 : -3;
+        currentMenu->menuitems[pause_features].status = p_features ? 1 : -3;
     }
 
     //
     // hidden hardcore difficulty option
     //
     if(currentMenu == &NewDef) {
-        currentMenu->menuitems[nightmare].status = p_features.value ? 1 : -3;
+        currentMenu->menuitems[nightmare].status = p_features ? 1 : -3;
     }
 
 #ifdef _USE_XINPUT  // XINPUT
@@ -5504,33 +5509,20 @@ void M_Init(void) {
     // setup region menu
 
     if(W_CheckNumForName("BLUDA0") != -1) {
-        CON_CvarSetValue(m_regionblood.name, 0);
+        m_regionblood = 0;
         RegionMenu[region_blood].status = 1;
     }
 
     if(W_CheckNumForName("JPMSG01") == -1) {
-        CON_CvarSetValue(st_regionmsg.name, 0);
+        st_regionmsg = false;
         RegionMenu[region_lang].status = 1;
     }
 
     if(W_CheckNumForName("PLLEGAL") == -1 &&
             W_CheckNumForName("JPLEGAL") == -1) {
-        CON_CvarSetValue(p_regionmode.name, 0);
+        p_regionmode = 0;
         RegionMenu[region_mode].status = 1;
     }
 
     M_InitShiftXForm();
 }
-
-//
-// M_RegisterCvars
-//
-
-void M_RegisterCvars(void) {
-    CON_CvarRegister(&m_regionblood);
-    CON_CvarRegister(&m_menufadetime);
-    CON_CvarRegister(&m_menumouse);
-    CON_CvarRegister(&m_cursorscale);
-}
-
-

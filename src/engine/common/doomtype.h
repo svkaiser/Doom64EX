@@ -31,7 +31,7 @@
 #include "SDL_config.h"
 #endif
 
-typedef int             dboolean;
+typedef bool            dboolean;
 typedef unsigned short  word;  // TODO: Rename every instance of 'word' to 'uint16'.
                                // 'Word' isn't the correct term unless you're writing for 16-bit systems, which we're not.
 typedef unsigned int    dword; // TODO: ditto, but 'dword' -> 'uint32'

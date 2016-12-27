@@ -91,13 +91,13 @@ clusterdef_t*       clusterdefs;
 // [kex] cvars
 //
 
-CVAR(p_features, 0);
-CVAR(p_autorun, 0);
-CVAR(p_fdoubleclick, 0);
-CVAR(p_sdoubleclick, 0);
-CVAR(p_usecontext, 0);
-CVAR(p_damageindicator, 0);
-CVAR(p_regionmode, 0);
+BoolProperty p_features("p_features", "");
+BoolProperty p_autorun("p_autorun", "");
+BoolProperty p_fdoubleclick("p_fdoubleclick", "");
+BoolProperty p_sdoubleclick("p_sdoubleclick", "");
+BoolProperty p_usecontext("p_usecontext", "");
+BoolProperty p_damageindicator("p_damageindicator", "");
+IntProperty p_regionmode("p_regionmode", "");
 
 //
 // [kex] sky definition stuff
@@ -1471,18 +1471,3 @@ void P_Init(void) {
     P_InitMapInfo();
     P_InitSkyDef();
 }
-
-//
-// P_RegisterCvars
-//
-
-void P_RegisterCvars(void) {
-    CON_CvarRegister(&p_features);
-    CON_CvarRegister(&p_autorun);
-    CON_CvarRegister(&p_fdoubleclick);
-    CON_CvarRegister(&p_sdoubleclick);
-    CON_CvarRegister(&p_usecontext);
-    CON_CvarRegister(&p_damageindicator);
-    CON_CvarRegister(&p_regionmode);
-}
-

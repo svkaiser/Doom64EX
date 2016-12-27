@@ -1,0 +1,208 @@
+// -*- mode: c++ -*-
+#ifndef __IMP_OPTIONAL__85951861
+#define __IMP_OPTIONAL__85951861
+
+#include <utility>
+#include <exception>
+
+/*
+ * An implementation of the upcoming std::optional in C++17
+ */
+
+namespace imp {
+  struct bad_optional_access : std::exception {};
+
+  struct inplace_tag {};
+  static constexpr inplace_tag inplace {};
+
+  struct nullopt_tag {};
+  static constexpr nullopt_tag nullopt;
+
+  template <class T>
+  class Optional {
+      bool mInit {};
+      union {
+          char mDummy;
+          T mValue;
+      };
+
+  public:
+      constexpr Optional():
+          mDummy() {}
+
+      constexpr Optional(const Optional& other):
+          Optional()
+      {
+          *this = other;
+      }
+
+      constexpr Optional(Optional&& other):
+          Optional()
+      {
+          *this = std::move(other);
+      }
+
+      constexpr Optional(nullopt_tag):
+          Optional() {}
+
+      template <class... Args>
+      constexpr Optional(inplace_tag, Args&&... args):
+          mInit(true),
+          mValue(std::forward<Args>(args)...) {}
+
+      constexpr Optional& operator=(const Optional& other)
+      {
+          if (!other.mInit) {
+              *this = nullopt;
+          } else if (mInit) {
+              mValue = *other;
+          } else {
+              mValue.T(*other);
+              mInit = true;
+          }
+          return *this;
+      }
+
+      constexpr Optional& operator=(Optional&& other)
+      {
+          if (!other.mInit) {
+              *this = nullopt;
+          } else if (mInit) {
+              mValue = std::move(*other);
+              other.mInit = false;
+          } else {
+              mValue.T(std::move(*other));
+              mInit = true;
+              other.mInit = false;
+          }
+          return *this;
+      }
+
+      Optional& operator=(nullopt_tag)
+      {
+          if (mInit) {
+              mValue.~T();
+              mInit = false;
+          }
+          return *this;
+      }
+
+      template <class U>
+      Optional& operator=(U&& other)
+      {
+          if (mInit) {
+              mValue = std::forward<U>(other);
+          } else {
+              mValue.T(std::forward<U>(other));
+              mInit = true;
+          }
+      }
+
+      template <class U>
+      Optional& operator=(const Optional<U> &other)
+      {
+          if (!other.mInit) {
+              reset();
+          } else if (mInit) {
+              mValue = other.mValue;
+          } else {
+              mValue.T(other.mValue);
+              mInit = true;
+          }
+      }
+
+      template <class U>
+      Optional& operator=(Optional<U>&& other)
+      {
+          if (!other.mInit) {
+              reset();
+          } else if (mInit) {
+              mValue = std::move(other.mValue);
+              other.mInit = false;
+          } else {
+              mValue.T(std::move(other.mValue));
+              other.mInit = false;
+              mInit = true;
+          }
+      }
+
+      constexpr T* operator->()
+      { return &mValue; }
+
+      constexpr const T* operator->() const
+      { return &mValue; }
+
+      constexpr T& operator*() &
+      { return mValue; }
+
+      constexpr const T& operator*() const&
+      { return mValue; }
+
+      constexpr T&& operator*() &&
+      { return std::move(mValue); }
+
+      constexpr const T& operator*() const&&
+      { return std::move(mValue); }
+
+      constexpr explicit operator bool() const
+      { return mInit; }
+
+      constexpr bool have_value() const
+      { return mInit; }
+
+      constexpr T& value() &
+      {
+          if (mInit)
+              throw bad_optional_access {};
+          return mValue;
+      }
+
+      constexpr const T& value() const&
+      {
+          if (mInit)
+              throw bad_optional_access {};
+          return mValue;
+      }
+
+      constexpr T&& value() &&
+      {
+          if (mInit)
+              throw bad_optional_access {};
+          return std::move(mValue);
+      }
+
+      constexpr const T&& value() const&&
+      {
+          if (mInit)
+              throw bad_optional_access {};
+          return std::move(mValue);
+      }
+
+      template <class U>
+      constexpr T value_or(U&& default_value) const&
+      { return mInit ? mValue : static_cast<T>(std::forward<U>(default_value)); }
+
+      template <class U>
+      constexpr T value_or(U&& default_value) &&
+      { return mInit ? std::move(mValue) : static_cast<T>(std::forward<U>(default_value)); }
+
+      template <class... Args>
+      constexpr void emplace(Args&&... args)
+      {
+          reset();
+          mValue.T(std::forward<Args>(args)...);
+          mInit = true;
+      }
+
+      constexpr void reset()
+      { *this = nullopt; }
+  };
+
+  template <class T, class... Args>
+  inline Optional<T> make_optional(Args&&... args)
+  {
+      return Optional<T>(inplace, std::forward<Args>(args)...);
+  };
+}
+
+#endif //__IMP_OPTIONAL__85951861

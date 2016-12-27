@@ -45,7 +45,7 @@ scparser_t sc_parser;
 // SC_Open
 //
 
-static void SC_Open(char* name) {
+static void SC_Open(const char* name) {
     int lump;
 
     CON_DPrintf("--------SC_Open: Reading %s--------\n", name);

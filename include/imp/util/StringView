@@ -60,6 +60,32 @@ namespace imp {
       return 0;
   }
 
+  template <class CharT>
+  constexpr bool __h_constexpr_isspace(CharT c) noexcept
+  {
+      return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
+  }
+
+  /**
+   * \brief A constexpr std::strnicmp
+   *
+   * Should be replaced when C++17 is out. See {\ref __h_constexpr_strlen}.
+   */
+  template <class CharT>
+  constexpr int __h_constexpr_stricmp(const CharT *lhs, const CharT *rhs, size_t len) noexcept
+  {
+      for (size_t i = 0; i < len; i++)
+      {
+          auto lwr_lhs = tolower(lhs[i]);
+          auto lwr_rhs = tolower(rhs[i]);
+          if (lwr_lhs < lwr_rhs)
+              return -1;
+          else if (lwr_lhs > lwr_rhs)
+              return 1;
+      }
+      return 0;
+  }
+
   /**
    * \class BasicStringView <imp/util/StringView>
    * \brief A non-owning string container
@@ -186,14 +212,22 @@ namespace imp {
       constexpr void remove_suffix(size_type n) noexcept
       { mLength -= n; }
 
-      constexpr BasicStringView substr(size_type len) noexcept
+      constexpr BasicStringView substr(size_type len) const noexcept
       {
           return { mData, len };
       }
 
-      constexpr BasicStringView substr(size_type off, size_type len) noexcept
+      constexpr BasicStringView substr(size_type off, size_type len) const noexcept
       {
           return { mData + off, len };
+      }
+
+      constexpr BasicStringView trim(bool (*pred)(CharT) = __h_constexpr_isspace) const
+      {
+          size_t left = 0, right = mLength;
+          for (; left < right && pred(mData[left]); ++left);
+          for (; left < right && pred(mData[right]); --right);
+          return substr(left, right - left);
       }
 
       constexpr void swap(BasicStringView &other) noexcept
@@ -219,6 +253,17 @@ namespace imp {
               return 1;
 
           return __h_constexpr_strcmp(mData, other.mData, mLength);
+      }
+
+      /*! Case insensitive (Latin-1 only) comparison */
+      constexpr int icompare(const BasicStringView &other) const
+      {
+          if (mLength < other.mLength)
+              return -1;
+          else if (mLength > other.mLength)
+              return 1;
+
+          return __h_constexpr_stricmp(mData, other.mData, mLength);
       }
 
       constexpr std::size_t hash() const noexcept

@@ -33,14 +33,17 @@
 #include "i_swap.h"
 #include "z_zone.h"
 #include "gl_texture.h"
-#include "con_console.h"
 
 #include <imp/Image>
 #include <sstream>
+#include <imp/Property>
 
-CVAR_CMD(i_gamma, 0) {
-    GL_DumpTextures();
-}
+FloatProperty i_gamma("i_gamma", "", 0.0f, Property::config,
+                      [](const FloatProperty &, float x)
+                      {
+                          GL_DumpTextures();
+                          return x;
+                      });
 
 //
 // I_PNGRowSize
@@ -61,7 +64,7 @@ static inline size_t I_PNGRowSize(int width, byte bits) {
 //
 
 d_inline static byte I_GetRGBGamma(int c) {
-    return (byte)MIN(pow((float)c, (1.0f + (0.01f * i_gamma.value))), 255);
+    return (byte)MIN(pow((float)c, (1.0f + (0.01f * i_gamma))), 255);
 }
 
 //
@@ -72,7 +75,7 @@ d_inline static byte I_GetRGBGamma(int c) {
 static void I_TranslatePalette(gfx::Palette &dest) {
     int i = 0;
 
-    if (i_gamma.value == 0)
+    if (i_gamma == 0)
         return;
 
     auto color_count = dest.count();

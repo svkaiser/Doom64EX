@@ -94,17 +94,17 @@ void AM_Start(void);
 
 // automap cvars
 
-CVAR(am_lines, 1);
-CVAR(am_nodes, 0);
-CVAR(am_ssect, 0);
-CVAR(am_fulldraw, 0);
-CVAR(am_showkeycolors, 0);
-CVAR(am_showkeymarkers, 0);
-CVAR(am_drawobjects, 0);
-CVAR(am_overlay, 0);
+BoolProperty am_lines("am_lines", "Draw map with lines", true);
+IntProperty am_nodes("am_nodes", "");
+BoolProperty am_ssect("am_ssect", "");
+BoolProperty am_fulldraw("am_fulldraw", "");
+BoolProperty am_showkeycolors("am_showkeycolors", "Show key colours in automap");
+BoolProperty am_showkeymarkers("am_showkeymarkers", "");
+BoolProperty am_drawobjects("am_drawobjects", "Show objects in automap");
+BoolProperty am_overlay("am_overlay", "Show automap overlay");
 
-CVAR_EXTERNAL(v_msensitivityx);
-CVAR_EXTERNAL(v_msensitivityy);
+extern FloatProperty v_msensitivityx;
+extern FloatProperty v_msensitivityy;
 
 #ifdef _USE_XINPUT  // XINPUT
 CVAR_EXTERNAL(i_rsticksensitivity);
@@ -492,8 +492,8 @@ void AM_Ticker(void) {
 
     if(followplayer) {
         if(am_flags & AF_PANMODE) {
-            int panscalex = (int)(v_msensitivityx.value / (1500.0f / scale));
-            int panscaley = (int)(v_msensitivityy.value / (1500.0f / scale));
+            int panscalex = (int)(v_msensitivityx / (1500.0f / scale));
+            int panscaley = (int)(v_msensitivityy / (1500.0f / scale));
 
             automappanx += ((I_MouseAccel(mpanx)*panscalex)/128) << 16;
             automappany += ((I_MouseAccel(mpany)*panscaley)/128) << 16;
@@ -595,7 +595,7 @@ static void AM_DrawMapped(void) {
     //
     // draw white outlines around the subsectors for overlay mode
     //
-    if(am_overlay.value) {
+    if(am_overlay) {
         fixed_t x1;
         fixed_t x2;
         fixed_t y1;
@@ -656,7 +656,7 @@ static void AM_DrawNodes(void) {
 
     nodenum = numnodes-1;
 
-    if(am_nodes.value >= 4) {
+    if(am_nodes >= 4) {
         while(!(nodenum & NF_SUBSECTOR)) {
             node = &nodes[nodenum];
             side = R_PointOnSide(plr->mo->x, plr->mo->y, node);
@@ -665,10 +665,10 @@ static void AM_DrawNodes(void) {
     }
 
     for(i = 0; i < numnodes; i++) {
-        if(am_nodes.value < 4) {
+        if(am_nodes < 4) {
             node = &nodes[i];
 
-            if(am_nodes.value == 1 || am_nodes.value >= 3) {
+            if(am_nodes == 1 || am_nodes >= 3) {
                 x1 = node->bbox[0][BOXLEFT];
                 y1 = node->bbox[0][BOXTOP];
                 x2 = node->bbox[0][BOXRIGHT];
@@ -726,7 +726,7 @@ static void AM_DrawNodes(void) {
                 AM_DrawLine(x1, x2, y1, y2, scale, 0x00FF00FF);
             }
 
-            if(am_nodes.value == 2 || am_nodes.value >= 3) {
+            if(am_nodes == 2 || am_nodes >= 3) {
                 x1 = node->x;
                 y1 = node->y;
                 x2 = (node->x + node->dx);
@@ -736,7 +736,7 @@ static void AM_DrawNodes(void) {
             }
         }
 
-        if(am_nodes.value >= 4) {
+        if(am_nodes >= 4) {
             break;
         }
     }
@@ -770,7 +770,7 @@ void AM_DrawWalls(void) {
             continue;
         }
 
-        if((l->flags & ML_MAPPED) || am_fulldraw.value || plr->powers[pw_allmap] || amCheating) {
+        if((l->flags & ML_MAPPED) || am_fulldraw || plr->powers[pw_allmap] || amCheating) {
             rcolor color = D_RGBA(0x8A, 0x5C, 0x30, 0xFF);  // default color
 
             //
@@ -792,7 +792,7 @@ void AM_DrawWalls(void) {
                 //
                 // draw colored doors based on key requirement
                 //
-                if(am_showkeycolors.value) {
+                if(am_showkeycolors) {
                     if(l->special & MLU_RED) {
                         color = D_RGBA(0xFF, 0x00, 0x00, 0xFF);
                     }
@@ -891,7 +891,7 @@ void AM_drawThings(void) {
             // draw thing triangles for automap cheat
             //
             if(amCheating == 2) {
-                if(t->type != MT_PLAYER && am_drawobjects.value != 1) {
+                if(t->type != MT_PLAYER && am_drawobjects != 1) {
                     //
                     // shootable stuff are marked as red while normal things are blue
                     //
@@ -903,14 +903,14 @@ void AM_drawThings(void) {
                     }
                 }
 
-                if(am_drawobjects.value) {
+                if(am_drawobjects) {
                     AM_DrawSprite(t, scale);
                 }
             }
             //
             // draw colored keys and artifacts in automap for new players
             //
-            else if(am_showkeymarkers.value) {
+            else if(am_showkeymarkers) {
                 if(t->type >= MT_ITEM_BLUECARDKEY && t->type <= MT_ITEM_ARTIFACT3) {
                     byte r, g, b;
 
@@ -958,11 +958,11 @@ void AM_drawThings(void) {
                         break;
                     }
 
-                    if(am_drawobjects.value != 1) {
+                    if(am_drawobjects != 1) {
                         AM_DrawTriangle(t, scale, amModeCycle, r, g, b);
                     }
 
-                    if(am_drawobjects.value) {
+                    if(am_drawobjects) {
                         AM_DrawSprite(t, scale);
                     }
                 }
@@ -1010,18 +1010,18 @@ void AM_Drawer(void) {
         AM_DrawMapped();
     }
     else {
-        if(am_lines.value) {
+        if(am_lines) {
             AM_DrawWalls();
         }
     }
 
-    if(am_nodes.value) {
+    if(am_nodes) {
         AM_DrawNodes();
     }
 
     AM_drawPlayers();
 
-    if(amCheating == 2 || am_showkeymarkers.value) {
+    if(amCheating == 2 || am_showkeymarkers) {
         AM_drawThings();
     }
 
@@ -1052,15 +1052,6 @@ void AM_Drawer(void) {
 //
 
 void AM_RegisterCvars(void) {
-    CON_CvarRegister(&am_lines);
-    CON_CvarRegister(&am_nodes);
-    CON_CvarRegister(&am_ssect);
-    CON_CvarRegister(&am_fulldraw);
-    CON_CvarRegister(&am_showkeycolors);
-    CON_CvarRegister(&am_showkeymarkers);
-    CON_CvarRegister(&am_drawobjects);
-    CON_CvarRegister(&am_overlay);
-
     G_AddCommand("automap", CMD_Automap, 0);
     G_AddCommand("+automap_in", CMD_AutomapSetFlag, AF_ZOOMIN);
     G_AddCommand("-automap_in", CMD_AutomapSetFlag, AF_ZOOMIN|PCKF_UP);

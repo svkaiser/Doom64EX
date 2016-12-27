@@ -305,7 +305,9 @@ set(KEXLIB_SOURCES
   gfx/Image.cc
   gfx/PngImage.cc
   gfx/DoomImage.cc
-  gfx/Pixel.cc)
+  gfx/Pixel.cc
+  common/Property.cc
+        )
 
 ##------------------------------------------------------------------------------
 ## Build target

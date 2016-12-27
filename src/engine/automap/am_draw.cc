@@ -45,9 +45,9 @@ extern byte amModeCycle;
 
 static angle_t am_viewangle;
 
-CVAR_EXTERNAL(am_fulldraw);
-CVAR_EXTERNAL(am_ssect);
-CVAR_EXTERNAL(r_texturecombiner);
+extern BoolProperty am_fulldraw;
+extern BoolProperty am_ssect;
+extern BoolProperty r_texturecombiner;
 
 //
 // AM_BeginDraw
@@ -56,7 +56,7 @@ CVAR_EXTERNAL(r_texturecombiner);
 void AM_BeginDraw(angle_t view, fixed_t x, fixed_t y) {
     am_viewangle = view;
 
-    if(r_texturecombiner.value > 0 && am_overlay.value) {
+    if(r_texturecombiner && am_overlay) {
         GL_SetState(GLSTATE_BLEND, 1);
 
         //
@@ -91,7 +91,7 @@ void AM_EndDraw(void) {
     dglPopMatrix();
     dglDepthRange(0.0f, 1.0f);
 
-    if(r_texturecombiner.value > 0 && am_overlay.value) {
+    if(r_texturecombiner && am_overlay) {
         GL_SetState(GLSTATE_BLEND, 0);
         GL_SetTextureMode(GL_COMBINE);
         GL_SetColorScale();
@@ -129,7 +129,7 @@ static dboolean DL_ProcessAutomap(vtxlist_t* vl, int* drawcount) {
     //
     // setup RGB data
     //
-    if(am_ssect.value) {
+    if(am_ssect) {
         int num = sub - subsectors;
         color = D_RGBA(
                     (num * 0x3f) & 0xff,
@@ -159,7 +159,7 @@ static dboolean DL_ProcessAutomap(vtxlist_t* vl, int* drawcount) {
         }
     }
 
-    if(am_overlay.value) {
+    if(am_overlay) {
         color -= D_RGBA(0, 0, 0, 0xBF);
     }
 
@@ -219,7 +219,7 @@ void AM_DrawLeafs(float scale) {
             //
             // add to draw list if visible
             //
-            if(!(sub->sector->flags & MS_HIDESSECTOR) || am_fulldraw.value) {
+            if(!(sub->sector->flags & MS_HIDESSECTOR) || am_fulldraw) {
                 vtxlist_t *list;
                 vtx_t *v = &drawVertex[0];
 
@@ -250,9 +250,9 @@ void AM_DrawLeafs(float scale) {
     //
     // process draw list
     //
-    DL_BeginDrawList(!am_ssect.value && r_fillmode.value, 0);
+    DL_BeginDrawList(!am_ssect && r_fillmode, 0);
 
-    if(r_texturecombiner.value > 0) {
+    if(r_texturecombiner) {
         if(!nolights) {
             dglTexCombModulate(GL_TEXTURE0_ARB, GL_PRIMARY_COLOR);
         }
@@ -341,7 +341,7 @@ void AM_DrawTriangle(mobj_t* mobj, float scale, dboolean solid, byte r, byte g, 
         return;
     }
 
-    if(r_fillmode.value) {
+    if(r_fillmode) {
         dglPolygonMode(GL_FRONT_AND_BACK, (solid == 1) ? GL_LINE : GL_FILL);
     }
 
@@ -351,7 +351,7 @@ void AM_DrawTriangle(mobj_t* mobj, float scale, dboolean solid, byte r, byte g, 
     dglDrawGeometry(3, tri);
     dglEnable(GL_TEXTURE_2D);
 
-    if(r_fillmode.value) {
+    if(r_fillmode) {
         dglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
@@ -475,7 +475,7 @@ void AM_DrawSprite(mobj_t* thing, float scale) {
     GL_BindSpriteTexture(sprframe->lump[rot], thing->info->palette);
     GL_SetState(GLSTATE_BLEND, 1);
 
-    alpha = (thing->alpha * (am_overlay.value ? 96 : 0xff)) / 0xff;
+    alpha = (thing->alpha * (am_overlay ? 96 : 0xff)) / 0xff;
 
     //
     // show as full white in non-textured mode or if the mobj is an item

@@ -164,13 +164,13 @@ typedef struct
 
 typedef struct
 {
-    char *version;
+    const char *version;
     int server_state;
     int num_players;
     int max_players;
     int gamemode;
     int gamemission;
-    char *description;
+    const char *description;
 } net_querydata_t;
 
 #endif /* #ifndef NET_DEFS_H */

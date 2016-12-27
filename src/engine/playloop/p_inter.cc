@@ -52,7 +52,7 @@
 #include "tables.h"
 #include "info.h"
 
-CVAR_EXTERNAL(p_damageindicator);
+extern BoolProperty p_damageindicator;
 
 
 // a weapon is found with two clip loads,
@@ -797,7 +797,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher) {
 
 static void P_Obituary(mobj_t* source, mobj_t* target) {
     static char omsg[128];
-    char *name;
+    const char *name;
     int i;
 
     if(!target->player) {
@@ -1005,7 +1005,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
             return;
         }
 
-        if(p_damageindicator.value) {
+        if(p_damageindicator) {
             if(target->player && !source->player) {
                 ST_AddDamageMarker(target, source);
             }

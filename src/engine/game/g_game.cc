@@ -132,54 +132,31 @@ byte forcecollision = 0;
 byte forcejump = 0;
 byte forcefreelook = 0;
 
+BoolProperty sv_nomonsters("sv_nomonsters", "Disable monsters", false, Property::network);
+BoolProperty sv_fastmonsters("sv_fastmonsters", "Fast monsters", false, Property::network);
+BoolProperty sv_respawnitems("sv_respawnitems", "Allow items to respawn", false, Property::network);
+BoolProperty sv_respawn("sv_respawn", "", false, Property::network);
+IntProperty sv_skill("sv_skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Property::network);
 
-NETCVAR(sv_nomonsters, 0);
-NETCVAR(sv_fastmonsters, 0);
-NETCVAR(sv_respawnitems, 0);
-NETCVAR(sv_respawn, 0);
-NETCVAR(sv_skill, 2);
+BoolProperty sv_lockmonsters("sv_lockmonsters", "", false, Property::network);
+BoolProperty sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Property::network);
+BoolProperty sv_friendlyfire("sv_friendlyfire", "", false, Property::network);
+BoolProperty sv_keepitems("sv_keepitems", "", false, Property::network);
+BoolProperty p_allowjump("p_allowjump", "", false, Property::network);
+BoolProperty p_autoaim("p_autoaim", "", true, Property::network);
+BoolProperty compat_collision("compat_collision", "", true, Property::network);
+BoolProperty compat_mobjpass("compat_mobjpass", "", true, Property::network);
+BoolProperty compat_limitpain("compat_limitpain", "", true, Property::network);
+BoolProperty compat_grabitems("compat_grabitems", "", true, Property::network);
 
-NETCVAR_PARAM(sv_lockmonsters,  0,  gameflags,      GF_LOCKMONSTERS);
-NETCVAR_PARAM(sv_allowcheats,   0,  gameflags,      GF_ALLOWCHEATS);
-NETCVAR_PARAM(sv_friendlyfire,  0,  gameflags,      GF_FRIENDLYFIRE);
-NETCVAR_PARAM(sv_keepitems,     0,  gameflags,      GF_KEEPITEMS);
-NETCVAR_PARAM(p_allowjump,      0,  gameflags,      GF_ALLOWJUMP);
-NETCVAR_PARAM(p_autoaim,        1,  gameflags,      GF_ALLOWAUTOAIM);
-NETCVAR_PARAM(compat_collision, 1,  compatflags,    COMPATF_COLLISION);
-NETCVAR_PARAM(compat_mobjpass,  1,  compatflags,    COMPATF_MOBJPASS);
-NETCVAR_PARAM(compat_limitpain, 1,  compatflags,    COMPATF_LIMITPAIN);
-NETCVAR_PARAM(compat_grabitems, 1,  compatflags,    COMPATF_REACHITEMS);
-
-CVAR_EXTERNAL(v_mlook);
-CVAR_EXTERNAL(v_mlookinvert);
-CVAR_EXTERNAL(v_yaxismove);
-CVAR_EXTERNAL(p_autorun);
-CVAR_EXTERNAL(p_fdoubleclick);
-CVAR_EXTERNAL(p_sdoubleclick);
-CVAR_EXTERNAL(v_msensitivityx);
-CVAR_EXTERNAL(v_msensitivityy);
-
-//
-// G_RegisterCvars
-//
-
-void G_RegisterCvars(void) {
-    CON_CvarRegister(&p_allowjump);
-    CON_CvarRegister(&p_autoaim);
-    CON_CvarRegister(&sv_nomonsters);
-    CON_CvarRegister(&sv_fastmonsters);
-    CON_CvarRegister(&sv_respawnitems);
-    CON_CvarRegister(&sv_lockmonsters);
-    CON_CvarRegister(&sv_respawn);
-    CON_CvarRegister(&sv_skill);
-    CON_CvarRegister(&sv_allowcheats);
-    CON_CvarRegister(&sv_friendlyfire);
-    CON_CvarRegister(&sv_keepitems);
-    CON_CvarRegister(&compat_collision);
-    CON_CvarRegister(&compat_mobjpass);
-    CON_CvarRegister(&compat_limitpain);
-    CON_CvarRegister(&compat_grabitems);
-}
+extern BoolProperty v_mlook;
+extern BoolProperty v_mlookinvert;
+extern BoolProperty v_yaxismove;
+extern BoolProperty p_autorun;
+extern BoolProperty p_fdoubleclick;
+extern BoolProperty p_sdoubleclick;
+extern IntProperty v_msensitivityx;
+extern IntProperty v_msensitivityy;
 
 //
 // G_CmdButton
@@ -281,12 +258,10 @@ static CMD(Seta) {
         return;
     }
 
-    CON_CvarSet(param[0], param[1]);
-
-    if(netgame) {
-        if(playeringame[0] && consoleplayer == 0) {
-            NET_SV_UpdateCvars(CON_CvarGet(param[0]));
-        }
+    if (auto p = Property::find(param[0])) {
+        p->set_value(param[1]);
+    } else {
+        I_Printf("Couldn't find property (cvar) %s\n", param[0]);
     }
 }
 
@@ -299,12 +274,11 @@ static CMD(Autorun) {
         return;
     }
 
-    if(p_autorun.value == 0) {
-        CON_CvarSetValue(p_autorun.name, 1);
+    if(!p_autorun) {
+        p_autorun = true;
         players[consoleplayer].message = GGAUTORUNON;
-    }
-    else {
-        CON_CvarSetValue(p_autorun.name, 0);
+    } else {
+        p_autorun = false;
         players[consoleplayer].message = GGAUTORUNOFF;
     }
 }
@@ -606,7 +580,7 @@ void G_BuildTiccmd(ticcmd_t* cmd) {
         speed=0;
     }
 
-    if(p_autorun.value) {
+    if(p_autorun) {
         speed = !speed;
     }
 
@@ -665,13 +639,13 @@ void G_BuildTiccmd(ticcmd_t* cmd) {
         cmd->angleturn -= pc->mousex * 0x8;
 
         if(forcefreelook != 2) {
-            if((int)v_mlook.value || forcefreelook) {
-                cmd->pitch -= (int)v_mlookinvert.value ? pc->mousey * 0x8 : -(pc->mousey * 0x8);
+            if(v_mlook || forcefreelook) {
+                cmd->pitch -= v_mlookinvert ? pc->mousey * 0x8 : -(pc->mousey * 0x8);
             }
         }
     }
 
-    if((int)v_yaxismove.value) {
+    if(v_yaxismove) {
         forward += pc->mousey;
     }
 
@@ -752,7 +726,7 @@ void G_BuildTiccmd(ticcmd_t* cmd) {
         pc->flags ^= PCF_FDCLICK;
         if(pc->key[PCKEY_FORWARD] & PCKF_DOUBLEUSE) {
             if(pc->flags & PCF_FDCLICK2) {
-                if(p_fdoubleclick.value) {
+                if(p_fdoubleclick) {
                     cmd->buttons |= BT_USE;
                 }
 
@@ -781,7 +755,7 @@ void G_BuildTiccmd(ticcmd_t* cmd) {
         pc->flags ^= PCF_SDCLICK;
         if(pc->key[PCKEY_STRAFE] & PCKF_DOUBLEUSE) {
             if(pc->flags & PCF_SDCLICK2) {
-                if(p_sdoubleclick.value) {
+                if(p_sdoubleclick) {
                     cmd->buttons |= BT_USE;
                 }
 
@@ -839,8 +813,8 @@ void G_DoCmdMouseMove(int x, int y) {
     playercontrols_t *pc;
 
     pc = &Controls;
-    pc->mousex += ((I_MouseAccel(x) * (int)v_msensitivityx.value) / 128);
-    pc->mousey += ((I_MouseAccel(y) * (int)v_msensitivityy.value) / 128);
+    pc->mousex += ((I_MouseAccel(x) * v_msensitivityx) / 128);
+    pc->mousey += ((I_MouseAccel(y) * v_msensitivityy) / 128);
 }
 
 
@@ -868,17 +842,35 @@ static void G_SetGameFlags(void) {
     gameflags = 0;
     compatflags = 0;
 
-    if(sv_lockmonsters.value > 0)  gameflags |= GF_LOCKMONSTERS;
-    if(sv_allowcheats.value > 0)   gameflags |= GF_ALLOWCHEATS;
-    if(sv_friendlyfire.value > 0)  gameflags |= GF_FRIENDLYFIRE;
-    if(sv_keepitems.value > 0)     gameflags |= GF_KEEPITEMS;
-    if(p_allowjump.value > 0)      gameflags |= GF_ALLOWJUMP;
-    if(p_autoaim.value > 0)        gameflags |= GF_ALLOWAUTOAIM;
+    if (sv_lockmonsters)
+        gameflags |= GF_LOCKMONSTERS;
 
-    if(compat_collision.value > 0) compatflags |= COMPATF_COLLISION;
-    if(compat_mobjpass.value > 0)  compatflags |= COMPATF_MOBJPASS;
-    if(compat_limitpain.value > 0) compatflags |= COMPATF_LIMITPAIN;
-    if(compat_grabitems.value > 0) compatflags |= COMPATF_REACHITEMS;
+    if (sv_allowcheats)
+        gameflags |= GF_ALLOWCHEATS;
+
+    if (sv_friendlyfire)
+        gameflags |= GF_FRIENDLYFIRE;
+
+    if (sv_keepitems)
+        gameflags |= GF_KEEPITEMS;
+
+    if (p_allowjump)
+         gameflags |= GF_ALLOWJUMP;
+
+    if (p_autoaim)
+         gameflags |= GF_ALLOWAUTOAIM;
+
+    if (compat_collision)
+        compatflags |= COMPATF_COLLISION;
+
+    if (compat_mobjpass)
+        compatflags |= COMPATF_MOBJPASS;
+
+    if (compat_limitpain)
+        compatflags |= COMPATF_LIMITPAIN;
+
+    if (compat_grabitems)
+        compatflags |= COMPATF_REACHITEMS;
 }
 
 //
@@ -901,11 +893,11 @@ void G_DoLoadLevel(void) {
 
     // update settings from server cvar
     if(!netgame) {
-        gameskill   = (int)sv_skill.value;
-        respawnparm = (int)sv_respawn.value;
-        respawnitem = (int)sv_respawnitems.value;
-        fastparm    = (int)sv_fastmonsters.value;
-        nomonsters  = (int)sv_nomonsters.value;
+        gameskill   = sv_skill;
+        respawnparm = sv_respawn;
+        respawnitem = sv_respawnitems;
+        fastparm    = sv_fastmonsters;
+        nomonsters  = sv_nomonsters;
     }
 
     map = P_GetMapInfo(gamemap);
@@ -1713,5 +1705,5 @@ void G_InitNew(skill_t skill, int map) {
     // [d64] For some reason this is added here
     M_ClearRandom();
 
-    CON_CvarSetValue(sv_skill.name, (float)skill);
+    sv_skill = skill;
 }

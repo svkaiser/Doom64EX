@@ -48,8 +48,8 @@ static void R_AddLeaf(subsector_t *sub);
 static void R_AddLine(seg_t *line);
 static void AddSegToDrawlist(drawlist_t *dl, seg_t *line, int texid, int sidetype);
 
-CVAR_EXTERNAL(i_interpolateframes);
-CVAR_EXTERNAL(r_texturecombiner);
+extern BoolProperty i_interpolateframes;
+extern BoolProperty r_texturecombiner;
 
 //
 // R_AddClipLine
@@ -281,7 +281,7 @@ dboolean R_GenerateSwitchPlane(void *data, vtx_t *v) {
 }
 
 d_inline static void GetSideTopBottom(sector_t* sector, rfloat *top, rfloat *bottom) {
-    if(i_interpolateframes.value) {
+    if(i_interpolateframes) {
         fixed_t frame_c = sector->frame_z2[1];
         fixed_t frame_f = sector->frame_z1[1];
 

@@ -93,17 +93,21 @@ typedef struct {
 static gl_env_state_t gl_env_state[GL_MAX_TEX_UNITS];
 static int curunit = 0;
 
-CVAR_EXTERNAL(r_texnonpowresize);
-CVAR_EXTERNAL(r_fillmode);
-CVAR_CMD(r_texturecombiner, 1) {
-    int i;
+extern IntProperty r_texnonpowresize;
+extern BoolProperty r_fillmode;
 
-    curunit = 0;
+BoolProperty r_texturecombiner("r_texturecombiner", "", true, Property::config,
+                               [](const BoolProperty &property, bool new_value) {
+                                   int i;
 
-    for(i = 0; i < GL_MAX_TEX_UNITS; i++) {
-        dmemset(&gl_env_state[i], 0, sizeof(gl_env_state_t));
-    }
-}
+                                   curunit = 0;
+
+                                   for(i = 0; i < GL_MAX_TEX_UNITS; i++) {
+                                       dmemset(&gl_env_state[i], 0, sizeof(gl_env_state_t));
+                                   }
+
+                                   return new_value;
+                               });
 
 //
 // CMD_DumpTextures
@@ -176,7 +180,7 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     int w;
     int h;
 
-    if(r_fillmode.value <= 0) {
+    if(r_fillmode <= 0) {
         return;
     }
 
@@ -258,7 +262,7 @@ void GL_SetNewPalette(int id, byte palID) {
 
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
-    if(r_texnonpowresize.value > 0) {
+    if(r_texnonpowresize > 0) {
         I_Error("FIXME: r_texnonpowresize unsupported.");
         // void *image;
         // int wp;
@@ -378,8 +382,8 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
 
-    if(!npot && r_texnonpowresize.value <= 0) {
-        CON_CvarSetValue(r_texnonpowresize.name, 1.0f);
+    if(!npot && r_texnonpowresize <= 0) {
+        r_texnonpowresize = 1;
     }
 
     dglGenTextures(1, &gfxptr[gfxid]);
@@ -487,7 +491,7 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
     int w;
     int h;
 
-    if(r_fillmode.value <= 0) {
+    if(!r_fillmode) {
         return;
     }
 
@@ -519,8 +523,8 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
 
-    if(!npot && r_texnonpowresize.value <= 0) {
-        CON_CvarSetValue(r_texnonpowresize.name, 1.0f);
+    if(!npot && r_texnonpowresize <= 0) {
+        r_texnonpowresize = 1;
     }
 
     dglGenTextures(1, &spriteptr[spritenum][pal]);
@@ -627,7 +631,7 @@ static dtexture envtexture = 0;
 void GL_BindEnvTexture(void) {
     rcolor rgb[16];
 
-    if(r_fillmode.value <= 0) {
+    if(!r_fillmode) {
         return;
     }
 
@@ -664,7 +668,7 @@ void GL_UpdateEnvTexture(rcolor color) {
         return;
     }
 
-    if(r_fillmode.value <= 0) {
+    if(!r_fillmode) {
         return;
     }
 
@@ -722,7 +726,7 @@ void GL_SetTextureUnit(int unit, dboolean enable) {
         return;
     }
 
-    if(r_fillmode.value <= 0) {
+    if(!r_fillmode) {
         return;
     }
 

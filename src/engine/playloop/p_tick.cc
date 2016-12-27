@@ -41,9 +41,9 @@
 #include "p_setup.h"
 #include "g_demo.h"
 
-CVAR_EXTERNAL(i_interpolateframes);
-CVAR_EXTERNAL(p_damageindicator);
-CVAR_EXTERNAL(r_wipe);
+extern BoolProperty i_interpolateframes;
+extern BoolProperty p_damageindicator;
+extern BoolProperty r_wipe;
 
 int     leveltime;
 
@@ -333,7 +333,7 @@ void P_Stop(void) {
     }
 
     // [kex] reset damage indicators
-    if(p_damageindicator.value) {
+    if(p_damageindicator) {
         ST_ClearDamageMarkers();
     }
 
@@ -357,7 +357,7 @@ void P_Stop(void) {
 
     // do wipe/melt effect
     if(gameaction != ga_loadgame) {
-        if(r_wipe.value) {
+        if(r_wipe) {
             if(gameaction != ga_warpquick) {
                 WIPE_MeltScreen();
             }
@@ -399,7 +399,7 @@ void P_Drawer(void) {
 
     GL_ClearView(0xFF000000);
 
-    if(!automapactive || am_overlay.value) {
+    if(!automapactive || am_overlay) {
         R_RenderPlayerView(&players[displayplayer]);
     }
 
@@ -411,10 +411,10 @@ void P_Drawer(void) {
 // P_Ticker
 //
 
-int P_Ticker(void) {
+bool P_Ticker(void) {
     int i;
 
-    if(i_interpolateframes.value) {
+    if(i_interpolateframes) {
         P_UpdateFrameStates();
     }
 

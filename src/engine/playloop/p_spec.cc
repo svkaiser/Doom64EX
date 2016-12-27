@@ -54,7 +54,7 @@
 #include "r_sky.h"
 #include "sc_main.h"
 
-CVAR_EXTERNAL(p_features);
+extern BoolProperty p_features;
 
 short globalint = 0;
 static byte tryopentype[3];
@@ -1628,7 +1628,7 @@ int P_DoSpecialLine(mobj_t* thing, line_t* line, int side) {
 
     case 253:
         // Unlock Cheat Menu
-        CON_CvarSetValue(p_features.name, 1);
+        p_features = true;
         ok = 1;
         break;
 

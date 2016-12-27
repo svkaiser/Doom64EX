@@ -165,7 +165,7 @@ static void NET_SV_SendConsoleMessage(net_client_t *client, char *s, ...)
 
 // Send a message to all clients
 
-static void NET_SV_BroadcastMessage(char *s, ...)
+static void NET_SV_BroadcastMessage(const char *s, ...)
 {
     char buf[1024];
     va_list args;
@@ -401,7 +401,7 @@ static net_client_t *NET_SV_FindClient(net_addr_t *addr)
 
 // send a rejection packet to a client
 
-static void NET_SV_SendReject(net_addr_t *addr, char *msg)
+static void NET_SV_SendReject(net_addr_t *addr, const char *msg)
 {
     net_packet_t *packet;
 
@@ -1639,19 +1639,22 @@ void NET_SV_Shutdown(void)
     }
 }
 
-void NET_SV_UpdateCvars(cvar_t* cvar)
+void NET_SV_UpdateCvars(const Property &cvar)
 {
     net_packet_t *packet;
     int i;
 
+    // FIXME: Fix cvar sending from clients
+#if 0
     if(!cvar->nonclient)
         return;
+#endif
 
     packet = NET_NewPacket(96);
 
     NET_WriteInt16(packet, NET_PACKET_TYPE_CVAR_UPDATE);
-    NET_WriteString(packet, cvar->name);
-    NET_WriteString(packet, cvar->string);
+    NET_WriteString(packet, cvar.name().data());
+    NET_WriteString(packet, cvar.value().c_str());
 
     // Send packet
 

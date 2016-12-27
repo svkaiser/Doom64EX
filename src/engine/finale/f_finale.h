@@ -34,13 +34,13 @@
 
 void    F_Start(void);
 void    F_Stop(void);
-int     F_Ticker(void);     // Called by main loop.
+bool     F_Ticker(void);     // Called by main loop.
 void    F_Drawer(void);
 
 void    IN_Start(void);
 void    IN_Stop(void);
 void    IN_Drawer(void);
-int     IN_Ticker(void);
+bool     IN_Ticker(void);
 
 
 

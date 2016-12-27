@@ -21,6 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#if 0
 #ifndef CON_CVAR_H
 #define CON_CVAR_H
 
@@ -89,4 +90,4 @@ void CON_CvarAutoComplete(char *partial);
 cvar_t *CON_CvarGet(const char *name);
 
 #endif
-
+#endif

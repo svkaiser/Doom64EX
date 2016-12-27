@@ -80,9 +80,9 @@ uint WGen_Swap32(unsigned int x);
 #define _PAD16(x)	x += (16 - ((uint) x & 15)) & 15
 
 void WGen_WadgenMain();
-void WGen_Printf(char *s, ...);
-void WGen_Complain(char *fmt, ...);
-void WGen_UpdateProgress(char *fmt, ...);
+void WGen_Printf(const char *s, ...);
+void WGen_Complain(const char *fmt, ...);
+void WGen_UpdateProgress(const char *fmt, ...);
 void WGen_ConvertN64Pal(dPalette_t * palette, word * data, int indexes);
 void WGen_AddDigest(char *name, int lump, int size);
 

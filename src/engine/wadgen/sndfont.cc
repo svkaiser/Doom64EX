@@ -90,7 +90,7 @@ static int npresets = 0;
 static int curpbag = 0;
 
 void
-SF_AddPreset(sfpresetheader_t * preset, char *name, int idx, int bank, int presetidx)
+SF_AddPreset(sfpresetheader_t * preset, const char *name, int idx, int bank, int presetidx)
 {
 	SF_NEWITEM(preset->presets, sd_sfpresetinfo_t, npresets);
 	strncpy(preset->presets[idx].achPresetName, name, 20);
@@ -110,7 +110,7 @@ SF_AddPreset(sfpresetheader_t * preset, char *name, int idx, int bank, int prese
 //**************************************************************
 
 static int ninstruments = 0;
-void SF_AddInstrument(sfinstheader_t * inst, char *name, int idx)
+void SF_AddInstrument(sfinstheader_t * inst, const char *name, int idx)
 {
 	SF_NEWITEM(inst->instruments, sd_sfinstinfo_t, ninstruments);
 	strncpy(inst->instruments[idx].achInstName, name, 20);
@@ -207,7 +207,7 @@ void SF_AddPresetBag(sfpresetbagheader_t * bag)
 
 static int nsamples = 0;
 void
-SF_AddSample(sfsample_t * sample, char *name, uint size, uint offset,
+SF_AddSample(sfsample_t * sample, const char *name, uint size, uint offset,
 	     int loopid)
 {
 	sd_sfsampleinfo_t *info;

@@ -32,11 +32,11 @@
 #include "r_sky.h"
 #include "r_drawlist.h"
 
-CVAR_EXTERNAL(i_interpolateframes);
-CVAR_EXTERNAL(r_texturecombiner);
-CVAR_EXTERNAL(r_fog);
-CVAR_EXTERNAL(r_rendersprites);
-CVAR_EXTERNAL(st_flashoverlay);
+extern BoolProperty i_interpolateframes;
+extern BoolProperty r_texturecombiner;
+extern BoolProperty r_fog;
+extern BoolProperty r_rendersprites;
+extern BoolProperty st_flashoverlay;
 
 //
 // ProcessWalls
@@ -109,15 +109,14 @@ static dboolean ProcessFlats(vtxlist_t* vl, int* drawcount) {
         v->y = F2D3D(leaf->vertex->y);
 
         if(vl->flags & DLF_CEILING) {
-            if(i_interpolateframes.value) {
+            if(i_interpolateframes) {
                 v->z = F2D3D(sector->frame_z2[1]);
-            }
-            else {
+            } else {
                 v->z = F2D3D(sector->ceilingheight);
             }
         }
         else {
-            if(i_interpolateframes.value) {
+            if(i_interpolateframes) {
                 v->z = F2D3D(sector->frame_z1[1]);
             }
             else {
@@ -210,14 +209,14 @@ static void SetupFog(void) {
     dglFogi(GL_FOG_MODE, GL_LINEAR);
 
     // don't render fog in wireframe mode
-    if(r_fillmode.value <= 0) {
+    if(!r_fillmode) {
         return;
     }
 
     if(!skyflatnum) {
         dglDisable(GL_FOG);
     }
-    else if(r_fog.value) {
+    else if(r_fog) {
         rfloat color[4] = { 0, 0, 0, 0 };
         rcolor fogcolor = 0;
         int fognear = 0;
@@ -279,7 +278,7 @@ static void SetupFog(void) {
 void R_SetViewMatrix(void) {
     dglMatrixMode(GL_PROJECTION);
     dglLoadIdentity();
-    dglViewFrustum(video_width, video_height, r_fov.value, 0.1f);
+    dglViewFrustum(video_width, video_height, r_fov, 0.1f);
     dglMatrixMode(GL_MODELVIEW);
     dglLoadIdentity();
     dglRotatef(-TRUEANGLES(viewpitch), 1.0f, 0.0f, 0.0f);
@@ -296,17 +295,17 @@ void R_RenderWorld(void) {
 
     dglEnable(GL_DEPTH_TEST);
 
-    DL_BeginDrawList(r_fillmode.value >= 1, r_texturecombiner.value >= 1);
+    DL_BeginDrawList(r_fillmode, r_texturecombiner);
 
     // setup texture environment for effects
-    if(r_texturecombiner.value) {
+    if(r_texturecombiner) {
         if(!nolights) {
             GL_UpdateEnvTexture(WHITE);
             GL_SetTextureUnit(1, true);
             dglTexCombModulate(GL_PREVIOUS, GL_PRIMARY_COLOR);
         }
 
-        if(st_flashoverlay.value <= 0) {
+        if(!st_flashoverlay) {
             GL_SetTextureUnit(2, true);
             dglTexCombColor(GL_PREVIOUS, flashcolor, GL_ADD);
         }
@@ -344,7 +343,7 @@ void R_RenderWorld(void) {
         spriteRenderTic = I_GetTimeMS();
     }
 
-    if(r_rendersprites.value) {
+    if(r_rendersprites) {
         R_SetupSprites();
     }
 

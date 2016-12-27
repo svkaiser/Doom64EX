@@ -38,7 +38,7 @@ word statindice = 0;
 static word indicecnt = 0;
 static word drawIndices[MAXINDICES];
 
-CVAR_EXTERNAL(r_drawtris);
+extern BoolProperty r_drawtris;
 
 //
 // dglLogError
@@ -140,7 +140,7 @@ void dglDrawGeometry(dword count, vtx_t *vtx) {
         dglUnlockArraysEXT();
     }
 
-    if(r_drawtris.value) {
+    if(r_drawtris) {
         dword j = 0;
         byte b;
 

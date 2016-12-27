@@ -103,7 +103,7 @@ static void NET_Query_SendQuery(net_addr_t *addr)
     NET_FreePacket(request);
 }
 
-static void formatted_printf(int wide, char *s, ...)
+static void formatted_printf(int wide, const char *s, ...)
 {
     va_list args;
     int i;

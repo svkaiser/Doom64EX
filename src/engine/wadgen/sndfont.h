@@ -374,7 +374,7 @@ extern soundfont_t soundfont;
 void SF_Setup(void);
 void SF_AddSampleData(soundfont_t * sf, cache in, size_t insize, char *newname,
 		      int loopid);
-void SF_AddSample(sfsample_t * sample, char *name, uint size, uint offset,
+void SF_AddSample(sfsample_t * sample, const char *name, uint size, uint offset,
 		  int loopid);
 void SF_CreatePresets(patch_t * patch, int npatch, subpatch_t * subpatch,
 		      int nsubpatch, wavtable_t * wavtable);

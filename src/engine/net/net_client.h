@@ -50,7 +50,7 @@ extern dboolean net_waiting_for_start;
 extern char net_player_names[MAXPLAYERS][MAXPLAYERNAME];
 extern char net_player_addresses[MAXPLAYERS][MAXPLAYERNAME];
 extern int net_player_number;
-extern char *net_player_name;
+extern String net_player_name;
 
 extern md5_digest_t net_server_wad_md5sum;
 extern md5_digest_t net_local_wad_md5sum;

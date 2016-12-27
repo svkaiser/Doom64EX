@@ -52,19 +52,19 @@
 #include "gl_draw.h"
 #include "g_demo.h"
 
-CVAR(st_drawhud, 1);
-CVAR(st_crosshair, 0);
-CVAR(st_crosshairopacity, 80);
-CVAR(st_flashoverlay, 0);
-CVAR(st_regionmsg, 0);
-CVAR(m_messages, 1);
-CVAR(m_playername, Player);
-CVAR(st_showpendingweapon, 1);
-CVAR(st_showstats, 0);
+IntProperty st_drawhud("st_drawhud", "", true);
+BoolProperty st_crosshair("st_crosshair", "", false);
+FloatProperty st_crosshairopacity("st_crosshairopacity", "", 80.0f);
+BoolProperty st_flashoverlay("st_flashoverlay", "", false);
+BoolProperty st_regionmsg("st_regionmsg", "", true);
+BoolProperty m_messages("m_messages", "", true);
+StringProperty m_playername("m_playername", "");
+BoolProperty st_showpendingweapon("st_showpendingweapon", "", true);
+BoolProperty st_showstats("st_showstats", "", false);
 
-CVAR_EXTERNAL(p_usecontext);
-CVAR_EXTERNAL(p_damageindicator);
-CVAR_EXTERNAL(r_texturecombiner);
+extern BoolProperty p_usecontext;
+extern BoolProperty p_damageindicator;
+extern BoolProperty r_texturecombiner;
 
 //
 // STATUS BAR DATA
@@ -115,7 +115,7 @@ static dboolean         st_wpndisplay_show;
 static byte             st_wpndisplay_alpha;
 static int              st_wpndisplay_ticks;
 
-char* chat_macros[] = {
+const char* chat_macros[] = {
     HUSTR_CHATMACRO0,
     HUSTR_CHATMACRO1,
     HUSTR_CHATMACRO2,
@@ -438,7 +438,7 @@ void ST_Ticker(void) {
     // damage indicator
     //
 
-    if(p_damageindicator.value) {
+    if(p_damageindicator) {
         ST_RunDamageMarkers();
     }
 
@@ -507,7 +507,7 @@ static void ST_DrawKey(int key, const float uv[4][2], const float xy[4][2]) {
             (flashCards[key].doDraw && flashCards[key].active)) {
         dmemcpy(keydrawxy, xy, (sizeof(float)*4) * 2);
 
-        if(st_drawhud.value >= 2) {
+        if(st_drawhud >= 2) {
             keydrawxy[0][0] += 20;
             keydrawxy[1][0] += 20;
             keydrawxy[2][0] += 20;
@@ -578,7 +578,7 @@ static void ST_DrawStatus(void) {
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DGL_CLAMP);
 
-    if(st_drawhud.value >= 2) {
+    if(st_drawhud >= 2) {
         GL_SetOrthoScale(0.725f);
     }
 
@@ -587,7 +587,7 @@ static void ST_DrawStatus(void) {
     dglSetVertex(st_vtx);
     st_vtxcount = 0;
 
-    if(st_drawhud.value == 1) {
+    if(st_drawhud == 1) {
         // health
 
         uv[0][0] = uv[3][0] = 0.0f;
@@ -648,7 +648,7 @@ static void ST_DrawStatus(void) {
     GL_ResetViewport();
     GL_SetState(GLSTATE_BLEND, 0);
 
-    if(st_drawhud.value >= 2) {
+    if(st_drawhud >= 2) {
         GL_SetOrthoScale(1.0f);
     }
 }
@@ -729,9 +729,9 @@ void ST_Drawer(void) {
     // flash overlay
     //
 
-    if((st_flashoverlay.value ||
+    if((st_flashoverlay ||
             gl_max_texture_units <= 2 ||
-            r_texturecombiner.value <= 0) && flashcolor) {
+            !r_texturecombiner) && flashcolor) {
         ST_FlashingScreen(st_flash_r, st_flash_g, st_flash_b, st_flash_a);
     }
 
@@ -739,18 +739,18 @@ void ST_Drawer(void) {
         return;
     }
 
-    checkautomap = (!automapactive || am_overlay.value);
+    checkautomap = (!automapactive || am_overlay);
 
     //
     // draw hud
     //
 
-    if(checkautomap && st_drawhud.value) {
+    if(checkautomap && st_drawhud > 0) {
         //Status graphics
         ST_DrawStatus();
 
         // original hud layout
-        if(st_drawhud.value == 1) {
+        if(st_drawhud == 1) {
             //Draw Ammo counter
             if(weaponinfo[plyr->readyweapon].ammo != am_noammo) {
                 Draw_Number(160, 215, plyr->ammo[weaponinfo[plyr->readyweapon].ammo], 0, REDALPHA(0x7f));
@@ -763,7 +763,7 @@ void ST_Drawer(void) {
             Draw_Number(271, 215, plyr->armorpoints, 0, REDALPHA(0x7f));
         }
         // arranged hud layout
-        else if(st_drawhud.value >= 2) {
+        else if(st_drawhud >= 2) {
             int wpn;
 
             if(plyr->pendingweapon == wp_nochange) {
@@ -829,10 +829,10 @@ void ST_Drawer(void) {
     // draw messages
     //
 
-    if(st_hasjmsg && st_regionmsg.value && plyr->messagepic >= 0) {
+    if(st_hasjmsg && st_regionmsg && plyr->messagepic >= 0) {
         ST_DrawJMessage(plyr->messagepic);
     }
-    else if(st_msg && (int)m_messages.value) {
+    else if(st_msg && m_messages) {
         Draw_Text(20, 20, ST_MSGCOLOR(automapactive ? 0xff : st_msgalpha), 1, false, "%s", st_msg);
     }
     else if(automapactive) {
@@ -878,7 +878,7 @@ void ST_Drawer(void) {
     if(st_crosshairs && !automapactive) {
         int x = (SCREENWIDTH / 2) - (ST_CROSSHAIRSIZE / 8);
         int y = (SCREENHEIGHT / 2) - (ST_CROSSHAIRSIZE / 8);
-        int alpha = (int)st_crosshairopacity.value;
+        int alpha = (int)st_crosshairopacity;
 
         if(alpha > 0xff) {
             alpha = 0xff;
@@ -888,14 +888,14 @@ void ST_Drawer(void) {
             alpha = 0;
         }
 
-        ST_DrawCrosshair(x, y, (int)st_crosshair.value, 2, WHITEALPHA(alpha));
+        ST_DrawCrosshair(x, y, (int)st_crosshair, 2, WHITEALPHA(alpha));
     }
 
     //
     // use action context
     //
 
-    if(p_usecontext.value) {
+    if(p_usecontext) {
         if(P_UseLines(&players[consoleplayer], true)) {
             char usestring[16];
             char contextstring[32];
@@ -923,7 +923,7 @@ void ST_Drawer(void) {
     // damage indicator
     //
 
-    if(p_damageindicator.value) {
+    if(p_damageindicator) {
         ST_DrawDamageMarkers();
     }
 
@@ -931,7 +931,7 @@ void ST_Drawer(void) {
     // display pending weapon
     //
 
-    if(st_showpendingweapon.value) {
+    if(st_showpendingweapon) {
         ST_DrawPendingWeapon();
     }
 
@@ -939,7 +939,7 @@ void ST_Drawer(void) {
     // display stats in automap
     //
 
-    if(st_showstats.value && automapactive) {
+    if(st_showstats && automapactive) {
         Draw_Text(20, 430, WHITE, 0.5f, false,
                   "Monsters:  %i / %i", plyr->killcount, totalkills);
         Draw_Text(20, 440, WHITE, 0.5f, false,
@@ -1475,21 +1475,3 @@ static void ST_DisplayName(int playernum) {
     dsnprintf(name, MAXPLAYERNAME, "%s", player_names[playernum]);
     Draw_Text(screenx, screeny, color, 1.0f, 0, name);
 }
-
-
-//
-// ST_RegisterCvars
-//
-
-void ST_RegisterCvars(void) {
-    CON_CvarRegister(&st_drawhud);
-    CON_CvarRegister(&st_crosshair);
-    CON_CvarRegister(&st_crosshairopacity);
-    CON_CvarRegister(&st_flashoverlay);
-    CON_CvarRegister(&st_regionmsg);
-    CON_CvarRegister(&st_showpendingweapon);
-    CON_CvarRegister(&st_showstats);
-    CON_CvarRegister(&m_messages);
-    CON_CvarRegister(&m_playername);
-}
-

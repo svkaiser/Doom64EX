@@ -35,11 +35,14 @@
 
 rcolor    bspColor[5];
 
-CVAR_CMD(i_brightness, 100) {
-    R_RefreshBrightness();
-}
+FloatProperty i_brightness("i_brightness", "Brightness", 100.0f, 0,
+                           [](const FloatProperty &, float x)
+                           {
+                               R_RefreshBrightness();
+                               return x;
+                           });
 
-CVAR_EXTERNAL(r_texturecombiner);
+extern BoolProperty r_texturecombiner;
 
 //
 // R_GetSlopeLight
@@ -251,9 +254,8 @@ void R_SetLightFactor(float lightfactor) {
 
 void R_RefreshBrightness(void) {
     float factor;
-    float brightness = i_brightness.value;
 
-    factor = (((infraredFactor > brightness) ? infraredFactor : brightness) + 100.0f);
+    factor = (((infraredFactor > i_brightness) ? infraredFactor : i_brightness) + 100.0f);
     R_SetLightFactor(factor);
 }
 

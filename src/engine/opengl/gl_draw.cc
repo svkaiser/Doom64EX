@@ -133,10 +133,10 @@ int Draw_Text(int x, int y, rcolor color, float scale,
 
     GL_SetState(GLSTATE_BLEND, 1);
 
-    if(!r_fillmode.value) {
+    if(!r_fillmode) {
         dglEnable(GL_TEXTURE_2D);
         dglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        r_fillmode.value = 1.0f;
+        r_fillmode = true;
         fill = true;
     }
 
@@ -219,7 +219,7 @@ int Draw_Text(int x, int y, rcolor color, float scale,
     if(fill) {
         dglDisable(GL_TEXTURE_2D);
         dglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        r_fillmode.value = 0.0f;
+        r_fillmode = false;
     }
 
     GL_SetState(GLSTATE_BLEND, 0);

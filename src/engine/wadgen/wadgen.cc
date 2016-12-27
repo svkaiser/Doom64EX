@@ -177,7 +177,7 @@ void WGen_Process(char *path)
 #endif
 }
 
-int M_CheckParm(char *);
+int M_CheckParm(const char *);
 void WGen_WadgenMain(void)
 {
 	char *p;
@@ -201,7 +201,7 @@ void WGen_WadgenMain(void)
 //**************************************************************
 //**************************************************************
 
-void WGen_Printf(char *s, ...)
+void WGen_Printf(const char *s, ...)
 {
 	char msg[1024];
 	va_list v;
@@ -223,7 +223,7 @@ void WGen_Printf(char *s, ...)
 //**************************************************************
 //**************************************************************
 
-void WGen_Complain(char *fmt, ...)
+void WGen_Complain(const char *fmt, ...)
 {
 	va_list va;
 	char buff[1024];
@@ -241,7 +241,7 @@ void WGen_Complain(char *fmt, ...)
 //**************************************************************
 //**************************************************************
 
-void WGen_UpdateProgress(char *fmt, ...)
+void WGen_UpdateProgress(const char *fmt, ...)
 {
 	va_list va;
 	char buff[1024];

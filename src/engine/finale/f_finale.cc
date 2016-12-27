@@ -118,7 +118,7 @@ void F_Stop(void) {
 // F_Ticker
 //
 
-int F_Ticker(void) {
+bool F_Ticker(void) {
     int st;
     playercontrols_t* pc = &Controls;
 

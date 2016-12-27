@@ -35,6 +35,7 @@
 #include "doomstat.h"
 #include "con_console.h"
 #include "z_zone.h"
+#include <imp/Property>
 
 //do controls menu length properly
 //if list of actions for menu>=MAX_MENUACTION_LENGTH then won't display any more
@@ -230,7 +231,6 @@ void DerefSingleAction(alist_t *al) {
 alist_t *DoRunActions(alist_t *al, dboolean free) {
     alist_t     *next = NULL;
     action_t    *action;
-    cvar_t      *cvar;
 
     while(al) {
         next = al->next;
@@ -242,7 +242,9 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
         if(action) {
             action->proc(action->data, al->param);
         }
-        else if(cvar = CON_CvarGet(al->cmd)) {
+        else if (auto cvar = Property::find(al->cmd)) {
+            // FIXME: Netgame cvar setting
+#if 0
             if(netgame) {
                 if(cvar->nonclient) {
                     // I'll just have to assume for now that
@@ -253,19 +255,23 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
                     }
                 }
             }
+#endif
 
             if(!al->param[0]) {
                 char str[256];
-                sprintf(str, "%s: %s (%s)", cvar->name, cvar->string, cvar->defvalue);
+                sprintf(str, "%s: %s (%s)", cvar->name().data(), cvar->value().c_str(), cvar->default_value().c_str());
                 CON_AddLine(str, dstrlen(str));
             }
             else {
-                CON_CvarSet(cvar->name, al->param[0]);
+                cvar->set_value(al->param[0]);
+                // FIXME: Update cvar in network game
+#if 0
                 if(netgame) {
                     if(playeringame[0] && consoleplayer == 0) {
                         NET_SV_UpdateCvars(cvar);
                     }
                 }
+#endif
             }
         }
         else {
@@ -684,7 +690,6 @@ void G_OutputBindings(FILE *fh) {
     int         i;
     alist_t     *al;
     char        name[MAX_KEY_NAME_LENGTH];
-    cvar_t      *var;
 
     for(i = 0; i < NUMKEYS; i++) {
         al = KeyActions[i];
@@ -717,8 +722,11 @@ void G_OutputBindings(FILE *fh) {
     }
 
     // cvars
-    for(var = cvarcap; var; var = var->next) {
-        fprintf(fh, "seta \"%s\" \"%s\"\n", var->name, var->string);
+    for(auto p : Property::all()) {
+        if (!p->is_config())
+            continue;
+
+        fprintf(fh, "seta \"%s\" \"%s\"\n", p->name().data(), p->value().c_str());
     }
 }
 
@@ -1161,7 +1169,7 @@ static CMD(UnbindAll) {
 // IsSameAction
 //
 
-static dboolean IsSameAction(char *cmd, alist_t *al) {
+static dboolean IsSameAction(const char *cmd, alist_t *al) {
     if(!al) {
         return false;
     }
@@ -1170,12 +1178,7 @@ static dboolean IsSameAction(char *cmd, alist_t *al) {
         {
             char buff[256];
             sprintf(buff, "%s %s", al->cmd, al->param[0]);
-            if(!dstrcmp(cmd, buff)) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            return strcmp(cmd, buff) == 0;
         }
     }
     else {
@@ -1214,7 +1217,7 @@ void G_GetActionName(char *buff, int n) {
 // G_GetActionBindings
 //
 
-void G_GetActionBindings(char *buff, char *action) {
+void G_GetActionBindings(char *buff, const char *action) {
     int     i;
     char    *p;
 
@@ -1269,7 +1272,7 @@ void G_GetActionBindings(char *buff, char *action) {
 // G_UnbindAction
 //
 
-void G_UnbindAction(char *action) {
+void G_UnbindAction(const char *action) {
     int i;
 
     for(i = 0; i < NUMKEYS; i++) {

@@ -43,20 +43,20 @@
 SDL_Window      *window;
 SDL_GLContext   glContext;
 
-CVAR(v_msensitivityx, 5);
-CVAR(v_msensitivityy, 5);
-CVAR(v_macceleration, 0);
-CVAR(v_mlook, 0);
-CVAR(v_mlookinvert, 0);
-CVAR(v_yaxismove, 0);
-CVAR(v_width, 640);
-CVAR(v_height, 480);
-CVAR(v_windowed, 1);
-CVAR(v_vsync, 1);
-CVAR(v_depthsize, 24);
-CVAR(v_buffersize, 32);
+FloatProperty v_msensitivityx("v_msensitivityy", "", 5.0f);
+FloatProperty v_msensitivityy("v_msensitivityx", "", 5.0f);
+FloatProperty v_macceleration("v_macceleration", "");
+BoolProperty v_mlook("v_mlook", "");
+BoolProperty v_mlookinvert("v_mlookinvert", "");
+BoolProperty v_yaxismove("v_yaxismove", "");
+IntProperty v_width("v_width", "", 640);
+IntProperty v_height("v_height", "", 480);
+BoolProperty v_windowed("v_windowed", "", true);
+BoolProperty v_vsync("v_vsync", "", true);
+IntProperty v_depthsize("v_depthsize", "", 24);
+IntProperty v_buffersize("v_buffersize", "", 32);
 
-CVAR_EXTERNAL(m_menumouse);
+extern BoolProperty m_menumouse;
 
 static void I_GetEvent(SDL_Event *Event);
 static void I_ReadMouse(void);
@@ -88,9 +88,9 @@ void I_InitScreen(void) {
     uint32  flags = 0;
     char    title[256];
 
-    InWindow        = (int)v_windowed.value;
-    video_width     = (int)v_width.value;
-    video_height    = (int)v_height.value;
+    InWindow        = v_windowed;
+    video_width     = v_width;
+    video_height    = v_height;
     video_ratio     = (float)video_width / (float)video_height;
 
     if(M_CheckParm("-window")) {
@@ -115,21 +115,21 @@ void I_InitScreen(void) {
     if(newwidth && newheight) {
         video_width = newwidth;
         video_height = newheight;
-        CON_CvarSetValue(v_width.name, (float)video_width);
-        CON_CvarSetValue(v_height.name, (float)video_height);
+        v_width = video_width;
+        v_height = video_height;
     }
 
-    if( v_depthsize.value != 8 &&
-        v_depthsize.value != 16 &&
-        v_depthsize.value != 24) {
-            CON_CvarSetValue(v_depthsize.name, 24);
+    if( v_depthsize != 8 &&
+        v_depthsize != 16 &&
+        v_depthsize != 24) {
+        v_depthsize = 24;
     }
 
-    if( v_buffersize.value != 8 &&
-        v_buffersize.value != 16 &&
-        v_buffersize.value != 24 &&
-        v_buffersize.value != 32) {
-            CON_CvarSetValue(v_buffersize.name, 32);
+    if( v_buffersize != 8 &&
+        v_buffersize != 16 &&
+        v_buffersize != 24 &&
+        v_buffersize != 32) {
+        v_buffersize = 32;
     }
 
     usingGL = false;
@@ -144,9 +144,9 @@ void I_InitScreen(void) {
     SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, (int)v_buffersize.value);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, (int)v_depthsize.value);
-    SDL_GL_SetSwapInterval((int)v_vsync.value);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, v_buffersize);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, v_depthsize);
+    SDL_GL_SetSwapInterval(v_vsync ? SDL_TRUE : SDL_FALSE);
 
     flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
 
@@ -169,19 +169,19 @@ void I_InitScreen(void) {
 
     if((glContext = SDL_GL_CreateContext(window)) == NULL) {
         // re-adjust depth size if video can't run it
-        if(v_depthsize.value >= 24) {
-            CON_CvarSetValue(v_depthsize.name, 16);
+        if(v_depthsize >= 24) {
+            v_depthsize = 16;
         }
-        else if(v_depthsize.value >= 16) {
-            CON_CvarSetValue(v_depthsize.name, 8);
+        else if(v_depthsize >= 16) {
+            v_depthsize = 8;
         }
 
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, (int)v_depthsize.value);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, v_depthsize);
 
         if((glContext = SDL_GL_CreateContext(window)) == NULL) {
             // fall back to lower buffer setting
-            CON_CvarSetValue(v_buffersize.name, 16);
-            SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, (int)v_buffersize.value);
+            v_buffersize = 16;
+            SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, v_buffersize);
 
             if((glContext = SDL_GL_CreateContext(window)) == NULL) {
                 // give up
@@ -504,7 +504,7 @@ static void I_ReadMouse(void) {
 //
 
 void I_MouseAccelChange(void) {
-    mouse_accelfactor = v_macceleration.value / 200.0f + 1.0f;
+    mouse_accelfactor = v_macceleration / 200.0f + 1.0f;
 }
 
 //
@@ -512,7 +512,7 @@ void I_MouseAccelChange(void) {
 //
 
 int I_MouseAccel(int val) {
-    if(!v_macceleration.value) {
+    if(!v_macceleration) {
         return val;
     }
 
@@ -537,7 +537,7 @@ static void I_ActivateMouse(void) {
 //
 
 static void I_DeactivateMouse(void) {
-    SDL_ShowCursor(m_menumouse.value < 1);
+    SDL_ShowCursor(m_menumouse ? SDL_FALSE : SDL_TRUE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
@@ -562,7 +562,7 @@ void I_UpdateGrab(void) {
 	if (!grab && currently_grabbed) {
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 		SDL_SetWindowGrab(window, SDL_FALSE);
-		SDL_ShowCursor(m_menumouse.value < 1);
+		SDL_ShowCursor(m_menumouse ? SDL_FALSE : SDL_TRUE);
 	}
 
 	currently_grabbed = grab;
@@ -674,7 +674,7 @@ static void I_GetEvent(SDL_Event *Event) {
 static void I_InitInputs(void) {
 	SDL_PumpEvents();
 
-    SDL_ShowCursor(m_menumouse.value < 1);
+    SDL_ShowCursor(m_menumouse ? SDL_FALSE : SDL_TRUE);
 
     I_MouseAccelChange();
 
@@ -682,24 +682,3 @@ static void I_InitInputs(void) {
     I_XInputInit();
 #endif
 }
-
-
-//
-// V_RegisterCvars
-//
-
-void V_RegisterCvars(void) {
-    CON_CvarRegister(&v_msensitivityx);
-    CON_CvarRegister(&v_msensitivityy);
-    CON_CvarRegister(&v_macceleration);
-    CON_CvarRegister(&v_mlook);
-    CON_CvarRegister(&v_mlookinvert);
-    CON_CvarRegister(&v_yaxismove);
-    CON_CvarRegister(&v_width);
-    CON_CvarRegister(&v_height);
-    CON_CvarRegister(&v_windowed);
-    CON_CvarRegister(&v_vsync);
-    CON_CvarRegister(&v_depthsize);
-    CON_CvarRegister(&v_buffersize);
-}
-

@@ -24,6 +24,7 @@
 // DESCRIPTION: Console cvar functionality (from Quake)
 //
 //-----------------------------------------------------------------------------
+#if 0
 
 #include "doomstat.h"
 #include "i_video.h"
@@ -233,3 +234,4 @@ void CON_CvarInit(void) {
     G_AddCommand("listcvars", CMD_ListCvars, 0);
 }
 
+#endif

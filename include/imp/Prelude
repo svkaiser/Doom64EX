@@ -15,6 +15,8 @@
 #include "util/StringView"
 #include "util/Guard"
 
+#define STUB(msg) fmt::print("STUB {}: {} ({}:{})\n", __FUNCTION__, msg, __LINE__, __FILE__)
+
 namespace fmt {
   inline void println(CStringRef fmt, ArgList args)
   {
@@ -22,7 +24,15 @@ namespace fmt {
       print("\n");
   }
 
+  inline void fatal(CStringRef fmt, ArgList args)
+  {
+      print(stderr, fmt, args);
+      print(stderr, "\n");
+      std::terminate();
+  }
+
   FMT_VARIADIC(void, println, CStringRef)
+  FMT_VARIADIC(void, fatal, CStringRef)
 
   template <class T>
   inline void print(const T &x)
@@ -46,7 +56,9 @@ namespace imp {
   template <class T>
   using WeakPtr = std::weak_ptr<T>;
   template <class T>
-  using List = std::vector<T>;
+  using Vector = std::vector<T>;
+  template <class T>
+  using InitList = std::initializer_list<T>;
 
   template <class T, class... Args>
   UniquePtr<T> unique(Args&&... args)
@@ -68,6 +80,7 @@ namespace imp {
 
   // Initialisation for various parts of the engine
   void init_image();
+  void init_properties();
 }
 
 inline std::ostream& operator<<(std::ostream& s, imp::StringView sv)

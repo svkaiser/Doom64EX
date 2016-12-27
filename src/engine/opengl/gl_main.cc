@@ -60,14 +60,14 @@ int         DGL_CLAMP = GL_CLAMP;
 float       max_anisotropic = 0;
 dboolean    widescreen = false;
 
-CVAR_EXTERNAL(r_filter);
-CVAR_EXTERNAL(r_texturecombiner);
-CVAR_EXTERNAL(r_anisotropic);
-CVAR_EXTERNAL(st_flashoverlay);
-CVAR_EXTERNAL(v_vsync);
-CVAR_EXTERNAL(v_depthsize);
-CVAR_EXTERNAL(v_buffersize);
-CVAR_EXTERNAL(r_colorscale);
+extern BoolProperty r_filter;
+extern BoolProperty r_texturecombiner;
+extern BoolProperty r_anisotropic;
+extern BoolProperty st_flashoverlay;
+extern BoolProperty v_vsync;
+extern IntProperty v_depthsize;
+extern IntProperty v_buffersize;
+extern IntProperty r_colorscale;
 
 //
 // CMD_DumpGLExtensions
@@ -294,11 +294,11 @@ void GL_SetTextureFilter(void) {
         return;
     }
 
-    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (int)r_filter.value == 0 ? GL_LINEAR : GL_NEAREST);
-    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (int)r_filter.value == 0 ? GL_LINEAR : GL_NEAREST);
+    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, r_filter ? GL_LINEAR : GL_NEAREST);
+    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, r_filter ? GL_LINEAR : GL_NEAREST);
 
     if(GLAD_GL_EXT_texture_filter_anisotropic) {
-        if(r_anisotropic.value) {
+        if(r_anisotropic) {
             dglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_anisotropic);
         }
         else {
@@ -325,7 +325,7 @@ void GL_SetDefaultCombiner(void) {
 
     GL_CheckFillMode();
 
-    if(r_texturecombiner.value > 0) {
+    if(r_texturecombiner > 0) {
         dglTexCombModulate(GL_TEXTURE0_ARB, GL_PRIMARY_COLOR);
     }
     else {
@@ -342,7 +342,7 @@ void GL_SetColorScale(void) {
         return;
     }
 
-    int cs = (int)r_colorscale.value;
+    int cs = r_colorscale;
 
     switch(cs) {
         case 1:
@@ -471,12 +471,7 @@ void GL_SetState(int bit, dboolean enable) {
 //
 
 void GL_CheckFillMode(void) {
-    if(r_fillmode.value <= 0) {
-        GL_SetState(GLSTATE_TEXTURE0, 0);
-    }
-    else if(r_fillmode.value > 0) {
-        GL_SetState(GLSTATE_TEXTURE0, 1);
-    }
+    GL_SetState(GLSTATE_TEXTURE0, !r_fillmode ? 0 : 1);
 }
 
 //
@@ -621,7 +616,7 @@ void GL_Init(void) {
     GL_SetTextureFilter();
     GL_SetDefaultCombiner();
 
-    r_fillmode.value = 1.0f;
+    r_fillmode = true;
 
     if(!GLAD_GL_ARB_multitexture) {
         CON_Warnf("GL_ARB_multitexture not supported...\n");
@@ -632,7 +627,7 @@ void GL_Init(void) {
     if(!gl_has_combiner) {
         CON_Warnf("Texture combiners not supported...\n");
         CON_Warnf("Setting r_texturecombiner to 0\n");
-        CON_CvarSetValue(r_texturecombiner.name, 0.0f);
+        r_texturecombiner = false;
     }
 
     dglEnableClientState(GL_VERTEX_ARRAY);

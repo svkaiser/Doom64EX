@@ -111,7 +111,7 @@ net_packet_t *NET_Conn_NewReliable(net_connection_t *conn, int packet_type);
 
 // Other miscellaneous common functions
 
-void NET_SafePuts(char *msg);
+void NET_SafePuts(const char *msg);
 unsigned int NET_ExpandTicNum(unsigned int relative, unsigned int b);
 
 //dboolean NET_ValidGameMode(GameMode_t mode, GameMission_t mission);

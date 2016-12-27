@@ -80,40 +80,52 @@ unsigned int    glBindCalls = 0;
 
 dboolean        bRenderSky = false;
 
-CVAR(r_fov, 74.0);
-CVAR(r_fillmode, 1);
-CVAR(r_uniformtime, 0);
-CVAR(r_fog, 1);
-CVAR(r_wipe, 1);
-CVAR(r_drawtris, 0);
-CVAR(r_drawmobjbox, 0);
-CVAR(r_drawblockmap, 0);
-CVAR(r_drawtrace, 0);
-CVAR(r_rendersprites, 1);
-CVAR(r_drawfill, 0);
-CVAR(r_skybox, 0);
+FloatProperty r_fov("r_fov", "Field of view angle", 74.0f);
+BoolProperty r_fillmode("r_fillmode", "", true);
+BoolProperty r_uniformtime("r_uniformtime", "", false);
+BoolProperty r_fog("r_fog", "", true);
+BoolProperty r_wipe("r_wipe", "", true);
+BoolProperty r_drawtris("r_drawtris", "", false);
+BoolProperty r_drawmobjbox("r_drawmobjbox", "", false);
+BoolProperty r_drawblockmap("r_drawblockmap", "", false);
+BoolProperty r_drawtrace("r_drawtrace", "", false);
+BoolProperty r_rendersprites("r_rendersprites", "", true);
+BoolProperty r_drawfill("r_drawfill", "", false);
+BoolProperty r_skybox("r_skybox", "", false);
 
-CVAR_CMD(r_colorscale, 0) {
-    GL_SetColorScale();
-}
+IntProperty r_colorscale("r_colorscale", "", 0, 0,
+                         [](const IntProperty &, int x)
+                         {
+                             GL_SetColorScale();
+                             return x;
+                         });
 
-CVAR_CMD(r_filter, 0) {
-    GL_DumpTextures();
-    GL_SetTextureFilter();
-}
+BoolProperty r_filter("r_filter", "", false, 0,
+                      [](const BoolProperty &, bool x)
+                      {
+                          GL_DumpTextures();
+                          GL_SetTextureFilter();
+                          return x;
+                      });
 
-CVAR_CMD(r_texnonpowresize, 0) {
-    GL_DumpTextures();
-}
+BoolProperty r_texnonpowresize("r_texnonpowresize", "", false, 0,
+                               [](const BoolProperty &, bool x)
+                               {
+                                   GL_DumpTextures();
+                                   return x;
+                               });
 
-CVAR_CMD(r_anisotropic, 0) {
-    GL_DumpTextures();
-    GL_SetTextureFilter();
-}
+BoolProperty r_anisotropic("r_anisotropic", "", false, 0,
+                           [](const BoolProperty &, bool x)
+                           {
+                               GL_DumpTextures();
+                               GL_SetTextureFilter();
+                               return x;
+                           });
 
-CVAR_EXTERNAL(r_texturecombiner);
-CVAR_EXTERNAL(i_interpolateframes);
-CVAR_EXTERNAL(p_usecontext);
+extern BoolProperty r_texturecombiner;
+extern BoolProperty i_interpolateframes;
+extern BoolProperty p_usecontext;
 
 //
 // CMD_Wireframe
@@ -500,11 +512,11 @@ void R_SetupFrame(player_t *player) {
         pitch += player->recoilpitch;
     }
 
-    viewangle   = R_Interpolate(angle, frame_angle, (int)i_interpolateframes.value);
-    viewpitch   = R_Interpolate(pitch, frame_pitch, (int)i_interpolateframes.value);
-    viewx       = R_Interpolate(viewcamera->x, frame_viewx, (int)i_interpolateframes.value);
-    viewy       = R_Interpolate(viewcamera->y, frame_viewy, (int)i_interpolateframes.value);
-    viewz       = R_Interpolate(cam_z, frame_viewz, (int)i_interpolateframes.value);
+    viewangle   = R_Interpolate(angle, frame_angle, i_interpolateframes);
+    viewpitch   = R_Interpolate(pitch, frame_pitch, i_interpolateframes);
+    viewx       = R_Interpolate(viewcamera->x, frame_viewx, i_interpolateframes);
+    viewy       = R_Interpolate(viewcamera->y, frame_viewy, i_interpolateframes);
+    viewz       = R_Interpolate(cam_z, frame_viewz, i_interpolateframes);
 
     fviewx      = F2D3D(viewx);
     fviewy      = F2D3D(viewy);
@@ -534,11 +546,8 @@ static void R_SetViewClipping(angle_t angle) {
 //
 
 void R_DrawWireframe(dboolean enable) {
-    if(enable == true) {
-        CON_CvarSetValue(r_fillmode.name, 0);
-    }
-    else {  //Turn off wireframe and set device back to the way it was
-        CON_CvarSetValue(r_fillmode.name, 1);
+    r_fillmode = !enable;
+    if (!enable) {
         dglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 }
@@ -805,7 +814,7 @@ static void R_DrawContextWall(line_t* line) {
 //
 
 void R_RenderPlayerView(player_t *player) {
-    if(!r_fillmode.value) {
+    if(!r_fillmode) {
         dglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
@@ -826,7 +835,7 @@ void R_RenderPlayerView(player_t *player) {
     //
     // check for t-junction cracks
     //
-    if(r_drawfill.value >= 1) {
+    if(r_drawfill) {
         dglClearColor(1, 0, 1, 0);
         dglClear(GL_COLOR_BUFFER_BIT);
         bRenderSky = false;
@@ -859,7 +868,7 @@ void R_RenderPlayerView(player_t *player) {
     //
     // interpolate moving sectors before draw
     //
-    if(i_interpolateframes.value) {
+    if(i_interpolateframes) {
         R_InterpolateSectors();
     }
 
@@ -878,19 +887,19 @@ void R_RenderPlayerView(player_t *player) {
     //
     R_RenderWorld();
 
-    if(r_drawblockmap.value) {
+    if(r_drawblockmap) {
         R_DrawBlockMap();
     }
 
-    if(r_drawmobjbox.value) {
+    if(r_drawmobjbox) {
         R_DrawThingBBox();
     }
 
-    if(r_drawtrace.value) {
+    if(r_drawtrace) {
         R_DrawRayTrace();
     }
 
-    if(p_usecontext.value) {
+    if(p_usecontext) {
         R_DrawContextWall(contextline);
     }
 
@@ -919,30 +928,3 @@ void R_RenderPlayerView(player_t *player) {
     //
     NetUpdate();
 }
-
-//
-// R_RegisterCvars
-//
-
-void R_RegisterCvars(void) {
-    CON_CvarRegister(&r_fov);
-    CON_CvarRegister(&r_fillmode);
-    CON_CvarRegister(&r_uniformtime);
-    CON_CvarRegister(&r_fog);
-    CON_CvarRegister(&r_filter);
-    CON_CvarRegister(&r_anisotropic);
-    CON_CvarRegister(&r_wipe);
-    CON_CvarRegister(&r_drawtris);
-    CON_CvarRegister(&r_drawmobjbox);
-    CON_CvarRegister(&r_drawblockmap);
-    CON_CvarRegister(&r_drawtrace);
-    CON_CvarRegister(&r_texturecombiner);
-    CON_CvarRegister(&r_rendersprites);
-    CON_CvarRegister(&r_texnonpowresize);
-    CON_CvarRegister(&r_drawfill);
-    CON_CvarRegister(&r_skybox);
-    CON_CvarRegister(&r_colorscale);
-}
-
-
-

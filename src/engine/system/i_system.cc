@@ -48,7 +48,7 @@
 #include "i_audio.h"
 #include "gl_draw.h"
 
-CVAR(i_interpolateframes, 0);
+BoolProperty i_interpolateframes("i_interpolateframes", "", false);
 
 #ifdef USESYSCONSOLE
 #include <windows.h>
@@ -716,18 +716,11 @@ CVAR_EXTERNAL(i_rstickthreshold);
 CVAR_EXTERNAL(i_xinputscheme);
 #endif
 
-CVAR_EXTERNAL(i_gamma);
-CVAR_EXTERNAL(i_brightness);
-
 void I_RegisterCvars(void) {
 #ifdef _USE_XINPUT
     CON_CvarRegister(&i_rsticksensitivity);
     CON_CvarRegister(&i_rstickthreshold);
     CON_CvarRegister(&i_xinputscheme);
 #endif
-
-    CON_CvarRegister(&i_gamma);
-    CON_CvarRegister(&i_brightness);
-    CON_CvarRegister(&i_interpolateframes);
 }
 

@@ -255,8 +255,7 @@ void W_Init(void) {
     // 20120724 villsa - find drag & drop wad files
     else {
         for(i = 1; i < myargc; i++) {
-            if(dstrstr(myargv[i], ".wad") ||
-                    dstrstr(myargv[i], ".WAD")) {
+            if(strstr(myargv[i], ".wad") || strstr(myargv[i], ".WAD")) {
                 char *filename;
                 if ((filename = I_FindDataFile(myargv[i]))) {
                     W_MergeFile(filename);

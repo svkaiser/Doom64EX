@@ -71,24 +71,32 @@ static dboolean nosound = false;
 static dboolean nomusic = false;
 static int lastmusic = 0;
 
-CVAR_CMD(s_sfxvol, 80)  {
-    if(cvar->value < 0.0f) {
-        return;
-    }
-    S_SetSoundVolume(cvar->value);
-}
-CVAR_CMD(s_musvol, 80)  {
-    if(cvar->value < 0.0f) {
-        return;
-    }
-    S_SetMusicVolume(cvar->value);
-}
-CVAR_CMD(s_gain, 1)     {
-    if(cvar->value < 0.0f) {
-        return;
-    }
-    S_SetGainOutput(cvar->value);
-}
+FloatProperty s_sfxvol("s_sfxvol", "", 80.0f, 0,
+                       [](const FloatProperty &, float x)
+                       {
+                           if (x < 0.0f)
+                               return x;
+                           S_SetSoundVolume(x);
+                           return x;
+                       });
+
+FloatProperty s_musvol("s_musvol", "", 80.0f, 0,
+                       [](const FloatProperty &, float x)
+                       {
+                           if (x < 0.0f)
+                               return x;
+                           S_SetMusicVolume(x);
+                           return x;
+                       });
+
+FloatProperty s_gain("s_gain", "", 1.0f, 0,
+                     [](const FloatProperty &, float x)
+                     {
+                         if(x < 0.0f)
+                             return x;
+                         S_SetGainOutput(x);
+                         return x;
+                     });
 
 //
 // Internals.
@@ -119,9 +127,9 @@ void S_Init(void) {
 
     I_InitSequencer();
 
-    S_SetMusicVolume(s_musvol.value);
-    S_SetSoundVolume(s_sfxvol.value);
-    S_SetGainOutput(s_gain.value);
+    S_SetMusicVolume(s_musvol);
+    S_SetSoundVolume(s_sfxvol);
+    S_SetGainOutput(s_gain);
 }
 
 //
@@ -393,19 +401,4 @@ int S_AdjustSoundParams(fixed_t x, fixed_t y, int* vol, int* sep) {
     }
 
     return (*vol > 0);
-}
-
-
-//
-// S_RegisterCvars
-//
-
-CVAR_EXTERNAL(s_soundfont);
-CVAR_EXTERNAL(s_driver);
-
-void S_RegisterCvars(void) {
-    CON_CvarRegister(&s_sfxvol);
-    CON_CvarRegister(&s_musvol);
-    CON_CvarRegister(&s_gain);
-    CON_CvarRegister(&s_soundfont);
 }

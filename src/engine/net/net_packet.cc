@@ -277,24 +277,20 @@ void NET_WriteInt32(net_packet_t *packet, unsigned int i)
     packet->len += 4;
 }
 
-void NET_WriteString(net_packet_t *packet, const char *string)
+void NET_WriteString(net_packet_t *packet, StringView string)
 {
     byte *p;
 
     // Increase the packet size until large enough to hold the string
 
-    while (packet->len + strlen(string) + 1 > packet->alloced)
+    while (packet->len + string.length() + 1 > packet->alloced)
     {
         NET_IncreasePacket(packet);
     }
 
     p = packet->data + packet->len;
 
-    strcpy((char *) p, string);
+    strcpy((char *) p, string.data());
 
-    packet->len += strlen(string) + 1;
+    packet->len += string.length() + 1;
 }
-
-
-
-

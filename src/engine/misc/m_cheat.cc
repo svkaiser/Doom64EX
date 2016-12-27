@@ -155,7 +155,7 @@ static void M_CheatBerserk(player_t* player, char dat[4]) {
     player->message = GOTBERSERK;
 }
 
-CVAR_EXTERNAL(sv_skill);
+extern IntProperty sv_skill;
 static void M_CheatWarp(player_t* player, char dat[4]) {
     int map;
     map = datoi(dat);
@@ -170,7 +170,7 @@ static void M_CheatWarp(player_t* player, char dat[4]) {
 
     // So be it.
     gameaction = ga_warpquick;
-    gameskill = (int)sv_skill.value;
+    gameskill = sv_skill;
     gamemap = nextmap = map;
     dmemset(passwordData, 0xff, 16);
 }
@@ -190,7 +190,7 @@ void M_CheatGiveWeapon(player_t* player, char dat[4]) {
     char c = dat[0];
     int w = datoi(&c);
 
-    static char* WeapGotNames[8] = {
+    static const char* WeapGotNames[8] = {
         GOTCHAINSAW,
         GOTSHOTGUN,
         GOTSHOTGUN2,
@@ -244,7 +244,7 @@ void M_CheatArtifacts(player_t* player, char dat[4]) {
     char c = dat[0];
     int a = datoi(&c);
 
-    static char* ArtiGotNames[3] = {
+    static const char* ArtiGotNames[3] = {
         GOTARTIFACT1,
         GOTARTIFACT2,
         GOTARTIFACT3

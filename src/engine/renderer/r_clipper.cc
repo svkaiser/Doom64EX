@@ -260,7 +260,7 @@ angle_t R_FrustumAngle(void) {
         return ANG270 - ANG90;
     }
 
-    range = (64.0f / (r_fov.value - (widescreen ? -4.0f : 10.0f)));
+    range = (64.0f / (r_fov - (widescreen ? -4.0f : 10.0f)));
 
     if(range > 1.0f) {
         range = 1.0f;

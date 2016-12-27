@@ -195,7 +195,7 @@ static void IN_Finish(void) {
 // IN_Ticker
 //
 
-int IN_Ticker(void) {
+bool IN_Ticker(void) {
     int   i;
     player_t  *player;
 

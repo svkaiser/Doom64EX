@@ -114,12 +114,11 @@ void G_BuildTiccmd(ticcmd_t* cmd);
 
 #define STRPAUSED    "Paused"
 
-CVAR_EXTERNAL(sv_nomonsters);
-CVAR_EXTERNAL(sv_fastmonsters);
-CVAR_EXTERNAL(sv_respawnitems);
-CVAR_EXTERNAL(sv_respawn);
-CVAR_EXTERNAL(sv_skill);
-
+extern BoolProperty sv_nomonsters;
+extern BoolProperty sv_fastmonsters;
+extern BoolProperty sv_respawnitems;
+extern BoolProperty sv_respawn;
+extern IntProperty sv_skill;
 
 //
 // EVENT HANDLING
@@ -188,7 +187,7 @@ void D_IncValidCount(void) {
 // D_MiniLoop
 //
 
-CVAR_EXTERNAL(i_interpolateframes);
+extern BoolProperty i_interpolateframes;
 
 extern dboolean renderinframe;
 extern int      gametime;
@@ -229,7 +228,7 @@ static void D_FinishDraw(void) {
     // normal update
     I_FinishUpdate();
 
-    if(i_interpolateframes.value) {
+    if(i_interpolateframes) {
         I_EndDisplay();
     }
 }
@@ -260,7 +259,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
         realtics = entertic - oldentertics;
         oldentertics = entertic;
 
-        if(i_interpolateframes.value) {
+        if(i_interpolateframes) {
             renderinframe = true;
 
             if(I_StartDisplay()) {
@@ -354,7 +353,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
                 I_Error("D_MiniLoop: lowtic < gametic");
             }
 
-            if(i_interpolateframes.value) {
+            if(i_interpolateframes) {
                 renderinframe = true;
 
                 if(I_StartDisplay()) {
@@ -392,7 +391,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
                     I_Error("gametic>lowtic");
                 }
 
-                if(i_interpolateframes.value) {
+                if(i_interpolateframes) {
                     I_GetTime_SaveMS();
                 }
 
@@ -433,7 +432,7 @@ drawframe:
         S_UpdateSounds();
 
         // Update display, next frame, with current state.
-        if(i_interpolateframes.value) {
+        if(i_interpolateframes) {
             if(!I_StartDisplay()) {
                 goto freealloc;
             }
@@ -474,10 +473,10 @@ static void Title_Drawer(void) {
 // Title_Ticker
 //
 
-static int Title_Ticker(void) {
+static bool Title_Ticker(void) {
     if(mainmenuactive) {
         if((gametic - pagetic) >= (TICRATE * 30)) {
-            return 1;
+            return true;
         }
     }
     else {
@@ -486,7 +485,7 @@ static int Title_Ticker(void) {
         }
     }
 
-    return 0;
+    return false;
 }
 
 //
@@ -522,9 +521,9 @@ static void Title_Stop(void) {
 // Legal_Start
 //
 
-CVAR_EXTERNAL(p_regionmode);
+extern IntProperty p_regionmode;
 
-static char* legalpic = "USLEGAL";
+static const char* legalpic = "USLEGAL";
 static int legal_x = 32;
 static int legal_y = 72;
 
@@ -539,22 +538,22 @@ static void Legal_Start(void) {
         return;
     }
 
-    if(p_regionmode.value >= 2 && jllump >= 0) {
+    if(p_regionmode >= 2 && jllump >= 0) {
         legalpic = "JPLEGAL";
         legal_x = 35;
         legal_y = 45;
     }
-    else if(p_regionmode.value >= 2 && jllump == -1) {
-        CON_CvarSetValue(p_regionmode.name, 1);
+    else if(p_regionmode >= 2 && jllump == -1) {
+        p_regionmode = 1;
     }
 
-    if(p_regionmode.value == 1 && pllump >= 0) {
+    if(p_regionmode == 1 && pllump >= 0) {
         legalpic = "PLLEGAL";
         legal_x = 35;
         legal_y = 50;
     }
-    else if(p_regionmode.value == 1 && pllump == -1) {
-        CON_CvarSetValue(p_regionmode.name, 0);
+    else if(p_regionmode == 1 && pllump == -1) {
+        p_regionmode = 0;
     }
 }
 
@@ -571,13 +570,13 @@ static void Legal_Drawer(void) {
 // Legal_Ticker
 //
 
-static int Legal_Ticker(void) {
+static bool Legal_Ticker(void) {
     if((gametic - pagetic) >= (TICRATE * 5)) {
         WIPE_FadeScreen(6);
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 //
@@ -619,7 +618,7 @@ static void Credits_Drawer(void) {
 // Credits_Ticker
 //
 
-static int Credits_Ticker(void) {
+static bool Credits_Ticker(void) {
     switch(creditstage) {
     case 0:
         if(screenalpha < 0xff) {
@@ -653,7 +652,7 @@ static int Credits_Ticker(void) {
 
     case 3:
         if(creditscreenstage >= 3) {
-            return 1;
+            return true;
         }
 
         screenalpha = 0;
@@ -664,7 +663,7 @@ static int Credits_Ticker(void) {
         break;
     }
 
-    return 0;
+    return false;
 }
 
 //
@@ -716,6 +715,7 @@ static void D_SplashScreen(void) {
 // Main game loop
 //
 
+[[noreturn]]
 void D_DoomLoop(void) {
     int exit;
 
@@ -725,7 +725,7 @@ void D_DoomLoop(void) {
 
     exit = gameaction;
 
-    while(1) {
+    for (;;) {
         exit = D_MiniLoop(Title_Start, Title_Stop, Title_Drawer, Title_Ticker);
 
         if(exit == ga_newgame || exit == ga_loadgame) {
@@ -875,7 +875,11 @@ static void D_Init(void) {
             name = myargv[p++];
             value = myargv[p++];
 
-            CON_CvarSet(name, value);
+            if (auto property = Property::find(name)) {
+                property->set_value(value);
+            } else {
+                I_Printf("Error: Couldn't find property (cvar) \"%s\"\n", name);
+            }
         }
     }
 
@@ -917,11 +921,11 @@ static void D_Init(void) {
     }
 
     // set server cvars
-    CON_CvarSetValue(sv_skill.name, (float)startskill);
-    CON_CvarSetValue(sv_respawn.name, (float)respawnparm);
-    CON_CvarSetValue(sv_respawnitems.name, (float)respawnitem);
-    CON_CvarSetValue(sv_fastmonsters.name, (float)fastparm);
-    CON_CvarSetValue(sv_nomonsters.name, (float)nomonsters);
+    sv_skill = startskill;
+    sv_respawn = respawnparm;
+    sv_respawnitems = respawnitem;
+    sv_fastmonsters = fastparm;
+    sv_nomonsters = nomonsters;
 
     p = M_CheckParm("-loadgame");
     if(p && p < myargc-1) {

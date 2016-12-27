@@ -27,7 +27,7 @@
 #include "doomdef.h"
 
 // Called by main loop, animate the intermission.
-int WI_Ticker(void);
+bool WI_Ticker(void);
 
 void WI_Stop(void);
 

@@ -24,7 +24,7 @@
 #ifndef NET_SERVER_H
 #define NET_SERVER_H
 
-#include "con_cvar.h"
+#include <imp/Property>
 
 // initialise server and wait for connections
 
@@ -45,7 +45,7 @@ void NET_SV_AddModule(net_module_t *module);
 
 // Update server cvars across all clients if changed by host/listen server
 
-void NET_SV_UpdateCvars(cvar_t* cvar);
+void NET_SV_UpdateCvars(const Property &cvar);
 
 #endif /* #ifndef NET_SERVER_H */
 

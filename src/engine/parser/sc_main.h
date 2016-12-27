@@ -33,7 +33,7 @@ typedef struct {
     int     rowpos;
     int     buffpos;
     int     buffsize;
-    void (*open)(char*);
+    void (*open)(const char*);
     void (*close)(void);
     void (*compare)(const char*);
     int (*find)(dboolean);
@@ -49,7 +49,7 @@ typedef struct {
 extern scparser_t sc_parser;
 
 typedef struct {
-    char*   token;
+    const char*   token;
     int64   ptroffset;
     char    type;
 } scdatatable_t;

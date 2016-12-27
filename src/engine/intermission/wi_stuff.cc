@@ -137,7 +137,7 @@ void WI_Stop(void) {
 // WI_Ticker
 //
 
-int WI_Ticker(void) {
+bool WI_Ticker(void) {
     dboolean    state = false;
     player_t*   player;
     int         i;

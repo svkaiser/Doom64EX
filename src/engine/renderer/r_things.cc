@@ -54,11 +54,11 @@ const char*     spritename;
 static visspritelist_t visspritelist[MAX_SPRITES];
 static visspritelist_t *vissprite = NULL;
 
-CVAR_EXTERNAL(m_regionblood);
-CVAR_EXTERNAL(st_flashoverlay);
-CVAR_EXTERNAL(i_interpolateframes);
-CVAR_EXTERNAL(r_texturecombiner);
-CVAR_EXTERNAL(r_rendersprites);
+extern BoolProperty m_regionblood;
+extern BoolProperty st_flashoverlay;
+extern BoolProperty i_interpolateframes;
+extern BoolProperty r_texturecombiner;
+extern IntProperty r_rendersprites;
 
 static void AddSpriteDrawlist(drawlist_t *dl, visspritelist_t *vis, int texid);
 
@@ -230,7 +230,7 @@ void R_InitSprites(const char** namelist) {
     //
 
     if(W_CheckNumForName("BLUDA0") <= -1) {
-        int lump = (int)m_regionblood.value;
+        int lump = (int)m_regionblood;
 
         if(lump > 1) {
             lump = 1;
@@ -418,7 +418,7 @@ static dboolean R_GenerateSpritePlane(void *data, vtx_t* vertex) {
     z2 = z - height;
 
     // render as billboard?
-    if(r_rendersprites.value >= 2) {
+    if(r_rendersprites >= 2) {
         float centerz;
         float centertop;
         float centerbottom;
@@ -579,7 +579,7 @@ static void AddSpriteDrawlist(drawlist_t *dl, visspritelist_t *vis, int texid) {
 //
 
 void R_SetupSprites(void) {
-    dboolean interpolate = (int)i_interpolateframes.value;
+    dboolean interpolate = i_interpolateframes;
     visspritelist_t *vis;
 
     for(vis = vissprite - 1; vis >= visspritelist; vis--) {
@@ -662,10 +662,10 @@ void R_DrawPSprite(pspdef_t *psp, sector_t* sector, player_t *player) {
 
     // setup vertex data
 
-    x = (F2D3D(R_Interpolate(psp->sx, psp->frame_x, (int)i_interpolateframes.value))
+    x = (F2D3D(R_Interpolate(psp->sx, psp->frame_x, i_interpolateframes))
          - spriteoffset[spritenum]);
 
-    y = (F2D3D(R_Interpolate(psp->sy, psp->frame_y, (int)i_interpolateframes.value))
+    y = (F2D3D(R_Interpolate(psp->sy, psp->frame_y, i_interpolateframes))
          - spritetopoffset[spritenum]);
 
     if(player->onground) {
@@ -688,7 +688,7 @@ void R_DrawPSprite(pspdef_t *psp, sector_t* sector, player_t *player) {
     //
     // setup texture environment for effects
     //
-    if(r_texturecombiner.value) {
+    if(r_texturecombiner) {
         float f[4] = {0};
 
         f[0] = f[1] = f[2] = ((float)sector->lightlevel / 255.0f);
@@ -701,7 +701,7 @@ void R_DrawPSprite(pspdef_t *psp, sector_t* sector, player_t *player) {
             dglTexCombModulate(GL_PREVIOUS, GL_PRIMARY_COLOR);
         }
 
-        if(st_flashoverlay.value <= 0) {
+        if(!st_flashoverlay) {
             GL_SetTextureUnit(2, true);
             dglTexCombColor(GL_PREVIOUS, flashcolor, GL_ADD);
         }

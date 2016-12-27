@@ -43,10 +43,10 @@
 #include "st_stuff.h"
 #include "w_wad.h"
 
-CVAR_EXTERNAL(sv_nomonsters);
-CVAR_EXTERNAL(sv_fastmonsters);
-CVAR_EXTERNAL(sv_respawnitems);
-CVAR_EXTERNAL(sv_respawn);
+extern BoolProperty sv_nomonsters;
+extern BoolProperty sv_fastmonsters;
+extern BoolProperty sv_respawnitems;
+extern BoolProperty sv_respawn;
 
 typedef int net_clientstate_t;
 enum
@@ -147,7 +147,7 @@ dboolean net_waiting_for_start = false;
 
 // Name that we send to the server
 
-char *net_player_name = NULL;
+String net_player_name;
 
 // The last ticcmd constructed
 
@@ -381,10 +381,10 @@ void NET_CL_StartGame(void)
     settings.deathmatch         = deathmatch;
     settings.map                = startmap;
     settings.skill              = startskill;
-    settings.nomonsters         = (int)sv_nomonsters.value;
-    settings.fast_monsters      = (int)sv_fastmonsters.value;
-    settings.respawn_monsters   = (int)sv_respawn.value;
-	settings.respawn_items      = (int)sv_respawnitems.value;
+    settings.nomonsters         = sv_nomonsters;
+    settings.fast_monsters      = sv_fastmonsters;
+    settings.respawn_monsters   = sv_respawn;
+	settings.respawn_items      = sv_respawnitems;
     settings.compatflags        = compatflags;
     settings.gameflags          = gameflags;
 
@@ -1003,7 +1003,11 @@ static void NET_CL_ParseCvarUpdate(net_packet_t* packet)
     cvarname    = NET_ReadString(packet);
     cvarvalue   = NET_ReadString(packet);
 
-    CON_CvarSet(cvarname, cvarvalue);
+    if (auto p = Property::find(cvarname)) {
+        if (p->is_network()) {
+            p->set_value(cvarvalue);
+        }
+    }
 
     sprintf(str, "%s changed to %s", cvarname, cvarvalue);
     ST_Notification(str);
@@ -1296,7 +1300,7 @@ void NET_CL_Disconnect(void)
     NET_CL_Shutdown();
 }
 
-CVAR_EXTERNAL(m_playername);
+extern StringProperty m_playername;
 
 void NET_CL_Init(void)
 {
@@ -1304,19 +1308,19 @@ void NET_CL_Init(void)
 
     p = M_CheckParm("-playername");
 	if(p && (p < myargc-1) && (myargv[p + 1][0] != '-'))
-		CON_CvarSet(m_playername.name, myargv[p + 1]);
+        m_playername = myargv[p + 1];
 
-    if (net_player_name == NULL)
-        net_player_name = m_playername.string;
+    if (net_player_name.empty())
+        net_player_name = m_playername;
 
     // Try to set from the USER and USERNAME environment variables
     // Otherwise, fallback to "Player"
 
-    if (net_player_name == NULL) 
+    if (net_player_name.empty())
         net_player_name = getenv("USER");
-    if (net_player_name == NULL)
+    if (net_player_name.empty())
         net_player_name = getenv("USERNAME");
-    if (net_player_name == NULL)
+    if (net_player_name.empty())
         net_player_name = "Player";
 }
 

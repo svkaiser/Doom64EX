@@ -35,6 +35,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <imp/Property>
+
 #endif
 
 #include "SDL.h"
@@ -52,7 +54,7 @@
 #include "SDL.h"
 
 // 20120203 villsa - cvar for soundfont location
-CVAR(s_soundfont, DOOMSND.SF2);
+StringProperty s_soundfont("s_soundfont", "doomsnd.sf2 location", "doomsnd.sf2"_sv, Property::config);
 
 //
 // Mutex
@@ -276,7 +278,7 @@ static void Seq_SetReverb(doomseq_t* seq,
 // Seq_SetConfig
 //
 
-static void Seq_SetConfig(doomseq_t* seq, char* setting, int value) {
+static void Seq_SetConfig(doomseq_t* seq, const char* setting, int value) {
     fluid_settings_setint(seq->settings, setting, value);
 }
 
@@ -1213,16 +1215,16 @@ void I_InitSequencer(void) {
     }
 
     sffound = false;
-    if (s_soundfont.string[0]) {
-        if (I_FileExists(s_soundfont.string)) {
-            I_Printf("Found SoundFont %s\n", s_soundfont.string);
-            doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont.string, 1);
+    if (!s_soundfont.native_value().empty()) {
+        if (I_FileExists(s_soundfont.value().c_str())) {
+            I_Printf("Found SoundFont %s\n", s_soundfont.native_value().c_str());
+            doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont.native_value().c_str(), 1);
 
-            CON_DPrintf("Loading %s\n", s_soundfont.string);
+            CON_DPrintf("Loading %s\n", s_soundfont.native_value().c_str());
 
             sffound = true;
         } else {
-            CON_Warnf("CVar s_soundfont doesn't point to a file.", s_soundfont.string);
+            CON_Warnf("CVar s_soundfont doesn't point to a file.");
         }
     }
 

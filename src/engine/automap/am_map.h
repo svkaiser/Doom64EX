@@ -24,7 +24,9 @@
 #ifndef __AMMAP_H__
 #define __AMMAP_H__
 
-CVAR_EXTERNAL(am_overlay);
+#include <imp/Property>
+
+extern BoolProperty am_overlay;
 
 // Called by main loop.
 dboolean AM_Responder(event_t* ev);

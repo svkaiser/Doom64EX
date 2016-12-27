@@ -686,7 +686,7 @@ typedef struct {
     float factor;
 } fadebright_t;
 
-CVAR_EXTERNAL(i_brightness);
+extern IntProperty i_brightness;
 
 //
 // T_FadeInBrightness
@@ -694,7 +694,7 @@ CVAR_EXTERNAL(i_brightness);
 
 void T_FadeInBrightness(fadebright_t* fb) {
     fb->factor += 2;
-    if(fb->factor < (i_brightness.value + 100)) {
+    if(fb->factor < (i_brightness + 100)) {
         R_SetLightFactor(fb->factor);
     }
     else {

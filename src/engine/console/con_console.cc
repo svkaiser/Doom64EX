@@ -65,7 +65,7 @@ static dboolean     console_enabled = false;
 static int          console_pos = 0;//bottom of console, in pixels
 static char         console_linebuffer[CON_BUFFERSIZE];
 static int          console_linelength;
-static dboolean     console_state = CST_UP;
+static int          console_state = CST_UP;
 static int          console_prevcmds[CMD_HISTORY_SIZE];
 static int          console_cmdhead;
 static int          console_nextcmd;
@@ -80,8 +80,6 @@ dboolean    console_initialized = false;
 
 void CON_Init(void) {
     int i;
-
-    CON_CvarInit();
 
     console_buffer = (conline_t **)Z_Malloc(sizeof(conline_t *) * MAX_CONSOLE_LINES, PU_STATIC, NULL);
     console_head = 0;
@@ -361,8 +359,9 @@ dboolean CON_Responder(event_t* ev) {
                 console_inputlength = 1;
                 break;
 
-            case KEY_TAB:
-                CON_CvarAutoComplete(&console_inputbuffer[1]);
+                case KEY_TAB:
+                // FIXME: Fix cvar tab autocompletion
+//                CON_CvarAutoComplete(&console_inputbuffer[1]);
                 break;
 
             case KEY_ENTER:

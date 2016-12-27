@@ -757,7 +757,7 @@ P_PathTraverse
     int        mapystep;
     int        count;
 
-    if(r_drawtrace.value) {
+    if(r_drawtrace) {
         tracedrawer_t* tdrawer;
 
         tdrawer = (tracedrawer_t*) Z_Malloc(sizeof(*tdrawer), PU_LEVSPEC, 0);
