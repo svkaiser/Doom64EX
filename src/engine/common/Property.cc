@@ -40,23 +40,14 @@ void Property::update()
     }
 }
 
-void Property::set_to_config()
-{
-    if (is_config()) {
-//        auto value = Config::find_property(mName);
-//        if (!value.empty()) {
-//            set_value(value);
-//            return;
-//        }
-    }
-    set_to_default();
-}
-
 std::vector<Property *> Property::all()
 {
-    std::vector<Property *> v(_global().properties.size());
-    for (auto& p : _global().properties)
+    std::vector<Property *> v;
+    v.reserve(_global().properties.size());
+    for (auto& p : _global().properties) {
+        assert(p.second != nullptr);
         v.emplace_back(p.second);
+    }
     return v;
 }
 

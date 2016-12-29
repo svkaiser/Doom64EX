@@ -28,8 +28,8 @@ namespace imp {
       virtual void p_set_to_default() = 0;
 
   public:
-      /*! Save the property in config.cfg */
-      static constexpr int config  = 0x1;
+      /*! Don't save the property in config.cfg */
+      static constexpr int noconfig  = 0x1;
       /*! Readonly if sv_cheats == 0 */
       static constexpr int cheat   = 0x2;
       /*! Don't display in console */
@@ -82,8 +82,8 @@ namespace imp {
       int flags() const
       { return mFlags; }
 
-      bool is_config() const
-      { return (mFlags & config) != 0; }
+      bool is_noconfig() const
+      { return (mFlags & noconfig) != 0; }
 
       bool is_cheat() const
       { return (mFlags & cheat) != 0; }
@@ -111,8 +111,6 @@ namespace imp {
           p_set_to_default();
           update();
       }
-
-      void set_to_config();
 
       void update();
   };

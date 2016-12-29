@@ -38,7 +38,7 @@
 #include <sstream>
 #include <imp/Property>
 
-FloatProperty i_gamma("i_gamma", "", 0.0f, Property::config,
+FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
                       [](const FloatProperty &, float x)
                       {
                           GL_DumpTextures();

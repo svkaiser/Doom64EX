@@ -96,7 +96,7 @@ static int curunit = 0;
 extern IntProperty r_texnonpowresize;
 extern BoolProperty r_fillmode;
 
-BoolProperty r_texturecombiner("r_texturecombiner", "", true, Property::config,
+BoolProperty r_texturecombiner("r_texturecombiner", "", true, 0,
                                [](const BoolProperty &property, bool new_value) {
                                    int i;
 

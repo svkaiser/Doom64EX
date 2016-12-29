@@ -723,7 +723,7 @@ void G_OutputBindings(FILE *fh) {
 
     // cvars
     for(auto p : Property::all()) {
-        if (!p->is_config())
+        if (p->is_noconfig())
             continue;
 
         fprintf(fh, "seta \"%s\" \"%s\"\n", p->name().data(), p->value().c_str());
