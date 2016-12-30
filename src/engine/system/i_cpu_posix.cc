@@ -39,8 +39,6 @@
 #include <sched.h>
 #endif
 
-#include "con_cvar.h"
-
 // cannot include DOOM headers here; required externs:
 extern void     I_Printf(const char* string, ...);
 extern int      M_CheckParm(const char *);

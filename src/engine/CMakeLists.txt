@@ -125,7 +125,6 @@ add_sources(common
 # src/console
 add_sources(console
   con_console.cc
-  con_cvar.cc
   )
 
 # src/doom_main

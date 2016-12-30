@@ -26,7 +26,6 @@
 
 #include "d_event.h"
 #include "gl_main.h"
-#include "con_cvar.h"
 
 #define MAX_CONSOLE_INPUT_LEN    80
 extern char     console_inputbuffer[];
