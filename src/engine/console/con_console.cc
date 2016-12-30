@@ -72,8 +72,30 @@ static int          console_nextcmd;
 
 char        console_inputbuffer[MAX_CONSOLE_INPUT_LEN];
 int         console_inputlength;
-dboolean    console_initialized = false;
+int     console_autocomplete = 0;
+bool    console_initialized = false;
+std::vector<Property*> console_autocomplete_list;
 
+//
+// CON_AutoComplete
+//
+static void CON_AutoComplete()
+{
+    if (console_inputlength <= 1)
+        return;
+
+    if (console_autocomplete == 0) {
+        console_autocomplete_list = Property::partial(&console_inputbuffer[1]);
+    }
+
+    if (console_autocomplete_list.empty())
+        return;
+
+    auto index = (console_autocomplete++) % console_autocomplete_list.size();
+    auto entry = console_autocomplete_list[index]->name();
+    strcpy(console_inputbuffer + 1, entry.data());
+    console_inputlength = entry.length() + 1;
+}
 //
 // CON_Init
 //
@@ -357,11 +379,11 @@ dboolean CON_Responder(event_t* ev) {
 
             case KEY_ESCAPE:
                 console_inputlength = 1;
+                console_autocomplete = 0;
                 break;
 
-                case KEY_TAB:
-                // FIXME: Fix cvar tab autocompletion
-//                CON_CvarAutoComplete(&console_inputbuffer[1]);
+            case KEY_TAB:
+                CON_AutoComplete();
                 break;
 
             case KEY_ENTER:
@@ -383,6 +405,7 @@ dboolean CON_Responder(event_t* ev) {
                 console_prevcmds[console_cmdhead] = -1;
                 G_ExecuteCommand(&console_inputbuffer[1]);
                 console_inputlength = 1;
+                console_autocomplete = 0;
                 CONCLEARINPUT();
                 break;
 
@@ -402,6 +425,7 @@ dboolean CON_Responder(event_t* ev) {
                     console_inputlength = console_buffer[c]->len;
                     dmemcpy(console_inputbuffer, console_buffer[console_prevcmds[console_nextcmd]]->line, console_inputlength);
                 }
+                console_autocomplete = 0;
                 break;
 
             case KEY_DOWNARROW:
@@ -421,6 +445,7 @@ dboolean CON_Responder(event_t* ev) {
                 console_nextcmd = c;
                 console_inputlength = console_buffer[console_prevcmds[console_nextcmd]]->len;
                 dmemcpy(console_inputbuffer, console_buffer[console_prevcmds[console_nextcmd]]->line, console_inputlength);
+                console_autocomplete = 0;
                 break;
 
             case KEY_MWHEELUP:
@@ -444,6 +469,7 @@ dboolean CON_Responder(event_t* ev) {
 
                 clearheld = false;
                 CON_ParseKey(c);
+                console_autocomplete = 0;
                 break;
             }
 

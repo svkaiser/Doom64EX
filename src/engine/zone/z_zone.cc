@@ -356,7 +356,7 @@ void *(Z_Realloc)(void *ptr, int size, int tag, void *user, const char *file, in
 
     // zero out newly created memory
     if (origsize < size) {
-        memset(result + origsize, 0, size - origsize);
+        memset(reinterpret_cast<char*>(result) + origsize, 0, size - origsize);
     }
 
 #ifdef ZONEFILE

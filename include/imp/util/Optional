@@ -4,6 +4,7 @@
 
 #include <utility>
 #include <exception>
+#include <type_traits>
 
 /*
  * An implementation of the upcoming std::optional in C++17
@@ -16,7 +17,7 @@ namespace imp {
   static constexpr inplace_tag inplace {};
 
   struct nullopt_tag {};
-  static constexpr nullopt_tag nullopt;
+  static constexpr nullopt_tag nullopt {};
 
   template <class T>
   class Optional {
@@ -186,6 +187,26 @@ namespace imp {
       constexpr T value_or(U&& default_value) &&
       { return mInit ? std::move(mValue) : static_cast<T>(std::forward<U>(default_value)); }
 
+      template <class Functor>
+      constexpr auto if_value(Functor functor) -> Optional<std::result_of_t<decltype(functor(value()))>>
+      {
+          if (have_value()) {
+              return { functor(value()) };
+          } else {
+              nullopt;
+          }
+      }
+
+      template <class Functor>
+      constexpr auto if_empty(Functor functor) -> Optional<std::result_of_t<decltype(functor(value()))>>
+      {
+          if (have_value()) {
+              return *this;
+          } else {
+              functor();
+          }
+      }
+
       template <class... Args>
       constexpr void emplace(Args&&... args)
       {
@@ -196,6 +217,160 @@ namespace imp {
 
       constexpr void reset()
       { *this = nullopt; }
+  };
+
+  template <class T>
+  class Optional<T&> {
+      T *mValue {};
+
+  public:
+      constexpr Optional() = default;
+
+      constexpr Optional(const Optional& other) = default;
+
+      constexpr Optional(Optional&& other) = default;
+
+      constexpr Optional(nullopt_tag) {}
+
+      constexpr Optional(std::nullptr_t) {}
+
+      constexpr Optional(T* value):
+          mValue(value) {}
+
+      template <class U>
+      constexpr Optional(inplace_tag, U&& value):
+          mValue(std::forward<U*>(&value)) {}
+
+      constexpr Optional& operator=(const Optional& other)
+      {
+          mValue = other.mValue;
+          return *this;
+      }
+
+      constexpr Optional& operator=(Optional&& other)
+      {
+          mValue = std::move(other.mValue);
+          return *this;
+      }
+
+      Optional& operator=(nullopt_tag)
+      {
+          mValue = nullptr;
+          return *this;
+      }
+
+      template <class U>
+      Optional& operator=(U&& other)
+      {
+          mValue = std::forward<U*>(&other);
+          return *this;
+      }
+
+      template <class U>
+      Optional& operator=(const Optional<U> &other)
+      {
+          mValue = other.mValue;
+          return *this;
+      }
+
+      template <class U>
+      Optional& operator=(Optional<U>&& other)
+      {
+          mValue = std::move(other.mValue);
+          return *this;
+      }
+
+      constexpr T* operator->()
+      { return mValue; }
+
+      constexpr const T* operator->() const
+      { return mValue; }
+
+      constexpr T& operator*() &
+      { return *mValue; }
+
+      constexpr const T& operator*() const&
+      { return *mValue; }
+
+      constexpr T&& operator*() &&
+      { return std::move(*mValue); }
+
+      constexpr const T& operator*() const&&
+      { return std::move(*mValue); }
+
+      constexpr bool operator!() const
+      { return mValue == nullptr; }
+
+      constexpr explicit operator bool() const
+      { return mValue != nullptr; }
+
+      constexpr bool have_value() const
+      { return mValue == nullptr; }
+
+      constexpr T& value() &
+      {
+          if (mValue == nullptr)
+              throw bad_optional_access {};
+          return *mValue;
+      }
+
+      constexpr const T& value() const&
+      {
+          if (mValue == nullptr)
+              throw bad_optional_access {};
+          return *mValue;
+      }
+
+      constexpr T&& value() &&
+      {
+          if (mValue == nullptr)
+              throw bad_optional_access {};
+          return std::move(*mValue);
+      }
+
+      constexpr const T&& value() const&&
+      {
+          if (mValue == nullptr)
+              throw bad_optional_access {};
+          return std::move(*mValue);
+      }
+
+      template <class U>
+      constexpr const T& value_or(U&& default_value) const&
+      { return mValue != nullptr ? *mValue : static_cast<T>(std::forward<U>(default_value)); }
+
+      template <class U>
+      constexpr T& value_or(U&& default_value) &&
+      { return mValue != nullptr ? std::move(*mValue) : static_cast<T>(std::forward<U>(default_value)); }
+
+      template <class Functor>
+      constexpr auto if_value(Functor functor) -> decltype(functor(**this))
+      {
+          if (have_value()) {
+              return functor(**this);
+          } else {
+              nullopt;
+          }
+      }
+
+      template <class Functor>
+      constexpr Optional& if_empty(Functor functor)
+      {
+          if (have_value()) {
+              return *this;
+          } else {
+              functor();
+          }
+      }
+
+      template <class U>
+      constexpr void emplace(U&& value)
+      {
+          mValue = std::forward<U*>(&value);
+      }
+
+      constexpr void reset()
+      { mValue = nullptr; }
   };
 
   template <class T, class... Args>

@@ -51,7 +51,7 @@ std::vector<Property *> Property::all()
     return v;
 }
 
-Property* Property::find(StringView name)
+Optional<Property&> Property::find(StringView name)
 {
     auto it = _global().properties.find(name);
     return it != _global().properties.end() ? it->second : nullptr;
@@ -72,10 +72,10 @@ Vector<Property *> Property::partial(StringView prefix)
         if (lower.length() > it.first.length())
             continue;
 
-        if (lower == it.first) {
-            list.push_back(it.second);
+        if (lower == it.first.substr(lower.length())) {
+            list.emplace_back(it.second);
             found = true;
-        } else if(found) {
+        } else if (found) {
             // std::map has sorted keys. If we've found some but stopped finding more,
             // it means we've gone too far.
             break;

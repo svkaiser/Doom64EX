@@ -4,34 +4,37 @@
 
 #include <string>
 #include "Types"
+#include "StringView"
 
 namespace imp {
   template <class T>
-  T from_string(const std::string&);
+  T from_string(StringView);
 
   template <>
-  inline std::string from_string<std::string>(const std::string &str)
-  { return str; }
+  inline std::string from_string<std::string>(StringView str)
+  { return str.to_string(); }
 
   template <>
-  inline int32 from_string<int32>(const std::string &str)
-  { return std::stoi(str); }
+  inline int32 from_string<int32>(StringView str)
+  {
+    return std::atoi(str.data());
+  }
 
   template <>
-  inline bool from_string<bool>(const std::string &str)
-  { return std::stoi(str) > 0; }
+  inline bool from_string<bool>(StringView str)
+  { return std::atoi(str.data()) > 0; }
 
   template <>
-  inline int64 from_string<int64>(const std::string &str)
-  { return std::stoll(str); }
+  inline int64 from_string<int64>(StringView str)
+  { return std::atoll(str.data()); }
 
   template <>
-  inline float from_string<float>(const std::string &str)
-  { return std::stof(str); }
+  inline float from_string<float>(StringView str)
+  { return std::strtof(str.data(), nullptr); }
 
   template <>
-  inline double from_string<double>(const std::string &str)
-  { return std::stod(str); }
+  inline double from_string<double>(StringView str)
+  { return std::strtod(str.data(), nullptr); }
 }
 
 #endif //__IMP_CONVERT__63784703

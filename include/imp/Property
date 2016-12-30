@@ -5,6 +5,7 @@
 #include <imp/util/Convert>
 #include <imp/util/Clamped>
 #include <imp/Prelude>
+#include <imp/util/Optional>
 
 namespace std {
   inline String to_string(String x)
@@ -44,7 +45,7 @@ namespace imp {
        * \param name Property name
        * \return A Property instance or nullptr if not found
        */
-      static Property* find(StringView name);
+      static Optional<Property&> find(StringView name);
 
       /*!
        * \brief Look for a typed property
@@ -53,9 +54,13 @@ namespace imp {
        * \return A TypeProperty instance or nullptr if not found
        */
       template <class T>
-      static TypedProperty<T>* find(StringView name)
+      static Optional<TypedProperty<T>&> find(StringView name)
       {
-          return dynamic_cast<TypedProperty<T>*>(find(name));
+          return find(name).if_value([](auto p)
+                                     {
+                                         auto p2 = dynamic_cast<TypedProperty<T> *>(p);
+                                         return { p2 ? *p2 : nullopt };
+                                     });
       }
 
       /*!
