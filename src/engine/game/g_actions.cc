@@ -258,12 +258,11 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
 #endif
 
             if(!al->param[0]) {
-                char str[256];
-                sprintf(str, "%s: %s (%s)", cvar->name().data(), cvar->value().c_str(), cvar->default_value().c_str());
-                CON_AddLine(str, dstrlen(str));
+                auto str = format("{}: {} ({})", cvar->name(), cvar->string(), cvar->default_string());
+                CON_AddLine(str.c_str(), str.size());
             }
             else {
-                cvar->set_value(al->param[0]);
+                cvar->set_string(al->param[0]);
                 // FIXME: Update cvar in network game
 #if 0
                 if(netgame) {
@@ -726,7 +725,7 @@ void G_OutputBindings(FILE *fh) {
         if (p->is_noconfig())
             continue;
 
-        fprintf(fh, "seta \"%s\" \"%s\"\n", p->name().data(), p->value().c_str());
+        println(fh, "seta \"{}\" \"{}\"", p->name(), p->string());
     }
 }
 

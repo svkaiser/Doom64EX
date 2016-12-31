@@ -342,7 +342,7 @@ void GL_SetColorScale(void) {
         return;
     }
 
-    int cs = r_colorscale;
+    int cs = *r_colorscale;
 
     switch(cs) {
         case 1:

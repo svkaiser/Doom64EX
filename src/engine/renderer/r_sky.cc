@@ -170,7 +170,7 @@ static void R_DrawSkyDome(int tiles, float rows, int height,
     //
     dglMatrixMode(GL_PROJECTION);
     dglLoadIdentity();
-    dglViewFrustum(video_width, video_height, r_fov, 0.1f);
+    dglViewFrustum(video_width, video_height, *r_fov, 0.1f);
     dglMatrixMode(GL_MODELVIEW);
     dglLoadIdentity();
     dglPushMatrix();
@@ -286,7 +286,7 @@ static void R_DrawSkyboxCloud(void) {
     //
     dglMatrixMode(GL_PROJECTION);
     dglLoadIdentity();
-    dglViewFrustum(video_width, video_height, r_fov, 0.1f);
+    dglViewFrustum(video_width, video_height, *r_fov, 0.1f);
     dglMatrixMode(GL_MODELVIEW);
     dglLoadIdentity();
     dglPushMatrix();

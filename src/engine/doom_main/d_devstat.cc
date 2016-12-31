@@ -251,7 +251,7 @@ dboolean D_DevKeyResponder(event_t* ev) {
                     players[consoleplayer].cheats |= CF_SPECTATOR;
                     players[consoleplayer].message = "Spectator Mode On";
 
-                    freelook = (int)v_mlook;
+                    freelook = *v_mlook;
                     v_mlook = true;
 
                     players[consoleplayer].mo->flags |= MF_FLOAT;

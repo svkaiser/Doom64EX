@@ -24,14 +24,20 @@ namespace fmt {
       print("\n");
   }
 
+  inline void println(std::FILE* fh, CStringRef fmt, ArgList args)
+  {
+      print(fh, fmt, args);
+      print(fh, "\n");
+  }
+
   inline void fatal(CStringRef fmt, ArgList args)
   {
-      print(stderr, fmt, args);
-      print(stderr, "\n");
+      println(stderr, fmt, args);
       std::terminate();
   }
 
   FMT_VARIADIC(void, println, CStringRef)
+  FMT_VARIADIC(void, println, std::FILE*, CStringRef)
   FMT_VARIADIC(void, fatal, CStringRef)
 
   template <class T>

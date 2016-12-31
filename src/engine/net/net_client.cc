@@ -381,10 +381,10 @@ void NET_CL_StartGame(void)
     settings.deathmatch         = deathmatch;
     settings.map                = startmap;
     settings.skill              = startskill;
-    settings.nomonsters         = sv_nomonsters;
-    settings.fast_monsters      = sv_fastmonsters;
-    settings.respawn_monsters   = sv_respawn;
-	settings.respawn_items      = sv_respawnitems;
+    settings.nomonsters         = *sv_nomonsters;
+    settings.fast_monsters      = *sv_fastmonsters;
+    settings.respawn_monsters   = *sv_respawn;
+	settings.respawn_items      = *sv_respawnitems;
     settings.compatflags        = compatflags;
     settings.gameflags          = gameflags;
 
@@ -1005,7 +1005,7 @@ static void NET_CL_ParseCvarUpdate(net_packet_t* packet)
 
     if (auto p = Property::find(cvarname)) {
         if (p->is_network()) {
-            p->set_value(cvarvalue);
+            p->set_string(cvarvalue);
         }
     }
 
@@ -1311,7 +1311,7 @@ void NET_CL_Init(void)
         m_playername = myargv[p + 1];
 
     if (net_player_name.empty())
-        net_player_name = m_playername;
+        net_player_name = *m_playername;
 
     // Try to set from the USER and USERNAME environment variables
     // Otherwise, fallback to "Player"

@@ -170,7 +170,7 @@ static void M_CheatWarp(player_t* player, char dat[4]) {
 
     // So be it.
     gameaction = ga_warpquick;
-    gameskill = sv_skill;
+    gameskill = *sv_skill;
     gamemap = nextmap = map;
     dmemset(passwordData, 0xff, 16);
 }

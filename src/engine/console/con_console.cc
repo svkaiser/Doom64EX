@@ -147,7 +147,7 @@ void CON_Init(void) {
 // CON_AddLine
 //
 
-void CON_AddLine(char *line, int len) {
+void CON_AddLine(const char *line, int len) {
     conline_t   *cline;
     int         i;
     dboolean    recursed = false;
@@ -200,8 +200,8 @@ void CON_AddLine(char *line, int len) {
 // CON_AddText
 //
 
-void CON_AddText(char *text) {
-    char    *src;
+void CON_AddText(const char *text) {
+    const char *src;
     char    c;
 
     if(!console_linebuffer) {

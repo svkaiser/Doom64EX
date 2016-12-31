@@ -88,9 +88,9 @@ void I_InitScreen(void) {
     uint32  flags = 0;
     char    title[256];
 
-    InWindow        = v_windowed;
-    video_width     = v_width;
-    video_height    = v_height;
+    InWindow        = *v_windowed;
+    video_width     = *v_width;
+    video_height    = *v_height;
     video_ratio     = (float)video_width / (float)video_height;
 
     if(M_CheckParm("-window")) {
@@ -144,8 +144,8 @@ void I_InitScreen(void) {
     SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, v_buffersize);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, v_depthsize);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, *v_buffersize);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, *v_depthsize);
     SDL_GL_SetSwapInterval(v_vsync ? SDL_TRUE : SDL_FALSE);
 
     flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
@@ -176,12 +176,12 @@ void I_InitScreen(void) {
             v_depthsize = 8;
         }
 
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, v_depthsize);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, *v_depthsize);
 
         if((glContext = SDL_GL_CreateContext(window)) == NULL) {
             // fall back to lower buffer setting
             v_buffersize = 16;
-            SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, v_buffersize);
+            SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, *v_buffersize);
 
             if((glContext = SDL_GL_CreateContext(window)) == NULL) {
                 // give up

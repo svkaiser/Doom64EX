@@ -1215,12 +1215,12 @@ void I_InitSequencer(void) {
     }
 
     sffound = false;
-    if (!s_soundfont.native_value().empty()) {
-        if (I_FileExists(s_soundfont.value().c_str())) {
-            I_Printf("Found SoundFont %s\n", s_soundfont.native_value().c_str());
-            doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont.native_value().c_str(), 1);
+    if (!s_soundfont->empty()) {
+        if (I_FileExists(s_soundfont->c_str())) {
+            I_Printf("Found SoundFont %s\n", s_soundfont->c_str());
+            doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont->c_str(), 1);
 
-            CON_DPrintf("Loading %s\n", s_soundfont.native_value().c_str());
+            CON_DPrintf("Loading %s\n", s_soundfont->c_str());
 
             sffound = true;
         } else {

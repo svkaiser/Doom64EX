@@ -97,7 +97,7 @@ extern IntProperty r_texnonpowresize;
 extern BoolProperty r_fillmode;
 
 BoolProperty r_texturecombiner("r_texturecombiner", "", true, 0,
-                               [](const BoolProperty &property, bool new_value) {
+                               [](const BoolProperty &, bool, bool&) {
                                    int i;
 
                                    curunit = 0;
@@ -105,8 +105,6 @@ BoolProperty r_texturecombiner("r_texturecombiner", "", true, 0,
                                    for(i = 0; i < GL_MAX_TEX_UNITS; i++) {
                                        dmemset(&gl_env_state[i], 0, sizeof(gl_env_state_t));
                                    }
-
-                                   return new_value;
                                });
 
 //

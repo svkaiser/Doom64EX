@@ -278,7 +278,7 @@ static void SetupFog(void) {
 void R_SetViewMatrix(void) {
     dglMatrixMode(GL_PROJECTION);
     dglLoadIdentity();
-    dglViewFrustum(video_width, video_height, r_fov, 0.1f);
+    dglViewFrustum(video_width, video_height, *r_fov, 0.1f);
     dglMatrixMode(GL_MODELVIEW);
     dglLoadIdentity();
     dglRotatef(-TRUEANGLES(viewpitch), 1.0f, 0.0f, 0.0f);
@@ -295,7 +295,7 @@ void R_RenderWorld(void) {
 
     dglEnable(GL_DEPTH_TEST);
 
-    DL_BeginDrawList(r_fillmode, r_texturecombiner);
+    DL_BeginDrawList(*r_fillmode, *r_texturecombiner);
 
     // setup texture environment for effects
     if(r_texturecombiner) {

@@ -492,8 +492,8 @@ void AM_Ticker(void) {
 
     if(followplayer) {
         if(am_flags & AF_PANMODE) {
-            int panscalex = (int)(v_msensitivityx / (1500.0f / scale));
-            int panscaley = (int)(v_msensitivityy / (1500.0f / scale));
+            int panscalex = (int)(*v_msensitivityx / (1500.0f / scale));
+            int panscaley = (int)(*v_msensitivityy / (1500.0f / scale));
 
             automappanx += ((I_MouseAccel(mpanx)*panscalex)/128) << 16;
             automappany += ((I_MouseAccel(mpany)*panscaley)/128) << 16;
@@ -656,7 +656,7 @@ static void AM_DrawNodes(void) {
 
     nodenum = numnodes-1;
 
-    if(am_nodes >= 4) {
+    if(*am_nodes >= 4) {
         while(!(nodenum & NF_SUBSECTOR)) {
             node = &nodes[nodenum];
             side = R_PointOnSide(plr->mo->x, plr->mo->y, node);
@@ -665,10 +665,10 @@ static void AM_DrawNodes(void) {
     }
 
     for(i = 0; i < numnodes; i++) {
-        if(am_nodes < 4) {
+        if(*am_nodes < 4) {
             node = &nodes[i];
 
-            if(am_nodes == 1 || am_nodes >= 3) {
+            if(*am_nodes == 1 || *am_nodes >= 3) {
                 x1 = node->bbox[0][BOXLEFT];
                 y1 = node->bbox[0][BOXTOP];
                 x2 = node->bbox[0][BOXRIGHT];
@@ -726,7 +726,7 @@ static void AM_DrawNodes(void) {
                 AM_DrawLine(x1, x2, y1, y2, scale, 0x00FF00FF);
             }
 
-            if(am_nodes == 2 || am_nodes >= 3) {
+            if(*am_nodes == 2 || *am_nodes >= 3) {
                 x1 = node->x;
                 y1 = node->y;
                 x2 = (node->x + node->dx);
@@ -736,7 +736,7 @@ static void AM_DrawNodes(void) {
             }
         }
 
-        if(am_nodes >= 4) {
+        if(*am_nodes >= 4) {
             break;
         }
     }
@@ -891,7 +891,7 @@ void AM_drawThings(void) {
             // draw thing triangles for automap cheat
             //
             if(amCheating == 2) {
-                if(t->type != MT_PLAYER && am_drawobjects != 1) {
+                if(t->type != MT_PLAYER && *am_drawobjects != 1) {
                     //
                     // shootable stuff are marked as red while normal things are blue
                     //
@@ -903,14 +903,14 @@ void AM_drawThings(void) {
                     }
                 }
 
-                if(am_drawobjects) {
+                if(*am_drawobjects) {
                     AM_DrawSprite(t, scale);
                 }
             }
             //
             // draw colored keys and artifacts in automap for new players
             //
-            else if(am_showkeymarkers) {
+            else if(*am_showkeymarkers) {
                 if(t->type >= MT_ITEM_BLUECARDKEY && t->type <= MT_ITEM_ARTIFACT3) {
                     byte r, g, b;
 
@@ -962,7 +962,7 @@ void AM_drawThings(void) {
                         AM_DrawTriangle(t, scale, amModeCycle, r, g, b);
                     }
 
-                    if(am_drawobjects) {
+                    if(*am_drawobjects) {
                         AM_DrawSprite(t, scale);
                     }
                 }
@@ -1010,12 +1010,12 @@ void AM_Drawer(void) {
         AM_DrawMapped();
     }
     else {
-        if(am_lines) {
+        if(*am_lines) {
             AM_DrawWalls();
         }
     }
 
-    if(am_nodes) {
+    if(*am_nodes) {
         AM_DrawNodes();
     }
 

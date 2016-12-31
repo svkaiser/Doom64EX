@@ -94,33 +94,29 @@ BoolProperty r_drawfill("r_drawfill", "", false);
 BoolProperty r_skybox("r_skybox", "", false);
 
 IntProperty r_colorscale("r_colorscale", "", 0, 0,
-                         [](const IntProperty &, int x)
+                         [](const IntProperty&, int, int&)
                          {
                              GL_SetColorScale();
-                             return x;
                          });
 
 BoolProperty r_filter("r_filter", "", false, 0,
-                      [](const BoolProperty &, bool x)
+                      [](const BoolProperty&, bool, bool&)
                       {
                           GL_DumpTextures();
                           GL_SetTextureFilter();
-                          return x;
                       });
 
 BoolProperty r_texnonpowresize("r_texnonpowresize", "", false, 0,
-                               [](const BoolProperty &, bool x)
+                               [](const BoolProperty&, bool, bool&)
                                {
                                    GL_DumpTextures();
-                                   return x;
                                });
 
 BoolProperty r_anisotropic("r_anisotropic", "", false, 0,
-                           [](const BoolProperty &, bool x)
+                           [](const BoolProperty&, bool, bool&)
                            {
                                GL_DumpTextures();
                                GL_SetTextureFilter();
-                               return x;
                            });
 
 extern BoolProperty r_texturecombiner;
@@ -512,11 +508,11 @@ void R_SetupFrame(player_t *player) {
         pitch += player->recoilpitch;
     }
 
-    viewangle   = R_Interpolate(angle, frame_angle, i_interpolateframes);
-    viewpitch   = R_Interpolate(pitch, frame_pitch, i_interpolateframes);
-    viewx       = R_Interpolate(viewcamera->x, frame_viewx, i_interpolateframes);
-    viewy       = R_Interpolate(viewcamera->y, frame_viewy, i_interpolateframes);
-    viewz       = R_Interpolate(cam_z, frame_viewz, i_interpolateframes);
+    viewangle   = R_Interpolate(angle, frame_angle, *i_interpolateframes);
+    viewpitch   = R_Interpolate(pitch, frame_pitch, *i_interpolateframes);
+    viewx       = R_Interpolate(viewcamera->x, frame_viewx, *i_interpolateframes);
+    viewy       = R_Interpolate(viewcamera->y, frame_viewy, *i_interpolateframes);
+    viewz       = R_Interpolate(cam_z, frame_viewz, *i_interpolateframes);
 
     fviewx      = F2D3D(viewx);
     fviewy      = F2D3D(viewy);

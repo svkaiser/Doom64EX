@@ -36,10 +36,9 @@
 rcolor    bspColor[5];
 
 FloatProperty i_brightness("i_brightness", "Brightness", 100.0f, 0,
-                           [](const FloatProperty &, float x)
+                           [](const FloatProperty&, float, float&)
                            {
                                R_RefreshBrightness();
-                               return x;
                            });
 
 extern BoolProperty r_texturecombiner;
@@ -255,7 +254,7 @@ void R_SetLightFactor(float lightfactor) {
 void R_RefreshBrightness(void) {
     float factor;
 
-    factor = (((infraredFactor > i_brightness) ? infraredFactor : i_brightness) + 100.0f);
+    factor = (((infraredFactor > *i_brightness) ? infraredFactor : *i_brightness) + 100.0f);
     R_SetLightFactor(factor);
 }
 

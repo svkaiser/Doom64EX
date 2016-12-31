@@ -21,13 +21,6 @@ namespace imp {
       String mDescription;
       int mFlags;
 
-  protected:
-      virtual String p_value() const = 0;
-      virtual void p_set_value(StringView) = 0;
-
-      virtual String p_default() const = 0;
-      virtual void p_set_to_default() = 0;
-
   public:
       /*! Don't save the property in config.cfg */
       static constexpr int noconfig  = 0x1;
@@ -99,30 +92,20 @@ namespace imp {
       bool is_network() const
       { return (mFlags & network) != 0; }
 
-      String value() const
-      { return p_value(); }
+      virtual String string() const = 0;
 
-      void set_value(StringView str)
-      {
-          p_set_value(str);
-          update();
-      }
+      virtual void set_string(StringView str) = 0;
 
-      String default_value() const
-      { return p_default(); }
+      virtual String default_string() const = 0;
 
-      void set_to_default()
-      {
-          p_set_to_default();
-          update();
-      }
+      virtual void reset_default() = 0;
 
       void update();
   };
 
   template <class T>
   class TypedProperty : public Property {
-      using setter_func = T (*)(const TypedProperty &property, T newValue);
+      using setter_func = void (*)(const TypedProperty &property, T oldValue, T& value);
 
       setter_func mSetter {};
 
@@ -142,60 +125,60 @@ namespace imp {
           mDefault(def),
           mValue(def) {}
 
-      const T& native_value() const
+      const T& operator*() const
       { return mValue; }
 
-      operator T() const
+      const T* operator->() const
+      { return &mValue; }
+
+      const T& value() const
       { return mValue; }
+
+      template <class U>
+      explicit operator U() const
+      { return static_cast<U>(mValue); }
 
       template <class U>
       TypedProperty& operator=(U value)
       {
-          mValue = mSetter ? mSetter(*this, value) : value;
+          auto old = mValue;
+          mValue = value;
+          mSetter ? mSetter(*this, old, mValue) : (void) 0;
           update();
           return *this;
       }
 
-      void set(const T &value)
-      {
-          mValue = value;
-      }
-
-  protected:
-
-      String p_value() const override
+      String string() const override
       {
           return std::to_string(mValue);
       }
 
-      String p_default() const override
+      String default_string() const override
       {
           return std::to_string(mDefault);
       }
 
-      void p_set_value(StringView strValue) override
+      void set_string(StringView strValue) override
       {
-          auto value = from_string<T>(strValue);
-          mValue = mSetter ? mSetter(*this, value) : value;
+          *this = from_string<T>(strValue);
       }
 
-      void p_set_to_default() override
+      void reset_default() override
       {
           mValue = mDefault;
+          update();
       }
   };
 
   using IntProperty = TypedProperty<int>;
   using FloatProperty = TypedProperty<float>;
-  using ClampedIntProperty = TypedProperty<Clamped<int>>;
-  using ClampedFloatProperty = TypedProperty<Clamped<float>>;
   using BoolProperty = TypedProperty<bool>;
   using StringProperty = TypedProperty<String>;
 }
 
 #define __IMP_TYPEDPROPERTY_ARITHMETIC_OPERATORS(Op) \
-template <class T, class U> constexpr T operator Op(const imp::TypedProperty<T> &l, const U &r) { return l.native_value() Op r; } \
-template <class T, class U> constexpr T operator Op(const T &l, const imp::TypedProperty<U> &r) { return l Op r.native_value(); }
+template <class T, class U> constexpr T operator Op(const imp::TypedProperty<T> &l, const U &r) { return *l Op r; } \
+template <class T, class U> constexpr T operator Op(const T &l, const imp::TypedProperty<U> &r) { return l Op *r; }
 
 __IMP_TYPEDPROPERTY_ARITHMETIC_OPERATORS(+)
 __IMP_TYPEDPROPERTY_ARITHMETIC_OPERATORS(-)
@@ -206,9 +189,9 @@ __IMP_TYPEDPROPERTY_ARITHMETIC_OPERATORS(%)
 #undef __IMP_TYPEDPROPERTY_ARITHMETIC_OPERATORS
 
 #define __IMP_TYPEDPROPERTY_COMPARISON_OPERATORS(Op) \
-template <class T, class U> constexpr bool operator Op(const imp::TypedProperty<T> &l, const imp::TypedProperty<U> &r) { return l.native_value() Op r.native_value(); } \
-template <class T, class U> constexpr bool operator Op(const imp::TypedProperty<T> &l, const U &r) { return l.native_value() Op r; } \
-template <class T, class U> constexpr bool operator Op(const T &l, const imp::TypedProperty<U> &r) { return l Op r.native_value(); }
+template <class T, class U> constexpr bool operator Op(const imp::TypedProperty<T> &l, const imp::TypedProperty<U> &r) { return *l Op *r; } \
+template <class T, class U> constexpr bool operator Op(const imp::TypedProperty<T> &l, const U &r) { return *l Op r; } \
+template <class T, class U> constexpr bool operator Op(const T &l, const imp::TypedProperty<U> &r) { return l Op *r; }
 
 __IMP_TYPEDPROPERTY_COMPARISON_OPERATORS(==)
 __IMP_TYPEDPROPERTY_COMPARISON_OPERATORS(!=)

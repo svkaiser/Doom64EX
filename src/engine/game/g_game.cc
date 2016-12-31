@@ -259,7 +259,7 @@ static CMD(Seta) {
     }
 
     if (auto p = Property::find(param[0])) {
-        p->set_value(param[1]);
+        p->set_string(param[1]);
     } else {
         I_Printf("Couldn't find property (cvar) %s\n", param[0]);
     }
@@ -813,8 +813,8 @@ void G_DoCmdMouseMove(int x, int y) {
     playercontrols_t *pc;
 
     pc = &Controls;
-    pc->mousex += ((I_MouseAccel(x) * v_msensitivityx) / 128);
-    pc->mousey += ((I_MouseAccel(y) * v_msensitivityy) / 128);
+    pc->mousex += ((I_MouseAccel(x) * *v_msensitivityx) / 128);
+    pc->mousey += ((I_MouseAccel(y) * *v_msensitivityy) / 128);
 }
 
 
@@ -893,11 +893,11 @@ void G_DoLoadLevel(void) {
 
     // update settings from server cvar
     if(!netgame) {
-        gameskill   = sv_skill;
-        respawnparm = sv_respawn;
-        respawnitem = sv_respawnitems;
-        fastparm    = sv_fastmonsters;
-        nomonsters  = sv_nomonsters;
+        gameskill   = *sv_skill;
+        respawnparm = *sv_respawn;
+        respawnitem = *sv_respawnitems;
+        fastparm    = *sv_fastmonsters;
+        nomonsters  = *sv_nomonsters;
     }
 
     map = P_GetMapInfo(gamemap);

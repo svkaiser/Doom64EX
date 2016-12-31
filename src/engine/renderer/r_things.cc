@@ -577,7 +577,7 @@ static void AddSpriteDrawlist(drawlist_t *dl, visspritelist_t *vis, int texid) {
 //
 
 void R_SetupSprites(void) {
-    dboolean interpolate = i_interpolateframes;
+    dboolean interpolate = *i_interpolateframes;
     visspritelist_t *vis;
 
     for(vis = vissprite - 1; vis >= visspritelist; vis--) {
@@ -660,10 +660,10 @@ void R_DrawPSprite(pspdef_t *psp, sector_t* sector, player_t *player) {
 
     // setup vertex data
 
-    x = (F2D3D(R_Interpolate(psp->sx, psp->frame_x, i_interpolateframes))
+    x = (F2D3D(R_Interpolate(psp->sx, psp->frame_x, *i_interpolateframes))
          - spriteoffset[spritenum]);
 
-    y = (F2D3D(R_Interpolate(psp->sy, psp->frame_y, i_interpolateframes))
+    y = (F2D3D(R_Interpolate(psp->sy, psp->frame_y, *i_interpolateframes))
          - spritetopoffset[spritenum]);
 
     if(player->onground) {

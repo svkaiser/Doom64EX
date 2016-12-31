@@ -230,24 +230,23 @@ static dboolean M_SetThumbnail(int which);
 IntProperty m_regionblood("m_regionblood", "");
 
 FloatProperty m_menufadetime("m_menufadetime", "", 0.0f, 0,
-                             [](const FloatProperty &, float x)
+                             [](const FloatProperty &p, float, float& x)
                              {
-                                 return clamp(x, 0.0f, 80.0f);
+                                 x = clamp(*p, 0.0f, 80.0f);
                              });
 
 BoolProperty m_menumouse("m_menumouse", "", true, 0,
-                         [](const BoolProperty &, bool new_value) {
-                             SDL_ShowCursor(new_value ? SDL_FALSE : SDL_TRUE);
-                             if(!new_value) {
+                         [](const BoolProperty &p, bool, bool&) {
+                             SDL_ShowCursor(*p ? SDL_FALSE : SDL_TRUE);
+                             if(!*p) {
                                  itemSelected = -1;
                              }
-                             return new_value;
                          });
 
 FloatProperty m_cursorscale("m_cursorscale", "", 8.0f, 0,
-                            [](const FloatProperty &, float x)
+                            [](const FloatProperty &p, float, float &x)
                             {
-                                return clamp(x, 0.0f, 50.0f);
+                                x = clamp(*p, 0.0f, 50.0f);
                             });
 
 //------------------------------------------------------------------------
@@ -847,7 +846,7 @@ void M_RegionChoice(int choice) {
 
         M_SetOptionValue(choice, 0, 1, 1, m_regionblood);
 
-        lump = m_regionblood;
+        lump = *m_regionblood;
 
         if(lump > 1) {
             lump = 1;
@@ -878,7 +877,7 @@ void M_DrawRegion(void) {
     }
     else {
         color = MENUCOLORRED;
-        string = (char*)regionmode[p_regionmode];
+        string = (char*)regionmode[*p_regionmode];
     }
 
     Draw_BigText(RegionDef.x + 136, RegionDef.y + LINEHEIGHT * region_mode, color, string);
@@ -889,7 +888,7 @@ void M_DrawRegion(void) {
     }
     else {
         color = MENUCOLORRED;
-        string = language[st_regionmsg];
+        string = language[*st_regionmsg];
     }
 
     Draw_BigText(RegionDef.x + 136, RegionDef.y + LINEHEIGHT * region_lang, color, string);
@@ -900,7 +899,7 @@ void M_DrawRegion(void) {
     }
     else {
         color = MENUCOLORRED;
-        string = bloodcolor[m_regionblood];
+        string = bloodcolor[*m_regionblood];
     }
 
     Draw_BigText(RegionDef.x + 136, RegionDef.y + LINEHEIGHT * region_blood, color, string);
@@ -1094,15 +1093,15 @@ void M_DrawNetwork(void) {
     }
 
     DRAWNETWORKITEM(network_playername, 0, &inputString);
-    DRAWNETWORKITEM(network_allowcheats, sv_allowcheats, msgNames);
-    DRAWNETWORKITEM(network_friendlyfire, sv_friendlyfire, msgNames);
-    DRAWNETWORKITEM(network_keepitems, sv_keepitems, msgNames);
-    DRAWNETWORKITEM(network_allowjump, p_allowjump, msgNames);
-    DRAWNETWORKITEM(network_allowautoaim, p_autoaim, msgNames);
-    DRAWNETWORKITEM(network_nomonsters, sv_nomonsters, msgNames);
-    DRAWNETWORKITEM(network_fastmonsters, sv_fastmonsters, msgNames);
-    DRAWNETWORKITEM(network_respawnmonsters, sv_respawn, msgNames);
-    DRAWNETWORKITEM(network_respawnitems, sv_respawnitems, respawnitemstrings);
+    DRAWNETWORKITEM(network_allowcheats, *sv_allowcheats, msgNames);
+    DRAWNETWORKITEM(network_friendlyfire, *sv_friendlyfire, msgNames);
+    DRAWNETWORKITEM(network_keepitems, *sv_keepitems, msgNames);
+    DRAWNETWORKITEM(network_allowjump, *p_allowjump, msgNames);
+    DRAWNETWORKITEM(network_allowautoaim, *p_autoaim, msgNames);
+    DRAWNETWORKITEM(network_nomonsters, *sv_nomonsters, msgNames);
+    DRAWNETWORKITEM(network_fastmonsters, *sv_fastmonsters, msgNames);
+    DRAWNETWORKITEM(network_respawnmonsters, *sv_respawn, msgNames);
+    DRAWNETWORKITEM(network_respawnitems, *sv_respawnitems, respawnitemstrings);
 
 #undef DRAWNETWORKITEM
 
@@ -1429,13 +1428,13 @@ void M_DrawMisc(void) {
     if(currentMenu->menupageoffset <= misc_menufade+1 &&
             (misc_menufade+1) - currentMenu->menupageoffset < currentMenu->numpageitems) {
         y = misc_menufade - currentMenu->menupageoffset;
-        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 80, m_menufadetime);
+        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 80, *m_menufadetime);
     }
 
     if(currentMenu->menupageoffset <= misc_cursorsize+1 &&
             (misc_cursorsize+1) - currentMenu->menupageoffset < currentMenu->numpageitems) {
         y = misc_cursorsize - currentMenu->menupageoffset;
-        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 50, m_cursorscale);
+        M_DrawThermo(MiscDef.x,MiscDef.y+LINEHEIGHT*(y+1), 50, *m_cursorscale);
     }
 
 #define DRAWMISCITEM(a, b, c) \
@@ -1447,25 +1446,25 @@ void M_DrawMisc(void) {
             c[(int)b]); \
     }
 
-    DRAWMISCITEM(misc_menumouse, m_menumouse, msgNames);
-    DRAWMISCITEM(misc_aim, p_autoaim, msgNames);
-    DRAWMISCITEM(misc_jump, p_allowjump, msgNames);
-    DRAWMISCITEM(misc_context, p_usecontext, mapdisplaytype);
-    DRAWMISCITEM(misc_wipe, r_wipe, msgNames);
-    DRAWMISCITEM(misc_texresize, r_texnonpowresize, texresizetype);
-    DRAWMISCITEM(misc_frame, i_interpolateframes, frametype);
-    DRAWMISCITEM(misc_combine, r_texturecombiner, msgNames);
-    DRAWMISCITEM(misc_sprites, r_rendersprites - 1, msgNames);
-    DRAWMISCITEM(misc_skybox, r_skybox, msgNames);
-    DRAWMISCITEM(misc_rgbscale, r_colorscale, rgbscaletype);
-    DRAWMISCITEM(misc_showkey, am_showkeymarkers, mapdisplaytype);
-    DRAWMISCITEM(misc_showlocks, am_showkeycolors, mapdisplaytype);
-    DRAWMISCITEM(misc_amobjects, am_drawobjects, objectdrawtype);
-    DRAWMISCITEM(misc_amoverlay, am_overlay, msgNames);
-    DRAWMISCITEM(misc_comp_collision, compat_collision, msgNames);
-    DRAWMISCITEM(misc_comp_pain, compat_limitpain, msgNames);
-    DRAWMISCITEM(misc_comp_pass, !compat_mobjpass, msgNames);
-    DRAWMISCITEM(misc_comp_grab, compat_grabitems, msgNames);
+    DRAWMISCITEM(misc_menumouse, *m_menumouse, msgNames);
+    DRAWMISCITEM(misc_aim, *p_autoaim, msgNames);
+    DRAWMISCITEM(misc_jump, *p_allowjump, msgNames);
+    DRAWMISCITEM(misc_context, *p_usecontext, mapdisplaytype);
+    DRAWMISCITEM(misc_wipe, *r_wipe, msgNames);
+    DRAWMISCITEM(misc_texresize, *r_texnonpowresize, texresizetype);
+    DRAWMISCITEM(misc_frame, *i_interpolateframes, frametype);
+    DRAWMISCITEM(misc_combine, *r_texturecombiner, msgNames);
+    DRAWMISCITEM(misc_sprites, *r_rendersprites - 1, msgNames);
+    DRAWMISCITEM(misc_skybox, *r_skybox, msgNames);
+    DRAWMISCITEM(misc_rgbscale, *r_colorscale, rgbscaletype);
+    DRAWMISCITEM(misc_showkey, *am_showkeymarkers, mapdisplaytype);
+    DRAWMISCITEM(misc_showlocks, *am_showkeycolors, mapdisplaytype);
+    DRAWMISCITEM(misc_amobjects, *am_drawobjects, objectdrawtype);
+    DRAWMISCITEM(misc_amoverlay, *am_overlay, msgNames);
+    DRAWMISCITEM(misc_comp_collision, *compat_collision, msgNames);
+    DRAWMISCITEM(misc_comp_pain, *compat_limitpain, msgNames);
+    DRAWMISCITEM(misc_comp_pass, !*compat_mobjpass, msgNames);
+    DRAWMISCITEM(misc_comp_grab, *compat_grabitems, msgNames);
 
 #undef DRAWMISCITEM
 
@@ -1561,17 +1560,17 @@ menu_t MouseDef = {
 };
 
 void M_DrawMouse(void) {
-    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensx+1),MAXSENSITIVITY, v_msensitivityx);
-    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensy+1),MAXSENSITIVITY, v_msensitivityy);
+    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensx+1),MAXSENSITIVITY, *v_msensitivityx);
+    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_sensy+1),MAXSENSITIVITY, *v_msensitivityy);
 
-    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_accel+1),20, v_macceleration);
+    M_DrawThermo(MouseDef.x,MouseDef.y+LINEHEIGHT*(mouse_accel+1),20, *v_macceleration);
 
     Draw_BigText(MouseDef.x + 144, MouseDef.y+LINEHEIGHT*mouse_look, MENUCOLORRED,
-                 msgNames[(int)v_mlook]);
+                 msgNames[*v_mlook]);
     Draw_BigText(MouseDef.x + 144, MouseDef.y+LINEHEIGHT*mouse_invert, MENUCOLORRED,
-                 msgNames[(int)v_mlookinvert]);
+                 msgNames[*v_mlookinvert]);
     Draw_BigText(MouseDef.x + 144, MouseDef.y+LINEHEIGHT*mouse_yaxismove, MENUCOLORRED,
-                 msgNames[(int)v_yaxismove]);
+                 msgNames[*v_yaxismove]);
 }
 
 void M_ChangeSensitivity(int choice) {
@@ -1775,19 +1774,19 @@ void M_DrawDisplay(void) {
     static const char* hudtype[3] = { "Off", "Classic", "Arranged" };
     static const char* flashtype[2] = { "Environment", "Overlay" };
 
-    M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(dbrightness+1), MAXBRIGHTNESS, i_brightness);
+    M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(dbrightness+1), MAXBRIGHTNESS, *i_brightness);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*messages, MENUCOLORRED,
-                 msgNames[(int)m_messages]);
+                 msgNames[*m_messages]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*statusbar, MENUCOLORRED,
-                 hudtype[(int)st_drawhud]);
+                 hudtype[*st_drawhud]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_flash, MENUCOLORRED,
-                 flashtype[(int)st_flashoverlay]);
+                 flashtype[*st_flashoverlay]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_damage, MENUCOLORRED,
-                 msgNames[(int)p_damageindicator]);
+                 msgNames[*p_damageindicator]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_weapon, MENUCOLORRED,
-                 msgNames[(int)st_showpendingweapon]);
+                 msgNames[*st_showpendingweapon]);
     Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_stats, MENUCOLORRED,
-                 msgNames[(int)st_showstats]);
+                 msgNames[*st_showstats]);
 
     if(st_crosshair <= 0) {
         Draw_BigText(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_crosshair, MENUCOLORRED,
@@ -1799,7 +1798,7 @@ void M_DrawDisplay(void) {
     }
 
     M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(display_opacity+1),
-                 255, st_crosshairopacity);
+                 255, *st_crosshairopacity);
 
     if(DisplayDef.hints[itemOn] != NULL) {
         GL_SetOrthoScale(0.5f);
@@ -2109,7 +2108,7 @@ void M_DrawVideo(void) {
     if(currentMenu->menupageoffset <= video_dgamma + 1 &&
             (video_dgamma+1) - currentMenu->menupageoffset < currentMenu->numpageitems) {
         y = video_dgamma - currentMenu->menupageoffset;
-        M_DrawThermo(VideoDef.x, VideoDef.y + LINEHEIGHT*(y + 1), 20, i_gamma);
+        M_DrawThermo(VideoDef.x, VideoDef.y + LINEHEIGHT*(y + 1), 20, *i_gamma);
     }
 
 #define DRAWVIDEOITEM(a, b) \
@@ -2122,15 +2121,15 @@ void M_DrawVideo(void) {
 
 #define DRAWVIDEOITEM2(a, b, c) DRAWVIDEOITEM(a, c[(int)b])
 
-    DRAWVIDEOITEM2(filter, r_filter, filterType);
-    DRAWVIDEOITEM2(anisotropic, r_anisotropic, msgNames);
-    DRAWVIDEOITEM2(windowed, v_windowed, msgNames);
+    DRAWVIDEOITEM2(filter, *r_filter, filterType);
+    DRAWVIDEOITEM2(anisotropic, *r_anisotropic, msgNames);
+    DRAWVIDEOITEM2(windowed, *v_windowed, msgNames);
     DRAWVIDEOITEM2(ratio, m_aspectRatio, ratioName);
 
     sprintf(res, "%ix%i", (int)v_width, (int)v_height);
     DRAWVIDEOITEM(resolution, res);
 
-    DRAWVIDEOITEM2(vsync, v_vsync, msgNames);
+    DRAWVIDEOITEM2(vsync, *v_vsync, msgNames);
 
     if(currentMenu->menupageoffset <= depth &&
             depth - currentMenu->menupageoffset < currentMenu->numpageitems) {
@@ -2545,9 +2544,9 @@ void M_Sound(int choice) {
 }
 
 void M_DrawSound(void) {
-    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(sfx_vol+1), 100, s_sfxvol);
-    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(music_vol+1), 100, s_musvol);
-    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(gain+1), 2, s_gain);
+    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(sfx_vol+1), 100, *s_sfxvol);
+    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(music_vol+1), 100, *s_musvol);
+    M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(gain+1), 2, *s_gain);
 }
 
 void M_SfxVol(int choice) {
@@ -3635,7 +3634,7 @@ void M_QuickLoadResponse(int ch) {
 static int prevtic = 0; // hack - check for overlapping sounds
 template <class T, class U>
 static void M_SetCvar(TypedProperty<T> &property, const U &value) {
-    if(property.native_value() == value) {
+    if(property == value) {
         return;
     }
 

@@ -72,30 +72,27 @@ static dboolean nomusic = false;
 static int lastmusic = 0;
 
 FloatProperty s_sfxvol("s_sfxvol", "", 80.0f, 0,
-                       [](const FloatProperty &, float x)
+                       [](const FloatProperty& p, float, float&)
                        {
-                           if (x < 0.0f)
-                               return x;
-                           S_SetSoundVolume(x);
-                           return x;
+                           if (p < 0.0f)
+                               return;
+                           S_SetSoundVolume(*p);
                        });
 
 FloatProperty s_musvol("s_musvol", "", 80.0f, 0,
-                       [](const FloatProperty &, float x)
+                       [](const FloatProperty& p, float, float&)
                        {
-                           if (x < 0.0f)
-                               return x;
-                           S_SetMusicVolume(x);
-                           return x;
+                           if (p < 0.0f)
+                               return;
+                           S_SetMusicVolume(*p);
                        });
 
 FloatProperty s_gain("s_gain", "", 1.0f, 0,
-                     [](const FloatProperty &, float x)
+                     [](const FloatProperty& p, float, float&)
                      {
-                         if(x < 0.0f)
-                             return x;
-                         S_SetGainOutput(x);
-                         return x;
+                         if(p < 0.0f)
+                             return;
+                         S_SetGainOutput(*p);
                      });
 
 //
@@ -127,9 +124,9 @@ void S_Init(void) {
 
     I_InitSequencer();
 
-    S_SetMusicVolume(s_musvol);
-    S_SetSoundVolume(s_sfxvol);
-    S_SetGainOutput(s_gain);
+    S_SetMusicVolume(*s_musvol);
+    S_SetSoundVolume(*s_sfxvol);
+    S_SetGainOutput(*s_gain);
 }
 
 //

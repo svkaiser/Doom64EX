@@ -39,10 +39,9 @@
 #include <imp/Property>
 
 FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
-                      [](const FloatProperty &, float x)
+                      [](const FloatProperty&, float, float&)
                       {
                           GL_DumpTextures();
-                          return x;
                       });
 
 //

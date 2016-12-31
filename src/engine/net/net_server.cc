@@ -1653,8 +1653,8 @@ void NET_SV_UpdateCvars(const Property &cvar)
     packet = NET_NewPacket(96);
 
     NET_WriteInt16(packet, NET_PACKET_TYPE_CVAR_UPDATE);
-    NET_WriteString(packet, cvar.name().data());
-    NET_WriteString(packet, cvar.value().c_str());
+    NET_WriteString(packet, cvar.name());
+    NET_WriteString(packet, cvar.string());
 
     // Send packet
 

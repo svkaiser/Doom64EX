@@ -35,12 +35,12 @@ extern dboolean console_initialized;
 #define CONCLEARINPUT() (dmemset(console_inputbuffer+1, 0, MAX_CONSOLE_INPUT_LEN-1))
 
 void CON_Init(void);
-void CON_AddText(char *text);
+void CON_AddText(const char *text);
 void CON_Printf(rcolor clr, const char *s, ...);
 void CON_Warnf(const char *s, ...);
 void CON_DPrintf(const char *s, ...);
 void CON_Draw(void);
-void CON_AddLine(char *line, int len);
+void CON_AddLine(const char *line, int len);
 void CON_Ticker(void);
 
 dboolean CON_Responder(event_t* ev);
