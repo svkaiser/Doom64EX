@@ -56,7 +56,7 @@ IntProperty st_drawhud("st_drawhud", "", true);
 BoolProperty st_crosshair("st_crosshair", "", false);
 FloatProperty st_crosshairopacity("st_crosshairopacity", "", 80.0f);
 BoolProperty st_flashoverlay("st_flashoverlay", "", false);
-BoolProperty st_regionmsg("st_regionmsg", "", true);
+BoolProperty st_regionmsg("st_regionmsg", "", false);
 BoolProperty m_messages("m_messages", "", true);
 StringProperty m_playername("m_playername", "");
 BoolProperty st_showpendingweapon("st_showpendingweapon", "", true);

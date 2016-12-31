@@ -261,34 +261,30 @@ void GL_SetNewPalette(int id, byte palID) {
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
     if(r_texnonpowresize > 0) {
-        I_Error("FIXME: r_texnonpowresize unsupported.");
-        // void *image;
-        // int wp;
-        // int hp;
+        int wp;
+        int hp;
 
-        // // pad the width and heights
-        // wp = GL_PadTextureDims(*origwidth);
-        // hp = GL_PadTextureDims(*origheight);
+        // pad the width and heights
+        wp = GL_PadTextureDims(*origwidth);
+        hp = GL_PadTextureDims(*origheight);
 
-        // image = Image_New_FromData(format == GL_RGBA8 ? PF_RGBA : PF_RGB, *origwidth, *origheight, data);
-        // Image_Resize(image, wp, hp);
+        Image image(format == GL_RGBA8 ? PixelFormat::rgba : PixelFormat::rgb, *origwidth, *origheight, data);
+        image.resize(wp, hp);
 
-        // *origwidth = wp;
-        // *origheight = hp;
+        *origwidth = wp;
+        *origheight = hp;
 
-        // dglTexImage2D(
-        //     GL_TEXTURE_2D,
-        //     0,
-        //     format,
-        //     wp,
-        //     hp,
-        //     0,
-        //     type,
-        //     GL_UNSIGNED_BYTE,
-        //     Image_GetData(image)
-        // );
-
-        // Image_Free(image);
+        dglTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                format,
+                wp,
+                hp,
+                0,
+                type,
+                GL_UNSIGNED_BYTE,
+                image.data_ptr()
+        );
     }
     else {
         dglTexImage2D(
