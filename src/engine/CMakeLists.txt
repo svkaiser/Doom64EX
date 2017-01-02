@@ -33,11 +33,6 @@ endif ()
 ##
 
 if (NOT USE_CONAN)
-  # fmt
-  find_package(Fmt REQUIRED)
-  add_include_directories(${Fmt_INCLUDE_DIR})
-  add_link_libraries(${Fmt_LIBRARY})
-
   # SDL2
   find_package(SDL2 REQUIRED)
   add_include_directories(${SDL2_INCLUDE_DIRS})
@@ -305,6 +300,8 @@ set(KEXLIB_SOURCES
   gfx/PngImage.cc
   gfx/DoomImage.cc
   gfx/Pixel.cc
+  fmt/format.cc
+  fmt/ostream.cc
   common/Property.cc
         )
 
@@ -313,7 +310,7 @@ set(KEXLIB_SOURCES
 ##
 
 add_executable(doom64ex MACOSX_BUNDLE ${SOURCES} ${KEXLIB_SOURCES})
-target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include")
+target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/engine")
 target_link_libraries(doom64ex ${LIBRARIES} ${CONAN_LIBS})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
 
