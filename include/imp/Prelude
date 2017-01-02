@@ -120,8 +120,28 @@ inline std::ostream& operator<<(std::ostream& s, const std::weak_ptr<T>& ptr)
 #ifndef IMP_DONT_POLLUTE_GLOBAL_NAMESPACE
 using namespace std::string_literals;
 using namespace std::chrono_literals;
-using namespace fmt;
 using namespace imp;
+
+// clang complains about ambiguity with stuff like sprintf and fprintf, since there exist functions with those names
+// in both the std and fmt namespaces, so we only forward the few functions we actually need, instead of
+// using namespace imp;
+
+template <class... Args>
+inline auto print(Args&&... args)
+{ return fmt::print(std::forward<Args>(args)...); }
+
+template <class... Args>
+inline auto println(Args&&... args)
+{ return fmt::println(std::forward<Args>(args)...); }
+
+template <class... Args>
+inline auto format(Args&&... args)
+{ return fmt::format(std::forward<Args>(args)...); }
+
+template <class... Args>
+inline auto fatal(Args&&... args)
+{ return fmt::fatal(std::forward<Args>(args)...); }
+
 #endif
 
 #endif //__IMP_PRELUDE__56107413
