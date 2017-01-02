@@ -38,6 +38,7 @@
 // calls all startup code, parses command line options.
 // If not overrided by user input, calls N_AdvanceDemo.
 //
+[[noreturn]]
 void D_DoomMain(void);
 
 int D_MiniLoop(void (*start)(void), void (*stop)(void),

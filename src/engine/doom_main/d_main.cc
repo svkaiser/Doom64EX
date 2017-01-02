@@ -76,6 +76,7 @@
 //  calls all ?_Responder, ?_Ticker, and ?_Drawer,
 //  calls I_GetTime, and I_StartTic
 //
+[[noreturn]]
 void D_DoomLoop(void);
 
 static int      pagetic;
@@ -968,6 +969,7 @@ static int D_CheckDemo(void) {
 // D_DoomMain
 //
 
+[[noreturn]]
 void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
 

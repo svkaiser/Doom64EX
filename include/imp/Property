@@ -52,7 +52,7 @@ namespace imp {
           return find(name).if_value([](auto p)
                                      {
                                          auto p2 = dynamic_cast<TypedProperty<T> *>(p);
-                                         return { p2 ? *p2 : nullopt };
+                                         return Optional<TypedProperty<T>&> { p2 ? *p2 : nullopt };
                                      });
       }
 

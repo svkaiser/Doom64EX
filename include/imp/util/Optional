@@ -193,7 +193,7 @@ namespace imp {
           if (have_value()) {
               return { functor(value()) };
           } else {
-              nullopt;
+              return nullopt;
           }
       }
 
@@ -203,7 +203,7 @@ namespace imp {
           if (have_value()) {
               return *this;
           } else {
-              functor();
+              return functor();
           }
       }
 
@@ -349,7 +349,7 @@ namespace imp {
           if (have_value()) {
               return functor(**this);
           } else {
-              nullopt;
+              return nullopt;
           }
       }
 
@@ -359,7 +359,7 @@ namespace imp {
           if (have_value()) {
               return *this;
           } else {
-              functor();
+              return functor();
           }
       }
 

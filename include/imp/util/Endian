@@ -67,16 +67,20 @@ namespace imp {
   { return x; }
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-  inline auto little_endian(auto x) noexcept
+  template <class T>
+  inline T little_endian(T x) noexcept
   { return x; }
 
-  inline auto big_endian(auto x) noexcept
+  template <class T>
+  inline T big_endian(T x) noexcept
   { return swap_bytes(x); }
 #elif BYTE_ORDER == BIG_ENDIAN
-  inline auto little_endian(auto x) noexcept
+  template <class T>
+  inline T little_endian(T x) noexcept
   { return swap_bytes(x); }
 
-  inline auto big_endian(auto x) noexcept
+  template <class T>
+  inline T big_endian(T x) noexcept
   { return x; }
 #else
 #error "Unknown or unsupported byte order"

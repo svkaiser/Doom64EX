@@ -87,11 +87,11 @@ namespace imp {
   // Initialisation for various parts of the engine
   void init_image();
   void init_properties();
-}
 
-inline std::ostream& operator<<(std::ostream& s, imp::StringView sv)
-{
-    return s.write(sv.data(), sv.length());
+  inline std::ostream& operator<<(std::ostream& s, StringView sv)
+  {
+      return s.write(sv.data(), sv.length());
+  }
 }
 
 template <class T, class Deleter>
