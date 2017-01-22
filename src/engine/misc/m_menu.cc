@@ -1488,12 +1488,12 @@ void M_ChangeMouseInvert(int choice);
 void M_ChangeYAxisMove(int choice);
 void M_DrawMouse(void);
 
-extern IntProperty v_msensitivityx;
-extern IntProperty v_msensitivityy;
+extern FloatProperty v_msensitivityx;
+extern FloatProperty v_msensitivityy;
 extern BoolProperty v_mlook;
 extern BoolProperty v_mlookinvert;
 extern BoolProperty v_yaxismove;
-extern IntProperty v_macceleration;
+extern FloatProperty v_macceleration;
 
 enum {
     mouse_sensx,

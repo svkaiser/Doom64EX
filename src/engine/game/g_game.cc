@@ -155,8 +155,8 @@ extern BoolProperty v_yaxismove;
 extern BoolProperty p_autorun;
 extern BoolProperty p_fdoubleclick;
 extern BoolProperty p_sdoubleclick;
-extern IntProperty v_msensitivityx;
-extern IntProperty v_msensitivityy;
+extern FloatProperty v_msensitivityx;
+extern FloatProperty v_msensitivityy;
 
 //
 // G_CmdButton
