@@ -752,7 +752,7 @@ void M_DrawOptions(void) {
 void M_RegionChoice(int choice);
 void M_DrawRegion(void);
 
-extern IntProperty st_regionmsg;
+extern BoolProperty st_regionmsg;
 extern IntProperty m_regionblood;
 extern IntProperty p_regionmode;
 
@@ -926,7 +926,7 @@ extern BoolProperty p_allowjump;
 extern BoolProperty p_autoaim;
 extern BoolProperty sv_nomonsters;
 extern BoolProperty sv_fastmonsters;
-extern IntProperty sv_respawnitems;
+extern BoolProperty sv_respawnitems;
 extern BoolProperty sv_respawn;
 extern BoolProperty sv_allowcheats;
 extern BoolProperty sv_friendlyfire;
@@ -1131,10 +1131,10 @@ void M_DrawMisc(void);
 
 extern BoolProperty am_showkeymarkers;
 extern BoolProperty am_showkeycolors;
-extern IntProperty am_drawobjects;
+extern BoolProperty am_drawobjects;
 extern BoolProperty am_overlay;
 extern BoolProperty r_skybox;
-extern IntProperty r_texnonpowresize;
+extern BoolProperty r_texnonpowresize;
 extern BoolProperty i_interpolateframes;
 extern BoolProperty p_usecontext;
 extern BoolProperty compat_collision;
@@ -1142,7 +1142,7 @@ extern BoolProperty compat_limitpain;
 extern BoolProperty compat_mobjpass;
 extern BoolProperty compat_grabitems;
 extern BoolProperty r_wipe;
-extern IntProperty r_rendersprites;
+extern BoolProperty r_rendersprites;
 extern BoolProperty r_texturecombiner;
 extern IntProperty r_colorscale;
 
@@ -1672,7 +1672,7 @@ void M_ChangeOpacity(int choice);
 void M_DrawDisplay(void);
 
 extern IntProperty st_drawhud;
-extern IntProperty st_crosshair;
+extern BoolProperty st_crosshair;
 extern FloatProperty st_crosshairopacity;
 extern BoolProperty st_flashoverlay;
 extern BoolProperty st_showpendingweapon;
