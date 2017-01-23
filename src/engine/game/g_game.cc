@@ -1628,7 +1628,7 @@ void G_Init(void) {
     G_AddCommand("setcamerastatic", CMD_PlayerCamera, 0);
     G_AddCommand("setcamerachase", CMD_PlayerCamera, 1);
     G_AddCommand("enddemo", CMD_EndDemo, 0);
-    AM_RegisterCvars();
+    AM_RegisterCommands();
 }
 
 //

@@ -1048,10 +1048,10 @@ void AM_Drawer(void) {
 }
 
 //
-// AM_RegisterCvars
+// AM_RegisterCommands
 //
 
-void AM_RegisterCvars(void) {
+void AM_RegisterCommands(void) {
     G_AddCommand("automap", CMD_Automap, 0);
     G_AddCommand("+automap_in", CMD_AutomapSetFlag, AF_ZOOMIN);
     G_AddCommand("-automap_in", CMD_AutomapSetFlag, AF_ZOOMIN|PCKF_UP);
