@@ -45,6 +45,6 @@ void AM_Stop(void);
 // Called on P_Start; resets automap variables
 void AM_Reset(void);
 
-void AM_RegisterCvars(void);
+void AM_RegisterCommands(void);
 
 #endif

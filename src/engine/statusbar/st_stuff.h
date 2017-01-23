@@ -56,7 +56,6 @@ void ST_DrawCrosshair(int x, int y, int slot, byte scalefactor, rcolor color);
 void ST_UpdateFlash(void);
 void ST_AddDamageMarker(mobj_t* target, mobj_t* source);
 void ST_ClearDamageMarkers(void);
-void ST_RegisterCvars(void);
 void ST_DisplayPendingWeapon(void);
 
 extern char player_names[MAXPLAYERS][MAXPLAYERNAME];
