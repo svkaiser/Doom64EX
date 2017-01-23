@@ -373,6 +373,7 @@ dboolean CON_Responder(event_t* ev) {
         if(ev->type == ev_keydown) {
             switch(c) {
             case '`':
+            case '^':
                 console_state = CST_UP;
                 console_enabled = false;
                 break;
@@ -482,7 +483,7 @@ dboolean CON_Responder(event_t* ev) {
 
     case CST_UP:
     case CST_RAISE:
-        if(c == '`') {
+        if(c == '`' || c == '^') {
             if(ev->type == ev_keydown) {
                 console_state = CST_DOWN;
                 console_enabled = true;
