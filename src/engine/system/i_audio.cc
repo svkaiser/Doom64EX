@@ -1089,6 +1089,11 @@ static void Seq_Shutdown(doomseq_t* seq) {
     SDL_WaitThread(seq->thread, NULL);
 
     //
+    // prevent calls to Audio_Play()
+    //
+    SDL_CloseAudio();
+
+    //
     // fluidsynth cleanup stuff
     //
     delete_fluid_synth(seq->synth);
