@@ -294,8 +294,8 @@ void GL_SetTextureFilter(void) {
         return;
     }
 
-    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, r_filter ? GL_LINEAR : GL_NEAREST);
-    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, r_filter ? GL_LINEAR : GL_NEAREST);
+    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, r_filter==0 ? GL_LINEAR : GL_NEAREST);
+    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, r_filter==0 ? GL_LINEAR : GL_NEAREST);
 
     if(GLAD_GL_EXT_texture_filter_anisotropic) {
         if(r_anisotropic) {
