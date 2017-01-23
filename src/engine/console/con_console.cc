@@ -331,11 +331,27 @@ void CON_Ticker(void) {
     }
 }
 
+void G_ClearInput(void);
+
+//
+// CON_ToggleConsole
+//
+
+void CON_ToggleConsole(void)
+{
+    console_enabled = !console_enabled;
+
+    if (console_state == CST_DOWN || console_state == CST_LOWER)
+        console_state = CST_UP;
+    else if (console_state == CST_UP || console_state == CST_RAISE)
+        console_state = CST_DOWN;
+
+    G_ClearInput();
+}
+
 //
 // CON_Responder
 //
-
-void G_ClearInput(void);
 
 dboolean CON_Responder(event_t* ev) {
     int c;
@@ -372,11 +388,6 @@ dboolean CON_Responder(event_t* ev) {
     case CST_LOWER:
         if(ev->type == ev_keydown) {
             switch(c) {
-            case '`':
-                console_state = CST_UP;
-                console_enabled = false;
-                break;
-
             case KEY_ESCAPE:
                 console_inputlength = 1;
                 console_autocomplete = 0;
@@ -479,18 +490,6 @@ dboolean CON_Responder(event_t* ev) {
             }
         }
         return true;
-
-    case CST_UP:
-    case CST_RAISE:
-        if(c == '`') {
-            if(ev->type == ev_keydown) {
-                console_state = CST_DOWN;
-                console_enabled = true;
-                G_ClearInput();
-            }
-            return false;
-        }
-        break;
     }
 
     return false;

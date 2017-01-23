@@ -42,6 +42,7 @@ void CON_DPrintf(const char *s, ...);
 void CON_Draw(void);
 void CON_AddLine(const char *line, int len);
 void CON_Ticker(void);
+void CON_ToggleConsole(void);
 
 dboolean CON_Responder(event_t* ev);
 

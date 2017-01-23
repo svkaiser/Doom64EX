@@ -572,19 +572,27 @@ void I_UpdateGrab(void) {
 // I_GetEvent
 //
 
+void CON_ToggleConsole(void);
+
 static void I_GetEvent(SDL_Event *Event) {
     event_t event;
     uint32 mwheeluptic = 0, mwheeldowntic = 0;
     uint32 tic = gametic;
 
     switch(Event->type) {
-	case SDL_KEYDOWN:
-		if(Event->key.repeat)
-			break;
+    case SDL_KEYDOWN:
+        if(Event->key.repeat)
+            break;
+
+        if (Event->key.keysym.scancode == SDL_SCANCODE_GRAVE) {
+            CON_ToggleConsole();
+            break;
+        }
+
         event.type = ev_keydown;
         event.data1 = I_TranslateKey(Event->key.keysym.sym);
         D_PostEvent(&event);
-        break;
+    break;
 
     case SDL_KEYUP:
         event.type = ev_keyup;
@@ -592,7 +600,7 @@ static void I_GetEvent(SDL_Event *Event) {
         D_PostEvent(&event);
         break;
 
-	case SDL_MOUSEBUTTONDOWN:
+  case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
 		if (!window_focused)
 			break;
