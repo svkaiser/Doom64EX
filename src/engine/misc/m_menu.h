@@ -57,7 +57,6 @@ void M_StartControlPanel(dboolean forcenext);
 
 void M_StartMainMenu(void);
 
-void M_RegisterCvars(void);
 
 
 

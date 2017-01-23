@@ -50,7 +50,6 @@ void G_Ticker(void);
 void G_ScreenShot(void);
 void G_RunTitleMap(void);
 void G_RunGame(void);
-void G_RegisterCvars(void);
 
 dboolean G_Responder(event_t* ev);
 

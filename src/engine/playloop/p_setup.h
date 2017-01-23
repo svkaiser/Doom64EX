@@ -37,7 +37,6 @@ void P_SetupLevel(int map, int playermask, skill_t skill);
 // Called by startup code.
 void P_Init(void);
 
-void P_RegisterCvars(void);
 
 //
 // [kex] mapinfo

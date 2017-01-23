@@ -58,6 +58,5 @@ extern int mouse_y;
 int I_MouseAccel(int val);
 void I_MouseAccelChange(void);
 
-void V_RegisterCvars(void);
 
 #endif

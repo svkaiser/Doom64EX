@@ -70,7 +70,6 @@ int S_GetActiveSounds(void);
 void S_StartMusic(int mnum);
 void S_StopMusic(void);
 
-void S_RegisterCvars(void);
 
 
 #endif
