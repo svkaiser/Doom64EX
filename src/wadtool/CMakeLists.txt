@@ -48,5 +48,9 @@ add_custom_target(kexwad ALL
 
 # Install kex.wad
 if (NOT WIN32)
-  install(FILES ${CMAKE_BINARY_DIR}/kex.wad DESTINATION share/games/doom64ex)
+  if (APPLE)
+    install(FILES ${CMAKE_BINARY_DIR}/kex.wad DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
+  else ()
+    install(FILES ${CMAKE_BINARY_DIR}/kex.wad DESTINATION share/games/doom64ex)
+  endif ()
 endif ()
