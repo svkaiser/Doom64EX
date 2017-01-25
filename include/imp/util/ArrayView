@@ -4,12 +4,8 @@
 
 #include <type_traits>
 #include <iterator>
-
-/* Forward-declare some std stuff */
-namespace std {
-  template <class T, class Allocator> class vector;
-  template <class T, size_t N> struct array;
-}
+#include <array>
+#include <vector>
 
 namespace imp {
   template <class T>
