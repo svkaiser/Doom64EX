@@ -29,14 +29,12 @@ Create a new directory inside the repo root where compilation will take place
 Run cmake and make
 
     $ cmake .. && make
-    
-Install doom64ex
+
+Install doom64ex (on macOS do not do this as root or with `sudo`)
 
     # make install
 
 ## Usage
-
-### Linux
 
 Doom64EX needs the Doom 64 data to be present in any of the following directories:
 
@@ -46,6 +44,7 @@ Doom64EX needs the Doom 64 data to be present in any of the following directorie
 * `/usr/local/share/doom64ex`
 * `/usr/share/games/doom64ex`
 * `/usr/share/doom64ex`
+* `~/Library/Application Support/doom64ex` (macOS only)
 
 The data files are:
 
