@@ -2,6 +2,7 @@
 #ifndef __IMP_CONVERT__63784703
 #define __IMP_CONVERT__63784703
 
+#include <cstdlib>
 #include <string>
 #include "Types"
 #include "StringView"
@@ -17,7 +18,7 @@ namespace imp {
   template <>
   inline int32 from_string<int32>(StringView str)
   {
-    return std::atoi(str.data());
+    return atoi(str.data());
   }
 
   template <>

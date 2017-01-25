@@ -4,13 +4,14 @@
 
 #include "Types"
 
-#if defined(APPLE) && defined(_WIN32)
-// We assume that Apple devices and Windows only run on little endian CPUs.
+#if defined(_WIN32)
+// We assume that Windows only runs on little endian CPUs.
 // (Intel and ARM)
 # define BIG_ENDIAN 0x1234
 # define LITTLE_ENDIAN 0x4321
 # define BYTE_ORDER LITTLE_ENDIAN
-
+#elif defined(__APPLE__)
+# include <machine/endian.h>
 #else
 # include <endian.h>
 #endif
@@ -35,6 +36,27 @@ namespace imp {
 
   inline uint64 swap_bytes(uint64 x) noexcept
   { return __bswap_64(x); }
+}
+#elif defined(__APPLE__)
+# include <libkern/OSByteOrder.h>
+namespace imp {
+    inline int16 swap_bytes(int16 x) noexcept
+    { return OSSwapInt16(x); }
+
+    inline uint16 swap_bytes(uint16 x) noexcept
+    { return OSSwapInt16(x); }
+
+    inline int32 swap_bytes(int32 x) noexcept
+    { return OSSwapInt32(x); }
+
+    inline uint32 swap_bytes(uint32 x) noexcept
+    { return OSSwapInt32(x); }
+
+    inline int64 swap_bytes(int64 x) noexcept
+    { return OSSwapInt64(x); }
+
+    inline uint64 swap_bytes(uint64 x) noexcept
+    { return OSSwapInt64(x); }
 }
 #elif defined(__GNUC__) || defined(__clang__)
 namespace imp {

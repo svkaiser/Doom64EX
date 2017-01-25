@@ -319,5 +319,11 @@ set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
 ##
 
 if (NOT WIN32)
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)
+  if (APPLE)
+    include(BundleUtilities)
+    fixup_bundle("${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app" "" "")
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app" DESTINATION /Applications USE_SOURCE_PERMISSIONS)
+  else ()
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)
+  endif ()
 endif ()

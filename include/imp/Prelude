@@ -2,6 +2,7 @@
 #ifndef __IMP_PRELUDE__56107413
 #define __IMP_PRELUDE__56107413
 
+#include <array>
 #include <chrono>
 #include <memory>
 #include <string>
