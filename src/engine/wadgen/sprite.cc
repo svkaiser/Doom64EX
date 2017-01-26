@@ -90,7 +90,7 @@ static const romLumpSpecial_t BloodSprites[] = {
 //
 //      N64 Doom64's sprite format is probably the most confusing
 //      data to handle (also refer to Sprite.h for the N64 Sprite struct)
-//      
+//
 //      Here is how this works:
 //
 //      There are two types of sprites. Compressed and Uncompressed.
@@ -270,7 +270,7 @@ void Sprite_Convert(int lump)
 		memcpy(buffer, exs->data, rs->width * rs->height);
 		memset(exs->data, 0, rs->width * rs->height);
 
-		for (exs->data, i = 0; i < rs->width * rs->height; i += 2)
+		for (i = 0; i < rs->width * rs->height; i += 2)
 			exs->data[tmp++] = ((buffer[i + 1] << 4) | buffer[i]);
 
 		for (i = 0; i < 16; i++) {
@@ -300,7 +300,7 @@ void Sprite_Convert(int lump)
 //      First decides if the sprite is compressed, or not. If not
 //      compressed then start converting 256 palette indexes, else
 //      just convert 16 colors.
-//      
+//
 //      Returns if the sprite is within the S_START
 //      and S_END markers and is not compressed, which means this
 //      sprite uses an external palettel lump.
