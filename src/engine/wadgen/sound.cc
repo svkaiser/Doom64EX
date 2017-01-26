@@ -380,18 +380,18 @@ Sound_CreateMidiTrack(midiheader_t * mthd, track_t * track, byte * data,
 		switch (*midi) {
 		case 0x02:	// unknown 0x02
 			PRINTSTRING(*midi);
-			*midi++;
+			(void)*midi++;
 			break;
 		case 0x07:	// program change
 			*buff++ = ((0x0c << 4) | chan);
-			*midi++;
+			(void)*midi++;
 
 			temp = *midi++;
 			if (temp >= newbankoffset)
 				temp = (temp - newbankoffset);
 
 			*buff++ = temp;
-			*midi++;
+			(void)*midi++;
 			tracksize += 2;
 
 			break;
@@ -437,7 +437,7 @@ Sound_CreateMidiTrack(midiheader_t * mthd, track_t * track, byte * data,
 			}
 
 			*buff++ = ((0x0e << 4) | chan);
-			*midi++;
+			(void)*midi++;
 
 			temp = *midi++;
 			pitchbend = temp;
@@ -459,45 +459,45 @@ Sound_CreateMidiTrack(midiheader_t * mthd, track_t * track, byte * data,
 			break;
 		case 0x0b:	// unknown 0x0b
 			PRINTSTRING(*midi);
-			*midi++;
-			*midi++;
+			(void)*midi++;
+			(void)*midi++;
 			break;
 		case 0x0c:	// global volume
 			*buff++ = ((0x0b << 4) | chan);
-			*midi++;
+			(void)*midi++;
 			*buff++ = 0x07;
 			*buff++ = *midi++;
 			tracksize += 3;
 			break;
 		case 0x0d:	// global panning
 			*buff++ = ((0x0b << 4) | chan);
-			*midi++;
+			(void)*midi++;
 			*buff++ = 0x0a;
 			*buff++ = *midi++;
 			tracksize += 3;
 			break;
 		case 0x0e:	// sustain pedal
 			*buff++ = ((0x0b << 4) | chan);
-			*midi++;
+			(void)*midi++;
 			*buff++ = 0x40;
 			*buff++ = *midi++;
 			tracksize += 3;
 			break;
 		case 0x0f:	// unknown 0x0f
 			PRINTSTRING(*midi);
-			*midi++;
-			*midi++;
+			(void)*midi++;
+			(void)*midi++;
 			break;
 		case 0x11:	// play note
 			*buff++ = ((0x09 << 4) | chan);
-			*midi++;
+			(void)*midi++;
 			*buff++ = note = *midi++;
 			*buff++ = *midi++;
 			tracksize += 3;
 			break;
 		case 0x12:	// stop note
 			*buff++ = ((0x09 << 4) | chan);
-			*midi++;
+			(void)*midi++;
 			*buff++ = *midi++;
 			*buff++ = 0;
 			tracksize += 3;

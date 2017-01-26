@@ -471,7 +471,7 @@ void* W_GetMapLump(int lump) {
 //
 
 int W_CheckNumForName(const char* name) {
-    register int i = -1;
+    int i = -1;
 
     if(numlumps) {
         i = lumpinfo[W_HashLumpName(name) % numlumps].index;

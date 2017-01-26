@@ -81,7 +81,7 @@ void *dmemcpy(void *s1, const void *s2, size_t n) {
 //
 
 void *dmemset(void *s, dword c, size_t n) {
-    register char *p = (char *)s;
+    char *p = (char *)s;
 
     while(n) {
         *p++ = (char)c;
@@ -105,7 +105,7 @@ char *dstrcpy(char *dest, const char *src) {
 //
 
 void dstrncpy(char *dest, const char *src, int maxcount) {
-    register char *p1 = dest;
+    char *p1 = dest;
     const char *p2 = src;
     while((maxcount--) >= 0) {
         *p1++ = *p2++;
@@ -172,7 +172,7 @@ int dstrnicmp(const char *s1, const char *s2, int len) {
 //
 
 void dstrupr(char *s) {
-    register char c;
+    char c;
 
     while((c = *s) != 0) {
         if(c >= 'a' && c <= 'z') {
@@ -187,7 +187,7 @@ void dstrupr(char *s) {
 //
 
 void dstrlwr(char *s) {
-    register char c;
+    char c;
 
     while((c = *s) != 0) {
         if(c >= 'A' && c <= 'Z') {
@@ -202,7 +202,7 @@ void dstrlwr(char *s) {
 //
 
 int dstrlen(const char *string) {
-    register int rc = 0;
+    int rc = 0;
     if(string)
         while(*(string++)) {
             rc++;
@@ -219,7 +219,7 @@ int dstrlen(const char *string) {
 //
 
 char *dstrrchr(char *s, char c) {
-    register int len = dstrlen(s);
+    int len = dstrlen(s);
     s += len;
     while(len--)
         if(*--s == c) {
@@ -242,8 +242,8 @@ void dstrcat(char *dest, const char *src) {
 //
 
 char *dstrstr(char *s1, char *s2) {
-    register char *p = s1;
-    register int len = dstrlen(s2);
+    char *p = s1;
+    int len = dstrlen(s2);
 
     for(; (p = dstrrchr(p, *s2)) != 0; p++) {
         if(dstrncmp(p, s2, len) == 0) {
