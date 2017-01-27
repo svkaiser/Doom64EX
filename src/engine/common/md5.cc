@@ -122,7 +122,7 @@ void MD5_UpdateString(md5_context_t *context, char *str)
 }
 
 /*
- * Final wrapup - pad to 64-byte boundary with the bit pattern 
+ * Final wrapup - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void
@@ -154,7 +154,7 @@ MD5_Final(byte digest[16], md5_context_t *ctx)
 
         ByteSwapBlock(ctx->buf, 4);
         memcpy(digest, ctx->buf, 16);
-        memset(ctx, 0, sizeof(ctx));    /* In case it's sensitive */
+        memset((void *)ctx, 0, sizeof(ctx));    /* In case it's sensitive */
 }
 
 #ifndef ASM_MD5
@@ -179,7 +179,7 @@ MD5_Final(byte digest[16], md5_context_t *ctx)
 void
 MD5_Transform(uint32_t buf[4], uint32_t const in[16])
 {
-        register uint32_t a, b, c, d;
+        uint32_t a, b, c, d;
 
         a = buf[0];
         b = buf[1];

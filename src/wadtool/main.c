@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        printf("Writing lump %.8s with size %d at %d\n", plump->name, plump->size, ftell(wad));
+        printf("Writing lump %.8s with size %d at %lu\n", plump->name, plump->size, ftell(wad));
 
         snprintf(path, 512, "%s/%s", src_dir, plump->file);
         if (!(f = fopen(path, "rb"))) {

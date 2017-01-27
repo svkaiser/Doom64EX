@@ -152,11 +152,6 @@ void CON_AddLine(const char *line, int len) {
     int         i;
     dboolean    recursed = false;
 
-    if(!console_linebuffer) {
-        //not initialised yet
-        return;
-    }
-
     if(recursed) {
         //later call to Z_Malloc can fail and call I_Error/I_Printf...
         return;
@@ -203,10 +198,6 @@ void CON_AddLine(const char *line, int len) {
 void CON_AddText(const char *text) {
     const char *src;
     char    c;
-
-    if(!console_linebuffer) {
-        return;
-    }
 
     src = text;
     c = *(src++);
@@ -507,10 +498,6 @@ void CON_Draw(void) {
     float   y = 0;
     float   x = 0;
     float   inputlen;
-
-    if(!console_linebuffer) {
-        return;
-    }
 
     if(!console_enabled) {
         return;

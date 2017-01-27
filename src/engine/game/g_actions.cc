@@ -423,6 +423,9 @@ dboolean G_ActionResponder(event_t *ev) {
     case ev_gamepad:
         I_XInputReadActions(ev);
         break;
+#else
+    case ev_gamepad:
+        break;
 #endif
     }
 
@@ -647,6 +650,11 @@ dboolean G_BindActionByEvent(event_t *ev, char *action) {
         if((button >= 0) && (button < MOUSE_BUTTONS)) {
             plist = &MouseActions[button];
         }
+        break;
+
+    case ev_keyup:
+    case ev_mouseup:
+    case ev_gamepad:
         break;
     }
     if(plist) {
