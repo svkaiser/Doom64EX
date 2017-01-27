@@ -50,9 +50,6 @@
 #include "g_local.h"
 #include "p_saveg.h"
 
-int        myargc;
-char**    myargv;
-
 //
 // M_CheckParm
 // Checks for the given parameter

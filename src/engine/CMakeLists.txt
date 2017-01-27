@@ -303,6 +303,7 @@ set(KEXLIB_SOURCES
   fmt/format.cc
   fmt/ostream.cc
   common/Property.cc
+  App.cc
         )
 
 ##------------------------------------------------------------------------------

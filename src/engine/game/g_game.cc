@@ -259,7 +259,9 @@ static CMD(Seta) {
     }
 
     if (auto p = Property::find(param[0])) {
-        p->set_string(param[1]);
+        if (!p->is_from_param()) {
+            p->set_string(param[1]);
+        }
     } else {
         I_Printf("Couldn't find property (cvar) %s\n", param[0]);
     }
