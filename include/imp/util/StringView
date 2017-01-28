@@ -37,6 +37,7 @@ namespace imp {
   template <class CharT>
   constexpr size_t __h_constexpr_strlen(const CharT *str) noexcept
   {
+      if (!str) return 0;
       size_t len = 0;
       while (str[len++]);
       return len ? len - 1 : 0; // We don't like '\0', so decrement

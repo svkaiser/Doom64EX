@@ -304,6 +304,8 @@ set(KEXLIB_SOURCES
   fmt/ostream.cc
   common/Property.cc
   App.cc
+  wad/Wad.cc
+  wad/DoomWad.cc
         )
 
 ##------------------------------------------------------------------------------

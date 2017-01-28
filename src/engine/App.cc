@@ -1,6 +1,7 @@
 #include <map>
 #include <fstream>
 #include <imp/App>
+#include <imp/Wad>
 
 [[noreturn]]
 void D_DoomMain();
@@ -41,12 +42,9 @@ namespace {
                   if (param) {
                       println("");
                   }
-
                   param = it->second;
                   param->set_have();
-
                   print("{:16s} = ", arg);
-
                   if (param->arity() == Arity::nullary) {
                       param = nullptr;
                       println(" true");
@@ -111,6 +109,11 @@ void app::main(int argc, char** argv)
             print(" {}", s);
         println("");
     }
+
+    /* Load Wad */
+    wad::mount("/home/zohar/.local/share/doom64ex/doom64.wad");
+    wad::mount("/home/zohar/.local/share/doom64ex/kex.wad");
+    wad::merge();
 
     if (_wadgen_param) {
         WGen_WadgenMain();

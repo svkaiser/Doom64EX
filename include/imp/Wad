@@ -1,0 +1,99 @@
+// -*- mode: c++ -*-
+#ifndef __IMP_WAD__45443636
+#define __IMP_WAD__45443636
+
+#include <imp/Prelude>
+#include <imp/util/Optional>
+
+namespace imp {
+  namespace wad {
+    enum struct Section;
+    struct Lump;
+    class LumpIterator;
+
+    bool mount(StringView path);
+
+    void merge();
+
+    Optional<Lump> find(StringView name);
+
+    Optional<Lump> find(std::size_t index);
+
+    LumpIterator section(Section s);
+
+    enum struct Section {
+        normal,
+        textures,
+        graphics,
+        sprites,
+        sounds
+    };
+
+    struct Lump {
+        String name;
+        SharedPtr<char> data {};
+        std::size_t size {};
+
+        Lump() = default;
+
+        Lump(Lump&&) = default;
+
+        Lump(const Lump&) = default;
+
+        Lump(String name, SharedPtr<char> data, std::size_t size):
+            name(name),
+            data(data),
+            size(size) {}
+
+        Lump& operator=(Lump&&) = default;
+
+        Lump& operator=(const Lump&) = default;
+    };
+
+    struct LumpIterator {
+        Lump lump_ {};
+        std::size_t index_;
+        std::size_t end_;
+
+    public:
+        LumpIterator(std::size_t begin, std::size_t end);
+
+        const Lump &operator*() const
+        { return lump_; }
+
+        const Lump *operator->() const
+        { return &lump_; }
+
+        operator bool() const
+        { return index_ < end_; }
+
+        bool operator!() const
+        { return !(index_ < end_); }
+
+        LumpIterator& operator++();
+    };
+  }
+
+  inline StringView to_string(wad::Section s)
+  {
+      using Section = wad::Section;
+      switch (s) {
+      case Section::normal:
+          return "normal"_sv;
+
+      case Section::textures:
+          return "textures"_sv;
+
+      case Section::graphics:
+          return "graphics"_sv;
+
+      case Section::sprites:
+          return "sprites"_sv;
+
+      case Section::sounds:
+          return "sounds"_sv;
+      }
+  }
+}
+
+#endif //__IMP_WAD__45443636
