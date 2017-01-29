@@ -65,7 +65,7 @@ namespace imp {
           } else if (mInit) {
               mValue = *other;
           } else {
-              mValue.T(*other);
+              ::new (static_cast<void*>(&mValue)) T(other.mValue);
               mInit = true;
           }
           return *this;
@@ -160,28 +160,28 @@ namespace imp {
 
       constexpr T& value() &
       {
-          if (mInit)
+          if (!mInit)
               throw bad_optional_access {};
           return mValue;
       }
 
       constexpr const T& value() const&
       {
-          if (mInit)
+          if (!mInit)
               throw bad_optional_access {};
           return mValue;
       }
 
       constexpr T&& value() &&
       {
-          if (mInit)
+          if (!mInit)
               throw bad_optional_access {};
           return std::move(mValue);
       }
 
       constexpr const T&& value() const&&
       {
-          if (mInit)
+          if (!mInit)
               throw bad_optional_access {};
           return std::move(mValue);
       }

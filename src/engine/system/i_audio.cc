@@ -1035,6 +1035,7 @@ static dboolean Seq_RegisterSongs(doomseq_t* seq) {
     fail = 0;
     for(; section; ++section) {
         auto& lump = *section;
+        auto i = lump.section_index;
         song_t* song;
 
         song = &seq->songs[i];

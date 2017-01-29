@@ -40,6 +40,7 @@ namespace imp {
                 int c = str[i];
                 hash_ ^= (hash_ << 5) + std::toupper(c) + (hash_ >> 2);
             }
+            hash_ &= 0xffff;
         }
 
         LumpHash(uint32 hash):
@@ -69,6 +70,7 @@ namespace imp {
         SharedPtr<char> data {};
         std::size_t size {};
         std::size_t index {};
+        std::size_t section_index {};
         Section section {};
 
         Lump() = default;

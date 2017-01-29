@@ -656,8 +656,9 @@ void R_InitFire(void) {
     int i;
     byte *pixdata;
 
-    fireLump = wad::find("FIRE")->index;
-    fireImage = I_ReadImage(fireLump, true, true, false, 0);
+    auto lump = wad::find("FIRE");
+    fireLump = lump->section_index;
+    fireImage = I_ReadImage(lump->index, true, true, false, 0);
 
     pixdata = fireImage.data_ptr();
     for (i = 0; i < 4096; i++)

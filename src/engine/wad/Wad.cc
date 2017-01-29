@@ -14,6 +14,7 @@ namespace {
       std::size_t id {};
       wad::Section section {};
       std::size_t index {};
+      std::size_t section_index {};
   };
 
   std::map<String, LumpId> _lumps;
@@ -62,36 +63,30 @@ bool wad::mount(StringView path)
 
 void wad::merge()
 {
+    std::size_t index = 0;
     _lumps_by_id.clear();
-    auto section = [](StringView prefix, wad::Section section)
+    auto section = [&](wad::Section section)
         {
             std::pair<std::size_t, std::size_t> pair;
-            if (!prefix.empty()) {
-                auto& x = _lumps[format("{}_START", prefix)] = {};
-                _lumps_by_id.push_back(&x);
-            }
             pair.first = _lumps_by_id.size();
             auto& v = _group_by_section[section];
             _lumps_by_id.insert(_lumps_by_id.end(), v.begin(), v.end());
+            std::size_t section_index {};
+            for (auto& x : v) {
+                x->index = index++;
+                x->section_index = section_index++;
+            }
             v.clear();
             pair.second = _lumps_by_id.size();
             _lumps_by_section[section] = pair;
-            if (!prefix.empty()) {
-                auto& x = _lumps[format("{}_END", prefix)] = {};
-                _lumps_by_id.push_back(&x);
-            }
         };
-    section(nullptr, wad::Section::normal);
-    section("T", wad::Section::textures);
-    section("G", wad::Section::graphics);
-    section("S", wad::Section::sprites);
-    section("DS", wad::Section::sounds);
+    section(wad::Section::normal);
+    section(wad::Section::textures);
+    section(wad::Section::graphics);
+    section(wad::Section::sprites);
+    section(wad::Section::sounds);
 
     _group_by_section.clear();
-
-    std::size_t i = 0;
-    for (auto x : _lumps_by_id)
-        x->index = i++;
 }
 
 bool wad::have_lump(StringView name)
@@ -101,17 +96,19 @@ bool wad::have_lump(StringView name)
 
 Optional<wad::Lump> wad::find(StringView name)
 {
-    println("wad::find(\"{}\");", name);
     auto it = _lumps.find(name);
-    if (it != _lumps.end())
+    if (it == _lumps.end())
         return nullopt;
 
     const auto& id = it->second;
     const auto& mount = _mounts[id.mount];
 
     /* Try to find lump by id (might be faster) */
-    if (auto l = mount->find(id.id))
+    if (auto l = mount->find(id.id)) {
+        l->index = it->second.index;
+        l->section_index = it->second.section_index;
         return l;
+    }
 
     /* Otherwise, try to find lump by name */
     return mount->find(name);
@@ -119,9 +116,6 @@ Optional<wad::Lump> wad::find(StringView name)
 
 Optional<wad::Lump> wad::find(std::size_t index)
 {
-    println("wad::find({});", index);
-    if (index == 0)
-        std::terminate();
     if (index >= _lumps_by_id.size())
         return nullopt;
 
@@ -129,8 +123,11 @@ Optional<wad::Lump> wad::find(std::size_t index)
     const auto& mount = _mounts[id.mount];
 
     /* Try to find lump by id (might be faster) */
-    if (auto l = mount->find(id.id))
+    if (auto l = mount->find(id.id)) {
+        l->index = id.index;
+        l->section_index = id.section_index;
         return l;
+    }
 
     /* Otherwise, try to find lump by name */
     return nullopt;

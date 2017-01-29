@@ -49,7 +49,7 @@ static void SC_Open(const char* name) {
     CON_DPrintf("--------SC_Open: Reading %s--------\n", name);
 
     auto lump = wad::find(name);
-    if(lump) {
+    if (!lump) {
         sc_parser.buffsize   = M_ReadFile(name, &sc_parser.buffer);
 
         if(sc_parser.buffsize == -1) {
@@ -75,8 +75,6 @@ static void SC_Open(const char* name) {
 //
 
 static void SC_Close(void) {
-    Z_Free(sc_parser.buffer);
-
     sc_parser.buffer         = NULL;
     sc_parser.buffsize       = 0;
     sc_parser.pointer_start  = NULL;

@@ -172,14 +172,14 @@ void R_InitSprites(const char** namelist) {
                 frame = l.name[4] - 'A';
                 rotation = l.name[5] - '0';
 
-                patched = l.index;
+                patched = l.section_index;
 
                 R_InstallSpriteLump(patched, frame, rotation, false);
 
                 if(l.name[6]) {
                     frame = l.name[6] - 'A';
                     rotation = l.name[7] - '0';
-                    R_InstallSpriteLump(l.index, frame, rotation, true);
+                    R_InstallSpriteLump(l.section_index, frame, rotation, true);
                 }
             }
         }
@@ -296,7 +296,7 @@ static void R_AddVisSprite(visspritelist_t* vissprite) {
     }
 
     if(thing->flags & MF_RENDERLASER) {
-        spritenum = wad::find("BOLTA0")->index;
+        spritenum = wad::find("BOLTA0")->section_index;
     }
     else {
         sprdef = &spriteinfo[thing->sprite];
@@ -484,7 +484,7 @@ static dboolean R_GenerateLaserPlane(void *data, vtx_t* vertex) {
 
     laser = (laser_t*)thing->extradata;
 
-    spritenum = wad::find("BOLTA0")->index;
+    spritenum = wad::find("BOLTA0")->section_index;
 
     dglSetVertexColor(vertex, D_RGBA(255, 0, 0, thing->alpha), 4);
 

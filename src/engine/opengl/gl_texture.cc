@@ -122,8 +122,6 @@ static CMD(ResetTextures) {
 //
 
 static void InitWorldTextures(void) {
-    int i = 0;
-
     auto it = wad::section(wad::Section::textures);
     swx_start           = -1;
     numtextures         = it.size();
@@ -135,7 +133,7 @@ static void InitWorldTextures(void) {
 
     for(; it; ++it) {
         auto& lump = *it;
-        void *image;
+        auto i = lump.section_index;
         int w;
         int h;
 
@@ -151,13 +149,11 @@ static void InitWorldTextures(void) {
         palettetranslation[i] = 0;
 
         // read PNG and setup global width and heights
-        image = I_PNGReadData(lump.index, true, true, false, &w, &h, NULL, 0);
+        I_PNGReadData(lump.index, true, true, false, &w, &h, NULL, 0);
 
         textureptr[i][0] = 0;
         texturewidth[i] = w;
         textureheight[i] = h;
-
-        free(image);
     }
 
     CON_DPrintf("%i world textures initialized\n", numtextures);
@@ -303,8 +299,6 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
 //
 
 static void InitGfxTextures(void) {
-    int i = 0;
-
     auto section = wad::section(wad::Section::graphics);
     numgfx          = section.size();
     gfxptr          = (dtexture*) Z_Calloc(numgfx * sizeof(dtexture), PU_STATIC, NULL);
@@ -315,6 +309,7 @@ static void InitGfxTextures(void) {
 
     for(; section; ++section) {
         auto& lump = *section;
+        auto i = lump.section_index;
         void *image;
         int w;
         int h;
@@ -347,7 +342,7 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     int gfxid;
 
     auto lump = wad::find(name).value();
-    gfxid = lump.index;
+    gfxid = lump.section_index;
 
     if(gfxid == curgfx) {
         return gfxid;
@@ -421,8 +416,6 @@ static void InitSpriteTextures(void) {
         for(j = 0; j < NUMSPRITES; j++) {
             // start looking for external palette lumps
             if(!dstrncmp(lump.name.data(), sprnames[j], 4)) {
-                char palname[9];
-
                 // increase the count if a palette lump is found
                 for(p = 1; p < 10; p++) {
                     if(wad::have_lump(format("PAL{}{}", sprnames[j], p))) {
@@ -450,12 +443,7 @@ static void InitSpriteTextures(void) {
         size_t x;
 
         // allocate # of sprites per pointer
-        spriteptr[i] = (dtexture*)Z_Malloc(spritecount[i] * sizeof(dtexture), PU_STATIC, 0);
-
-        // reset references
-        for(x = 0; x < spritecount[i]; x++) {
-            spriteptr[i][x] = 0;
-        }
+        spriteptr[i] = (dtexture*)Z_Calloc(spritecount[i] * sizeof(dtexture), PU_STATIC, 0);
 
         // read data and setup globals
         image = I_PNGReadData(lump.index, true, true, false, &w, &h, offset, 0);
@@ -932,11 +920,11 @@ void GL_DumpTextures(void) {
         GL_UnloadTexture(&textureptr[i][0]);
 
         for(p = 0; p < numanimdef; p++) {
-            // int lump = W_GetNumForName(animdefs[p].name) - t_start;
+            int lump = wad::find(animdefs[p].name)->section_index;
 
-            // if(lump != i) {
-            //     continue;
-            // }
+            if(lump != i) {
+                 continue;
+            }
 
             if(animdefs[p].palette) {
                 for(j = 1; j < animdefs[p].frames; j++) {
@@ -948,7 +936,7 @@ void GL_DumpTextures(void) {
 
     for(i = 0; i < numsprtex; i++) {
         for(p = 0; p < spritecount[i]; p++) {
-            GL_UnloadTexture(&spriteptr[i][p]);
+            //GL_UnloadTexture(&spriteptr[i][p]);
         }
     }
 

@@ -9,66 +9,71 @@ void D_DoomMain();
 [[noreturn]]
 void WGen_WadgenMain();
 
-int myargc {};
-char** myargv {};
+int myargc{};
 
-namespace {
-  auto& _gparams()
-  {
-      static std::map<StringView, app::Param*> params;
-      return params;
-  }
+char **myargv{};
 
-  auto& _params = _gparams();
+namespace
+{
+    auto &_gparams()
+    {
+        static std::map<StringView, app::Param *> params;
+        return params;
+    }
 
-  StringView _program;
-  Vector<String> _rest;
+    auto &_params = _gparams();
 
-  app::StringParam _wadgen_param("wadgen");
+    StringView _program;
 
-  struct ParamsParser
-  {
-      using Arity = app::Param::Arity;
-      app::Param *param {};
+    Vector<String> _rest;
 
-      void process(StringView arg)
-      {
-          if (arg[0] == '-') {
-              arg.remove_prefix(1);
-              auto it = _params.find(arg);
-              if (it == _params.end()) {
-                  // TODO: Print error
-              } else {
-                  if (param) {
-                      println("");
-                  }
-                  param = it->second;
-                  param->set_have();
-                  print("{:16s} = ", arg);
-                  if (param->arity() == Arity::nullary) {
-                      param = nullptr;
-                      println(" true");
-                  }
-              }
-          } else {
-              if (!param) {
-                  _rest.emplace_back(arg);
-                  return;
-              }
+    app::StringParam _wadgen_param("wadgen");
 
-              param->add(arg);
-              print(" {}", arg);
-              if (param->arity() != Arity::nary) {
-                  param = nullptr;
-                  println("");
-              }
-          }
-      }
-  };
+    struct ParamsParser
+    {
+        using Arity = app::Param::Arity;
+        app::Param *param{};
+
+        void process(StringView arg)
+        {
+            if (arg[0] == '-') {
+                arg.remove_prefix(1);
+                auto it = _params.find(arg);
+                if (it == _params.end()) {
+                    // TODO: Print error
+                }
+                else {
+                    if (param) {
+                        println("");
+                    }
+                    param = it->second;
+                    param->set_have();
+                    print("{:16s} = ", arg);
+                    if (param->arity() == Arity::nullary) {
+                        param = nullptr;
+                        println(" true");
+                    }
+                }
+            }
+            else {
+                if (!param) {
+                    _rest.emplace_back(arg);
+                    return;
+                }
+
+                param->add(arg);
+                print(" {}", arg);
+                if (param->arity() != Arity::nary) {
+                    param = nullptr;
+                    println("");
+                }
+            }
+        }
+    };
 }
 
 [[noreturn]]
-void app::main(int argc, char** argv)
+void app::main(int argc, char **argv)
 {
     using Arity = app::Param::Arity;
     myargc = argc;
@@ -95,7 +100,8 @@ void app::main(int argc, char** argv)
                 f >> arg;
                 parser.process(arg);
             }
-        } else {
+        }
+        else {
             parser.process(arg);
         }
     }
@@ -105,7 +111,7 @@ void app::main(int argc, char** argv)
     /* Print rest params */
     if (!_rest.empty()) {
         print("{:16s} = ", "rest");
-        for (const auto& s : _rest)
+        for (const auto &s : _rest)
             print(" {}", s);
         println("");
     }
@@ -117,7 +123,8 @@ void app::main(int argc, char** argv)
 
     if (_wadgen_param) {
         WGen_WadgenMain();
-    } else {
+    }
+    else {
         D_DoomMain();
     }
 }
@@ -132,13 +139,14 @@ bool app::have_param(StringView name)
     return _params.count(name);
 }
 
-const app::Param* app::param(StringView name)
+const app::Param *app::param(StringView name)
 {
     auto it = _params.find(name);
     return it != _params.end() ? it->second : nullptr;
 }
 
-app::Param::Param(StringView name, app::Param::Arity arity):
+app::Param::Param(StringView name, app::Param::Arity arity)
+    :
     arity_(arity)
 {
     _gparams()[name] = this;
@@ -154,7 +162,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     app::main(argc, argv);
 }
 #else
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     app::main(argc, argv);
 }

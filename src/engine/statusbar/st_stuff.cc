@@ -1086,7 +1086,7 @@ void ST_Init(void) {
     st_crosshairs = 0;
 
     if(auto lump = wad::find("CRSHAIRS")) {
-        st_crosshairs = (gfxwidth[lump->index] / ST_CROSSHAIRSIZE);
+        st_crosshairs = (gfxwidth[lump->section_index] / ST_CROSSHAIRSIZE);
     }
 
     dmgmarkers.next = dmgmarkers.prev = &dmgmarkers;
@@ -1097,7 +1097,9 @@ void ST_Init(void) {
         char name[9];
 
         sprintf(name, "JPMSG%02d", i + 1);
-        st_jmessages[i] = wad::find(name)->index;
+        st_jmessages[i] = -1;
+        if (auto lump = wad::find(name))
+            st_jmessages[i] = lump->section_index;
 
         if(st_jmessages[i] != -1) {
             st_hasjmsg = true;

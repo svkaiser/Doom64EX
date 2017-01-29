@@ -26,6 +26,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <t_bsp.h>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -399,7 +400,8 @@ void R_PrecacheLevel(void) {
             num++;
 
             for(p = 0; p < numanimdef; p++) {
-                int lump = wad::find(animdefs[p].name)->index;
+                auto l = wad::find(animdefs[p].name);
+                int lump = l.value().section_index;
 
                 if(lump != i) {
                     continue;

@@ -154,7 +154,7 @@ static std::map<wad::LumpHash, int> texturehashlist;
 static void P_InitTextureHashTable(void) {
     auto section = wad::section(wad::Section::textures);
     for(int i = 0; section; ++section, ++i) {
-        texturehashlist.emplace(section->name, i);
+        auto it = texturehashlist.emplace(section->name, i);
     }
 }
 
@@ -310,7 +310,7 @@ void P_LoadSectors(int lump) {
         ss->frame_z2[1] = ss->ceilingheight;
 
         for(j = 0; j < numskydef; j++) {
-            if(ss->ceilingpic == wad::find(skydefs[j].flat)->index) {
+            if(ss->ceilingpic == wad::find(skydefs[j].flat)->section_index) {
                 skyflatnum = j;
                 break;
             }
@@ -966,7 +966,7 @@ void P_SetupSky(void) {
 
     skyindex    = skyflatnum;
     sky         = &skydefs[skyindex];
-    skyflatnum  = wad::find(sky->flat)->index;
+    skyflatnum  = wad::find(sky->flat)->section_index;
 
     if(sky->pic[0]) {
         skypicnum = wad::find(sky->pic)->index;
@@ -1183,12 +1183,12 @@ static void P_InitMapInfo(void) {
                         text = sc_parser.getstring();
 
                         auto lump = wad::find(text);
-                        if(lump && lump->section == wad::Section::sounds) {
+                        if(!lump || lump->section != wad::Section::sounds) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             mapdef.music = -1;
                         }
                         else {
-                            mapdef.music = lump.value().index;
+                            mapdef.music = lump->section_index;
                         }
                     }
                     else if(!dstricmp(sc_parser.token, "COMPAT_COLLISION")) {
@@ -1264,11 +1264,11 @@ static void P_InitMapInfo(void) {
                         text = sc_parser.getstring();
 
                         auto lump = wad::find(text);
-                        if(lump && lump->section == wad::Section::sounds) {
+                        if(!lump || lump->section != wad::Section::sounds) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             cluster.music = -1;
                         } else {
-                            cluster.music = lump.value().index;
+                            cluster.music = lump.value().section_index;
                         }
                     }
                     //
