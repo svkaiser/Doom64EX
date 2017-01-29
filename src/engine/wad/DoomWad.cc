@@ -126,7 +126,7 @@ namespace {
               stream_.read(info.data.get(), info.size);
           }
 
-          return make_optional<wad::Lump>(info.name, info.data, info.size);
+          return make_optional<wad::Lump>(info.name, info.data, info.size, info.section);
       }
 
       Optional<wad::Lump> find(StringView) override

@@ -34,10 +34,10 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "z_zone.h"
-#include "w_wad.h"
 #include "m_misc.h"
 #include "sc_main.h"
 #include "con_console.h"
+#include <imp/Wad>
 
 scparser_t sc_parser;
 
@@ -46,13 +46,10 @@ scparser_t sc_parser;
 //
 
 static void SC_Open(const char* name) {
-    int lump;
-
     CON_DPrintf("--------SC_Open: Reading %s--------\n", name);
 
-    lump = W_CheckNumForName(name);
-
-    if(lump <= -1) {
+    auto lump = wad::find(name);
+    if(lump) {
         sc_parser.buffsize   = M_ReadFile(name, &sc_parser.buffer);
 
         if(sc_parser.buffsize == -1) {
@@ -60,8 +57,8 @@ static void SC_Open(const char* name) {
         }
     }
     else {
-        sc_parser.buffer     = (byte*) W_CacheLumpNum(lump, PU_STATIC);
-        sc_parser.buffsize   = W_LumpLength(lump);
+        sc_parser.buffer = (byte*) lump->data.get();
+        sc_parser.buffsize = lump->size;
     }
 
     CON_DPrintf("%s size: %ikb\n", name, sc_parser.buffsize >> 10);

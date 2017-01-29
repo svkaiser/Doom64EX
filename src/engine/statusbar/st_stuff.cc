@@ -694,7 +694,7 @@ void ST_DrawCrosshair(int x, int y, int slot, byte scalefactor, rcolor color) {
 static void ST_DrawJMessage(int pic) {
     int lump = st_jmessages[pic];
 
-    GL_BindGfxTexture(lumpinfo[lump].name, true);
+    GL_BindGfxTexture(wad::find(lump)->name.data(), true);
     GL_SetState(GLSTATE_BLEND, 1);
 
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
@@ -705,8 +705,8 @@ static void ST_DrawJMessage(int pic) {
     GL_SetupAndDraw2DQuad(
         20,
         20,
-        gfxwidth[lump - g_start],
-        gfxheight[lump - g_start],
+        gfxwidth[lump],
+        gfxheight[lump],
         0,
         1,
         0,
@@ -1084,10 +1084,9 @@ void ST_Init(void) {
     // setup crosshairs
 
     st_crosshairs = 0;
-    lump = W_CheckNumForName("CRSHAIRS");
 
-    if(!(lump <= -1)) {
-        st_crosshairs = (gfxwidth[lump - g_start] / ST_CROSSHAIRSIZE);
+    if(auto lump = wad::find("CRSHAIRS")) {
+        st_crosshairs = (gfxwidth[lump->index] / ST_CROSSHAIRSIZE);
     }
 
     dmgmarkers.next = dmgmarkers.prev = &dmgmarkers;
@@ -1098,7 +1097,7 @@ void ST_Init(void) {
         char name[9];
 
         sprintf(name, "JPMSG%02d", i + 1);
-        st_jmessages[i] = W_CheckNumForName(name);
+        st_jmessages[i] = wad::find(name)->index;
 
         if(st_jmessages[i] != -1) {
             st_hasjmsg = true;

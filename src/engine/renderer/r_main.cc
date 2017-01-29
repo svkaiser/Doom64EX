@@ -48,7 +48,6 @@
 #include "gl_draw.h"
 #include "g_actions.h"
 
-lumpinfo_t      *lumpinfo;
 int             skytexture;
 
 fixed_t         viewx=0;
@@ -400,7 +399,7 @@ void R_PrecacheLevel(void) {
             num++;
 
             for(p = 0; p < numanimdef; p++) {
-                int lump = W_GetNumForName(animdefs[p].name) - t_start;
+                int lump = wad::find(animdefs[p].name)->index;
 
                 if(lump != i) {
                     continue;

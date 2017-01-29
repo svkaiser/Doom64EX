@@ -45,7 +45,6 @@
 #include "wi_stuff.h"
 #include "st_stuff.h"
 #include "am_map.h"
-#include "w_wad.h"
 #include "p_local.h"
 #include "s_sound.h"
 #include "d_englsh.h"
@@ -59,6 +58,7 @@
 #include "m_password.h"
 #include "i_video.h"
 #include "g_demo.h"
+#include <imp/Wad>
 
 #define DCLICK_TIME     20
 

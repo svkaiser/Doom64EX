@@ -28,7 +28,6 @@
 #include "r_local.h"
 #include "i_png.h"
 #include "i_system.h"
-#include "w_wad.h"
 #include "z_zone.h"
 #include "gl_texture.h"
 #include "gl_main.h"
@@ -36,6 +35,7 @@
 #include "p_local.h"
 #include "con_console.h"
 #include "g_actions.h"
+#include <imp/Wad>
 
 #define GL_MAX_TEX_UNITS    4
 
@@ -46,8 +46,6 @@ int         curgfx;
 
 // world textures
 
-int         t_start;
-int         t_end;
 int         swx_start;
 int         numtextures;
 dtexture**  textureptr;
@@ -58,8 +56,6 @@ word*       palettetranslation;
 
 // gfx textures
 
-int         g_start;
-int         g_end;
 int         numgfx;
 dtexture*   gfxptr;
 word*       gfxwidth;
@@ -69,8 +65,6 @@ word*       gfxorigheight;
 
 // sprite textures
 
-int         s_start;
-int         s_end;
 dtexture**  spriteptr;
 int         numsprtex;
 word*       spritewidth;
@@ -130,17 +124,17 @@ static CMD(ResetTextures) {
 static void InitWorldTextures(void) {
     int i = 0;
 
-    t_start             = W_GetNumForName("T_START") + 1;
-    t_end               = W_GetNumForName("T_END") - 1;
+    auto it = wad::section(wad::Section::textures);
     swx_start           = -1;
-    numtextures         = (t_end - t_start) + 1;
+    numtextures         = it.size();
     textureptr          = (dtexture**)Z_Calloc(sizeof(dtexture*) * numtextures, PU_STATIC, NULL);
     texturetranslation  = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
     palettetranslation  = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
     texturewidth        = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
     textureheight       = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
 
-    for(i = 0; i < numtextures; i++) {
+    for(; it; ++it) {
+        auto& lump = *it;
         void *image;
         int w;
         int h;
@@ -149,7 +143,7 @@ static void InitWorldTextures(void) {
         textureptr[i] = (dtexture*)Z_Malloc(1 * sizeof(dtexture), PU_STATIC, 0);
 
         // get starting index for switch textures
-        if(!dstrnicmp(lumpinfo[t_start + i].name, "SWX", 3) && swx_start == -1) {
+        if(!dstrnicmp(lump.name.data(), "SWX", 3) && swx_start == -1) {
             swx_start = i;
         }
 
@@ -157,7 +151,7 @@ static void InitWorldTextures(void) {
         palettetranslation[i] = 0;
 
         // read PNG and setup global width and heights
-        image = I_PNGReadData(t_start + i, true, true, false, &w, &h, NULL, 0);
+        image = I_PNGReadData(lump.index, true, true, false, &w, &h, NULL, 0);
 
         textureptr[i][0] = 0;
         texturewidth[i] = w;
@@ -210,8 +204,8 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     }
 
     // create a new texture
-    image = I_PNGReadData(t_start + texnum, false, true, true,
-                        &w, &h, NULL, palettetranslation[texnum]);
+    image = I_PNGReadData(wad::section(wad::Section::textures)[texnum].index, false, true, true,
+                          &w, &h, NULL, palettetranslation[texnum]);
 
     dglGenTextures(1, &textureptr[texnum][palettetranslation[texnum]]);
     dglBindTexture(GL_TEXTURE_2D, textureptr[texnum][palettetranslation[texnum]]);
@@ -311,21 +305,21 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
 static void InitGfxTextures(void) {
     int i = 0;
 
-    g_start         = W_GetNumForName("G_START") + 1;
-    g_end           = W_GetNumForName("G_END") - 1;
-    numgfx          = (g_end - g_start) + 1;
+    auto section = wad::section(wad::Section::graphics);
+    numgfx          = section.size();
     gfxptr          = (dtexture*) Z_Calloc(numgfx * sizeof(dtexture), PU_STATIC, NULL);
     gfxwidth        = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxorigwidth    = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxheight       = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxorigheight   = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
 
-    for(i = 0; i < numgfx; i++) {
+    for(; section; ++section) {
+        auto& lump = *section;
         void *image;
         int w;
         int h;
 
-        image = I_PNGReadData(g_start + i, true, true, false, &w, &h, NULL, 0);
+        image = I_PNGReadData(lump.index, true, true, false, &w, &h, NULL, 0);
 
         gfxptr[i] = 0;
         gfxwidth[i] = w;
@@ -346,15 +340,14 @@ static void InitGfxTextures(void) {
 int GL_BindGfxTexture(const char* name, dboolean alpha) {
     void *image;
     dboolean npot;
-    int lump;
     int width;
     int height;
     int format;
     int type;
     int gfxid;
 
-    lump = W_GetNumForName(name);
-    gfxid = (lump - g_start);
+    auto lump = wad::find(name).value();
+    gfxid = lump.index;
 
     if(gfxid == curgfx) {
         return gfxid;
@@ -371,7 +364,7 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
         return gfxid;
     }
 
-    image = I_PNGReadData(lump, false, true, alpha, &width, &height, NULL, 0);
+    image = I_PNGReadData(lump.index, false, true, alpha, &width, &height, NULL, 0);
 
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
@@ -411,9 +404,8 @@ static void InitSpriteTextures(void) {
     int palcnt = 0;
     int offset[2];
 
-    s_start             = W_GetNumForName("S_START") + 1;
-    s_end               = W_GetNumForName("S_END") - 1;
-    numsprtex           = (s_end - s_start) + 1;
+    auto section = wad::section(wad::Section::sprites);
+    numsprtex           = section.size();
     spritewidth         = (word*)Z_Malloc(numsprtex * sizeof(word), PU_STATIC, 0);
     spriteoffset        = (float*)Z_Malloc(numsprtex * sizeof(float), PU_STATIC, 0);
     spritetopoffset     = (float*)Z_Malloc(numsprtex * sizeof(float), PU_STATIC, 0);
@@ -422,18 +414,18 @@ static void InitSpriteTextures(void) {
     spritecount         = (word*)Z_Calloc(numsprtex * sizeof(word), PU_STATIC, 0);
 
     // gather # of sprites per texture pointer
-    for(i = 0; i < numsprtex; i++) {
+    for(i = 0; section; ++section, ++i) {
+        auto& lump = *section;
         spritecount[i]++;
 
         for(j = 0; j < NUMSPRITES; j++) {
             // start looking for external palette lumps
-            if(!dstrncmp(lumpinfo[s_start + i].name, sprnames[j], 4)) {
+            if(!dstrncmp(lump.name.data(), sprnames[j], 4)) {
                 char palname[9];
 
                 // increase the count if a palette lump is found
                 for(p = 1; p < 10; p++) {
-                    sprintf(palname, "PAL%s%i", sprnames[j], p);
-                    if(W_CheckNumForName(palname) != -1) {
+                    if(wad::have_lump(format("PAL{}{}", sprnames[j], p))) {
                         palcnt++;
                         spritecount[i]++;
                     }
@@ -449,7 +441,9 @@ static void InitSpriteTextures(void) {
     CON_DPrintf("%i sprites initialized\n", numsprtex);
     CON_DPrintf("%i external palettes initialized\n", palcnt);
 
-    for(i = 0; i < numsprtex; i++) {
+    section = wad::section(wad::Section::sprites);
+    for(i = 0; section; ++section, ++i) {
+        auto& lump = *section;
         void *image;
         int w;
         int h;
@@ -464,7 +458,7 @@ static void InitSpriteTextures(void) {
         }
 
         // read data and setup globals
-        image = I_PNGReadData(s_start + i, true, true, false, &w, &h, offset, 0);
+        image = I_PNGReadData(lump.index, true, true, false, &w, &h, offset, 0);
 
         spritewidth[i]      = w;
         spriteheight[i]     = h;
@@ -512,7 +506,7 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
         return;
     }
 
-    image = I_PNGReadData(s_start + spritenum, false, true, true, &w, &h, NULL, pal);
+    image = I_PNGReadData(wad::section(wad::Section::sprites)[spritenum].index, false, true, true, &w, &h, NULL, pal);
 
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
@@ -938,11 +932,11 @@ void GL_DumpTextures(void) {
         GL_UnloadTexture(&textureptr[i][0]);
 
         for(p = 0; p < numanimdef; p++) {
-            int lump = W_GetNumForName(animdefs[p].name) - t_start;
+            // int lump = W_GetNumForName(animdefs[p].name) - t_start;
 
-            if(lump != i) {
-                continue;
-            }
+            // if(lump != i) {
+            //     continue;
+            // }
 
             if(animdefs[p].palette) {
                 for(j = 1; j < animdefs[p].frames; j++) {

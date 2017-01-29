@@ -30,7 +30,6 @@
 #include <ctype.h>
 #include "i_system.h"
 #include "z_zone.h"
-#include "w_wad.h"
 #include "s_sound.h"
 #include "d_englsh.h"
 #include "sounds.h"
@@ -42,6 +41,7 @@
 #include "st_stuff.h"
 #include "r_wipe.h"
 #include "gl_draw.h"
+#include <imp/Wad>
 
 static int          castrotation = 0;
 static int          castnum;

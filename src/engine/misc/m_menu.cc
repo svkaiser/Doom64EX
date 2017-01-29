@@ -48,7 +48,6 @@
 #include "d_main.h"
 #include "i_system.h"
 #include "z_zone.h"
-#include "w_wad.h"
 #include "st_stuff.h"
 #include "g_actions.h"
 #include "g_game.h"
@@ -67,7 +66,7 @@
 #include "p_setup.h"
 #include "gl_texture.h"
 #include "gl_draw.h"
-
+#include <imp/Wad>
 //
 // definitions
 //
@@ -5507,18 +5506,17 @@ void M_Init(void) {
 
     // setup region menu
 
-    if(W_CheckNumForName("BLUDA0") != -1) {
+    if(wad::have_lump("BLUDA0")) {
         m_regionblood = 0;
         RegionMenu[region_blood].status = 1;
     }
 
-    if(W_CheckNumForName("JPMSG01") == -1) {
+    if(!wad::have_lump("JPMSG01")) {
         st_regionmsg = false;
         RegionMenu[region_lang].status = 1;
     }
 
-    if(W_CheckNumForName("PLLEGAL") == -1 &&
-            W_CheckNumForName("JPLEGAL") == -1) {
+    if(!wad::have_lump("PLLEGAL") && !wad::have_lump("JPLEGAL")) {
         p_regionmode = 0;
         RegionMenu[region_mode].status = 1;
     }

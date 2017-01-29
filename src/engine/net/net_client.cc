@@ -41,7 +41,7 @@
 #include "net_structrw.h"
 
 #include "st_stuff.h"
-#include "w_wad.h"
+#include <imp/Wad>
 
 extern BoolProperty sv_nomonsters;
 extern BoolProperty sv_fastmonsters;
@@ -1182,7 +1182,7 @@ dboolean NET_CL_Connect(net_addr_t *addr)
 
     // Read checksums of our WAD directory and dehacked information
 
-    W_Checksum(net_local_wad_md5sum);
+    // W_Checksum(net_local_wad_md5sum);
 
     // create a new network I/O context and add just the
     // necessary module

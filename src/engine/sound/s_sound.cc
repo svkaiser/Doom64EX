@@ -34,7 +34,6 @@
 #include "z_zone.h"
 #include "m_fixed.h"
 #include "m_random.h"
-#include "w_wad.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "doomstat.h"
@@ -44,6 +43,7 @@
 #include "p_setup.h"
 #include "i_audio.h"
 #include "con_console.h"
+#include <imp/Wad>
 
 // Adjustable by menu.
 #define NORM_VOLUME     127

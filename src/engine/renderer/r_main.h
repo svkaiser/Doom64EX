@@ -28,7 +28,6 @@
 
 #include "t_bsp.h"
 #include "d_player.h"
-#include "w_wad.h"
 #include "gl_main.h"
 
 extern fixed_t      viewx;

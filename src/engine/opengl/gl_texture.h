@@ -33,15 +33,11 @@ extern int                  curgfx;
 extern word*                texturewidth;
 extern word*                textureheight;
 extern dtexture**           textureptr;
-extern int                  t_start;
-extern int                  t_end;
 extern int                  swx_start;
 extern int                  numtextures;
 extern word*                texturetranslation;
 extern word*                palettetranslation;
 
-extern int                  g_start;
-extern int                  g_end;
 extern int                  numgfx;
 extern dtexture*            gfxptr;
 extern word*                gfxwidth;
@@ -49,8 +45,6 @@ extern word*                gfxorigwidth;
 extern word*                gfxheight;
 extern word*                gfxorigheight;
 
-extern int                  s_start;
-extern int                  s_end;
 extern dtexture**           spriteptr;
 extern int                  numsprtex;
 extern word*                spritewidth;

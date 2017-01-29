@@ -13,6 +13,7 @@ namespace {
       std::size_t mount {};
       std::size_t id {};
       wad::Section section {};
+      std::size_t index {};
   };
 
   std::map<String, LumpId> _lumps;
@@ -87,10 +88,20 @@ void wad::merge()
     section("DS", wad::Section::sounds);
 
     _group_by_section.clear();
+
+    std::size_t i = 0;
+    for (auto x : _lumps_by_id)
+        x->index = i++;
+}
+
+bool wad::have_lump(StringView name)
+{
+    return _lumps.count(name);
 }
 
 Optional<wad::Lump> wad::find(StringView name)
 {
+    println("wad::find(\"{}\");", name);
     auto it = _lumps.find(name);
     if (it != _lumps.end())
         return nullopt;
@@ -108,6 +119,9 @@ Optional<wad::Lump> wad::find(StringView name)
 
 Optional<wad::Lump> wad::find(std::size_t index)
 {
+    println("wad::find({});", index);
+    if (index == 0)
+        std::terminate();
     if (index >= _lumps_by_id.size())
         return nullopt;
 
@@ -130,6 +144,7 @@ wad::LumpIterator wad::section(wad::Section section)
 
 wad::LumpIterator::LumpIterator(std::size_t begin, std::size_t end):
     index_(begin),
+    begin_(begin),
     end_(end)
 {
     if (index_ < end_) {
@@ -145,3 +160,9 @@ wad::LumpIterator& wad::LumpIterator::operator++()
 
     return *this;
 }
+
+const wad::Lump& wad::LumpIterator::operator[](std::size_t i)
+{
+    return *wad::find(begin_ + i);
+}
+

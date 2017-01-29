@@ -35,7 +35,6 @@
 #include "m_fixed.h"
 #include "g_game.h"
 #include "i_system.h"
-#include "w_wad.h"
 #include "p_local.h"
 #include "s_sound.h"
 #include "doomstat.h"
@@ -51,6 +50,9 @@
 #include "m_random.h"
 #include "z_zone.h"
 #include "sc_main.h"
+#include <map>
+#include <imp/Wad>
+#include "Map.hh"
 
 void P_SpawnMapThing(mapthing_t *mthing);
 
@@ -147,18 +149,12 @@ mapthing_t          playerstarts[MAXPLAYERS];
 // P_InitTextureHashTable
 //
 
-static word*        texturehashlist[2];
+static std::map<wad::LumpHash, int> texturehashlist;
 
 static void P_InitTextureHashTable(void) {
-    int i;
-    int t = W_GetNumForName("T_START") + 1;
-
-    texturehashlist[0]  = (word*) Z_Alloca(numtextures * sizeof(word));
-    texturehashlist[1]  = (word*) Z_Alloca(numtextures * sizeof(word));
-
-    for(i = 0; i < numtextures; i++) {
-        texturehashlist[0][i] = W_HashLumpName(lumpinfo[t + i].name) % 65536;
-        texturehashlist[1][i] = i;
+    auto section = wad::section(wad::Section::textures);
+    for(int i = 0; section; ++section, ++i) {
+        texturehashlist.emplace(section->name, i);
     }
 }
 
@@ -167,17 +163,9 @@ static void P_InitTextureHashTable(void) {
 //
 
 static word P_GetTextureHashKey(int hash) {
-    int i;
-
-    for(i = 0; i < numtextures; i++) {
-        if(texturehashlist[0][i] == hash) {
-            return texturehashlist[1][i];
-        }
-    }
-
-    return 0;
+    auto it = texturehashlist.find(hash);
+    return it != texturehashlist.end() ? it->second : 0;
 }
-
 
 //
 // P_LoadVertexes
@@ -322,7 +310,7 @@ void P_LoadSectors(int lump) {
         ss->frame_z2[1] = ss->ceilingheight;
 
         for(j = 0; j < numskydef; j++) {
-            if(ss->ceilingpic == (W_GetNumForName(skydefs[j].flat) - t_start)) {
+            if(ss->ceilingpic == wad::find(skydefs[j].flat)->index) {
                 skyflatnum = j;
                 break;
             }
@@ -978,14 +966,14 @@ void P_SetupSky(void) {
 
     skyindex    = skyflatnum;
     sky         = &skydefs[skyindex];
-    skyflatnum  = (W_GetNumForName(sky->flat) - t_start);
+    skyflatnum  = wad::find(sky->flat)->index;
 
     if(sky->pic[0]) {
-        skypicnum = W_GetNumForName(sky->pic);
+        skypicnum = wad::find(sky->pic)->index;
     }
 
     if(sky->backdrop[0]) {
-        skybackdropnum = W_GetNumForName(sky->backdrop);
+        skybackdropnum = wad::find(sky->backdrop)->index;
     }
 
     if(sky->flags & SKF_FIRE) {
@@ -1189,24 +1177,18 @@ static void P_InitMapInfo(void) {
                     //
                     if(!dstricmp(sc_parser.token, "MUSIC")) {
                         char* text;
-                        int ds_start;
-                        int ds_end;
-                        int lump;
 
                         ok = true;
 
                         text = sc_parser.getstring();
-                        ds_start = W_GetNumForName("DS_START") + 1;
-                        ds_end = W_GetNumForName("DS_END") - 1;
 
-                        lump = W_GetNumForName(text);
-
-                        if(lump > ds_end && lump < ds_start) {
+                        auto lump = wad::find(text);
+                        if(lump && lump->section == wad::Section::sounds) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             mapdef.music = -1;
                         }
                         else {
-                            mapdef.music = (lump - ds_start);
+                            mapdef.music = lump.value().index;
                         }
                     }
                     else if(!dstricmp(sc_parser.token, "COMPAT_COLLISION")) {
@@ -1279,22 +1261,14 @@ static void P_InitMapInfo(void) {
                     // get music track ID
                     //
                     if(!dstricmp(sc_parser.token, "MUSIC")) {
-                        int ds_start;
-                        int ds_end;
-                        int lump;
-
                         text = sc_parser.getstring();
-                        ds_start = W_GetNumForName("DS_START") + 1;
-                        ds_end = W_GetNumForName("DS_END") - 1;
 
-                        lump = W_GetNumForName(text);
-
-                        if(lump > ds_end && lump < ds_start) {
+                        auto lump = wad::find(text);
+                        if(lump && lump->section == wad::Section::sounds) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             cluster.music = -1;
-                        }
-                        else {
-                            cluster.music = (lump - ds_start);
+                        } else {
+                            cluster.music = lump.value().index;
                         }
                     }
                     //

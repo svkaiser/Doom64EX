@@ -15,11 +15,46 @@ namespace imp {
 
     void merge();
 
+    bool have_lump(StringView name);
+
     Optional<Lump> find(StringView name);
 
     Optional<Lump> find(std::size_t index);
 
     LumpIterator section(Section s);
+
+    class LumpHash {
+        uint32 hash_ {};
+
+    public:
+        LumpHash() = default;
+
+        LumpHash(LumpHash&&) = default;
+
+        LumpHash(const LumpHash&) = default;
+
+        LumpHash(StringView str):
+            hash_(1315423911)
+        {
+            for (int i = 0; i < 8 && str[i]; ++i) {
+                int c = str[i];
+                hash_ ^= (hash_ << 5) + std::toupper(c) + (hash_ >> 2);
+            }
+        }
+
+        LumpHash(uint32 hash):
+            hash_(hash) {}
+
+        uint32 get() const
+        { return hash_; }
+
+        LumpHash& operator=(LumpHash&&) = default;
+
+        LumpHash& operator=(const LumpHash&) = default;
+
+        bool operator<(LumpHash other) const
+        { return hash_ < other.hash_; }
+    };
 
     enum struct Section {
         normal,
@@ -33,6 +68,8 @@ namespace imp {
         String name;
         SharedPtr<char> data {};
         std::size_t size {};
+        std::size_t index {};
+        Section section {};
 
         Lump() = default;
 
@@ -40,10 +77,11 @@ namespace imp {
 
         Lump(const Lump&) = default;
 
-        Lump(String name, SharedPtr<char> data, std::size_t size):
+        Lump(String name, SharedPtr<char> data, std::size_t size, Section section):
             name(name),
             data(data),
-            size(size) {}
+            size(size),
+            section(section) {}
 
         Lump& operator=(Lump&&) = default;
 
@@ -53,10 +91,14 @@ namespace imp {
     struct LumpIterator {
         Lump lump_ {};
         std::size_t index_;
+        std::size_t begin_;
         std::size_t end_;
 
     public:
         LumpIterator(std::size_t begin, std::size_t end);
+
+        std::size_t size() const
+        { return end_ - begin_; }
 
         const Lump &operator*() const
         { return lump_; }
@@ -71,6 +113,8 @@ namespace imp {
         { return !(index_ < end_); }
 
         LumpIterator& operator++();
+
+        const Lump& operator[](std::size_t);
     };
   }
 

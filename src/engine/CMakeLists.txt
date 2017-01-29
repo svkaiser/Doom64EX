@@ -220,6 +220,7 @@ add_sources(playloop
   p_telept.cc
   p_tick.cc
   p_user.cc
+  Map.cc
   )
 
 # src/renderer
@@ -255,13 +256,6 @@ add_sources(system
   i_swap.h
   i_system.cc
   i_video.cc
-  )
-
-# src/wadfile
-add_sources(wadfile
-  w_file.cc
-  w_merge.cc
-  w_wad.cc
   )
 
 # src/wadgen

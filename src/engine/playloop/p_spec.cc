@@ -38,7 +38,6 @@
 #include "i_system.h"
 #include "z_zone.h"
 #include "m_random.h"
-#include "w_wad.h"
 #include "p_macros.h"
 #include "m_fixed.h"
 #include "tables.h"
@@ -177,7 +176,7 @@ void P_InitPicAnims(void) {
         animinfo[i].delay = 0;
         animinfo[i].tic = 0;
         animinfo[i].isreverse = false;
-        animinfo[i].texnum = W_GetNumForName(animdefs[i].name) - t_start;
+        animinfo[i].texnum = wad::find(animdefs[i].name)->index;
         animinfo[i].frame = -1;
 
         // reallocate texture pointers if they contain multiple palettes

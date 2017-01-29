@@ -44,7 +44,6 @@
 #include "sounds.h"
 #include "m_shift.h"
 #include "z_zone.h"
-#include "w_wad.h"
 #include "s_sound.h"
 #include "f_finale.h"
 #include "m_misc.h"
@@ -66,6 +65,7 @@
 #include "gl_draw.h"
 
 #include "net_client.h"
+#include <imp/Wad>
 
 //
 // D_DoomLoop()
@@ -529,31 +529,28 @@ static int legal_x = 32;
 static int legal_y = 72;
 
 static void Legal_Start(void) {
-    int pllump;
-    int jllump;
+    bool pllump = wad::have_lump("PLLEGAL");
+    bool jllump = wad::have_lump("JPLEGAL");
 
-    pllump = W_CheckNumForName("PLLEGAL");
-    jllump = W_CheckNumForName("JPLEGAL");
-
-    if(pllump == -1 && jllump == -1) {
+    if(!pllump && !jllump) {
         return;
     }
 
-    if(p_regionmode >= 2 && jllump >= 0) {
+    if(p_regionmode >= 2 && jllump) {
         legalpic = "JPLEGAL";
         legal_x = 35;
         legal_y = 45;
     }
-    else if(p_regionmode >= 2 && jllump == -1) {
+    else if(p_regionmode >= 2 && !jllump) {
         p_regionmode = 1;
     }
 
-    if(p_regionmode == 1 && pllump >= 0) {
+    if(p_regionmode == 1 && pllump) {
         legalpic = "PLLEGAL";
         legal_x = 35;
         legal_y = 50;
     }
-    else if(p_regionmode == 1 && pllump == -1) {
+    else if(p_regionmode == 1 && !pllump) {
         p_regionmode = 0;
     }
 }
@@ -997,9 +994,6 @@ void D_DoomMain(void) {
 
     I_Printf("D_Init: Init DOOM parameters\n");
     D_Init();
-
-    I_Printf("W_Init: Init WADfiles.\n");
-    W_Init();
 
     I_Printf("M_Init: Init miscellaneous info.\n");
     M_Init();

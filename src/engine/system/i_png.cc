@@ -27,7 +27,6 @@
 
 #include <algorithm>
 #include <math.h>
-#include <w_wad.h>
 
 #include "doomdef.h"
 #include "i_swap.h"
@@ -37,6 +36,7 @@
 #include <imp/Image>
 #include <sstream>
 #include <imp/Property>
+#include <imp/Wad>
 
 FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
                       [](const FloatProperty&, float, float&)
@@ -89,16 +89,13 @@ static void I_TranslatePalette(gfx::Palette &dest) {
 
 gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
 {
-    char *lcache;
-    int lsize;
     int i;
 
     // get lump data
-    lcache = reinterpret_cast<char*>(W_CacheLumpNum(lump, PU_STATIC));
-    lsize = W_LumpLength(lump);
+    auto l = wad::find(lump);
 
-    std::istringstream ss(std::string(lcache, lsize));
-    gfx::Image image {ss}; //= Image_New_FromMemory(lcache, lsize);
+    std::istringstream ss(std::string(l->data.get(), l->size));
+    gfx::Image image {ss};
 
     if (palindex && image.is_indexed())
     {
@@ -112,12 +109,12 @@ gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha
         pal_count = pal->count();
 
         char palname[9];
-        snprintf(palname, sizeof(palname), "PAL%4.4s%d", lumpinfo[lump].name, palindex);
+        snprintf(palname, sizeof(palname), "PAL%4.4s%d", l->name.data(), palindex);
 
         gfx::Palette newpal;
-        if (W_CheckNumForName(palname) != -1)
+        if (auto pl = wad::find(palname))
         {
-            gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(W_CacheLumpName(palname, PU_STATIC));
+            gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(pl->data.get());
             newpal = *pal;
 
             // swap out current palette with the new one

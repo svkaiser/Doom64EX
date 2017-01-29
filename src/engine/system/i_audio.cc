@@ -46,10 +46,10 @@
 #include "doomdef.h"
 #include "i_system.h"
 #include "i_audio.h"
-#include "w_wad.h"
 #include "z_zone.h"
 #include "i_swap.h"
 #include "con_console.h"    // for cvars
+#include <imp/Wad>
 
 #include "SDL.h"
 
@@ -1014,17 +1014,14 @@ static dboolean Song_RegisterTracks(song_t* song) {
 
 static dboolean Seq_RegisterSongs(doomseq_t* seq) {
     int i;
-    int start;
-    int end;
     int fail;
 
     seq->nsongs = 0;
     i = 0;
 
-    start = W_GetNumForName("DS_START") + 1;
-    end = W_GetNumForName("DS_END") - 1;
+    auto section = wad::section(wad::Section::sounds);
 
-    seq->nsongs = (end - start) + 1;
+    seq->nsongs = section.size();
 
     //
     // no midi songs found in iwad?
@@ -1036,12 +1033,13 @@ static dboolean Seq_RegisterSongs(doomseq_t* seq) {
     seq->songs = (song_t*)Z_Calloc(seq->nsongs * sizeof(song_t), PU_STATIC, 0);
 
     fail = 0;
-    for(i = 0; i < seq->nsongs; i++) {
+    for(; section; ++section) {
+        auto& lump = *section;
         song_t* song;
 
         song = &seq->songs[i];
-        song->data = (byte*) W_CacheLumpNum(start + i, PU_STATIC);
-        song->length = W_LumpLength(start + i);
+        song->data = (byte*) lump.data.get();
+        song->length = lump.size;
 
         if(!song->length) {
             continue;

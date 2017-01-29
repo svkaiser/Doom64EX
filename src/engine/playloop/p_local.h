@@ -27,10 +27,11 @@
 
 #include "doomdef.h"
 #include "d_player.h"
-#include "w_wad.h"
 #include "info.h"
 #include "m_menu.h"
 #include "t_bsp.h"
+#include "d_main.h"
+#include <imp/Wad>
 
 #define FLOATSPEED        (FRACUNIT*4)
 

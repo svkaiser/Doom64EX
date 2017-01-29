@@ -33,7 +33,6 @@
 #include "doomdef.h"
 #include "st_stuff.h"
 #include "p_local.h"
-#include "w_wad.h"
 #include "t_bsp.h"
 #include "m_cheat.h"
 #include "m_fixed.h"
@@ -48,10 +47,7 @@
 #include "gl_draw.h"
 #include "g_actions.h"
 #include "g_controls.h"
-
-#ifdef _WIN32
-#include "g_controls.h"
-#endif
+#include <imp/Wad>
 
 // automap flags
 

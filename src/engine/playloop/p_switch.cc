@@ -29,7 +29,6 @@
 #include "i_system.h"
 #include "doomdef.h"
 #include "p_local.h"
-#include "w_wad.h"
 #include "g_game.h"
 #include "s_sound.h"
 #include "sounds.h"
