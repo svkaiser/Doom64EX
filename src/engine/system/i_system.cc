@@ -451,68 +451,6 @@ char *I_GetUserFile(const char *file) {
     return path;
 }
 
-/**
- * @brief Find a regular read-only data file.
- *
- * @return Fully-qualified path or NULL if not found.
- * @note The returning value MUST be freed by the caller.
- */
-
-char *I_FindDataFile(const char *file) {
-    char *path, *dir;
-
-    path = (char*) malloc(512);
-
-    if ((dir = I_GetBaseDir())) {
-        snprintf(path, 511, "%s%s", dir, file);
-        free(dir);
-        if (I_FileExists(path))
-            return path;
-    }
-
-    if ((dir = I_GetUserDir())) {
-        snprintf(path, 511, "%s%s", dir, file);
-        free(dir);
-        if (I_FileExists(path))
-            return path;
-    }
-
-#if defined(__LINUX__) || defined(__OpenBSD__)
-    {
-        int i;
-        const char *paths[] = {
-                "/usr/local/share/games/doom64ex/",
-                "/usr/local/share/doom64ex/",
-                "/usr/local/share/doom/",
-                "/usr/share/games/doom64ex/",
-                "/usr/share/doom64ex/",
-                "/usr/share/doom/",
-                "/opt/doom64ex/",
-        };
-
-        for (i = 0; i < sizeof(paths) / sizeof(*paths); i++) {
-            snprintf(path, 511, "%s%s", paths[i], file);
-            if (I_FileExists(path))
-                return path;
-        }
-    }
-#endif
-
-    free(path);
-    return NULL;
-}
-
-/**
- * @brief Checks to see if the given absolute path is a regular file.
- * @param path Absolute path to check.
- */
-
-dboolean I_FileExists(const char *path)
-{
-    struct stat st;
-    return !stat(path, &st) && S_ISREG(st.st_mode);
-}
-
 //
 // I_GetTime
 // returns time in 1/70th second tics

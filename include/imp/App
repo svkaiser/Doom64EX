@@ -18,6 +18,10 @@ namespace imp {
     [[noreturn]]
     void main(int argc, char** argv);
 
+    bool file_exists(StringView name);
+
+    Optional<String> find_data_file(StringView name, StringView dir_hint = "");
+
     StringView program();
 
     void register_param(StringView, Param*);

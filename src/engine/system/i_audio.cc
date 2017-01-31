@@ -50,6 +50,7 @@
 #include "i_swap.h"
 #include "con_console.h"    // for cvars
 #include <imp/Wad>
+#include <imp/App>
 
 #include "SDL.h"
 
@@ -1161,7 +1162,7 @@ static int SDLCALL Thread_PlayerHandler(void *param) {
 
 void I_InitSequencer(void) {
     dboolean sffound;
-    char *sfpath;
+    Optional<String> sfpath;
 
     CON_DPrintf("--------Initializing Software Synthesizer--------\n");
 
@@ -1220,7 +1221,7 @@ void I_InitSequencer(void) {
 
     sffound = false;
     if (!s_soundfont->empty()) {
-        if (I_FileExists(s_soundfont->c_str())) {
+        if (app::file_exists(*s_soundfont)) {
             I_Printf("Found SoundFont %s\n", s_soundfont->c_str());
             doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont->c_str(), 1);
 
@@ -1232,13 +1233,12 @@ void I_InitSequencer(void) {
         }
     }
 
-    if (!sffound && (sfpath = I_FindDataFile("doomsnd.sf2"))) {
-        I_Printf("Found SoundFont %s\n", sfpath);
-        doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath, 1);
+    if (!sffound && (sfpath = app::find_data_file("doomsnd.sf2"))) {
+        I_Printf("Found SoundFont %s\n", sfpath->c_str());
+        doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);
 
-        CON_DPrintf("Loading %s\n", sfpath);
+        CON_DPrintf("Loading %s\n", sfpath->c_str());
 
-        free(sfpath);
         sffound = true;
     }
 

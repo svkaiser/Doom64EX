@@ -11,6 +11,8 @@ namespace imp {
     struct Lump;
     class LumpIterator;
 
+    void init();
+
     bool mount(StringView path);
 
     void merge();

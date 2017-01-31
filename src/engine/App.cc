@@ -2,6 +2,9 @@
 #include <fstream>
 #include <imp/App>
 #include <imp/Wad>
+#include <sys/stat.h>
+
+#include "SDL.h"
 
 [[noreturn]]
 void D_DoomMain();
@@ -13,63 +16,61 @@ int myargc{};
 
 char **myargv{};
 
-namespace
-{
-    auto &_gparams()
-    {
-        static std::map<StringView, app::Param *> params;
-        return params;
-    }
+namespace {
+  auto &_gparams()
+  {
+      static std::map<StringView, app::Param *> params;
+      return params;
+  }
 
-    auto &_params = _gparams();
+  auto &_params = _gparams();
 
-    StringView _program;
+  String _base_dir { "." };
+  String _data_dir { "." };
+  StringView _program;
 
-    Vector<String> _rest;
+  Vector<String> _rest;
 
-    app::StringParam _wadgen_param("wadgen");
+  app::StringParam _wadgen_param("wadgen");
 
-    struct ParamsParser
-    {
-        using Arity = app::Param::Arity;
-        app::Param *param{};
+  struct ParamsParser {
+      using Arity = app::Param::Arity;
+      app::Param *param{};
 
-        void process(StringView arg)
-        {
-            if (arg[0] == '-') {
-                arg.remove_prefix(1);
-                auto it = _params.find(arg);
-                if (it == _params.end()) {
-                    // TODO: Print error
-                }
-                else {
-                    if (param) {
-                        println("");
-                    }
-                    param = it->second;
-                    param->set_have();
-                    print("{:16s} = ", arg);
-                    if (param->arity() == Arity::nullary) {
-                        param = nullptr;
-                        println(" true");
-                    }
-                }
-            }
-            else {
-                if (!param) {
-                    _rest.emplace_back(arg);
-                    return;
-                }
+      void process(StringView arg)
+      {
+          if (arg[0] == '-') {
+              arg.remove_prefix(1);
+              auto it = _params.find(arg);
+              if (it == _params.end()) {
+                  println(stderr, "Unknown parameter -{}", arg);
+              } else {
+                  if (param) {
+                      println("");
+                  }
+                  param = it->second;
+                  param->set_have();
+                  print("{:16s} = ", arg);
+                  if (param->arity() == Arity::nullary) {
+                      param = nullptr;
+                      println(" true");
+                  }
+              }
+          } else {
+              if (!param) {
+                  _rest.emplace_back(arg);
+                  return;
+              }
 
-                param->add(arg);
-                print(" {}", arg);
-                if (param->arity() != Arity::nary) {
-                    param = nullptr;
-                    println("");
-                }
-            }
-        }
-    };
+              param->add(arg);
+              print(" {}", arg);
+              if (param->arity() != Arity::nary) {
+                  param = nullptr;
+                  println("");
+              }
+          }
+      }
+  };
 }
 
 [[noreturn]]
@@ -80,6 +81,23 @@ void app::main(int argc, char **argv)
     myargv = argv;
 
     _program = argv[0];
+
+    auto base_dir = SDL_GetBasePath();
+    if (base_dir) {
+        _base_dir = base_dir;
+        SDL_free(base_dir);
+    }
+
+    // Data files have to be in the cwd on Windows for compatibility reasons.
+#ifdef _WIN32
+    auto data_dir = SDL_GetBasePath();
+#else
+    auto data_dir = SDL_GetPrefPath("", "doom64ex");
+#endif
+    if (data_dir) {
+        _data_dir = data_dir;
+        SDL_free(data_dir);
+    }
 
     /* Process command-line arguments */
     println("Parameters:");
@@ -100,8 +118,7 @@ void app::main(int argc, char **argv)
                 f >> arg;
                 parser.process(arg);
             }
-        }
-        else {
+        } else {
             parser.process(arg);
         }
     }
@@ -116,17 +133,57 @@ void app::main(int argc, char **argv)
         println("");
     }
 
-    /* Load Wad */
-    wad::mount("/home/zohar/.local/share/doom64ex/doom64.rom");
-    wad::mount("/home/zohar/.local/share/doom64ex/kex.wad");
-    wad::merge();
-
     if (_wadgen_param) {
         WGen_WadgenMain();
-    }
-    else {
+    } else {
         D_DoomMain();
     }
+}
+
+bool app::file_exists(StringView path)
+{
+    struct stat st;
+    return !stat(path.data(), &st) && S_ISREG(st.st_mode);
+}
+
+Optional<String> app::find_data_file(StringView name, StringView dir_hint)
+{
+    String path;
+
+    if (!dir_hint.empty()) {
+        path = format("{}{}", dir_hint, name);
+        if (app::file_exists(path))
+            return { inplace, path };
+    }
+
+    path = format("{}{}", _base_dir, name);
+    if (app::file_exists(path))
+        return { inplace, path };
+
+    path = format("{}{}", _data_dir, name);
+    if (app::file_exists(path))
+        return { inplace, path };
+
+#if defined(__LINUX__) || defined(__OpenBSD__)
+    int i;
+    const char *paths[] = {
+        "/usr/local/share/games/doom64ex/",
+        "/usr/local/share/doom64ex/",
+        "/usr/local/share/doom/",
+        "/usr/share/games/doom64ex/",
+        "/usr/share/doom64ex/",
+        "/usr/share/doom/",
+        "/opt/doom64ex/",
+    };
+
+    for (auto p : paths) {
+        path = format("{}{}", p, name);
+        if (app::file_exists(path))
+            return { inplace, path };
+    }
+#endif
+
+    return nullopt;
 }
 
 StringView app::program()
@@ -145,8 +202,7 @@ const app::Param *app::param(StringView name)
     return it != _params.end() ? it->second : nullptr;
 }
 
-app::Param::Param(StringView name, app::Param::Arity arity)
-    :
+app::Param::Param(StringView name, app::Param::Arity arity) :
     arity_(arity)
 {
     _gparams()[name] = this;
@@ -162,8 +218,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     app::main(argc, argv);
 }
 #else
+
 int main(int argc, char **argv)
 {
     app::main(argc, argv);
 }
+
 #endif

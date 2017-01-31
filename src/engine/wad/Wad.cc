@@ -1,4 +1,5 @@
 #include <map>
+#include <imp/App>
 #include "WadFormat.hh"
 
 namespace {
@@ -25,6 +26,32 @@ namespace {
   std::map<wad::Section, std::pair<std::size_t, std::size_t>> _lumps_by_section;
 
   std::map<wad::Section, std::vector<LumpId *>> _group_by_section;
+
+  app::StringParam _iwad_path("iwad");
+}
+
+void wad::init()
+{
+    if (_iwad_path && !wad::mount(_iwad_path.get())) {
+        fatal("Could not mount IWAD at {}", _iwad_path.get());
+    } else {
+        auto path = app::find_data_file("doom64.wad");
+        if (!path)
+            fatal("Could not find IWAD");
+        if (!wad::mount(*path))
+            fatal("Could not mount IWAD at {}", *path);
+    }
+
+    if(auto path = app::find_data_file("kex.wad")) {
+        if (!wad::mount(*path)) {
+            fatal("Could not mount kex.wad");
+        }
+    } else {
+        fatal("Could not find kex.wad");
+    }
+
+    wad::merge();
+
 }
 
 bool wad::mount(StringView path)
@@ -60,6 +87,8 @@ bool wad::mount(StringView path)
             _group_by_section[reader->section].emplace_back(&pair.first->second);
         }
     }
+
+    return true;
 }
 
 void wad::merge()

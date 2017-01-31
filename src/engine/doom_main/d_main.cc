@@ -995,6 +995,9 @@ void D_DoomMain(void) {
     I_Printf("D_Init: Init DOOM parameters\n");
     D_Init();
 
+    I_Printf("W_Init: Init WADfiles.\n");
+    wad::init();
+
     I_Printf("M_Init: Init miscellaneous info.\n");
     M_Init();
 
