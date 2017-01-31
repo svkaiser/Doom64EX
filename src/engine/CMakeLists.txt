@@ -300,6 +300,7 @@ set(KEXLIB_SOURCES
   App.cc
   wad/Wad.cc
   wad/DoomWad.cc
+  wad/RomWad.cc
         )
 
 ##------------------------------------------------------------------------------

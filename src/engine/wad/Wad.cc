@@ -3,7 +3,8 @@
 
 namespace {
   wad::Format::loader _loaders[] {
-      wad::doom_loader
+      wad::doom_loader,
+      wad::rom_loader
   };
 
   std::vector<UniquePtr<wad::Format>> _mounts;

@@ -117,7 +117,7 @@ void app::main(int argc, char **argv)
     }
 
     /* Load Wad */
-    wad::mount("/home/zohar/.local/share/doom64ex/doom64.wad");
+    wad::mount("/home/zohar/.local/share/doom64ex/doom64.rom");
     wad::mount("/home/zohar/.local/share/doom64ex/kex.wad");
     wad::merge();
 
