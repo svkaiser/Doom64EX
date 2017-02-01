@@ -3,7 +3,7 @@
 
 namespace {
   template <class T>
-  std::istream& read_into(std::istream& s, T& x)
+  void read_into(std::istream& s, T& x)
   {
       s.read(reinterpret_cast<char*>(&x), sizeof(T));
   }

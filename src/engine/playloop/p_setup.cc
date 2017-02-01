@@ -154,8 +154,8 @@ static std::map<wad::LumpHash, int> texturehashlist;
 static void P_InitTextureHashTable(void) {
     auto section = wad::section(wad::Section::textures);
     for(int i = 0; section; ++section, ++i) {
-        auto it = texturehashlist.emplace(section->name, i);
-    }
+        auto it = texturehashlist.emplace(wad::LumpHash { section->name }, i);
+
 }
 
 //
