@@ -49,7 +49,7 @@ before_install:
   - ./configure
   - make
   - sudo make install
-  - update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
+  - sudo update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
   - cmake --version
 
   # Set correct GCC or Clang versions.
