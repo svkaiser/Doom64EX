@@ -43,12 +43,12 @@ void wad::init()
             fatal("Could not mount IWAD at {}", *path);
     }
 
-    if(auto path = app::find_data_file("kex.wad")) {
+    if(auto path = app::find_data_file("doom64ex.pk3")) {
         if (!wad::mount(*path)) {
-            fatal("Could not mount kex.wad");
+            fatal("Could not mount doom64ex.pk3");
         }
     } else {
-        fatal("Could not find kex.wad");
+        fatal("Could not find doom64ex.pk3");
     }
 
     wad::merge();
