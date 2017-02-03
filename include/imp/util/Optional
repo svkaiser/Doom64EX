@@ -51,6 +51,11 @@ namespace imp {
           mInit(true),
           mValue(std::forward<Args>(args)...) {}
 
+      template <class U>
+      constexpr Optional(U&& other):
+          mInit(true),
+          mValue(std::forward<U>(other)) {}
+
       ~Optional()
       {
           if (mInit) {
@@ -101,7 +106,7 @@ namespace imp {
           if (mInit) {
               mValue = std::forward<U>(other);
           } else {
-              mValue.T(std::forward<U>(other));
+              ::new (static_cast<void*>(&mValue)) T(std::forward<U>(other));
               mInit = true;
           }
       }

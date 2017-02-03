@@ -5,7 +5,7 @@ namespace imp {
     struct Reader {
         Section section {};
         std::size_t id {};
-        StringView name {};
+        String name {};
 
         virtual ~Reader() {}
 
@@ -25,6 +25,7 @@ namespace imp {
     };
 
     UniquePtr<Format> doom_loader(StringView);
+    UniquePtr<Format> zip_loader(StringView);
     UniquePtr<Format> rom_loader(StringView);
   }
 }

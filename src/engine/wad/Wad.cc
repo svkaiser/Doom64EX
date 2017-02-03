@@ -5,7 +5,8 @@
 namespace {
   wad::Format::loader _loaders[] {
       wad::doom_loader,
-      wad::rom_loader
+      wad::rom_loader,
+      wad::zip_loader
   };
 
   std::vector<UniquePtr<wad::Format>> _mounts;
@@ -51,7 +52,6 @@ void wad::init()
     }
 
     wad::merge();
-
 }
 
 bool wad::mount(StringView path)
