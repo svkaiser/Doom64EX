@@ -22,7 +22,7 @@
 ## 02111-1307, USA.
 ##
 
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(doom64ex C CXX)
 
@@ -102,16 +102,21 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
 ## doom64ex.pk3 target
 ##
 
-# Build doom64ex.pk3
-add_custom_target(create_pk3 ALL
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/distrib/doom64ex.pk3"
-  COMMAND ${CMAKE_COMMAND} -E tar "cfv" "${CMAKE_BINARY_DIR}/doom64ex.pk3" --format=zip "*")
+# CMake 3.3.2 is the earliest version with support for --format=zip
+if(CMAKE_VERSION VERSION_LESS 3.3.2)
+  message(WARNING "Your CMake version is fairly old, so you'll need to generate the doom64ex.pk3 file manually. See README.md for more information.")
+else()
+  # Build doom64ex.pk3
+  add_custom_target(pk3 ALL
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/distrib/doom64ex.pk3"
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" "${CMAKE_BINARY_DIR}/doom64ex.pk3" --format=zip "*")
 
-# Install doom64ex.pk3
-if (NOT WIN32)
-  if (APPLE)
-    install(FILES ${CMAKE_BINARY_DIR}/doom64ex.pk3 DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
-  else ()
-    install(FILES ${CMAKE_BINARY_DIR}/doom64ex.pk3 DESTINATION share/games/doom64ex)
+  # Install doom64ex.pk3
+  if (NOT WIN32)
+    if (APPLE)
+      install(FILES ${CMAKE_BINARY_DIR}/doom64ex.pk3 DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
+    else ()
+      install(FILES ${CMAKE_BINARY_DIR}/doom64ex.pk3 DESTINATION share/games/doom64ex)
+    endif ()
   endif ()
-endif ()
+endif()

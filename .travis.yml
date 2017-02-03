@@ -42,16 +42,6 @@ before_install:
   - sudo apt-get update -q
   - sudo apt-get install libsdl2-dev libsdl2-net-dev
 
-  # Update CMake
-  - wget http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz
-  - tar -xzf cmake-3.4.1.tar.gz
-  - cd cmake-3.4.1
-  - ./configure
-  - make
-  - sudo make install
-  - sudo update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
-  - cmake --version
-
   # Set correct GCC or Clang versions.
   - if [ -n "$GCC_VERSION" ]; then export CC="gcc-${GCC_VERSION}" CXX="g++-${GCC_VERSION}"; fi
   - if [ -n "$CLANG_VERSION" ]; then export CC="clang-${CLANG_VERSION}" CXX="clang++-${CLANG_VERSION}"; fi
