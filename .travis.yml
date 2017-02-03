@@ -12,6 +12,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - kubuntu-backports
+            - george-edison55-precise-backports
           packages:
             - gcc-5
             - g++-5
@@ -27,6 +28,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.5
+            - george-edison55-precise-backports
             - kubuntu-backports
           packages:
             - clang-3.5
