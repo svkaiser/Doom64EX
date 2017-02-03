@@ -37,14 +37,20 @@ matrix:
             - libgtest-dev
 
 before_install:
-  # CMake 3.x
-  - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
-
   # SDL2 packages
   - sudo add-apt-repository ppa:zoogie/sdl2-snapshots -y
-
   - sudo apt-get update -q
-  - sudo apt-get install libsdl2-dev libsdl2-net-dev cmake
+  - sudo apt-get install libsdl2-dev libsdl2-net-dev
+
+  # Update CMake
+  - wget http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz
+  - tar -xzf cmake-3.4.1.tar.gz
+  - cd cmake-3.4.1
+  - ./configure
+  - make
+  - sudo make install
+  - update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
+  - cmake --version
 
   # Set correct GCC or Clang versions.
   - if [ -n "$GCC_VERSION" ]; then export CC="gcc-${GCC_VERSION}" CXX="g++-${GCC_VERSION}"; fi
