@@ -30,9 +30,8 @@ project(doom64ex C CXX)
 ## Build Options
 ##
 
-option(GENERATE_KEXWAD "Generate kex.wad" ON)
-option(BUILD_TESTS "Compile unit tests" ON)
-option(FORCE_INCLUDE_OPENGL "Include OpenGL without using find_package" OFF)
+option(ENABLE_TESTING "Compile unit tests" ON)
+option(ENABLE_SYSTEM_FLUIDSYNTH "Link with system-wide fluidsynth and not fluidsynth-lite" OFF)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
 set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
@@ -95,6 +94,11 @@ endif(BUILD_TESTS)
 ##------------------------------------------------------------------------------
 ## Include subprojects
 ##
+
+if(NOT ENABLE_SYSTEM_FLUIDSYNTH)
+  add_subdirectory("${CMAKE_SOURCE_DIR}/fluidsynth")
+  message(STATUS >> ${FLUIDSYNTH_LIBRARIES})
+endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
 

@@ -52,7 +52,9 @@ if (NOT USE_CONAN)
   add_link_libraries(${PNG_LIBRARIES})
 
   # FluidSynth
-  find_package(FluidSynth REQUIRED)
+  if (ENABLE_SYSTEM_FLUIDSYNTH)
+    find_package(FluidSynth REQUIRED)
+  endif()
   add_include_directories(${FLUIDSYNTH_INCLUDE_DIR})
   add_link_libraries(${FLUIDSYNTH_LIBRARIES})
 
