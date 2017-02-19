@@ -1,6 +1,6 @@
 language: c++
 dist: trusty
-sudo: required 
+sudo: false 
 
 matrix:
   include:
@@ -17,8 +17,8 @@ matrix:
             - g++-5
             - cmake
             - libpng-dev
-            - libfluidsynth-dev
             - libgtest-dev
+            - libsdl2-net-dev
     - os: linux
       compiler: clang
       env: CLANG_VERSION=3.5
@@ -33,15 +33,10 @@ matrix:
             - cmake
             - libstdc++-5-dev
             - libpng-dev
-            - libfluidsynth-dev
             - libgtest-dev
+            - libsdl2-net-dev
 
 before_install:
-  # SDL2 packages
-  - sudo add-apt-repository ppa:zoogie/sdl2-snapshots -y
-  - sudo apt-get update -q
-  - sudo apt-get install libsdl2-dev libsdl2-net-dev
-
   # Set correct GCC or Clang versions.
   - if [ -n "$GCC_VERSION" ]; then export CC="gcc-${GCC_VERSION}" CXX="g++-${GCC_VERSION}"; fi
   - if [ -n "$CLANG_VERSION" ]; then export CC="clang-${CLANG_VERSION}" CXX="clang++-${CLANG_VERSION}"; fi
