@@ -40,6 +40,14 @@ used instead.
 
 Note: You may also need to install dynamic libraries separately.
 
+## Using the system-provided FluidSynth library
+
+Doom64EX uses [fluidsynth-lite](https://github.com/dotfloat/fluidsynth-lite) to
+reduce the number of dependencies. If you wish to use FluidSynth as provided by
+your package-manager, add `-DENABLE_SYSTEM_FLUIDSYNTH=ON` as a cmake argument.
+
+    $ cmake -DENABLE_SYSTEM_FLUIDSYNTH=ON ..
+
 ## Compiling on Linux
 
 All of these steps are done using the terminal.
@@ -76,8 +84,11 @@ On Arch Linux:
 Find a suitable place to build the program and navigate there using `cd`.
 
     $ # Clone this repository (if you haven't done so already)
-    $ git clone https://github.com/svkaiser/Doom64EX
+    $ git clone https://github.com/svkaiser/Doom64EX --recursive
     $ cd Doom64EX
+
+    $ # If you have previously cloned the repository, you'll need to also grab the fluidsynth-lite submodule
+    $ git update --init --recursive
     
     $ # Create a new directory inside the repository
     $ mkdir build
@@ -119,7 +130,10 @@ Open `Terminal.app` (or a terminal replacement).
 Find a suitable place to build the program and navigate there using terminal.
 
     $ # Clone this repository (if you haven't done so already)
-    $ git clone https://github.com/svkaiser/Doom64EX
+    $ git clone https://github.com/svkaiser/Doom64EX --recursive
+
+    $ # If you have previously cloned the repository, you'll need to also grab the fluidsynth-lite submodule
+    $ git update --init --recursive
     
     $ mkdir build       # Create a build directory within the git repo
     $ cd build          # Change into the new directory

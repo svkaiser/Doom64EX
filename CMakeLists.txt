@@ -33,6 +33,12 @@ project(doom64ex C CXX)
 option(ENABLE_TESTING "Compile unit tests" ON)
 option(ENABLE_SYSTEM_FLUIDSYNTH "Link with system-wide fluidsynth and not fluidsynth-lite" OFF)
 
+# If fluidsynth-lite wasn't cloned, fall back to using system fluidsynth.
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/fluidsynth/CMakeLists.txt" AND NOT ENABLE_SYSTEM_FLUIDSYNTH)
+  set(ENABLE_SYSTEM_FLUIDSYNTH ON)
+  message(WARNING "The fluidsynth submodule wasn't initialised. Run `git submodule --init --recursive` to use fluidsynth-lite, or add -DENABLE_SYSTEM_FLUIDSYNTH=ON to use the system-provided FluidSynth library.")
+endif()
+
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
 set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -97,7 +103,6 @@ endif(BUILD_TESTS)
 
 if(NOT ENABLE_SYSTEM_FLUIDSYNTH)
   add_subdirectory("${CMAKE_SOURCE_DIR}/fluidsynth")
-  message(STATUS >> ${FLUIDSYNTH_LIBRARIES})
 endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
