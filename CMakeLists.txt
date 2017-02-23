@@ -56,7 +56,7 @@ endif()
 ## Compiler Options
 ##
 
-if(NOT MSVC)
+if(NOT MSVC AND CMAKE_BUILD_TYPE EQUAL Debug)
   set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
