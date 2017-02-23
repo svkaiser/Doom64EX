@@ -92,7 +92,7 @@ namespace imp {
         Lump& operator=(const Lump&) = default;
     };
 
-    struct LumpIterator {
+    class LumpIterator {
         Lump lump_ {};
         std::size_t index_;
         std::size_t begin_;

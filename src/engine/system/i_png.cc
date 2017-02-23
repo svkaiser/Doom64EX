@@ -45,20 +45,6 @@ FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
                       });
 
 //
-// I_PNGRowSize
-//
-
-// FIXME: What is this for?
-static inline size_t I_PNGRowSize(int width, byte bits) {
-    if(bits >= 8) {
-        return ((width * bits) >> 3);
-    }
-    else {
-        return (((width * bits) + 7) >> 3);
-    }
-}
-
-//
 // I_GetRGBGamma
 //
 

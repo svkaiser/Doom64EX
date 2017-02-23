@@ -49,14 +49,12 @@ namespace {
   class CopyTransform : public DefaultPixelTransform<void> {
       const Palette *mSrcPal;
       const byte *mSrc;
-      const Palette *mDstPal;
       byte *mDst;
 
   public:
-      CopyTransform(const Palette *srcPal, const byte *src, const Palette *dstPal, byte *dst):
+      CopyTransform(const Palette *srcPal, const byte *src, const Palette *, byte *dst):
           mSrcPal(srcPal),
           mSrc(src),
-          mDstPal(dstPal),
           mDst(dst) {}
 
 

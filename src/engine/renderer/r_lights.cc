@@ -44,14 +44,6 @@ FloatProperty i_brightness("i_brightness", "Brightness", 100.0f, 0,
 extern BoolProperty r_texturecombiner;
 
 //
-// R_GetSlopeLight
-//
-
-d_inline static int R_GetSlopeLight(int p, float c) {
-    return (int)(p / (255 / c));
-}
-
-//
 // R_LightToVertex
 //
 

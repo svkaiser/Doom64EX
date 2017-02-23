@@ -77,13 +77,6 @@ static const romLumpSpecial_t HudSprNames[] = {
 	{"JPMSG44", "PJ"}, {"JPMSG45", "PJ"}, {NULL, NULL}
 };
 
-static const romLumpSpecial_t BloodSprites[] = {
-	{"RBLDA0", "P"}, {"RBLDB0", "P"}, {"RBLDC0", "P"}, {"RBLDD0", "P"},
-	{"GBLDA0", "J"}, {"GBLDB0", "J"}, {"GBLDC0", "J"}, {"GBLDD0", "J"},
-	{"BLUDA0", "EX"}, {"BLUDB0", "EX",}, {"BLUDC0", "EX"}, {"BLUDD0", "EX"},
-	{NULL, NULL}
-};
-
 //**************************************************************
 //**************************************************************
 //      Sprite_Convert

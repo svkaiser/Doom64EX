@@ -37,7 +37,7 @@
 
 namespace imp {
   namespace gfx {
-    struct Palette;
+    class Palette;
 
     /**
      * \brief Exception class for pixel format errors.
