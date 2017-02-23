@@ -1613,7 +1613,7 @@ enum {
     tc_morph,
     tc_exp,
     tc_endthinkers
-} specials_e;
+};
 
 struct {
     actionf_p1 function;

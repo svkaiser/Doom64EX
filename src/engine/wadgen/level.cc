@@ -172,7 +172,6 @@ void Level_GetMapWad(int num)
 	wadheader_t wad;
 	lump_t *l = NULL;
 	int lump = 0;
-	int i = 0;
 	byte *buffer;
 
 	sprintf(name, "MAP%02d", num + 1);

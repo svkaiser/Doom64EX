@@ -139,7 +139,7 @@ int                eventtail=0;
 
 void D_PostEvent(event_t* ev) {
     events[eventhead] = *ev;
-    eventhead = (++eventhead)&(MAXEVENTS-1);
+    eventhead = (eventhead + 1) & (MAXEVENTS - 1);
 }
 
 
@@ -151,7 +151,7 @@ void D_PostEvent(event_t* ev) {
 void D_ProcessEvents(void) {
     event_t* ev;
 
-    for(; eventtail != eventhead; eventtail = (++eventtail)&(MAXEVENTS-1)) {
+    for(; eventtail != eventhead; eventtail = (eventtail + 1) & (MAXEVENTS - 1)) {
         ev = &events[eventtail];
 
         // 20120404 villsa - don't do console inputs for demo playbacks

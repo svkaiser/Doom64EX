@@ -56,6 +56,12 @@ endif()
 ## Compiler Options
 ##
 
+if(NOT MSVC)
+  set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -fno-strict-aliasing")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
+endif()
+
 if(MINGW)
   set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows")
 endif(MINGW)

@@ -169,9 +169,9 @@ void M_EncodePassword(void) {
 
     encode[5] |= (player->artifacts << 2);
 
-    decodebit[0] = I_SwapBE16(*(short*)&encode[0]);
-    decodebit[1] = I_SwapBE16(*(short*)&encode[2]);
-    decodebit[2] = I_SwapBE16(*(short*)&encode[4]);
+    decodebit[0] = I_SwapBE16(*(short *) &encode[0]);
+    decodebit[1] = I_SwapBE16(*(short *) &encode[2]);
+    decodebit[2] = I_SwapBE16(*(short *) &encode[4]);
 
     *(short*)&encode[6] = I_SwapBE16(~(decodebit[0] + decodebit[1] + decodebit[2]));
     *(short*)&encode[8] = I_SwapBE16(~(decodebit[0] ^ decodebit[1] ^ decodebit[2]));

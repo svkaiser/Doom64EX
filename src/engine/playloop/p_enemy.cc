@@ -1762,10 +1762,8 @@ void A_Explode(mobj_t* thingy) {
 //
 
 void A_BarrelExplode(mobj_t* actor) {
-    mobj_t* exp;
-
     S_StartSound(actor, sfx_explode);
-    exp = P_SpawnMobj(actor->x+FRACUNIT, actor->y+FRACUNIT, actor->z+(actor->height<<1), MT_EXPLOSION1);
+    P_SpawnMobj(actor->x+FRACUNIT, actor->y+FRACUNIT, actor->z+(actor->height<<1), MT_EXPLOSION1);
     A_Explode(actor);
 
     A_OnDeathTrigger(actor);

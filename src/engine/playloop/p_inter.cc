@@ -987,7 +987,6 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
     int         saved;
     player_t*   player;
     fixed_t     thrust;
-    int         temp;
 
     if(!(target->flags & MF_SHOOTABLE)) {
         return;    // shouldn't happen...
@@ -1100,8 +1099,6 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
         if(player->damagecount > 100) {
             player->damagecount = 100;    // teleport stomp does 10k points...
         }
-
-        temp = damage < 100 ? damage : 100;
     }
 
     // do the damage

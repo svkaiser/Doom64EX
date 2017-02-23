@@ -462,7 +462,7 @@ void Deflate_Decompress(byte * input, byte * output)
 	int incrBit;
 
 	byte *tablePtr1;
-	byte *a1p;
+//	byte *a1p;
 	byte *s4p;
 	byte *t8p;
 	byte *t9p;
@@ -486,7 +486,7 @@ void Deflate_Decompress(byte * input, byte * output)
 
 	decoder.null2 = 0x7FFFFFFF;
 
-	a1p = tablePtr1;
+//	a1p = tablePtr1;
 	a[2] = 1;
 	a[3] = 0;
 	// Z_Alloc(a[0], a1p, a[2], a[3]);

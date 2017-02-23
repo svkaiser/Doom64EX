@@ -125,7 +125,6 @@ void Sprite_Convert(int lump)
 	int w = 0;
 	int h = 0;
 	int pos = 0;
-	int oldw = 0;
 	int inv = 0;
 	int id = 0;
 	int i = 0;
@@ -160,7 +159,6 @@ void Sprite_Convert(int lump)
 	readBuf =
 	    (byte *) (romWadFile.lumpcache[lump] + sizeof(d64RawSprite_t));
 
-	oldw = rs->width = _SWAP16(rs->width);
 	rs->height = _SWAP16(rs->height);
 	rs->xoffs = _SWAP16(rs->xoffs);
 	rs->yoffs = _SWAP16(rs->yoffs);

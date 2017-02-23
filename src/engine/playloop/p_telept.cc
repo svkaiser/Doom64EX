@@ -160,9 +160,6 @@ int EV_Teleport(line_t* line, int side, mobj_t* thing) {
 int EV_SilentTeleport(line_t* line, mobj_t* thing) {
     int         tag;
     mobj_t*     m;
-    fixed_t     oldx;
-    fixed_t     oldy;
-    fixed_t     oldz;
 
     tag = line->tag;
     for(m = mobjhead.next; m != &mobjhead; m = m->next) {
@@ -175,10 +172,6 @@ int EV_SilentTeleport(line_t* line, mobj_t* thing) {
         if(m->tid != tag) {
             continue;
         }
-
-        oldx = thing->x;
-        oldy = thing->y;
-        oldz = thing->z;
 
         if(thing->player) {
             P_Telefrag(thing, m->x, m->y);

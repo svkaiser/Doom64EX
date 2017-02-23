@@ -96,7 +96,7 @@ void P_ChangeSwitchTexture(line_t* line, int useAgain) {
     }
 
     if(SWITCHMASK(line->flags) == ML_SWITCHX04) {
-        swx = swx_start + (sides[line->sidenum[0]].bottomtexture - swx_start) ^ 1;
+        swx = swx_start + ((sides[line->sidenum[0]].bottomtexture - swx_start) ^ 1);
 
         S_StartSound(buttonlist->soundorg, sound);
         sides[line->sidenum[0]].bottomtexture = swx;
@@ -108,7 +108,7 @@ void P_ChangeSwitchTexture(line_t* line, int useAgain) {
         return;
     }
     else if(SWITCHMASK(line->flags) == ML_SWITCHX02) {
-        swx = swx_start + (sides[line->sidenum[0]].toptexture - swx_start) ^ 1;
+        swx = swx_start + ((sides[line->sidenum[0]].toptexture - swx_start) ^ 1);
 
         S_StartSound(buttonlist->soundorg, sound);
         sides[line->sidenum[0]].toptexture = swx;
@@ -120,7 +120,7 @@ void P_ChangeSwitchTexture(line_t* line, int useAgain) {
         return;
     }
     else if(SWITCHMASK(line->flags) == (ML_SWITCHX02 | ML_SWITCHX04)) {
-        swx = swx_start + (sides[line->sidenum[0]].midtexture - swx_start) ^ 1;
+        swx = swx_start + ((sides[line->sidenum[0]].midtexture - swx_start) ^ 1);
 
         S_StartSound(buttonlist->soundorg, sound);
         sides[line->sidenum[0]].midtexture = swx;

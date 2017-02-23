@@ -867,7 +867,7 @@ void P_CreateFadeThinker(mobj_t* mobj, line_t* line) {
 //
 
 void P_CreateFadeOutThinker(mobj_t* mobj, line_t* line) {
-    int flags;
+    int flags {};
 
     if(mobj->flags & MF_SHOOTABLE) {
         flags |= MF_SHOOTABLE;

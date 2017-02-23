@@ -27,21 +27,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <ctype.h>
 #include "i_system.h"
-#include "z_zone.h"
 #include "s_sound.h"
 #include "d_englsh.h"
-#include "sounds.h"
 #include "doomstat.h"
-#include "t_bsp.h"
 #include "g_local.h"
-#include "info.h"
-#include "r_local.h"
-#include "st_stuff.h"
 #include "r_wipe.h"
 #include "gl_draw.h"
-#include <imp/Wad>
 
 static int          castrotation = 0;
 static int          castnum;
@@ -124,11 +116,11 @@ bool F_Ticker(void) {
 
     if(!castdeath) {
         if(pc->key[PCKEY_LEFT]) {
-            castrotation = castrotation+1 & 7;
+            castrotation = (castrotation + 1) & 7;
             pc->key[PCKEY_LEFT] = 0;
         }
         else if(pc->key[PCKEY_RIGHT]) {
-            castrotation = castrotation-1 & 7;
+            castrotation = (castrotation - 1) & 7;
             pc->key[PCKEY_RIGHT] = 0;
         }
         else if(players[consoleplayer].cmd.buttons) {
@@ -136,9 +128,9 @@ bool F_Ticker(void) {
         }
     }
 
-    finalePal.r = MIN(finalePal.r += 2, 250);
-    finalePal.g = MIN(finalePal.g += 2, 250);
-    finalePal.b = MIN(finalePal.b += 2, 250);
+    finalePal.r = MIN(finalePal.r + 2, 250);
+    finalePal.g = MIN(finalePal.g + 2, 250);
+    finalePal.b = MIN(finalePal.b + 2, 250);
 
     if(!castdeath && castdying) {
         S_StartSound(NULL, sfx_shotgun);

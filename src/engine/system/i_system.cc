@@ -260,7 +260,6 @@ void I_ShowSysConsole(dboolean show) {
 #endif
 
 ticcmd_t        emptycmd;
-static int64    I_GetTime_Scale = 1<<24;
 
 //
 // I_uSleep
@@ -291,14 +290,6 @@ static int I_GetTimeNormal(void) {
 }
 
 //
-// I_GetTime_Scaled
-//
-
-static int I_GetTime_Scaled(void) {
-    return (int)((int64) I_GetTimeNormal() * I_GetTime_Scale >> 24);
-}
-
-//
 // I_GetTime_Error
 //
 
@@ -322,7 +313,6 @@ void I_InitClockRate(void) {
 static unsigned int start_displaytime;
 static unsigned int displaytime;
 static dboolean InDisplay = false;
-static int saved_gametic = -1;
 
 dboolean realframe = false;
 

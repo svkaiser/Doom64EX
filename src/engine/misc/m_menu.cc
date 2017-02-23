@@ -121,7 +121,6 @@ static dboolean MenuBindActive = false;
 static dboolean showfullitemvalue[3] = { false, false, false};
 static int      levelwarp = 0;
 static dboolean wireframeon = false;
-static dboolean lockmonstersmon = false;
 static int      thermowait = 0;
 static int      m_aspectRatio = 0;
 static int      m_ScreenSize = 1;
@@ -207,7 +206,6 @@ void M_QuickSave(void);
 void M_QuickLoad(void);
 
 static int M_StringWidth(const char *string);
-static int M_StringHeight(const char *string);
 static int M_BigStringWidth(const char *string);
 
 static void M_DrawThermo(int x, int y, int thermWidth, float thermDot);
@@ -266,7 +264,7 @@ enum {
     loadgame,
     quitdoom,
     main_end
-} main_e;
+};
 
 menuitem_t MainMenu[]= {
     {1,"New Game",M_NewGame,'n'},
@@ -313,7 +311,7 @@ enum {
     pause_savegame,
     pause_quitdoom,
     pause_end
-} pause_e;
+};
 
 menuitem_t PauseMenu[]= {
     {1,"Options",M_Options,'o'},
@@ -356,7 +354,7 @@ enum {
     quityes = 0,
     quitno,
     quitend
-} quitprompt_e;
+};
 
 menuitem_t QuitGameMenu[]= {
     {1,"Yes",M_QuitGame,'y'},
@@ -406,7 +404,7 @@ enum {
     quit2yes = 0,
     quit2no,
     quit2end
-} quit2prompt_e;
+};
 
 menuitem_t QuitGameMenu2[]= {
     {1,"Yes",M_QuitGame2,'y'},
@@ -455,7 +453,7 @@ enum {
     PMainYes = 0,
     PMainNo,
     PMain_end
-} prompt_e;
+};
 
 menuitem_t PromptMain[]= {
     {1,"Yes",M_EndGame,'y'},
@@ -512,7 +510,7 @@ enum {
     RMainYes = 0,
     RMainNo,
     RMain_end
-} rlprompt_e;
+};
 
 menuitem_t RestartConfirmMain[]= {
     {1,"Yes",M_RestartLevel,'y'},
@@ -564,7 +562,7 @@ void M_NewGameNotifyResponse(int choice);
 enum {
     SNN_Ok = 0,
     SNN_End
-} startnewnotify_e;
+};
 
 menuitem_t StartNewNotify[]= {
     {1,"Ok",M_NewGameNotifyResponse,'o'}
@@ -612,7 +610,7 @@ enum {
     violence,
     nightmare,
     newg_end
-} newgame_e;
+};
 
 menuitem_t NewGameMenu[]= {
     {1,"Be Gentle!",M_ChooseSkill, 'b'},
@@ -685,7 +683,7 @@ enum {
     options_region,
     options_return,
     opt_end
-} options_e;
+};
 
 menuitem_t OptionsMenu[]= {
     {1,"Controls",M_Controls, 'c'},
@@ -762,7 +760,7 @@ enum {
     region_default,
     region_return,
     region_end
-} region_e;
+};
 
 menuitem_t RegionMenu[]= {
     {2,"Region Mode:", M_RegionChoice, 'r'},
@@ -948,7 +946,7 @@ enum {
     network_default,
     network_return,
     network_end
-} network_e;
+};
 
 menuitem_t NetworkMenu[]= {
     {-1,"Player Setup",0 },
@@ -1076,12 +1074,6 @@ void M_DrawNetwork(void) {
         "10 Minutes"
     };
 
-    static const char* networkscalestrings[3] = {
-        "x 1",
-        "x 2",
-        "x 3"
-    };
-
 #define DRAWNETWORKITEM(a, b, c) \
     if(currentMenu->menupageoffset <= a && \
         a - currentMenu->menupageoffset < currentMenu->numpageitems) \
@@ -1177,7 +1169,7 @@ enum {
     misc_default,
     misc_return,
     misc_end
-} misc_e;
+};
 
 menuitem_t MiscMenu[]= {
     {-1,"Menu Options",0 },
@@ -1507,7 +1499,7 @@ enum {
     mouse_default,
     mouse_return,
     mouse_end
-} mouse_e;
+};
 
 menuitem_t MouseMenu[]= {
     {3,"Mouse Sensitivity X",M_ChangeSensitivity, 'x'},
@@ -1695,7 +1687,7 @@ enum {
     e_default,
     display_return,
     display_end
-} display_e;
+};
 
 menuitem_t DisplayMenu[]= {
     {3,"Brightness",M_ChangeBrightness, 'b'},
@@ -1927,7 +1919,7 @@ enum {
     v_default,
     video_return,
     video_end
-} video_e;
+};
 
 menuitem_t VideoMenu[]= {
     {3,"Gamma Correction",M_ChangeGammaLevel, 'g'},
@@ -2261,7 +2253,7 @@ void M_ChangeRatio(int choice) {
         }
     }
     else {
-        m_aspectRatio = MAX(m_aspectRatio--, 0);
+        m_aspectRatio = MAX(m_aspectRatio - 1, 0);
     }
 
     switch(m_aspectRatio) {
@@ -2307,7 +2299,7 @@ void M_ChangeResolution(int choice) {
         }
     }
     else {
-        m_ScreenSize = MAX(m_ScreenSize--, 0);
+        m_ScreenSize = MAX(m_ScreenSize - 1, 0);
     }
 
     M_SetResolution();
@@ -2493,7 +2485,7 @@ enum {
     sound_default,
     sound_return,
     sound_end
-} sound_e;
+};
 
 menuitem_t SoundMenu[]= {
     {3,"Sound Volume",M_SfxVol,'s'},
@@ -2636,7 +2628,7 @@ enum {
     features_noclip,
     features_wireframe,
     features_end
-} features_e;
+};
 
 #define FEATURESWARPLEVEL    "Warp To Level:"
 #define FEATURESWARPFUN        "Warp To Fun:"
@@ -3109,7 +3101,7 @@ enum {
 #endif
     controls_return,
     controls_end
-} controls_e;
+};
 
 menuitem_t ControlsMenu[]= {
     {1,"Bindings",M_ControlChoice, 'k'},
@@ -3183,7 +3175,7 @@ void M_DrawQuickSaveConfirm(void);
 enum {
     QS_Ok = 0,
     QS_End
-} qsconfirm_e;
+};
 
 menuitem_t QuickSaveConfirm[]= {
     {1,"Ok",M_ReturnToOptions,'o'}
@@ -3223,7 +3215,7 @@ void M_DrawNetLoadNotify(void);
 enum {
     NLN_Ok = 0,
     NLN_End
-} netloadnotify_e;
+};
 
 menuitem_t NetLoadNotify[]= {
     {1,"Ok",M_ReturnToOptions,'o'}
@@ -3263,7 +3255,7 @@ void M_DrawSaveDeadNotify(void);
 enum {
     SDN_Ok = 0,
     SDN_End
-} savedeadnotify_e;
+};
 
 menuitem_t SaveDeadNotify[]= {
     {1,"Ok",M_ReturnToOptions,'o'}
@@ -3312,7 +3304,7 @@ enum {
     load7,
     load8,
     load_end
-} load_e;
+};
 
 menuitem_t SaveMenu[]= {
     {1,"", M_SaveSelect,'1'},
@@ -3550,7 +3542,7 @@ enum {
     QSP_Yes = 0,
     QSP_No,
     QSP_End
-} quicksaveprompt_e;
+};
 
 menuitem_t QuickSavePrompt[]= {
     {1,"Yes",M_QuickSaveResponse,'y'},
@@ -3591,7 +3583,7 @@ enum {
     QLP_Yes = 0,
     QLP_No,
     QLP_End
-} quickloadprompt_e;
+};
 
 menuitem_t QuickLoadPrompt[]= {
     {1,"Yes",M_QuickLoadResponse,'y'},
@@ -3801,29 +3793,6 @@ static int M_StringWidth(const char* string) {
     return w;
 }
 
-
-
-//
-// M_StringHeight
-// Find string height from hu_font chars
-//
-
-static int M_StringHeight(const char* string) {
-    int i;
-    int h;
-    int height = ST_FONTWHSIZE;
-
-    h = height;
-
-    for(i = 0; i < dstrlen(string); i++) {
-        if(string[i] == '\n') {
-            h += height;
-        }
-    }
-
-    return h;
-}
-
 //
 // M_BigStringWidth
 // Find string width from bigfont chars
@@ -3938,7 +3907,6 @@ static void M_CheckDragThermoBar(event_t* ev, menu_t* menu) {
     float width;
     float scalex;
     float scaley;
-    float value;
     float lineheight;
 
     // must be a mouse held event and menu must have thermobar settings
@@ -3985,7 +3953,7 @@ static void M_CheckDragThermoBar(event_t* ev, menu_t* menu) {
 
                 // convert mouse x coordinate into thermo bar position
                 // set cvar as well
-                value = (mx / scalex) - x;
+//                value = (mx / scalex) - x;
 //                CON_CvarSetValue(bar[i].mitem->name,
 //                                 value * (bar[i].width / 100.0f));
 

@@ -41,13 +41,13 @@
 #define ANGLETOFINESHIFT    19
 
 // Binary Angle Measument, BAM.
-#define ANG45            0x20000000
-#define ANG90            0x40000000
-#define ANG180            0x80000000
-#define ANG270            0xc0000000
+#define ANG45            0x20000000U
+#define ANG90            0x40000000U
+#define ANG180            0x80000000U
+#define ANG270            0xc0000000U
 #define ANG1            (ANG45/45)
 #define ANG5            (ANG90/18)
-#define ANGLE_MAX        (0xffffffff)
+#define ANGLE_MAX        (0xffffffffU)
 
 
 #define SLOPERANGE        2048

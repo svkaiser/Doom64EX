@@ -188,8 +188,8 @@ wad::LumpIterator& wad::LumpIterator::operator++()
     return *this;
 }
 
-const wad::Lump& wad::LumpIterator::operator[](std::size_t i)
+const wad::Lump wad::LumpIterator::operator[](std::size_t i)
 {
-    return *wad::find(begin_ + i);
+    return wad::find(begin_ + i).value();
 }
 

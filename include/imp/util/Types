@@ -35,10 +35,6 @@ namespace imp {
   // Tags
   struct noinit_tag {};
 
-  namespace {
-    static noinit_tag noinit {};
-  }
-
   // Misc
   namespace _detail {
     template<class... Args>

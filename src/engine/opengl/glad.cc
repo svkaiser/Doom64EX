@@ -40,7 +40,6 @@ static int max_loaded_major;
 static int max_loaded_minor;
 
 static const char *exts = NULL;
-static int num_exts_i = 0;
 static const char **exts_i = NULL;
 
 static int get_exts(void) {

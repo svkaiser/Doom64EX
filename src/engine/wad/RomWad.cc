@@ -17,12 +17,14 @@ namespace {
       char version;
   };
 
+#if 0
   RomIwad _rom_iwad[4] {
       { 0x6df60, 'P', 0 },
       { 0x64580, 'J', 0 },
       { 0x63d10, 'E', 0 },
       { 0x63dc0, 'E', 1 }
   };
+#endif
 
   struct WadHeader {
       char id[4];

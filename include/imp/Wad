@@ -118,7 +118,7 @@ namespace imp {
 
         LumpIterator& operator++();
 
-        const Lump& operator[](std::size_t);
+        const Lump operator[](std::size_t);
     };
   }
 
@@ -141,6 +141,8 @@ namespace imp {
       case Section::sounds:
           return "sounds"_sv;
       }
+
+      return ""_sv;
   }
 }
 

@@ -62,7 +62,6 @@ namespace {
       for (int x = 0; x < header.width; x++)
       {
           uint8 rowStart = 0;
-          int _j = 0;
           stream.seekg(fstart + columns[x], std::ios::beg);
 
           while (rowStart != 0xff)

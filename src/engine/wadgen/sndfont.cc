@@ -412,7 +412,7 @@ SF_CreatePresets(patch_t * patch, int npatch,
 			//
 			// sample loops
 			//
-			if (wt->loopid != -1) {
+			if (wt->loopid != ~0U) {
 				value.wAmount = 1;
 				SF_AddInstrumentGenerator(&inst->gen,
 							  GEN_SAMPLEMODE,
@@ -459,7 +459,6 @@ SF_CreatePresets(patch_t * patch, int npatch,
 void SF_WriteSoundFont(void)
 {
 	FILE *handle;
-	int i;
     char *outFile;
 
     // MP2E: Use ROM directory instead of executable directory

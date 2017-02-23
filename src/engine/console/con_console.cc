@@ -62,7 +62,6 @@ static int          console_head;
 static int          console_lineoffset;
 static int          console_minline;
 static dboolean     console_enabled = false;
-static int          console_pos = 0;//bottom of console, in pixels
 static char         console_linebuffer[CON_BUFFERSIZE];
 static int          console_linelength;
 static int          console_state = CST_UP;
@@ -293,7 +292,7 @@ void CON_ParseKey(char c) {
     }
 
     if(shiftdown) {
-        c = shiftxform[c];
+        c = shiftxform[static_cast<size_t>(c)];
     }
 
     if(console_inputlength >= MAX_CONSOLE_INPUT_LEN - 2) {

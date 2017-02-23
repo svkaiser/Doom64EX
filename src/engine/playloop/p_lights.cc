@@ -607,7 +607,6 @@ int P_DoSectorLightChange(line_t* line, short tag) {
     sector_t* sec1;
     sector_t* sec2;
     int secnum;
-    int rtn;
 
     secnum = P_FindSectorFromTag(tag);
 
@@ -618,11 +617,9 @@ int P_DoSectorLightChange(line_t* line, short tag) {
     sec2 = &sectors[secnum];
     
     secnum = -1;
-    rtn = 0;
 
     while((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0) {
         sec1 = &sectors[secnum];
-        rtn = 1;
 
         for(j = 0; j < 5; j++) {
             ptr1 = (sec1->colors[j]);

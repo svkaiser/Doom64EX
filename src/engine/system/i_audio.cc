@@ -1014,11 +1014,9 @@ static dboolean Song_RegisterTracks(song_t* song) {
 //
 
 static dboolean Seq_RegisterSongs(doomseq_t* seq) {
-    int i;
     int fail;
 
     seq->nsongs = 0;
-    i = 0;
 
     auto section = wad::section(wad::Section::sounds);
 

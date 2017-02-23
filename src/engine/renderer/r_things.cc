@@ -131,7 +131,6 @@ void R_InstallSpriteLump(int lump, unsigned frame, unsigned rotation, dboolean f
 void R_InitSprites(const char** namelist) {
     const char**  check;
     int     i;
-    int     l;
     int     intname;
     int     frame;
     int     rotation;

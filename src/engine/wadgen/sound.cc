@@ -664,8 +664,6 @@ Sound_DecodeVADPCM(byte * in, short *out, uint len, predictor_t * book,
 	short lastsmp[8];
 	int index;
 	int pred;
-	byte *pin = in;
-	int total = 0;
 	int _len = (len / 9) * 9;	//make sure length was actually a multiple of 9
 	int samples = 0;
 	int x;
