@@ -1,4 +1,6 @@
 #include <fstream>
+#include <sstream>
+#include <utility>
 #include "WadFormat.hh"
 
 namespace {
@@ -17,14 +19,12 @@ namespace {
       char version;
   };
 
-#if 0
   RomIwad _rom_iwad[4] {
       { 0x6df60, 'P', 0 },
       { 0x64580, 'J', 0 },
       { 0x63d10, 'E', 0 },
       { 0x63dc0, 'E', 1 }
   };
-#endif
 
   struct WadHeader {
       char id[4];
@@ -66,19 +66,49 @@ namespace {
   public:
       RomFormat(StringView name)
       {
-          std::ifstream rom(name);
+          std::istringstream rom;
+          rom.exceptions(rom.failbit | rom.badbit);
 
-          Header header;
-          read_into(rom, header);
+          {
+              std::ifstream file(name, std::ios::binary);
+              rom.str({ std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>() });
+          }
 
-          rom.seekg(0x63d10);
+          Header rom_header;
+          read_into(rom, rom_header);
+
+          // Swap bytes if the ROM is big-endian.
+          if (memcmp(rom_header.name, _n64_name, 6) == 0) {
+              auto str = rom.str();
+              for (size_t i = 0; i < str.size(); i += 2)
+                  std::swap(str[i], str[i+1]);
+              rom.str(str);
+              read_into(rom, rom_header);
+          }
+
+          if (memcmp(rom_header.name, _z64_name, 6) != 0)
+              fatal("Not a valid Doom 64 ROM");
+
+          // Find the location of the WAD
+          std::size_t wad_pos {};
+          for (const auto& loc : _rom_iwad) {
+              if (loc.country_id == rom_header.country_id && loc.version == rom_header.version_id) {
+                  rom.seekg(loc.position, std::ios::beg);
+                  wad_pos = loc.position;
+              }
+          }
+
+          if (wad_pos == 0) {
+              fatal("WAD not found in Doom 64 ROM");
+          }
+
           WadHeader wad_header;
           read_into(rom, wad_header);
 
-          if (memcmp(wad_header.id, "IWAD", 4) && memcmp(wad_header.id, "PWAD", 4))
-              throw "Not a WAD";
+          if (memcmp(wad_header.id, "IWAD", 4) != 0)
+              fatal("Not an IWAD");
 
-          rom.seekg(0x63d10 + wad_header.infotableofs);
+          rom.seekg(wad_pos + wad_header.infotableofs);
           for (std::size_t i = 0; i < wad_header.numlumps; ++i) {
               WadDir dir;
               read_into(rom, dir);
