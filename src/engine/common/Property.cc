@@ -21,7 +21,7 @@ Property::Property(StringView name, StringView description, int flags):
 {
     if (_global().properties.count(name)) {
         // TODO: Replace with an exception
-        fatal("Property with the name {} already exists!", name);
+        println("Property with the name {} already exists!", name);
     }
 
     _global().properties.emplace(name, this);

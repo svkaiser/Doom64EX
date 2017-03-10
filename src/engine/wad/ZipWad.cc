@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <zlib.h>
+#include <sstream>
 #include "WadFormat.hh"
 
 namespace {
@@ -107,36 +108,54 @@ namespace {
       throw "End of Central Dir not found in ZIP";
   }
 
+  String _normalize(StringView filename)
+  {
+      String r;
+      for (auto ch : filename) {
+          if (!std::isalnum(ch))
+              break;
+          r.push_back(static_cast<char>(std::toupper(ch)));
+      }
+      return r;
+  }
+
   struct ZipInfo {
       bool compressed;
       size_t filepos;
       size_t size;
       wad::Section section;
-      SharedPtr<char> cache;
   };
 
-  class ZipReader : public wad::Reader {
-      std::istream &stream_;
-      std::vector<ZipInfo> &infos_;
-
-      String normalize(StringView filename)
-      {
-          String r;
-          for (auto ch : filename) {
-              if (!std::isalnum(ch))
-                  break;
-              r.push_back(static_cast<char>(std::toupper(ch)));
-          }
-          return r;
-      }
+  class ZipLump : public wad::BasicLump {
+      std::istringstream stream_;
 
   public:
-      ZipReader(std::istream &stream, std::vector<ZipInfo> &infos):
-          stream_(stream),
-          infos_(infos) {}
+      ZipLump(size_t lump_id, std::istringstream stream):
+          wad::BasicLump(lump_id),
+          stream_(std::move(stream)) {}
 
-      bool poll() override
+      std::istream& stream() override
+      { return stream_; }
+
+      String as_bytes() override
+      { return stream_.str(); }
+  };
+
+  class ZipFormat : public wad::Format {
+      std::ifstream stream_;
+      std::vector<ZipInfo> infos_;
+      size_t central_dir_pos_ {};
+
+  public:
+      ZipFormat(std::ifstream &&stream):
+          stream_(std::move(stream)) {}
+
+      Vector<wad::LumpInfo> read_all() override
       {
+          _find_first_central_dir(stream_);
+          central_dir_pos_ = static_cast<size_t>(stream_.tellg());
+          Vector<wad::LumpInfo> lumps;
+
           while (!stream_.eof()) {
               char sig[4];
               stream_.read(sig, 4);
@@ -160,63 +179,43 @@ namespace {
                   if (entry.uncompressed == 0 && entry.compressed == 0)
                       continue;
 
+                  wad::Section section {};
                   auto loc = filename.find_first_of('/', 1);
                   if (loc != String::npos) {
-                      auto section_name = normalize(filename.substr(0, loc));
+                      auto section_name = _normalize(filename.substr(0, loc));
                       if (section_name == "GRAPHICS") {
-                          this->section = wad::Section::graphics;
+                          section = wad::Section::graphics;
                       } else if (section_name == "TEXTURES") {
-                          this->section = wad::Section::textures;
+                          section = wad::Section::textures;
                       } else if (section_name == "SOUNDS") {
-                          this->section = wad::Section::sounds;
+                          section = wad::Section::sounds;
                       } else if (section_name == "SPRITES") {
-                          this->section = wad::Section::sprites;
+                          section = wad::Section::sprites;
                       } else {
-                          this->section = wad::Section::normal;
+                          section = wad::Section::normal;
                       }
                       loc++;
                   } else {
-                      this->section = wad::Section::normal;
+                      section = wad::Section::normal;
                       loc = 0;
                   }
-                  this->name = normalize(filename.substr(loc)).substr(0, 8);
-                  this->id = infos_.size();
+                  auto name = _normalize(filename.substr(loc)).substr(0, 8);
+                  auto index = infos_.size();
 
-                  infos_.push_back({ entry.method == 8, entry.local_offset, entry.uncompressed, section, nullptr });
-                  return true;
+                  infos_.push_back({ entry.method == 8, entry.local_offset, entry.uncompressed, section });
+                  lumps.emplace_back(name, section, index);
               } else {
                   break;
               }
           }
-          return false;
-      }
-  };
 
-  class ZipFormat : public wad::Format {
-      std::ifstream stream_;
-      std::vector<ZipInfo> infos_;
-      size_t central_dir_pos_ {};
-
-  public:
-      ZipFormat(std::ifstream &&stream):
-          stream_(std::move(stream)) {}
-
-      UniquePtr<wad::Reader> reader() override
-      {
-          _find_first_central_dir(stream_);
-          central_dir_pos_ = static_cast<size_t>(stream_.tellg());
-          return std::make_unique<ZipReader>(stream_, infos_);
+          return lumps;
       }
 
-      Optional<wad::Lump> find(std::size_t id) override
+      UniquePtr<wad::BasicLump> find(size_t lump_index, size_t zip_index) override
       {
-          if (id >= infos_.size())
-              return nullopt;
-
-          auto& info = infos_[id];
-
-          if (info.cache)
-              return { inplace, "", info.cache, info.size, info.section };
+          assert(zip_index < infos_.size());
+          auto& info = infos_[zip_index];
 
           char sig[4];
           stream_.seekg(info.filepos);
@@ -229,12 +228,12 @@ namespace {
 
           stream_.seekg(header.name_length + header.extra_length, std::ios::cur);
 
-          info.cache.reset(new char[header.uncompressed]);
+          String cache(header.uncompressed, 0);
           z_stream zs {};
           char buffer[32] {};
 
           inflateInit2(&zs, -MAX_WBITS);
-          zs.next_out = reinterpret_cast<byte*>(info.cache.get());
+          zs.next_out = reinterpret_cast<byte*>(&cache[0]);
           zs.avail_out = header.uncompressed;
 
           int code {};
@@ -247,17 +246,16 @@ namespace {
               code = inflate(&zs, Z_SYNC_FLUSH);
           } while(code == Z_OK && zs.avail_out);
 
+          inflateEnd(&zs);
+
           if (code != Z_OK && code != Z_STREAM_END)
               throw "invalid inflate stream";
 
           if (zs.avail_out != 0)
               throw "truncated deflate stream";
 
-          return { inplace, "", info.cache, info.size, info.section };
+          return std::make_unique<ZipLump>(lump_index, std::istringstream { std::move(cache) });
       }
-
-      Optional<wad::Lump> find(StringView name) override
-      { return nullopt; }
   };
 }
 

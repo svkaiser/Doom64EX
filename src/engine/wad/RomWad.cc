@@ -125,11 +125,9 @@ namespace {
 
       ~RomFormat() override {}
 
-      UniquePtr<wad::Reader> reader() override { return {}; }
+      Vector<wad::LumpInfo> read_all() override { return {}; }
 
-      Optional<wad::Lump> find(std::size_t id) override { return {}; }
-
-      Optional<wad::Lump> find(StringView name) override { return {}; }
+      UniquePtr<wad::BasicLump> find(size_t lump_id, size_t mount_id) override { return {}; }
   };
 }
 

@@ -57,8 +57,11 @@ static void SC_Open(const char* name) {
         }
     }
     else {
-        sc_parser.buffer = (byte*) lump->data.get();
-        sc_parser.buffsize = lump->size;
+        auto bytes = lump->as_bytes();
+        auto memory = new char[bytes.size()];
+        std::copy(bytes.begin(), bytes.end(), memory);
+        sc_parser.buffer = reinterpret_cast<byte*>(memory);
+        sc_parser.buffsize = bytes.size();
     }
 
     CON_DPrintf("%s size: %ikb\n", name, sc_parser.buffsize >> 10);
@@ -138,7 +141,7 @@ static int SC_SetData(void *_data, void *_table) {
 
     for(i = 0; table[i].token; i++) {
         if(!dstricmp(table[i].token, sc_parser.token)) {
-            byte* pointer = ((byte*)data + table[i].ptroffset);
+            byte* pointer = (data + table[i].ptroffset);
             char* name;
             byte rgb[3];
 
@@ -158,7 +161,7 @@ static int SC_SetData(void *_data, void *_table) {
                 *(int*)pointer = sc_parser.getint();
                 break;
             case 'b':
-                *(int*)pointer = true;
+                *(bool*)pointer = true;
                 break;
             case 'c':
                 sc_parser.compare("="); // expect a '='

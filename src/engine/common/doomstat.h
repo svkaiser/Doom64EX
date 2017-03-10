@@ -183,10 +183,10 @@ typedef struct {
     int         type;
     int         cluster;
     int         exitdelay;
-    dboolean    nointermission;
-    dboolean    clearchts;
-    dboolean    forcegodmode;
-    dboolean    contmusexit;
+    bool        nointermission;
+    bool        clearchts;
+    bool        forcegodmode;
+    bool        contmusexit;
     int         oldcollision;
     int         allowjump;
     int         allowfreelook;

@@ -154,7 +154,7 @@ static std::map<wad::LumpHash, int> texturehashlist;
 static void P_InitTextureHashTable(void) {
     auto section = wad::section(wad::Section::textures);
     for(int i = 0; section; ++section, ++i) {
-        texturehashlist.emplace(wad::LumpHash { section->name }, i);
+        texturehashlist.emplace(wad::LumpHash { section->lump_name() }, i);
     }
 }
 
@@ -310,7 +310,7 @@ void P_LoadSectors(int lump) {
         ss->frame_z2[1] = ss->ceilingheight;
 
         for(j = 0; j < numskydef; j++) {
-            if(ss->ceilingpic == wad::find(skydefs[j].flat)->section_index) {
+            if(ss->ceilingpic == wad::find(skydefs[j].flat)->section_index()) {
                 skyflatnum = j;
                 break;
             }
@@ -966,14 +966,14 @@ void P_SetupSky(void) {
 
     skyindex    = skyflatnum;
     sky         = &skydefs[skyindex];
-    skyflatnum  = wad::find(sky->flat)->section_index;
+    skyflatnum  = wad::find(sky->flat)->section_index();
 
     if(sky->pic[0]) {
-        skypicnum = wad::find(sky->pic)->index;
+        skypicnum = wad::find(sky->pic)->lump_index();
     }
 
     if(sky->backdrop[0]) {
-        skybackdropnum = wad::find(sky->backdrop)->index;
+        skybackdropnum = wad::find(sky->backdrop)->lump_index();
     }
 
     if(sky->flags & SKF_FIRE) {
@@ -1104,25 +1104,28 @@ void P_SetupLevel(int map, int playermask, skill_t skill) {
 //
 
 static scdatatable_t mapdatatable[] = {
-    {   "CLASSTYPE", (int64)&((mapdef_t*)0)->type,                 'i' },
-    {   "LEVELNUM", (int64)&((mapdef_t*)0)->mapid,                'i' },
-    {   "CLUSTER", (int64)&((mapdef_t*)0)->cluster,              'i' },
-    {   "EXITDELAY", (int64)&((mapdef_t*)0)->exitdelay,            'i' },
-    {   "NOINTERMISSION", (int64)&((mapdef_t*)0)->nointermission,       'b' },
-    {   "CLEARCHEATS", (int64)&((mapdef_t*)0)->clearchts,            'b' },
-    {   "CONTINUEMUSICONEXIT", (int64)&((mapdef_t*)0)->contmusexit,          'b' },
-    {   "FORCEGODMODE", (int64)&((mapdef_t*)0)->forcegodmode,         'b' },
-    {   NULL,                   0,                                          0   }
+    { "CLASSTYPE", offsetof(mapdef_t, type), 'i' },
+    { "LEVELNUM", offsetof(mapdef_t, mapid), 'i' },
+    { "CLUSTER", offsetof(mapdef_t, cluster), 'i' },
+    { "EXITDELAY", offsetof(mapdef_t, exitdelay), 'i' },
+    { "NOINTERMISSION", offsetof(mapdef_t, nointermission), 'b' },
+    { "CLEARCHEATS", offsetof(mapdef_t, clearchts), 'b' },
+    { "CONTINUEMUSICONEXIT", offsetof(mapdef_t, contmusexit), 'b' },
+    { "FORCEGODMODE", offsetof(mapdef_t, forcegodmode), 'b' },
+    { nullptr, 0, 0 }
 };
 
 static scdatatable_t clusterdatatable[] = {
-    {   "PIC", (int64)&((clusterdef_t*)0)->pic,              'S' },
-    {   "NOINTERMISSION", (int64)&((clusterdef_t*)0)->nointermission,   'b' },
-    {   "SCROLLTEXTEND", (int64)&((clusterdef_t*)0)->scrolltextend,    'b' },
-    {   "PIC_X", (int64)&((clusterdef_t*)0)->pic_x,            'i' },
-    {   "PIC_Y", (int64)&((clusterdef_t*)0)->pic_y,            'i' },
-    {   NULL,                   0,                                          0   }
+    { "PIC", offsetof(clusterdef_t, pic), 'S' },
+    { "NOINTERMISSION", offsetof(clusterdef_t, nointermission), 'b' },
+    { "SCROLLTEXTEND", offsetof(clusterdef_t, scrolltextend), 'b' },
+    { "PIC_X", offsetof(clusterdef_t, pic_x), 'i' },
+    { "PIC_Y", offsetof(clusterdef_t, pic_y), 'i' },
+    { nullptr, 0, 0 }
 };
+
+// from audio.cc
+size_t Seq_SoundLookup(StringView name);
 
 static void P_InitMapInfo(void) {
     mapdef_t mapdef;
@@ -1183,12 +1186,12 @@ static void P_InitMapInfo(void) {
                         text = sc_parser.getstring();
 
                         auto lump = wad::find(text);
-                        if(!lump || lump->section != wad::Section::sounds) {
+                        if(!lump || lump->section() != wad::Section::sounds) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             mapdef.music = -1;
                         }
                         else {
-                            mapdef.music = lump->section_index;
+                            mapdef.music = Seq_SoundLookup(lump->lump_name());
                         }
                     }
                     else if(!dstricmp(sc_parser.token, "COMPAT_COLLISION")) {
@@ -1264,11 +1267,11 @@ static void P_InitMapInfo(void) {
                         text = sc_parser.getstring();
 
                         auto lump = wad::find(text);
-                        if(!lump || lump->section != wad::Section::sounds) {
+                        if(!lump || lump->section() != wad::Section::sounds) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             cluster.music = -1;
                         } else {
-                            cluster.music = lump.value().section_index;
+                            cluster.music = Seq_SoundLookup(lump->lump_name());
                         }
                     }
                     //

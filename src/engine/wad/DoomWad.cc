@@ -1,4 +1,5 @@
 #include <fstream>
+#include <sstream>
 #include "WadFormat.hh"
 
 namespace {
@@ -24,40 +25,28 @@ namespace {
   static_assert(sizeof(Directory) == 16, "WAD Directory must have a sizeof of 16 bytes");
 
   struct Info {
-      wad::Section section;
       size_t filepos;
       size_t size;
-      String name;
-      SharedPtr<char> data;
+      std::istringstream cache;
+
+      Info(size_t filepos, size_t size):
+          filepos(filepos),
+          size(size) {}
   };
 
-  class DoomReader : public wad::Reader {
-      using iterator = typename Vector<Info>::const_iterator;
-
-      iterator it_;
-      iterator begin_;
-      iterator end_;
+  class DoomLump : public wad::BasicLump {
+      std::istringstream &stream_;
 
   public:
-      DoomReader(iterator begin, iterator end):
-          it_(begin),
-          begin_(begin),
-          end_(end) {}
+      DoomLump(size_t lump_id, std::istringstream& stream):
+          wad::BasicLump(lump_id),
+          stream_(stream) {}
 
-      ~DoomReader() override {}
+      std::istream& stream() override
+      { return stream_; }
 
-      bool poll() override
-      {
-          if (it_ == end_)
-              return false;
-
-          this->section = it_->section;
-          this->id = it_ - begin_;
-          this->name = it_->name;
-          ++it_;
-
-          return true;
-      }
+      String as_bytes() override
+      { return stream_.str(); }
   };
 
   class DoomFormat : public wad::Format {
@@ -68,12 +57,22 @@ namespace {
       DoomFormat(StringView path):
           stream_(path, std::ios::binary)
       {
+          stream_.exceptions(stream_.failbit | stream_.badbit);
+      }
+
+      ~DoomFormat() override {}
+
+      Vector<wad::LumpInfo> read_all() override
+      {
+          Vector<wad::LumpInfo> lumps;
           wad::Section section {};
           Header header;
           read_into(stream_, header);
 
           stream_.seekg(header.infotableofs);
           size_t numlumps = header.numlumps;
+
+          table_.clear();
           for (size_t i = 0; i < numlumps; ++i) {
               Directory dir;
               read_into(stream_, dir);
@@ -107,32 +106,27 @@ namespace {
                   continue;
               }
 
-              table_.push_back({ section, dir.filepos, dir.size, name, nullptr });
+              lumps.emplace_back(name, section, table_.size());
+              table_.emplace_back(dir.filepos, dir.size);
           }
+
+          return lumps;
       }
 
-      ~DoomFormat() override {}
-
-      UniquePtr<wad::Reader> reader() override
+      UniquePtr<wad::BasicLump> find(size_t lump_id, size_t mount_id) override
       {
-          return std::make_unique<DoomReader>(table_.cbegin(), table_.cend());
-      }
+          std::istringstream ss;
+          auto& info = table_[mount_id];
 
-      Optional<wad::Lump> find(std::size_t id) override
-      {
-          auto& info = table_[id];
-
-          if (info.size && !info.data) {
-              info.data.reset(new char[info.size]);
+          if (info.size && !info.cache.str().size()) {
               stream_.seekg(info.filepos);
-              stream_.read(info.data.get(), info.size);
+              String str(info.size, 0);
+              stream_.read(&str[0], info.size);
+              info.cache.str(std::move(str));
           }
 
-          return make_optional<wad::Lump>(info.name, info.data, info.size, info.section);
+          return std::make_unique<DoomLump>(lump_id, info.cache);
       }
-
-      Optional<wad::Lump> find(StringView) override
-      { return nullopt; }
   };
 }
 

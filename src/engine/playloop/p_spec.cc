@@ -78,12 +78,12 @@ int         numanimdef;
 animdef_t*  animdefs;
 
 static scdatatable_t animdatatable[] = {
-    {   "RESTARTDELAY", (int64)&((animdef_t*)0)->delay,   'i' },
-    {   "FRAMES", (int64)&((animdef_t*)0)->frames,  'i' },
-    {   "CYCLEPALETTES", (int64)&((animdef_t*)0)->palette, 'b' },
-    {   "REWIND", (int64)&((animdef_t*)0)->reverse, 'b' },
-    {   "SPEED", (int64)&((animdef_t*)0)->speed,   'i' },
-    {   NULL,               0,                              0   }
+    { "RESTARTDELAY", offsetof(animdef_t, delay), 'i' },
+    { "FRAMES", offsetof(animdef_t, frames), 'i' },
+    { "CYCLEPALETTES", offsetof(animdef_t, palette), 'b' },
+    { "REWIND", offsetof(animdef_t, reverse), 'b' },
+    { "SPEED", offsetof(animdef_t, speed), 'i' },
+    { nullptr, 0, 0 }
 };
 
 //
@@ -176,7 +176,7 @@ void P_InitPicAnims(void) {
         animinfo[i].delay = 0;
         animinfo[i].tic = 0;
         animinfo[i].isreverse = false;
-        animinfo[i].texnum = wad::find(animdefs[i].name)->section_index;
+        animinfo[i].texnum = wad::find(animdefs[i].name)->section_index();
         animinfo[i].frame = -1;
 
         // reallocate texture pointers if they contain multiple palettes

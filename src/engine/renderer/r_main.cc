@@ -401,7 +401,7 @@ void R_PrecacheLevel(void) {
 
             for(p = 0; p < numanimdef; p++) {
                 auto l = wad::find(animdefs[p].name);
-                int lump = l.value().section_index;
+                int lump = l->section_index();
 
                 if(lump != i) {
                     continue;

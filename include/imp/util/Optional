@@ -82,11 +82,9 @@ namespace imp {
               *this = nullopt;
           } else if (mInit) {
               mValue = std::move(*other);
-              other.mInit = false;
           } else {
               ::new (static_cast<void*>(&mValue)) T(std::move(other.mValue));
               mInit = true;
-              other.mInit = false;
           }
           return *this;
       }
@@ -109,6 +107,7 @@ namespace imp {
               ::new (static_cast<void*>(&mValue)) T(std::forward<U>(other));
               mInit = true;
           }
+          return *this;
       }
 
       template <class U>

@@ -76,20 +76,20 @@ gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha
     // get lump data
     auto l = wad::find(lump);
 
-    std::istringstream ss(std::string(l->data.get(), l->size));
-    gfx::Image image {ss};
+    auto image = l->as_image();
 
     if (palindex && image.is_indexed())
     {
         auto pal = image.palette();
 
         char palname[9];
-        snprintf(palname, sizeof(palname), "PAL%4.4s%d", l->name.data(), palindex);
+        snprintf(palname, sizeof(palname), "PAL%4.4s%d", l->lump_name().data(), palindex);
 
         gfx::Palette newpal;
         if (auto pl = wad::find(palname))
         {
-            gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(pl->data.get());
+            auto bytes = pl->as_bytes();
+            gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(&bytes[0]);
             newpal = *pal;
 
             // swap out current palette with the new one

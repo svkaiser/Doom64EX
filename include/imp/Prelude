@@ -66,6 +66,8 @@ namespace imp {
   using Vector = std::vector<T>;
   template <class T>
   using InitList = std::initializer_list<T>;
+  template <class T, size_t N>
+  using Array = std::array<T, N>;
 
   template <class T, class... Args>
   UniquePtr<T> unique(Args&&... args)

@@ -39,7 +39,7 @@ void W_CacheMapLump(int map)
 
     _lumps.clear();
 
-    std::istringstream ss({ file->data.get(), file->size });
+    std::istringstream ss(file->as_bytes());
 
     Header header;
     read_into(ss, header);

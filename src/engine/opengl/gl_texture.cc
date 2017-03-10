@@ -122,18 +122,17 @@ static CMD(ResetTextures) {
 //
 
 static void InitWorldTextures(void) {
-    auto it = wad::section(wad::Section::textures);
     swx_start           = -1;
-    numtextures         = it.size();
+    numtextures         = wad::section_size(wad::Section::textures);
     textureptr          = (dtexture**)Z_Calloc(sizeof(dtexture*) * numtextures, PU_STATIC, NULL);
     texturetranslation  = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
     palettetranslation  = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
     texturewidth        = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
     textureheight       = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
 
-    for(; it; ++it) {
+    for(auto it = wad::section(wad::Section::textures); it; ++it) {
         auto& lump = *it;
-        auto i = lump.section_index;
+        auto i = lump.section_index();
         int w;
         int h;
 
@@ -141,7 +140,7 @@ static void InitWorldTextures(void) {
         textureptr[i] = (dtexture*)Z_Malloc(1 * sizeof(dtexture), PU_STATIC, 0);
 
         // get starting index for switch textures
-        if(!dstrnicmp(lump.name.data(), "SWX", 3) && swx_start == -1) {
+        if(!dstrnicmp(lump.lump_name().data(), "SWX", 3) && swx_start == -1) {
             swx_start = i;
         }
 
@@ -149,7 +148,7 @@ static void InitWorldTextures(void) {
         palettetranslation[i] = 0;
 
         // read PNG and setup global width and heights
-        I_PNGReadData(lump.index, true, true, false, &w, &h, NULL, 0);
+        free(I_PNGReadData(lump.lump_index(), true, true, false, &w, &h, NULL, 0));
 
         textureptr[i][0] = 0;
         texturewidth[i] = w;
@@ -200,7 +199,7 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     }
 
     // create a new texture
-    image = I_PNGReadData(wad::section(wad::Section::textures)[texnum].index, false, true, true,
+    image = I_PNGReadData(wad::find(wad::Section::textures, texnum)->lump_index(), false, true, true,
                           &w, &h, NULL, palettetranslation[texnum]);
 
     dglGenTextures(1, &textureptr[texnum][palettetranslation[texnum]]);
@@ -299,22 +298,21 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
 //
 
 static void InitGfxTextures(void) {
-    auto section = wad::section(wad::Section::graphics);
-    numgfx          = section.size();
+    numgfx          = wad::section_size(wad::Section::graphics);
     gfxptr          = (dtexture*) Z_Calloc(numgfx * sizeof(dtexture), PU_STATIC, NULL);
     gfxwidth        = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxorigwidth    = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxheight       = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxorigheight   = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
 
-    for(; section; ++section) {
+    for(auto section = wad::section(wad::Section::graphics); section; ++section) {
         auto& lump = *section;
-        auto i = lump.section_index;
+        auto i = lump.section_index();
         void *image;
         int w;
         int h;
 
-        image = I_PNGReadData(lump.index, true, true, false, &w, &h, NULL, 0);
+        image = I_PNGReadData(lump.lump_index(), true, true, false, &w, &h, NULL, 0);
 
         gfxptr[i] = 0;
         gfxwidth[i] = w;
@@ -341,8 +339,8 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     int type;
     int gfxid;
 
-    auto lump = wad::find(name).value();
-    gfxid = lump.section_index;
+    auto lump = wad::find(name);
+    gfxid = lump->section_index();
 
     if(gfxid == curgfx) {
         return gfxid;
@@ -359,7 +357,7 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
         return gfxid;
     }
 
-    image = I_PNGReadData(lump.index, false, true, alpha, &width, &height, NULL, 0);
+    image = I_PNGReadData(lump->lump_index(), false, true, alpha, &width, &height, NULL, 0);
 
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
@@ -400,7 +398,7 @@ static void InitSpriteTextures(void) {
     int offset[2];
 
     auto section = wad::section(wad::Section::sprites);
-    numsprtex           = section.size();
+    numsprtex           = wad::section_size(wad::Section::sprites);
     spritewidth         = (word*)Z_Malloc(numsprtex * sizeof(word), PU_STATIC, 0);
     spriteoffset        = (float*)Z_Malloc(numsprtex * sizeof(float), PU_STATIC, 0);
     spritetopoffset     = (float*)Z_Malloc(numsprtex * sizeof(float), PU_STATIC, 0);
@@ -415,7 +413,7 @@ static void InitSpriteTextures(void) {
 
         for(j = 0; j < NUMSPRITES; j++) {
             // start looking for external palette lumps
-            if(!dstrncmp(lump.name.data(), sprnames[j], 4)) {
+            if(!dstrncmp(lump.lump_name().data(), sprnames[j], 4)) {
                 // increase the count if a palette lump is found
                 for(p = 1; p < 10; p++) {
                     if(wad::have_lump(format("PAL{}{}", sprnames[j], p))) {
@@ -445,7 +443,7 @@ static void InitSpriteTextures(void) {
         spriteptr[i] = (dtexture*)Z_Calloc(spritecount[i] * sizeof(dtexture), PU_STATIC, 0);
 
         // read data and setup globals
-        image = I_PNGReadData(lump.index, true, true, false, &w, &h, offset, 0);
+        image = I_PNGReadData(lump.lump_index(), true, true, false, &w, &h, offset, 0);
 
         spritewidth[i]      = w;
         spriteheight[i]     = h;
@@ -493,7 +491,7 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
         return;
     }
 
-    image = I_PNGReadData(wad::section(wad::Section::sprites)[spritenum].index, false, true, true, &w, &h, NULL, pal);
+    image = I_PNGReadData(wad::find(wad::Section::sprites, spritenum)->lump_index(), false, true, true, &w, &h, NULL, pal);
 
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
@@ -919,7 +917,7 @@ void GL_DumpTextures(void) {
         GL_UnloadTexture(&textureptr[i][0]);
 
         for(p = 0; p < numanimdef; p++) {
-            int lump = wad::find(animdefs[p].name)->section_index;
+            int lump = wad::find(animdefs[p].name)->section_index();
 
             if(lump != i) {
                  continue;

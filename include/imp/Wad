@@ -6,9 +6,13 @@
 #include <imp/util/Optional>
 
 namespace imp {
+  namespace gfx {
+    class Image;
+  }
+
   namespace wad {
     enum struct Section;
-    struct Lump;
+    class Lump;
     class LumpIterator;
 
     void init();
@@ -23,7 +27,11 @@ namespace imp {
 
     Optional<Lump> find(std::size_t index);
 
+    Optional<Lump> find(Section section, std::size_t index);
+
     LumpIterator section(Section s);
+
+    std::size_t section_size(Section s);
 
     class LumpHash {
         uint32 hash_ {};
@@ -67,58 +75,101 @@ namespace imp {
         sounds
     };
 
-    struct Lump {
-        String name;
-        SharedPtr<char> data {};
-        std::size_t size {};
-        std::size_t index {};
-        std::size_t section_index {};
-        Section section {};
+    constexpr size_t num_sections = 5;
 
+    class BasicLump {
+        std::size_t id_;
+
+    public:
+        BasicLump(std::size_t id):
+            id_(id) {}
+
+        StringView lump_name() const;
+
+        std::size_t lump_index() const;
+
+        Section section() const;
+
+        std::size_t section_index() const;
+
+        virtual std::istream& stream() = 0;
+
+        virtual String as_bytes();
+
+        virtual gfx::Image as_image();
+    };
+
+    class Lump {
+        UniquePtr<BasicLump> data_ {};
+
+    public:
         Lump() = default;
+
+        Lump(UniquePtr<BasicLump> data):
+            data_(std::move(data)) {}
 
         Lump(Lump&&) = default;
 
-        Lump(const Lump&) = default;
-
-        Lump(String name, SharedPtr<char> data, std::size_t size, Section section):
-            name(name),
-            data(data),
-            size(size),
-            section(section) {}
+        Lump(const Lump&) = delete;
 
         Lump& operator=(Lump&&) = default;
 
-        Lump& operator=(const Lump&) = default;
+        Lump& operator=(const Lump&) = delete;
+
+        StringView lump_name() const
+        { return data_->lump_name(); }
+
+        std::size_t lump_index() const
+        { return data_->lump_index(); }
+
+        Section section() const
+        { return data_->section(); }
+
+        std::size_t section_index() const
+        { return data_->section_index(); }
+
+        std::istream& stream()
+        { return data_->stream(); }
+
+        String as_bytes()
+        { return data_->as_bytes(); }
+
+        char* bytes_ptr()
+        {
+            auto bytes = as_bytes();
+            char *memory = new char[bytes.size()];
+            std::copy(bytes.begin(), bytes.end(), memory);
+            return memory;
+        }
+
+        gfx::Image as_image();
     };
 
     class LumpIterator {
-        Lump lump_ {};
-        std::size_t index_;
-        std::size_t begin_;
-        std::size_t end_;
+        std::size_t index_ {};
+        Section section_ {};
+        Lump lump_;
 
     public:
-        LumpIterator(std::size_t begin, std::size_t end);
+        LumpIterator(Section section);
 
-        std::size_t size() const
-        { return end_ - begin_; }
+        Lump& operator*();
 
-        const Lump &operator*() const
-        { return lump_; }
+        Lump* operator->()
+        { return &**this; }
 
-        const Lump *operator->() const
-        { return &lump_; }
+        bool has_next() const;
+
+        void next();
 
         operator bool() const
-        { return index_ < end_; }
+        { return has_next(); }
 
-        bool operator!() const
-        { return !(index_ < end_); }
-
-        LumpIterator& operator++();
-
-        const Lump operator[](std::size_t);
+        LumpIterator& operator++()
+        {
+            next();
+            return *this;
+        }
     };
   }
 
@@ -141,8 +192,6 @@ namespace imp {
       case Section::sounds:
           return "sounds"_sv;
       }
-
-      return ""_sv;
   }
 }
 

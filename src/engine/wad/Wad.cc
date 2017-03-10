@@ -1,40 +1,58 @@
 #include <map>
 #include <imp/App>
+#include <imp/Image>
+#include <algorithm>
 #include "WadFormat.hh"
 
 namespace {
-  wad::Format::loader _loaders[] {
+  wad::Format::loader loaders_[] {
       wad::doom_loader,
       wad::rom_loader,
       wad::zip_loader
   };
 
-  std::vector<UniquePtr<wad::Format>> _mounts;
+  Vector<UniquePtr<wad::Format>> mounts_;
 
-  struct LumpId {
-      String name {};
-      std::size_t mount {};
-      std::size_t id {};
-      wad::Section section {};
-      std::size_t index {};
-      std::size_t section_index {};
-  };
+  Vector<wad::LumpInfo> lumps_;
 
-  std::map<String, LumpId> _lumps;
+  Array<Vector<wad::LumpInfo*>, wad::num_sections> sections_;
 
-  std::vector<LumpId *> _lumps_by_id;
-
-  std::map<wad::Section, std::pair<std::size_t, std::size_t>> _lumps_by_section;
-
-  std::map<wad::Section, std::vector<LumpId *>> _group_by_section;
-
-  app::StringParam _iwad_path("iwad");
+  app::StringParam iwad_path_("iwad");
 }
+
+StringView wad::BasicLump::lump_name() const
+{ return lumps_[id_].lump_name; }
+
+std::size_t wad::BasicLump::lump_index() const
+{ return lumps_[id_].lump_index; }
+
+wad::Section wad::BasicLump::section() const
+{ return lumps_[id_].section; }
+
+size_t wad::BasicLump::section_index() const
+{ return lumps_[id_].section_index; }
+
+String wad::BasicLump::as_bytes()
+{
+    auto& s = stream();
+    s.seekg(0);
+    return { std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
+}
+
+gfx::Image wad::BasicLump::as_image()
+{
+    auto& s = stream();
+    s.seekg(0);
+    return { s };
+}
+
+gfx::Image wad::Lump::as_image()
+{ return data_->as_image(); }
 
 void wad::init()
 {
-    if (_iwad_path && !wad::mount(_iwad_path.get())) {
-        fatal("Could not mount IWAD at {}", _iwad_path.get());
+    if (iwad_path_ && !wad::mount(iwad_path_.get())) {
+        fatal("Could not mount IWAD at {}", iwad_path_.get());
     } else {
         auto path = app::find_data_file("doom64.wad");
         if (!path)
@@ -57,10 +75,10 @@ void wad::init()
 bool wad::mount(StringView path)
 {
     wad::Format *format {};
-    for (auto l : _loaders) {
+    for (auto l : loaders_) {
         if (auto f = l(path)) {
             format = f.get();
-            _mounts.emplace_back(std::move(f));
+            mounts_.emplace_back(std::move(f));
             break;
         }
     }
@@ -68,128 +86,124 @@ bool wad::mount(StringView path)
     if (!format)
         return false;
 
-    auto mount = _mounts.size() - 1;
-    auto reader = format->reader();
-    while (reader->poll()) {
-        auto it = _lumps.find(reader->name);
-        if (it != _lumps.end()) {
-            auto& name = it->first;
-            auto& id = it->second;
-            if (id.section != reader->section) {
-                fatal("Unexpected WAD Lump section {} when loading \"{}:{}\"\n"
-                      "Previously defined as {}",
-                      path, name, to_string(reader->section), to_string(id.section));
-            }
-            id.mount = mount;
-            id.id = reader->id;
-        } else {
-            auto pair = _lumps.emplace(reader->name, LumpId { reader->name, mount, reader->id, reader->section });
-            _group_by_section[reader->section].emplace_back(&pair.first->second);
-        }
-    }
+    auto mount = mounts_.size() - 1;
+    auto new_lumps = format->read_all();
+    for (auto& l : new_lumps)
+        l.mount = mount;
+    lumps_.insert(lumps_.begin(), std::make_move_iterator(new_lumps.begin()), std::make_move_iterator(new_lumps.end()));
 
     return true;
 }
 
 void wad::merge()
 {
-    std::size_t index = 0;
-    _lumps_by_id.clear();
-    auto section = [&](wad::Section section)
-        {
-            std::pair<std::size_t, std::size_t> pair;
-            pair.first = _lumps_by_id.size();
-            auto& v = _group_by_section[section];
-            _lumps_by_id.insert(_lumps_by_id.end(), v.begin(), v.end());
-            std::size_t section_index {};
-            for (auto& x : v) {
-                x->index = index++;
-                x->section_index = section_index++;
-            }
-            v.clear();
-            pair.second = _lumps_by_id.size();
-            _lumps_by_section[section] = pair;
-        };
-    section(wad::Section::normal);
-    section(wad::Section::textures);
-    section(wad::Section::graphics);
-    section(wad::Section::sprites);
-    section(wad::Section::sounds);
+    // Use a stable sort to allow different versions of lumps.
+    std::stable_sort(lumps_.begin(), lumps_.end(),
+                     [](const LumpInfo &a, const LumpInfo &b) { return a.lump_name < b.lump_name; });
 
-    _group_by_section.clear();
+    // Clear the sections
+    sections_.fill({});
+
+    LumpInfo *prev_lump {};
+    size_t index {};
+    for (auto& l : lumps_) {
+        if (!prev_lump || prev_lump->lump_name != l.lump_name) {
+            auto &s = sections_[static_cast<size_t>(l.section)];
+            l.section_index = s.size();
+            s.emplace_back(&l);
+            l.lump_index = index++;
+            prev_lump = &l;
+        } else {
+            assert(l.section == prev_lump->section);
+            l.lump_index = prev_lump->lump_index;
+            l.section_index = prev_lump->section_index;
+        }
+    }
 }
 
 bool wad::have_lump(StringView name)
 {
-    return _lumps.count(name);
+    return wad::find(name).have_value();
 }
 
 Optional<wad::Lump> wad::find(StringView name)
 {
-    auto it = _lumps.find(name);
-    if (it == _lumps.end())
+    auto it = std::lower_bound(lumps_.begin(), lumps_.end(), name,
+                               [](const LumpInfo& a, const StringView& b) {
+                                   return a.lump_name < b;
+                               });
+
+    if (it == lumps_.end() || it->lump_name != name)
         return nullopt;
 
-    const auto& id = it->second;
-    const auto& mount = _mounts[id.mount];
+    const auto& mount = mounts_[it->mount];
 
-    /* Try to find lump by id (might be faster) */
-    if (auto l = mount->find(id.id)) {
-        l->index = it->second.index;
-        l->section_index = it->second.section_index;
-        return l;
+    if (auto l = mount->find(std::distance(lumps_.begin(), it), it->mount_index)) {
+        assert(it->lump_name == l->lump_name());
+        return { inplace, std::move(l) };
     }
 
-    /* Otherwise, try to find lump by name */
-    return mount->find(name);
+    return nullopt;
 }
 
-Optional<wad::Lump> wad::find(std::size_t index)
+Optional<wad::Lump> wad::find(size_t lump_id)
 {
-    if (index >= _lumps_by_id.size())
+    auto it = std::lower_bound(lumps_.begin(), lumps_.end(), lump_id,
+                               [](const LumpInfo& lhs, const size_t& rhs) {
+                                   return lhs.lump_index < rhs;
+                               });
+
+    if (it == lumps_.end() || it->lump_index != lump_id)
         return nullopt;
 
-    const auto& id = *_lumps_by_id[index];
-    const auto& mount = _mounts[id.mount];
+    auto& lump = *it;
+    const auto& mount = mounts_[lump.mount];
 
-    /* Try to find lump by id (might be faster) */
-    if (auto l = mount->find(id.id)) {
-        l->index = id.index;
-        l->section_index = id.section_index;
-        return l;
+    size_t index = static_cast<size_t>(std::distance(lumps_.begin(), it));
+    if (auto l = mount->find(index, lump.mount_index)) {
+        assert(lump.lump_index == l->lump_index());
+        return { inplace, std::move(l) };
     }
 
-    /* Otherwise, try to find lump by name */
     return nullopt;
+}
+
+Optional<wad::Lump> wad::find(wad::Section section, size_t index)
+{
+    return wad::find(sections_[static_cast<size_t>(section)][index]->lump_index);
 }
 
 wad::LumpIterator wad::section(wad::Section section)
 {
-    auto& p = _lumps_by_section[section];
-    return { p.first, p.second };
+    return section;
 }
 
-wad::LumpIterator::LumpIterator(std::size_t begin, std::size_t end):
-    index_(begin),
-    begin_(begin),
-    end_(end)
+size_t wad::section_size(wad::Section section)
 {
-    if (index_ < end_) {
-        lump_ = *wad::find(index_);
+    auto& s = sections_[static_cast<size_t>(section)];
+    return s.empty() ? 0 : s.back()->section_index + 1;
+}
+
+wad::LumpIterator::LumpIterator(Section section):
+    section_(section),
+    lump_(std::move(*wad::find(section_, 0)))
+{
+}
+
+wad::Lump& wad::LumpIterator::operator*()
+{
+    if (lump_.section_index() != index_) {
+        lump_ = std::move(*wad::find(section_, index_));
     }
+    return lump_;
 }
 
-wad::LumpIterator& wad::LumpIterator::operator++()
+bool wad::LumpIterator::has_next() const
 {
-    if (++index_ < end_) {
-        lump_ = *wad::find(index_);
-    }
-
-    return *this;
+    return (index_) < wad::section_size(section_);
 }
 
-const wad::Lump wad::LumpIterator::operator[](std::size_t i)
+void wad::LumpIterator::next()
 {
-    return wad::find(begin_ + i).value();
+    ++index_;
 }
-

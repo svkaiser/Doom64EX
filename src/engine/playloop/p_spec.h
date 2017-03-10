@@ -40,8 +40,8 @@ typedef struct {
     char        name[9];
     int         frames;
     int         speed;
-    dboolean    reverse;
-    dboolean    palette;
+    bool        reverse;
+    bool        palette;
 } animdef_t;
 
 extern int          numanimdef;

@@ -362,7 +362,7 @@ static void R_DrawSkyboxCloud(void) {
     // bind cloud texture and set blending
     //
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::find(skypicnum)->name.c_str(), false);
+    GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), false);
     GL_SetState(GLSTATE_BLEND, 1);
 
     //
@@ -447,7 +447,7 @@ static void R_DrawSimpleSky(int lump, int offset) {
     int gfxLmp;
     float row;
 
-    gfxLmp = GL_BindGfxTexture(wad::find(lump)->name.data(), true);
+    gfxLmp = GL_BindGfxTexture(wad::find(lump)->lump_name().data(), true);
     height = gfxheight[gfxLmp];
     lumpheight = gfxorigheight[gfxLmp];
 
@@ -498,7 +498,7 @@ static void R_DrawClouds(void) {
     vtx_t v[4];
 
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::find(skypicnum)->name.data(), false);
+    GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), false);
 
     pos = (TRUEANGLES(viewangle) / 360.0f) * 2.0f;
 
@@ -657,8 +657,8 @@ void R_InitFire(void) {
     byte *pixdata;
 
     auto lump = wad::find("FIRE");
-    fireLump = lump->section_index;
-    fireImage = I_ReadImage(lump->index, true, true, false, 0);
+    fireLump = lump->section_index();
+    fireImage = I_ReadImage(lump->lump_index(), true, true, false, 0);
 
     pixdata = fireImage.data_ptr();
     for (i = 0; i < 4096; i++)
@@ -812,7 +812,7 @@ void R_DrawSky(void) {
             }
             else {
                 GL_SetTextureUnit(0, true);
-                GL_BindGfxTexture(wad::find(skypicnum)->name.data(), true);
+                GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), true);
 
                 //
                 // drawer will assume that the texture's
@@ -845,7 +845,7 @@ void R_DrawSky(void) {
                 float base;
 
                 GL_SetTextureUnit(0, true);
-                l = GL_BindGfxTexture(wad::find(skybackdropnum)->name.data(), true);
+                l = GL_BindGfxTexture(wad::find(skybackdropnum)->lump_name().data(), true);
 
                 //
                 // handle the case for non-powers of 2 texture

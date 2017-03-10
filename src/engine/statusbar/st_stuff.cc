@@ -694,7 +694,7 @@ void ST_DrawCrosshair(int x, int y, int slot, byte scalefactor, rcolor color) {
 static void ST_DrawJMessage(int pic) {
     int lump = st_jmessages[pic];
 
-    GL_BindGfxTexture(wad::find(lump)->name.data(), true);
+    GL_BindGfxTexture(wad::find(lump)->lump_name().data(), true);
     GL_SetState(GLSTATE_BLEND, 1);
 
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
@@ -1085,7 +1085,7 @@ void ST_Init(void) {
     st_crosshairs = 0;
 
     if(auto lump = wad::find("CRSHAIRS")) {
-        st_crosshairs = (gfxwidth[lump->section_index] / ST_CROSSHAIRSIZE);
+        st_crosshairs = (gfxwidth[lump->section_index()] / ST_CROSSHAIRSIZE);
     }
 
     dmgmarkers.next = dmgmarkers.prev = &dmgmarkers;
@@ -1098,7 +1098,7 @@ void ST_Init(void) {
         sprintf(name, "JPMSG%02d", i + 1);
         st_jmessages[i] = -1;
         if (auto lump = wad::find(name))
-            st_jmessages[i] = lump->section_index;
+            st_jmessages[i] = lump->section_index();
 
         if(st_jmessages[i] != -1) {
             st_hasjmsg = true;

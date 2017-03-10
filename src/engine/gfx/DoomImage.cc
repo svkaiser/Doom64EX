@@ -66,7 +66,7 @@ namespace {
 
           while (rowStart != 0xff)
           {
-              uint8 pixelCount;
+              uint8 pixelCount {};
               char dummy;
 
               stream.read(reinterpret_cast<char*>(&rowStart), 1);

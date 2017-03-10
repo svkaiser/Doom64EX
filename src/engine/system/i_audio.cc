@@ -29,15 +29,7 @@
 
 
 #include <stdlib.h>
-#include <stdio.h>
-
-#ifndef _WIN32
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <imp/Property>
-
-#endif
+#include <algorithm>
 
 #include "SDL.h"
 #include "fluidsynth.h"
@@ -1013,33 +1005,50 @@ static dboolean Song_RegisterTracks(song_t* song) {
 // Allocate data for all midi songs
 //
 
-static dboolean Seq_RegisterSongs(doomseq_t* seq) {
-    int fail;
+// Doom64EX expects audio to be loaded in this order since the sound indices are hardcoded in info.cc
+static const std::array<StringView, 117> audio_lumps_ {{
+    "NOSOUND", "SNDPUNCH", "SNDSPAWN", "SNDEXPLD", "SNDIMPCT", "SNDPSTOL", "SNDSHTGN", "SNDPLSMA", "SNDBFG",
+    "SNDSAWUP", "SNDSWIDL", "SNDSAW1", "SNDSAW2", "SNDMISLE", "SNDBFGXP", "SNDPSTRT", "SNDPSTOP", "SNDDORUP",
+    "SNDDORDN", "SNDSCMOV", "SNDSWCH1", "SNDSWCH2", "SNDITEM", "SNDSGCK", "SNDOOF1", "SNDTELPT", "SNDOOF2",
+    "SNDSHT2F", "SNDLOAD1", "SNDLOAD2", "SNDPPAIN", "SNDPLDIE", "SNDSLOP", "SNDZSIT1", "SNDZSIT2", "SNDZSIT3",
+    "SNDZDIE1", "SNDZDIE2", "SNDZDIE3", "SNDZACT", "SNDPAIN1", "SNDPAIN2", "SNDDBACT", "SNDSCRCH", "SNDISIT1",
+    "SNDISIT2", "SNDIDIE1", "SNDIDIE2", "SNDIACT", "SNDSGSIT", "SNDSGATK", "SNDSGDIE", "SNDB1SIT", "SNDB1DIE",
+    "SNDHDSIT", "SNDHDDIE", "SNDSKATK", "SNDB2SIT", "SNDB2DIE", "SNDPESIT", "SNDPEPN", "SNDPEDIE", "SNDBSSIT",
+    "SNDBSDIE", "SNDBSLFT", "SNDBSSMP", "SNDFTATK", "SNDFTSIT", "SNDFTHIT", "SNDFTDIE", "SNDBDMSL", "SNDRVACT",
+    "SNDTRACR", "SNDDART", "SNDRVHIT", "SNDCYSIT", "SNDCYDTH", "SNDCYHOF", "SNDMETAL", "SNDDOR2U", "SNDDOR2D",
+    "SNDPWRUP", "SNDLASER", "SNDBUZZ", "SNDTHNDR", "SNDLNING", "SNDQUAKE", "SNDDRTHT", "SNDRCACT", "SNDRCATK",
+    "SNDRCDIE", "SNDRCPN", "SNDRCSIT", "MUSAMB01", "MUSAMB02", "MUSAMB03", "MUSAMB04", "MUSAMB05", "MUSAMB06",
+    "MUSAMB07", "MUSAMB08", "MUSAMB09", "MUSAMB10", "MUSAMB11", "MUSAMB12", "MUSAMB13", "MUSAMB14", "MUSAMB15",
+    "MUSAMB16", "MUSAMB17", "MUSAMB18", "MUSAMB19", "MUSAMB20", "MUSFINAL", "MUSDONE", "MUSINTRO", "MUSTITLE" }};
 
-    seq->nsongs = 0;
+size_t Seq_SoundLookup(StringView name) {
+    return std::distance(audio_lumps_.begin(), std::find(audio_lumps_.begin(), audio_lumps_.end(), name));
+}
 
-    auto section = wad::section(wad::Section::sounds);
-
-    seq->nsongs = section.size();
-
-    //
-    // no midi songs found in iwad?
-    //
-    if(seq->nsongs <= 0) {
-        return false;
-    }
+static bool Seq_RegisterSongs(doomseq_t* seq) {
+    seq->nsongs = audio_lumps_.size();
 
     seq->songs = (song_t*)Z_Calloc(seq->nsongs * sizeof(song_t), PU_STATIC, 0);
 
-    fail = 0;
-    for(; section; ++section) {
-        auto& lump = *section;
-        auto i = lump.section_index;
+    size_t fail {};
+    size_t i {};
+    for(auto name : audio_lumps_) {
+        auto opt = wad::find(name);
+
+        if (!opt || opt->section() != wad::Section::sounds) {
+            fail++;
+            continue;
+        }
+
+        auto& lump = *opt;
         song_t* song;
 
-        song = &seq->songs[i];
-        song->data = (byte*) lump.data.get();
-        song->length = lump.size;
+        auto bytes = lump.as_bytes();
+        auto memory = new char[bytes.size()];
+        std::copy(bytes.begin(), bytes.end(), memory);
+        song = &seq->songs[i++];
+        song->data = (byte*) memory;
+        song->length = bytes.size();
 
         if(!song->length) {
             continue;

@@ -2,14 +2,26 @@
 
 namespace imp {
   namespace wad {
-    struct Reader {
-        Section section {};
-        std::size_t id {};
-        String name {};
+    struct LumpInfo {
+        String lump_name;
+        std::size_t lump_index {};
+        Section section;
+        std::size_t section_index {};
+        std::size_t mount {};
+        std::size_t mount_index;
 
-        virtual ~Reader() {}
+        LumpInfo(String lump_name, Section section, std::size_t index):
+            lump_name(lump_name),
+            section(section),
+            mount_index(index) {}
 
-        virtual bool poll() = 0;
+        LumpInfo(const LumpInfo&) = delete;
+
+        LumpInfo(LumpInfo&&) = default;
+
+        LumpInfo& operator=(const LumpInfo&) = delete;
+
+        LumpInfo& operator=(LumpInfo&&) = default;
     };
 
     struct Format {
@@ -17,11 +29,9 @@ namespace imp {
 
         virtual ~Format() {}
 
-        virtual UniquePtr<Reader> reader() = 0;
+        virtual Vector<LumpInfo> read_all() = 0;
 
-        virtual Optional<Lump> find(std::size_t id) = 0;
-
-        virtual Optional<Lump> find(StringView name) = 0;
+        virtual UniquePtr<BasicLump> find(std::size_t lump_id, std::size_t mount_id) = 0;
     };
 
     UniquePtr<Format> doom_loader(StringView);

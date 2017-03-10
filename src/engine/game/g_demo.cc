@@ -248,7 +248,7 @@ void G_PlayDemo(const char* name) {
         }
 
         CON_DPrintf("--------Playing demo %s--------\n", name);
-        demobuffer = demo_p = (byte*) wad::find(name)->data.get();
+        demobuffer = demo_p = (byte*) wad::find(name)->bytes_ptr();
     }
     
     if(strncmp((char*)demo_p, "DM64", 4)) {

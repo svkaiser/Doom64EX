@@ -49,9 +49,9 @@ typedef struct {
 extern scparser_t sc_parser;
 
 typedef struct {
-    const char*   token;
-    int64   ptroffset;
-    char    type;
+    const char* token;
+    ptrdiff_t ptroffset;
+    char type;
 } scdatatable_t;
 
 void SC_Init(void);
