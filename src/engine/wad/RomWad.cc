@@ -63,6 +63,59 @@ namespace {
   static_assert(sizeof(Header) == 64, "N64 ROM header struct must be sizeof 64");
 
   class RomFormat : public wad::Format {
+      /* From Wadgen's wad.c
+       *
+       * Based off of JaguarDoom's decompression algorithm.
+       * This is a rather simple LZSS-type algorithm that was used
+       * on all lumps in JaguardDoom and PSXDoom.
+       * Doom64 only uses this on the Sprites and GFX lumps, but uses
+       * a more sophisticated algorithm for everything else.
+       */
+      String lzss_decompress_(std::istream& in)
+      {
+          String out;
+
+          int getidbyte {};
+          char idbyte {};
+          while (!in.eof()) {
+              if (!getidbyte)
+                  in.get(idbyte);
+
+              /* assign a new idbyte every 8th loop */
+              getidbyte = (getidbyte + 1) & 7;
+
+              if (idbyte & 1) {
+                  /* begin decompressing and get position */
+                  uint16 pos;
+                  read_into(in, pos);
+
+                  /* setup length */
+                  char len {};
+                  in.get(len);
+                  len = static_cast<char>((len & 0xf) + 1);
+                  if (len == 1)
+                      break;
+
+                  /* setup string */
+                  auto source = out.substr(out.size() - pos - 1);
+
+                  /* copy source into output */
+                  for (int i = 0; i < len; ++i)
+                      out.append(source);
+              } else {
+                  /* not compressed, just output the byte as is */
+                  char c;
+                  in.get(c);
+                  out.push_back(c);
+              }
+
+              /* shift to next bit and begin the check at the beginning */
+              idbyte >>= 1;
+          }
+
+          return out;
+      }
+
   public:
       RomFormat(StringView name)
       {
