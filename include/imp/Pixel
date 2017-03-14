@@ -55,9 +55,121 @@ namespace imp {
         rgba,
     };
 
+    namespace detail {
+      template <int, int LShift, typename std::enable_if<LShift <= 0>::type* = nullptr>
+      constexpr size_t resize_component_shift(size_t x)
+      {
+          return x >> -LShift;
+      }
+
+      template <int FromBits, int LShift, typename std::enable_if<(LShift > 0)>::type* = nullptr>
+      constexpr size_t resize_component_shift(size_t x)
+      {
+          return (x << LShift) + resize_component_shift<FromBits, LShift - FromBits>(x);
+      }
+
+      template <int FromDepth, int ToDepth>
+      constexpr size_t resize_component(size_t x)
+      {
+          return resize_component_shift<FromDepth, ToDepth - FromDepth>(x);
+      };
+    }
+
     struct Index8 {
         uint8 index;
     };
+
+#define DEFINE_COLOR_COMPONENT(ClassName, VarName)                    \
+    template <size_t Depth>                                           \
+    struct ClassName ## Component {                                   \
+        using VarName ## _type = size_t;                              \
+        static constexpr size_t VarName ## _depth = Depth;            \
+        static constexpr size_t VarName ## _min = 0;                  \
+        static constexpr size_t VarName ## _max = (1U << Depth) - 1U; \
+        size_t VarName : Depth;                                       \
+        constexpr ClassName ## Component() {}                         \
+        constexpr ClassName ## Component(size_t x):                   \
+                             VarName(x) {}                            \
+    };                                                                \
+    namespace detail {                                                \
+      template <class C, typename = void>                             \
+      struct ClassName ## Helper {                                    \
+          constexpr static bool have = false;                         \
+          constexpr static size_t depth = 0;                          \
+          constexpr static size_t get(const C&) { return 0; }         \
+          constexpr static void set(C&, size_t) {}                    \
+      };                                                              \
+      template <class C>                                              \
+      struct ClassName ## Helper<C, void_t<decltype(C::VarName)>> {   \
+          constexpr static bool have = true;                          \
+          constexpr static size_t depth = C::VarName ## _depth;       \
+          constexpr static size_t get(const C& c)                     \
+          { return c.VarName; }                                       \
+          constexpr static void set(C& c, size_t x)                   \
+          { c.VarName = x; }                                          \
+      };                                                              \
+      template <class From, class To>                                 \
+      constexpr void convert_ ## VarName(const From& from, To& to)    \
+      {                                                               \
+          using FromH = ClassName ## Helper<From>;                    \
+          using ToH = ClassName ## Helper<To>;                        \
+          auto val = FromH::get(from);                                \
+          val = resize_component<FromH::depth, ToH::depth>(val);      \
+          ToH::set(to, val);                                          \
+      }                                                               \
+    }
+
+    DEFINE_COLOR_COMPONENT(Red, red)
+    DEFINE_COLOR_COMPONENT(Green, green)
+    DEFINE_COLOR_COMPONENT(Blue, blue)
+    DEFINE_COLOR_COMPONENT(Alpha, alpha)
+
+    template <class... Components>
+    struct ColorComponents;
+
+    template <>
+    struct ColorComponents<> {
+        constexpr ColorComponents() = default;
+    };
+
+    template <class C, class... Cs>
+    struct ColorComponents<C, Cs...> : public C, public ColorComponents<Cs...> {
+        constexpr ColorComponents() = default;
+
+        template <class T, class... Ts>
+        constexpr ColorComponents(T&& x, Ts&&... xs):
+            C(std::forward<T>(x)),
+            ColorComponents<Cs...>(std::forward<Ts>(xs)...) {};
+    };
+
+    template <class... Components>
+    struct Color : ColorComponents<Components...> {
+        constexpr Color() = default;
+
+        constexpr Color(const Color&) = default;
+
+        constexpr Color(Color&&) = default;
+
+        template <class... Ts>
+        constexpr Color(Ts&&... xs):
+            ColorComponents<Components...>(std::forward<Ts>(xs)...) {}
+
+        template <class... Cs>
+        constexpr Color(const Color<Cs...>& other):
+            Color()
+        {
+            detail::convert_red(other, *this);
+            detail::convert_green(other, *this);
+            detail::convert_blue(other, *this);
+            detail::convert_alpha(other, *this);
+        }
+
+        constexpr Color& operator=(const Color&) = default;
+
+        constexpr Color& operator=(Color&&) = default;
+    };
+
+    using Red8 = Color<RedComponent<8>>;
 
     struct Rgb {
         uint8 red = 0;
