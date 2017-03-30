@@ -257,7 +257,7 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
         wp = GL_PadTextureDims(*origwidth);
         hp = GL_PadTextureDims(*origheight);
 
-        Image image(format == GL_RGBA8 ? PixelFormat::rgba : PixelFormat::rgb, *origwidth, *origheight, data);
+        gfx::Image image(format == GL_RGBA8 ? gfx::PixelFormat::rgba : gfx::PixelFormat::rgb, *origwidth, *origheight, data);
         image.resize(wp, hp);
 
         *origwidth = wp;
@@ -272,7 +272,7 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
                 0,
                 type,
                 GL_UNSIGNED_BYTE,
-                image.data_ptr()
+                image.data()
         );
     }
     else {

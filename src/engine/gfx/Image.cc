@@ -223,7 +223,7 @@ namespace {
           auto dstIt = mDst.map<DstT>().begin();
 
           for (; srcIt != srcEnd; ++srcIt, ++dstIt)
-              *dstIt = convert_pixel(*srcIt, pixel_traits<DstT>::tag());
+              *dstIt = *srcIt;
       }
 
       template <class SrcT, class SrcPalT, class DstT, class>
@@ -249,7 +249,7 @@ namespace {
                   index--;
               }
 
-              *dstIt = convert_pixel(*(srcPal + index), pixel_traits<DstT>::tag());
+              *dstIt = *(srcPal + index);
           }
       };
   };

@@ -29,6 +29,10 @@ namespace {
   template <class T>
   constexpr PixelInfo pi()
   {
+      // using Rgba5551 = Color<RedComponent<5>, GreenComponent<5>, BlueComponent<5>, AlphaComponent<1>>;
+      // constexpr Rgba5551 c { 1, 2, 3, 0 };
+      // static_assert(sizeof(c) == 16, "");
+
       using Traits = pixel_traits<T>;
       return PixelInfo {
           .format = Traits::format,
@@ -64,7 +68,7 @@ namespace {
           auto& src = *reinterpret_cast<const SrcT*>(mSrc);
           auto& dst = *reinterpret_cast<DstT*>(mDst);
 
-          dst = convert_pixel(src, pixel_traits<DstT>::tag());
+          dst = src;
       };
 
       template <class SrcT, class SrcPalT, class DstT, class>
@@ -76,7 +80,7 @@ namespace {
           auto& src = mSrcPal->color_unsafe<SrcPalT>(srcIdx.index);
           auto& dst = *reinterpret_cast<DstT*>(mDst);
 
-          dst = convert_pixel(src, pixel_traits<DstT>::tag());
+          dst = src;
       };
   };
 }

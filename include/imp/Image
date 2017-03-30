@@ -30,15 +30,6 @@ namespace imp {
   namespace gfx {
     class Image;
 
-    struct ImageError : std::runtime_error
-    { using std::runtime_error::runtime_error; };
-
-    struct ImageLoadError: ImageError
-    { using ImageError::ImageError; };
-
-    struct ImageSaveError: ImageError
-    { using ImageError::ImageError; };
-
     struct ImageFormatIO {
         virtual bool is_format(std::istream&) const = 0;
         virtual Image load(std::istream&) const = 0;
@@ -51,172 +42,304 @@ namespace imp {
         int y = 0;
     };
 
+    enum struct ImageFormat {
+        png,
+        doom
+    };
+
+    template <class T, class PalT>
+    class BasicImage;
+
+    template <class T, class PalT>
+    class BasicImageRef;
+
+    template <class T, class PalT = void>
+    class BasicScanline {
+        static_assert(detail::is_index<T>, "T must be of index pixel type");
+
+        friend class BasicImage<T, PalT>;
+        friend class BasicImageRef<T, PalT>;
+
+        static constexpr auto format_ = T::format;
+        BasicPal<PalT>* pal_ {};
+        T* data_ {};
+        int16 width_ {};
+
+        BasicScanline(BasicPal<PalT>& pal, T* data, int16 width):
+            pal_(&pal),
+            data_(data),
+            width_(width) {}
+    public:
+        BasicScanline() = default;
+
+        BasicScanline(BasicScanline&&) = default;
+
+        BasicScanline(const BasicScanline&) = default;
+
+        BasicScanline& operator=(BasicScanline&&) = default;
+
+        BasicScanline& operator=(const BasicScanline&) = default;
+
+        T* data()
+        { return data_; }
+
+        const T* data() const
+        { return data_; }
+
+        int16 width() const
+        { return width_; }
+
+        size_t size() const
+        { return static_cast<size_t>(width_); }
+
+        BasicPal<PalT>& pal()
+        { return *pal_; }
+
+        const BasicPal<PalT>& pal() const
+        { return *pal_; }
+
+        T* begin()
+        { return data_; }
+
+        const T* begin() const
+        { return data_; }
+
+        const T* cbegin() const
+        { return data_; }
+
+        T* end()
+        { return data_ + width_; }
+
+        const T* end() const
+        { return data_ + width_; }
+
+        const T* cend() const
+        { return data_ + width_; }
+
+        T& operator[](size_t i)
+        { return pal_[data_[i]]; }
+
+        const T& operator[](size_t i) const
+        { return pal_[data_[i]]; }
+    };
+
+    template <class T, class PalT = void>
+    class BasicImage {
+        static_assert(detail::is_index<T>, "T must be of index pixel type");
+
+        static constexpr auto format_ = T::format;
+        int16 width_ {};
+        int16 height_ {};
+        int16 pitch_ {};
+        std::unique_ptr<char[]> data_ {};
+        BasicPal<PalT> pal_ {};
+
+        size_t allocsize_() const
+        { return static_cast<size_t>(pitch_) * static_cast<size_t>(height_) * sizeof(T); }
+
+    public:
+        BasicImage() = default;
+
+        BasicImage(BasicImage&&) = default;
+
+        BasicImage(const BasicImage& other):
+            width_(other.width_),
+            height_(other.height_),
+            pitch_(other.pitch_),
+            data_(std::make_unique<char[]>(other.allocsize_())),
+            pal_(other.pal_)
+        {
+            std::copy(other.data_.get(), other.data_.get() + other.allocsize_(), data_.get());
+        }
+
+        BasicImage& operator=(BasicImage&&) = default;
+
+        BasicImage& operator=(const BasicImage& other)
+        {
+            width_ = other.width_;
+            height_ = other.height_;
+            pitch_ = other.pitch_;
+            data_ = std::make_unique<char[]>(other.allocsize_());
+            std::copy_n(other.data_.get(), other.allocsize_(), data_.get());
+            return *this;
+        }
+
+        int16 width() const
+        { return width_; }
+
+        int16 height() const
+        { return height_; }
+
+        int16 pitch() const
+        { return pitch_; }
+
+        BasicScanline<T, PalT> operator[](size_t i)
+        { return { pal_, reinterpret_cast<T*>(data_.get() + static_cast<size_t>(pitch) * i), width_ }; };
+
+        BasicScanline<const T, const PalT> operator[](size_t i) const
+        { return { pal_, reinterpret_cast<T*>(data_.get() + static_cast<size_t>(pitch) * i), width_ }; };
+    };
+
+    template <class T>
+    class BasicScanline<T, void> {
+        static_assert(detail::is_color<T>, "T must be of color pixel type");
+
+        friend class BasicImage<T, void>;
+        friend class BasicImageRef<T, void>;
+
+        static constexpr auto format_ = T::format;
+        int16 width_ {};
+        T* data_ {};
+
+        BasicScanline(int16 width, T* data):
+            width_(width),
+            data_(data_) {}
+
+    public:
+        BasicScanline() = default;
+
+        BasicScanline(const BasicScanline&) = default;
+
+        BasicScanline& operator=(const BasicScanline&) = default;
+
+        T* data()
+        { return data_; }
+
+        const T* data() const
+        { return data_; }
+    };
+
+    template <class T, class PalT>
+    class BasicImageRef {
+        static_assert(detail::is_index<T>, "T must be of index pixel type");
+
+        static constexpr auto format_ = T::format;
+        int16 width_ {};
+        int16 height_ {};
+        int16 pitch_ {};
+        char *data_ {};
+        BasicPalRef<PalT> pal_ {};
+
+    public:
+        BasicImageRef() = default;
+
+        BasicImageRef(const BasicImageRef&) = default;
+
+        BasicImageRef(Image& other):
+            width_(other.width()),
+            height_(other.height()),
+            pitch_(other.pitch()),
+            data_(other.data()),
+            pal_(other.pal().ref<PalT>()) {}
+
+        BasicImageRef& operator=(const BasicImageRef&) = default;
+    };
+
     /**
      * \brief A container type for images
      */
     class Image {
-        const PixelInfo* mTraits = nullptr;
-        uint16 mWidth = 0;
-        uint16 mHeight = 0;
-        std::unique_ptr<byte[]> mData = nullptr;
-        std::shared_ptr<const Palette> mPalette = nullptr;
-        SpriteOffsets mOffsets;
-        uint16 mTransparentIdx = static_cast<uint16>(-1);
-
-        size_t _area() const
-        { return mWidth * mHeight; }
+        PixelFormat format_ {};
+        int16 width_ {};
+        int16 height_ {};
+        int16 pitch_ {};
+        std::unique_ptr<char[]> data_ {};
+        Pal pal_ {};
+        SpriteOffsets offsets_ {};
 
     public:
         Image() = default;
 
+        Image(Image&&) = default;
+
         Image(const Image &);
-
-        Image(Image&&) noexcept = default;
-
-        Image(PixelFormat format, uint16 width, uint16 height, byte *data);
-
-        explicit Image(PixelFormat format, uint16 width, uint16 height, std::unique_ptr<byte[]> data);
-
-        explicit Image(PixelFormat format, uint16 width, uint16 height, noinit_tag);
 
         Image(std::istream&);
 
-        Image(std::istream&, StringView mimetype);
+        Image(std::istream&, ImageFormat format);
 
         Image& operator=(const Image &);
 
-        Image& operator=(Image&& other) noexcept = default;
+        Image& operator=(Image&&) = default;
 
         void load(std::istream&);
 
-        void load(std::istream&, StringView mimetype);
+        void load(std::istream&, ImageFormat format);
 
-        void save(std::ostream& s, StringView mimetype) const;
+        void save(std::ostream& s, ImageFormat format) const;
 
-        Image clone() const
+        void clear()
+        { *this = {}; }
+
+        char* data()
+        { return data_.get(); }
+
+        const char* data() const
+        { return data_.get(); }
+
+        template<class T, class PalT = void>
+        BasicImageRef<T, PalT> ref()
         {
-            return Image(*this);
+            if (format_ != T::format)
+                throw std::logic_error("Image pixel type error");
+            return *this;
         }
-
-        void reset()
-        { *this = Image(); }
-
-        byte* data_ptr()
-        { return mData.get(); }
-
-        const byte* data_ptr() const
-        { return mData.get(); }
-
-        byte* scanline_ptr(uint16 index);
-
-        const byte* scanline_ptr(uint16 index) const;
-
-        template <class SrcT, class DstT = SrcT>
-        PixelMap<SrcT, DstT> scanline_map(uint16 idx)
-        {
-            test_pixel_format<SrcT>(mTraits);
-
-            auto ptr = reinterpret_cast<SrcT*>(scanline_ptr(idx));
-            return { ptr, ptr + mWidth };
-        };
-
-        template <class SrcT, class DstT = SrcT>
-        PixelMap<const SrcT, const DstT> scanline_map(uint16 idx) const
-        {
-            test_pixel_format<SrcT>(mTraits);
-
-            auto ptr = reinterpret_cast<const SrcT*>(scanline_ptr(idx));
-            return { ptr, ptr + mWidth };
-        };
-
-        byte* pixel_ptr(uint16 x, uint16 y);
-
-        const byte* pixel_ptr(uint16 x, uint16 y) const;
-
-        template <class T = Rgb>
-        T pixel(uint16 x, uint16 y) const
-        {
-            auto ptr = pixel_ptr(x, y);
-            T px;
-            copy_pixel(format(), mPalette.get(), ptr,
-                       pixel_traits<T>::format, nullptr,
-                       reinterpret_cast<byte *>(&px));
-            return px;
-        }
-
-        template <class T = Rgb>
-        void set_pixel(uint16 x, uint16 y, const T &px)
-        {
-            auto ptr = pixel_ptr(x, y);
-            copy_pixel(pixel_traits<T>::format, nullptr, reinterpret_cast<const byte*>(&px),
-                       format(), mPalette.get(), ptr);
-        }
-
-        Image& convert(PixelFormat);
-
-        Image& resize(uint16 width, uint16 height);
-
-        Image& scale(uint16 width, uint16 height);
-
-        template<class SrcT, class DstT = SrcT>
-        PixelMap<SrcT, DstT> map()
-        {
-            test_pixel_format<SrcT>(mTraits);
-
-            auto ptr = reinterpret_cast<SrcT *>(data_ptr());
-            return { ptr, ptr + _area() };
-        }
-
-        template<class SrcT, class DstT = SrcT>
-        PixelMap<const SrcT, const DstT> map() const
-        {
-            test_pixel_format<SrcT>(mTraits);
-
-            auto ptr = reinterpret_cast<const SrcT *>(data_ptr());
-            return { ptr, ptr + _area() };
-        }
-
-        const PixelInfo &traits() const
-        { return *mTraits; }
 
         PixelFormat format() const
-        { return mTraits->format; }
+        { return format_; }
 
-        uint16 width() const
-        { return mWidth; }
+        int16 width() const
+        { return width_; }
 
-        uint16 height() const
-        { return mHeight; }
+        int16 height() const
+        { return height_; }
 
-        std::shared_ptr<const Palette> palette() const
-        { return mPalette; }
+        int16 pitch() const
+        { return pitch_; }
 
-        PixelFormat palette_format() const
-        { return mPalette ? mPalette->format() : PixelFormat::none; }
+        Pal &pal()
+        { return pal_; }
 
-        void set_palette(Palette palette)
-        { mPalette = std::make_shared<Palette>(std::move(palette)); }
+        const Pal& pal() const
+        { return pal_; }
 
-        void set_palette(const std::shared_ptr<const Palette> &palette)
-        { mPalette = palette; }
+        PixelFormat pal_format() const
+        { return pal_ ? pal_.format() : PixelFormat::none; }
 
-        uint16 trans() const
-        { return mTransparentIdx; }
+        void set_pal(Pal pal)
+        { pal_ = std::move(pal); }
 
-        void set_trans(uint16 idx)
-        { mTransparentIdx = idx; }
-
-        const SpriteOffsets &offsets() const
-        { return mOffsets; }
+        SpriteOffsets offsets() const
+        { return offsets_; }
 
         void set_offsets(const SpriteOffsets &offsets)
-        {
-            mOffsets = offsets;
-        }
+        { offsets_ = offsets; }
 
-        bool is_indexed() const
-        { return !mTraits->color; }
+        template <class T>
+        class ImageRef {
+            Image& ref_;
+            size_t width_ {};
+            size_t height_ {};
+            size_t pitch_ {};
+
+            ImageRef(Image& parent):
+                ref_(parent),
+                width_(parent.width()),
+                height_(parent.height()),
+                pitch_(parent.pitch()) {}
+
+            friend class Image;
+        public:
+
+            T* data()
+            { return reinterpret_cast<T*>(ref_.data()); }
+
+            const T* data() const
+            { return reinterpret_cast<T*>(ref_.data()); }
+        };
     };
+
+    gfx::Image scale(gfx::Image, size_t new_width, size_t new_height);
 
     /**
      * \brief Equality operator for Image
