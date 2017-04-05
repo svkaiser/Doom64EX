@@ -123,7 +123,7 @@
 #define GOTPLASMA       "You got the plasma gun!"
 #define GOTSHOTGUN      "You got the shotgun!"
 #define GOTSHOTGUN2     "You got the super shotgun!"
-#define GOTLASER        "What the !@#%* is this!"
+#define GOTLASER        "What the !@#%%%%* is this!"
 
 #define FOUNDSECRET     "You found a secret area!"
 
