@@ -24,7 +24,8 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-project(doom64ex C CXX)
+cmake_policy(SET CMP0048 NEW)
+project(Doom64EX VERSION 3.0.0 LANGUAGES C CXX)
 
 ##------------------------------------------------------------------------------
 ## Build Options
@@ -32,6 +33,8 @@ project(doom64ex C CXX)
 
 option(ENABLE_TESTING "Compile unit tests" ON)
 option(ENABLE_SYSTEM_FLUIDSYNTH "Link with system-wide fluidsynth and not fluidsynth-lite" OFF)
+option(ENABLE_GTK3 "Display windows using GTK+3" OFF)
+option(VERSION_DEV "Add git commit hash to window title" ON)
 
 # If fluidsynth-lite wasn't cloned, fall back to using system fluidsynth.
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/fluidsynth/CMakeLists.txt" AND NOT ENABLE_SYSTEM_FLUIDSYNTH)
@@ -56,53 +59,62 @@ endif()
 ## Compiler Options
 ##
 
-if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
-  message(STATUS "Debug mode: Enabling stricter warnings")
-  set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
+# if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
+#   message(STATUS "Debug mode: Enabling stricter warnings")
+#   set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing")
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS}")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 
-  message(STATUS "Debug mode: Enabling AddressSanitizer")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-endif()
+#   message(STATUS "Debug mode: Enabling AddressSanitizer")
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+# endif()
 
 if(MINGW)
   set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows")
 endif(MINGW)
 
 ##------------------------------------------------------------------------------
-## CMake functions
+## Configure config.hh
 ##
 
-function(add_include_directories)
-  unset(NEW_INCLUDES)
-  foreach (ARG ${ARGN})
-    list(APPEND NEW_INCLUDES ${ARG})
-  endforeach ()
-  set(INCLUDES ${INCLUDES} ${NEW_INCLUDES} PARENT_SCOPE)
-endfunction()
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE PROJECT_VERSION_GIT
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-function(add_sources PREFIX)
-  unset(NEW_SOURCES)
-  foreach (ARG ${ARGN})
-    list(APPEND NEW_SOURCES "${SOURCE_ROOT_DIR}/${PREFIX}/${ARG}")
-  endforeach ()
-  set(SOURCES ${SOURCES} ${NEW_SOURCES} PARENT_SCOPE)
-  set(INCLUDES ${INCLUDES} "${SOURCE_ROOT_DIR}/${PREFIX}" PARENT_SCOPE)
-endfunction()
+if(VERSION_DEV)
+  set(PROJECT_VERSION_FULL "${PROJECT_VERSION}-git+${PROJECT_VERSION_GIT}")
+endif()
 
-function(add_link_libraries)
-  unset(NEW_LIBRARIES)
-  foreach (ARG ${ARGN})
-    list(APPEND NEW_LIBRARIES ${ARG})
-  endforeach ()
-  set(LIBRARIES ${LIBRARIES} ${NEW_LIBRARIES} PARENT_SCOPE)
-endfunction()
+configure_file("${CMAKE_SOURCE_DIR}/src/config.hh.in" "${CMAKE_BINARY_DIR}/config/config.hh")
 
 ##------------------------------------------------------------------------------
-## Project-wide Dependencies
+## Dependencies
 ##
+
+if (NOT USE_CONAN)
+  # SDL2
+  find_package(SDL2 REQUIRED)
+
+  # SDL2_Net
+  find_package(SDL2_net REQUIRED)
+
+  # zlib
+  find_package(ZLIB REQUIRED)
+
+  # libpng
+  find_package(PNG REQUIRED)
+
+  # FluidSynth
+  if (ENABLE_SYSTEM_FLUIDSYNTH)
+    find_package(FluidSynth REQUIRED)
+  endif()
+
+  # OpenGL
+  find_package(OpenGL REQUIRED)
+endif(NOT USE_CONAN)
 
 if(BUILD_TESTS)
   find_package(GTest)

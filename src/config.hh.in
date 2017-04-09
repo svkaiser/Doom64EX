@@ -1,0 +1,15 @@
+#ifndef __CONFIG_HH__51912889
+#define __CONFIG_HH__51912889
+
+#include <imp/Prelude>
+
+namespace imp {
+  namespace config {
+    constexpr auto name = "@PROJECT_NAME@"_sv;
+    constexpr auto version = "@PROJECT_VERSION@"_sv;
+    constexpr auto version_git = "@PROJECT_VERSION_GIT@"_sv;
+    constexpr auto version_full = "@PROJECT_VERSION_FULL@"_sv;
+  }
+}
+
+#endif //__CONFIG_HH__51912889

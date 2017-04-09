@@ -39,6 +39,7 @@
 #include "i_video.h"
 #include "d_main.h"
 #include "gl_main.h"
+#include <config.hh>
 
 SDL_Window      *window;
 SDL_GLContext   glContext;
@@ -86,7 +87,6 @@ void I_InitScreen(void) {
     int     newheight;
     int     p;
     uint32  flags = 0;
-    char    title[256];
 
     InWindow        = *v_windowed;
     video_width     = *v_width;
@@ -154,8 +154,8 @@ void I_InitScreen(void) {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
 
-    sprintf(title, "Doom64 - Version Date: %s", version_date);
-    window = SDL_CreateWindow(title,
+    auto title = format("{} {} - SDL2, OpenGL 1.4", config::name, config::version_full);
+    window = SDL_CreateWindow(title.c_str(),
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
                               video_width,

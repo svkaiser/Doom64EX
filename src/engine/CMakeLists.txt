@@ -29,290 +29,232 @@ if (CMAKE_VERSION VERSION_LESS 3.1.3)
 endif ()
 
 ##------------------------------------------------------------------------------
-## Set up external dependencies
-##
-
-if (NOT USE_CONAN)
-  # SDL2
-  find_package(SDL2 REQUIRED)
-  add_include_directories(${SDL2_INCLUDE_DIRS})
-  add_link_libraries(${SDL2_LIBRARIES})
-
-  # SDL2_Net
-  find_package(SDL2_net REQUIRED)
-  add_include_directories(${SDL2_NET_INCLUDE_DIRS})
-  add_link_libraries(${SDL2_NET_LIBRARIES})
-
-  # zlib
-  find_package(ZLIB REQUIRED)
-
-  # libpng
-  find_package(PNG REQUIRED)
-  add_include_directories(${PNG_INCLUDE_DIRS})
-  add_link_libraries(${PNG_LIBRARIES})
-
-  # FluidSynth
-  if (ENABLE_SYSTEM_FLUIDSYNTH)
-    find_package(FluidSynth REQUIRED)
-  endif()
-  add_include_directories(${FLUIDSYNTH_INCLUDE_DIR})
-  add_link_libraries(${FLUIDSYNTH_LIBRARIES})
-
-  # OpenGL
-  if(FORCE_INCLUDE_OPENGL)
-    add_include_directories("/usr/include/GL/")
-    add_link_libraries("/usr/lib32/libGL.so")
-  else()
-    find_package(OpenGL REQUIRED)
-    add_include_directories(${OPENGL_INCLUDE_DIRS})
-    add_link_libraries(${OPENGL_LIBRARIES})
-  endif(FORCE_INCLUDE_OPENGL)
-endif(NOT USE_CONAN)
-
-##------------------------------------------------------------------------------
-## Configure "version.h"
-##
-
-set(VERSION_MAJOR 2)
-set(VERSION_MINOR 6)
-set(VERSION_PATCH 0)
-set(VERSION_GIT true)
-
-##------------------------------------------------------------------------------
 ## Platform-specific sources
 ##
 
 if (WIN32)
-  add_sources(system/win32
-    doom64.rc
-    )
-
-  add_sources(system
-    i_cpu.cc
-    )
+  set(PLATFORM_SOURCES
+    system/win32/doom64.rc
+    system/i_cpu.cc)
 else ()
-  add_sources(system
-    i_cpu_posix.cc
-    )
+  set(PLATFORM_SOURCES
+    system/i_cpu_posix.cc)
 
-  add_link_libraries(m) # math lib
+  set(PLATFORM_LIBRARIES
+    m)
 endif ()
 
 ##------------------------------------------------------------------------------
 ## Sources
 ##
 
-# src/automap
-add_sources(automap
-  am_draw.cc
-  am_map.cc
-  )
+set(LIBRARIES
+  ${PLATFORM_LIBRARIES}
+  ${SDL2_LIBRARIES}
+  ${SDL2_NET_LIBRARIES}
+  ${PNG_LIBRARIES}
+  ${FLUIDSYNTH_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+  ${CONAN_LIBS})
 
-# src/common
-add_sources(common
-  doomdata.h
-  doomdef.h
-  doomstat.h
-  doomtype.h
-  info.cc
-  md5.cc
-  tables.cc
-  )
+set(INCLUDES
+  ${PLATFORM_INCLUDES}
+  "${CMAKE_SOURCE_DIR}/include"
+  "${CMAKE_BINARY_DIR}/config"
 
-# src/console
-add_sources(console
-  con_console.cc
-  )
+  "${SDL2_INCUDE_DIRS}"
+  "${SDL2_NET_INCLUDE_DIRS}"
+  "${PNG_INCLUDE_DIRS}"
+  "${FLUIDSYNTH_INCLUDE_DIR}"
+  "${OPENGL_INCLUDE_DIRS}"
 
-# src/doom_main
-add_sources(doom_main
-  d_devstat.cc
-  d_englsh.h
-  d_event.h
-  d_keywds.h
-  d_main.cc
-  d_net.cc
-  d_player.h
-  d_think.h
-  d_ticcmd.h
-  )
+  automap/
+  common/
+  console/
+  doom_main/
+  finale/
+  fmt/
+  game/
+  gfx/
+  intermission/
+  misc/
+  net/
+  opengl/
+  parser/
+  playloop/
+  renderer/
+  sound/
+  statusbar/
+  system/
+  wadgen/
+  zone/)
 
-# src/finale
-add_sources(finale
-  f_finale.cc
-  in_stuff.cc
-  )
+set(SOURCES
+  ${PLATFORM_SOURCES}
+  App.cc
 
-# src/game
-add_sources(game
-  g_actions.cc
-  g_controls.h
-  g_demo.cc
-  g_game.cc
-  g_local.h
-  g_settings.cc
-  )
+  # automap
+  automap/am_draw.cc
+  automap/am_map.cc
 
-# src/intermission
-add_sources(intermission
-  wi_stuff.cc
-  )
+  # common
+  common/info.cc
+  common/md5.cc
+  common/tables.cc
+  common/Property.cc
 
-# src/misc
-add_sources(misc
-  m_cheat.cc
-  m_fixed.cc
-  m_keys.cc
-  m_menu.cc
-  m_misc.cc
-  m_password.cc
-  m_random.cc
-  m_shift.cc
-  )
+  # console
+  console/con_console.cc
 
-# src/net
-add_sources(net
-  net_client.cc
-  net_common.cc
-  net_dedicated.cc
-  net_defs.h
-  net_io.cc
-  net_loop.cc
-  net_packet.cc
-  net_query.cc
-  net_sdl.cc
-  net_server.cc
-  net_structrw.cc
-  )
+  # doom_main
+  doom_main/d_devstat.cc
+  doom_main/d_main.cc
+  doom_main/d_net.cc
 
-# src/opengl
-add_sources(opengl
-  dgl.cc
-  gl_draw.cc
-  gl_main.cc
-  gl_texture.cc
-  glad.cc
-  )
+  # finale
+  finale/f_finale.cc
+  finale/in_stuff.cc
 
-# src/parser
-add_sources(parser
-  sc_main.cc
-  )
+  # fmt
+  fmt/format.cc
+  fmt/ostream.cc
 
-# src/playloop
-add_sources(playloop
-  p_ceilng.cc
-  p_doors.cc
-  p_enemy.cc
-  p_floor.cc
-  p_inter.cc
-  p_lights.cc
-  p_local.h
-  p_macros.cc
-  p_map.cc
-  p_maputl.cc
-  p_mobj.cc
-  p_plats.cc
-  p_pspr.cc
-  p_saveg.cc
-  p_setup.cc
-  p_sight.cc
-  p_spec.cc
-  p_switch.cc
-  p_telept.cc
-  p_tick.cc
-  p_user.cc
-  Map.cc
-  )
+  # game
+  game/g_actions.cc
+  game/g_demo.cc
+  game/g_game.cc
+  game/g_settings.cc
 
-# src/renderer
-add_sources(renderer
-  r_bsp.cc
-  r_clipper.cc
-  r_drawlist.cc
-  r_lights.cc
-  r_local.h
-  r_main.cc
-  r_scene.cc
-  r_sky.cc
-  r_things.cc
-  r_wipe.cc
-  )
-
-# src/sound
-add_sources(sound
-  sounds.h
-  s_sound.cc
-  )
-
-# src/statusbar
-add_sources(statusbar
-  st_stuff.cc
-  )
-
-# src/system
-add_sources(system
-  i_audio.cc
-  i_main.cc
-  i_png.cc
-  i_swap.h
-  i_system.cc
-  i_video.cc
-  )
-
-# src/wadgen
-add_sources(wadgen
-  deflate-N64.cc
-  deflate-N64.h
-  gfx.cc
-  gfx.h
-  level.cc
-  level.h
-  png.cc
-  rom.cc
-  rom.h
-  sndfont.cc
-  sndfont.h
-  sound.cc
-  sound.h
-  sprite.cc
-  sprite.h
-  texture.cc
-  texture.h
-  wad.cc
-  wad.h
-  wadgen.cc
-  wadgen.h
-  )
-
-# src/zone
-add_sources(zone
-  z_zone.cc
-  )
-
-# kexlib
-set(KEXLIB_SOURCES
+  # gfx
   gfx/Image.cc
   gfx/PngImage.cc
   gfx/DoomImage.cc
   gfx/Pixel.cc
-  fmt/format.cc
-  fmt/ostream.cc
-  common/Property.cc
-  App.cc
+
+  # intermission
+  intermission/wi_stuff.cc
+
+  # misc
+  misc/m_cheat.cc
+  misc/m_fixed.cc
+  misc/m_keys.cc
+  misc/m_menu.cc
+  misc/m_misc.cc
+  misc/m_password.cc
+  misc/m_random.cc
+  misc/m_shift.cc
+
+  # net
+  net/net_client.cc
+  net/net_common.cc
+  net/net_dedicated.cc
+  net/net_defs.h
+  net/net_io.cc
+  net/net_loop.cc
+  net/net_packet.cc
+  net/net_query.cc
+  net/net_sdl.cc
+  net/net_server.cc
+  net/net_structrw.cc
+
+  # opengl
+  opengl/dgl.cc
+  opengl/gl_draw.cc
+  opengl/gl_main.cc
+  opengl/gl_texture.cc
+  opengl/glad.cc
+
+  # parser
+  parser/sc_main.cc
+
+  # playloop
+  playloop/p_ceilng.cc
+  playloop/p_doors.cc
+  playloop/p_enemy.cc
+  playloop/p_floor.cc
+  playloop/p_inter.cc
+  playloop/p_lights.cc
+  playloop/p_macros.cc
+  playloop/p_map.cc
+  playloop/p_maputl.cc
+  playloop/p_mobj.cc
+  playloop/p_plats.cc
+  playloop/p_pspr.cc
+  playloop/p_saveg.cc
+  playloop/p_setup.cc
+  playloop/p_sight.cc
+  playloop/p_spec.cc
+  playloop/p_switch.cc
+  playloop/p_telept.cc
+  playloop/p_tick.cc
+  playloop/p_user.cc
+  playloop/Map.cc
+
+  # renderer
+  renderer/r_bsp.cc
+  renderer/r_clipper.cc
+  renderer/r_drawlist.cc
+  renderer/r_lights.cc
+  renderer/r_local.h
+  renderer/r_main.cc
+  renderer/r_scene.cc
+  renderer/r_sky.cc
+  renderer/r_things.cc
+  renderer/r_wipe.cc
+
+  # sound
+  sound/s_sound.cc
+
+  # statusbar
+  statusbar/st_stuff.cc
+
+  # system
+  system/i_audio.cc
+  system/i_main.cc
+  system/i_png.cc
+  system/i_swap.h
+  system/i_system.cc
+  system/i_video.cc
+
+  # wad
   wad/Wad.cc
   wad/DoomWad.cc
   wad/RomWad.cc
   wad/ZipWad.cc
-        )
+
+  # wadgen
+  wadgen/deflate-N64.cc
+  wadgen/deflate-N64.h
+  wadgen/gfx.cc
+  wadgen/gfx.h
+  wadgen/level.cc
+  wadgen/level.h
+  wadgen/png.cc
+  wadgen/rom.cc
+  wadgen/rom.h
+  wadgen/sndfont.cc
+  wadgen/sndfont.h
+  wadgen/sound.cc
+  wadgen/sound.h
+  wadgen/sprite.cc
+  wadgen/sprite.h
+  wadgen/texture.cc
+  wadgen/texture.h
+  wadgen/wad.cc
+  wadgen/wad.h
+  wadgen/wadgen.cc
+  wadgen/wadgen.h
+
+  # zone
+  zone/z_zone.cc)
 
 ##------------------------------------------------------------------------------
 ## Build target
 ##
 
-add_executable(doom64ex MACOSX_BUNDLE ${SOURCES} ${KEXLIB_SOURCES})
-target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/engine")
-target_link_libraries(doom64ex ${LIBRARIES} ${CONAN_LIBS})
+add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
+target_include_directories(doom64ex PRIVATE ${INCLUDES})
+target_link_libraries(doom64ex ${LIBRARIES})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
 
 ##------------------------------------------------------------------------------
@@ -322,7 +264,7 @@ set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
 if (NOT WIN32)
   if (APPLE)
     install(CODE "include(BundleUtilities)"
-                 "fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app\" \"\" \"\")")
+      "fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app\" \"\" \"\")")
     install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app" DESTINATION /Applications USE_SOURCE_PERMISSIONS)
   else ()
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/doom64ex DESTINATION bin)
