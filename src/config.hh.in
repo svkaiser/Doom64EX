@@ -6,9 +6,9 @@
 namespace imp {
   namespace config {
     constexpr auto name = "@PROJECT_NAME@"_sv;
-    constexpr auto version = "@PROJECT_VERSION@"_sv;
-    constexpr auto version_git = "@PROJECT_VERSION_GIT@"_sv;
-    constexpr auto version_full = "@PROJECT_VERSION_FULL@"_sv;
+    constexpr auto version = "@VERSION@"_sv;
+    constexpr auto version_git = "@VERSION_GIT@"_sv;
+    constexpr auto version_full = "@VERSION_FULL@"_sv;
   }
 }
 

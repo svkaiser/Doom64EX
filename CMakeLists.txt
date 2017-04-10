@@ -23,9 +23,7 @@
 ##
 
 cmake_minimum_required(VERSION 2.8.12)
-
-cmake_policy(SET CMP0048 NEW)
-project(Doom64EX VERSION 3.0.0 LANGUAGES C CXX)
+project(Doom64EX C CXX)
 
 ##------------------------------------------------------------------------------
 ## Build Options
@@ -81,11 +79,16 @@ endif(MINGW)
 execute_process(
   COMMAND git log -1 --format=%h
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE PROJECT_VERSION_GIT
+  OUTPUT_VARIABLE VERSION_GIT
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+set(VERSION_MAJOR 3)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 0)
+set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
 if(VERSION_DEV)
-  set(PROJECT_VERSION_FULL "${PROJECT_VERSION}-git+${PROJECT_VERSION_GIT}")
+  set(VERSION_FULL "${VERSION}-git+${VERSION_GIT}")
 endif()
 
 configure_file("${CMAKE_SOURCE_DIR}/src/config.hh.in" "${CMAKE_BINARY_DIR}/config/config.hh")
