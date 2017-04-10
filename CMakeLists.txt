@@ -42,6 +42,8 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/fluidsynth/CMakeLists.txt" AND NOT ENABLE_SYS
   message(WARNING "The fluidsynth submodule wasn't initialised. Run `git submodule --init --recursive` to use fluidsynth-lite, or add -DENABLE_SYSTEM_FLUIDSYNTH=ON to use the system-provided FluidSynth library.")
 endif()
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
 set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -114,6 +116,12 @@ if (NOT USE_CONAN)
 
   # OpenGL
   find_package(OpenGL REQUIRED)
+
+  # GTK3
+  if(ENABLE_GTK3)
+    find_package(GTK3 REQUIRED)
+    find_package(Vala REQUIRED)
+  endif(ENABLE_GTK3)
 endif(NOT USE_CONAN)
 
 if(BUILD_TESTS)
@@ -129,6 +137,10 @@ if(NOT ENABLE_SYSTEM_FLUIDSYNTH)
 endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
+
+if(ENABLE_GTK3)
+  add_subdirectory("${CMAKE_SOURCE_DIR}/src/gtk3")
+endif(ENABLE_GTK3)
 
 ##------------------------------------------------------------------------------
 ## doom64ex.pk3 target
