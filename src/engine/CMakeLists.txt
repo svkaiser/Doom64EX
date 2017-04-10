@@ -32,22 +32,17 @@ endif ()
 ## Platform-specific sources
 ##
 
-if(WIN32)
-
+if (WIN32)
   set(PLATFORM_SOURCES
     system/win32/doom64.rc
     system/i_cpu.cc)
-
-else()
-
+else ()
   set(PLATFORM_SOURCES
     system/i_cpu_posix.cc)
 
   set(PLATFORM_LIBRARIES
-    dl
     m)
-
-endif()
+endif ()
 
 ##------------------------------------------------------------------------------
 ## Sources
@@ -64,36 +59,35 @@ set(LIBRARIES
 
 set(INCLUDES
   ${PLATFORM_INCLUDES}
-  ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_BINARY_DIR}/config
-  ${CMAKE_CURRENT_BINARY_DIR}
+  "${CMAKE_SOURCE_DIR}/include"
+  "${CMAKE_BINARY_DIR}/config"
 
-  ${SDL2_INCUDE_DIRS}
-  ${SDL2_NET_INCLUDE_DIRS}
-  ${PNG_INCLUDE_DIRS}
-  ${FLUIDSYNTH_INCLUDE_DIR}
-  ${OPENGL_INCLUDE_DIRS}
+  "${SDL2_INCUDE_DIRS}"
+  "${SDL2_NET_INCLUDE_DIRS}"
+  "${PNG_INCLUDE_DIRS}"
+  "${FLUIDSYNTH_INCLUDE_DIR}"
+  "${OPENGL_INCLUDE_DIRS}"
 
-  automap
-  common
-  console
-  doom_main
-  finale
-  fmt
-  game
-  gfx
-  intermission
-  misc
-  net
-  opengl
-  parser
-  playloop
-  renderer
-  sound
-  statusbar
-  system
-  wadgen
-  zone)
+  automap/
+  common/
+  console/
+  doom_main/
+  finale/
+  fmt/
+  game/
+  gfx/
+  intermission/
+  misc/
+  net/
+  opengl/
+  parser/
+  playloop/
+  renderer/
+  sound/
+  statusbar/
+  system/
+  wadgen/
+  zone/)
 
 set(SOURCES
   ${PLATFORM_SOURCES}
@@ -149,9 +143,6 @@ set(SOURCES
   misc/m_password.cc
   misc/m_random.cc
   misc/m_shift.cc
-
-  # native_ui
-  native_ui/Gtk3.cc
 
   # net
   net/net_client.cc
