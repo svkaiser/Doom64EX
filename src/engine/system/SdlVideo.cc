@@ -178,6 +178,7 @@ class SdlVideo : public IVideo {
     bool has_focus_ { false };
     bool has_mouse_ { false };
     Vector<VideoMode> modes_ {};
+    int lastmbtn_ {};
 
     void init_gl_() {
         switch (opengl_) {
@@ -256,7 +257,7 @@ public:
     SdlVideo(OpenGLVer opengl):
         opengl_(opengl)
     {
-        SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+        SDL_Init(SDL_INIT_EVERYTHING);
         SDL_ShowCursor(SDL_FALSE);
         init_modes_();
         
@@ -310,7 +311,7 @@ public:
 
         SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, copy.buffer_size);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, copy.depth_size);
-        SDL_GL_SetSwapInterval(copy.vsync ? SDL_TRUE : SDL_FALSE);
+        SDL_GL_SetSwapInterval(copy.vsync ? 1 : 0);
 
         if (!sdl_window_) {
             // Prepare SDL's GL attributes
@@ -463,19 +464,11 @@ public:
                 D_PostEvent(&doom);
                 break;
 
-            case SDL_MOUSEMOTION:
-                doom.type = ev_mouse;
-                doom.data2 = mouse_accel_(e.motion.xrel << 5);
-                doom.data3 = mouse_accel_((-e.motion.yrel) << 5);
-                D_PostEvent(&doom);
-
-                mouse_x = e.motion.x;
-                mouse_y = e.motion.y;
-
-                break;
-
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
+                if (!has_focus_)
+                    break;
+
                 doom.type = (e.type == SDL_MOUSEBUTTONUP) ? ev_mouseup : ev_mousedown;
                 doom.data1 = translate_mouse_(SDL_GetMouseState(nullptr, nullptr));
                 D_PostEvent(&doom);
@@ -514,15 +507,28 @@ public:
                 default:
                     break;
                 }
-                return;
+                break;
 
             case SDL_QUIT:
                 I_Quit();
                 return;
                 
             default:
-                return;
+                break;
             }
+        }
+
+        int x, y;
+        SDL_GetRelativeMouseState(&x, &y);
+        auto btn = SDL_GetMouseState(&mouse_x, &mouse_y);
+        if (x != 0 || y != 0 || btn || (lastmbtn_ != btn)) {
+            event_t ev {};
+            ev.type = ev_mouse;
+            ev.data1 = translate_mouse_(btn);
+            ev.data2 = x << 5;
+            ev.data3 = (-y) << 5;
+            D_PostEvent(&ev);
+            lastmbtn_ = btn;
         }
     }
 };
