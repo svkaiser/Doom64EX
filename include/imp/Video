@@ -33,7 +33,7 @@ namespace imp {
       virtual ~IVideo() {}
       virtual void set_mode(const VideoMode&) = 0;
       virtual VideoMode current_mode() = 0;
-      virtual Vector<VideoMode> modes() = 0;
+      virtual ArrayView<VideoMode> modes() = 0;
       virtual void swap_window() = 0;
       virtual void grab(bool) = 0;
       virtual void poll_events() = 0;

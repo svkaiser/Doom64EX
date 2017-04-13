@@ -5,6 +5,8 @@
 #include <doomdef.h>
 #include <doom_main/d_main.h>
 #include <SDL_video.h>
+#include <common/doomstat.h>
+#include <renderer/r_main.h>
 
 namespace {
   // Exclusive fullscreen by default on Windows only.
@@ -362,6 +364,12 @@ public:
                 SDL_SetWindowFullscreen(sdl_window_, SDL_WINDOW_FULLSCREEN);
                 break;
             }
+
+            SDL_GetWindowSize(sdl_window_, &video_width, &video_height);
+            video_ratio = static_cast<float>(video_width) / video_height;
+            glViewport(0, 0, video_width, video_height);
+            GL_CalcViewSize();
+            R_SetViewMatrix();
         }
 
         v_width = copy.width;
@@ -406,9 +414,9 @@ public:
         return mode;
     }
 
-    Vector<VideoMode> modes() override
+    ArrayView<VideoMode> modes() override
     {
-        return {};
+        return modes_;
     }
 
     void swap_window() override

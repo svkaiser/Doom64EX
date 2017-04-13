@@ -79,6 +79,7 @@ extern int DGL_CLAMP;
 
 extern dboolean usingGL;
 
+void GL_CalcViewSize();
 dboolean GL_CheckExtension(const char *ext);
 void* GL_RegisterProc(const char *address);
 void GL_Init(void);
