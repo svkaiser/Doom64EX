@@ -33,10 +33,7 @@
 
 ////////////Video///////////////
 
-extern SDL_Surface *screen;
-
 void I_InitVideo(void);
-void I_InitScreen(void);
 void I_ShutdownVideo(void);
 //
 // Called by D_DoomLoop,
@@ -50,8 +47,6 @@ void I_CenterMouse(void);
 
 ////////////Input//////////////
 
-extern int UseMouse[2];
-extern int UseJoystick;
 extern int mouse_x;
 extern int mouse_y;
 

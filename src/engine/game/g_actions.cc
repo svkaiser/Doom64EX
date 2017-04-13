@@ -318,6 +318,7 @@ void TryActions(alist_t *al, dboolean up) {
         if(action) {
             action->proc(action->data, al->param);
         }
+
         return;
     }
 

@@ -67,6 +67,7 @@
 #include "gl_texture.h"
 #include "gl_draw.h"
 #include <imp/Wad>
+#include <imp/Video>
 //
 // definitions
 //
@@ -1630,7 +1631,6 @@ void M_ChangeMouseAccel(int choice) {
         }
         break;
     }
-    I_MouseAccelChange();
 }
 
 void M_ChangeMouseLook(int choice) {
@@ -2114,7 +2114,7 @@ void M_DrawVideo(void) {
 
     DRAWVIDEOITEM2(filter, *r_filter, filterType);
     DRAWVIDEOITEM2(anisotropic, *r_anisotropic, msgNames);
-    DRAWVIDEOITEM2(windowed, *v_windowed, msgNames);
+    DRAWVIDEOITEM2(windowed, Video->is_windowed(), msgNames);
     DRAWVIDEOITEM2(ratio, m_aspectRatio, ratioName);
 
     sprintf(res, "%ix%i", (int)v_width, (int)v_height);

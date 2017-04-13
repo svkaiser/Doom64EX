@@ -323,6 +323,7 @@ extern dboolean windowpause;
 #define KEY_RALT                (0x80+0x38)
 
 #define KEY_CAPS                0xba
+#define KEY_GRAVE               0xbb // Console button
 
 #define KEY_INSERT              0xd2
 #define KEY_HOME                0xc7

@@ -491,8 +491,8 @@ void AM_Ticker(void) {
             int panscalex = (int)(*v_msensitivityx / (1500.0f / scale));
             int panscaley = (int)(*v_msensitivityy / (1500.0f / scale));
 
-            automappanx += ((I_MouseAccel(mpanx)*panscalex)/128) << 16;
-            automappany += ((I_MouseAccel(mpany)*panscaley)/128) << 16;
+            automappanx += ((mpanx*panscalex)/128) << 16;
+            automappany += ((mpany*panscaley)/128) << 16;
             mpanx = mpany = 0;
         }
         else {

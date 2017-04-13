@@ -92,7 +92,9 @@ set(INCLUDES
 
 set(SOURCES
   ${PLATFORM_SOURCES}
+
   App.cc
+  Globals.cc
 
   # automap
   automap/am_draw.cc
@@ -216,6 +218,7 @@ set(SOURCES
   system/i_swap.h
   system/i_system.cc
   system/i_video.cc
+  system/SdlVideo.cc
 
   # wad
   wad/Wad.cc
