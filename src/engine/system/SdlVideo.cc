@@ -209,7 +209,7 @@ class SdlVideo : public IVideo {
     }
 
     VideoMode sanitize_mode_(const VideoMode &mode) {
-        VideoMode copy { mode };
+        VideoMode copy = mode;
 
         copy.width = std::max(copy.width, 320);
         copy.height = std::max(copy.height, 240);
