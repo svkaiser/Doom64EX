@@ -6,6 +6,12 @@
 
 #include "SDL.h"
 
+#ifdef main
+#undef main
+#else
+#define SDL_main main
+#endif
+
 [[noreturn]]
 void D_DoomMain();
 
@@ -131,11 +137,15 @@ void app::main(int argc, char **argv)
         println("");
     }
 
+#ifndef _WIN32
     if (_wadgen_param) {
         WGen_WadgenMain();
     } else {
         D_DoomMain();
     }
+#else
+    D_DoomMain();
+#endif
 }
 
 bool app::file_exists(StringView path)
@@ -205,20 +215,7 @@ app::Param::Param(StringView name, app::Param::Arity arity) :
     _gparams()[name] = this;
 }
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
-{
-    int argc = __argc;
-    char** argv = __argv;
-    app::main(argc, argv);
-}
-#else
-
-int main(int argc, char **argv)
+int SDL_main(int argc, char **argv)
 {
     app::main(argc, argv);
 }
-
-#endif

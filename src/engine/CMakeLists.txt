@@ -35,12 +35,42 @@ endif ()
 if(WIN32)
 
   set(PLATFORM_SOURCES
+    native_ui/WinAPI.cc
+    native_ui/WinAPI-windows-is-dumb.c
     system/win32/doom64.rc
     system/i_cpu.cc)
 
+  set(PLATFORM_LIBRARIES
+    mingw32)
+
 else()
 
+  set(WADGEN_SOURCES
+    wadgen/deflate-N64.c
+    wadgen/deflate-N64.h
+    wadgen/gfx.c
+    wadgen/gfx.h
+    wadgen/level.c
+    wadgen/level.h
+    wadgen/png.c
+    wadgen/rom.c
+    wadgen/rom.h
+    wadgen/sndfont.c
+    wadgen/sndfont.h
+    wadgen/sound.c
+    wadgen/sound.h
+    wadgen/sprite.c
+    wadgen/sprite.h
+    wadgen/texture.c
+    wadgen/texture.h
+    wadgen/wad.c
+    wadgen/wad.h
+    wadgen/wadgen.c
+    wadgen/wadgen.h)
+
   set(PLATFORM_SOURCES
+    ${WADGEN_SOURCES}
+    native_ui/Gtk3.cc
     system/i_cpu_posix.cc)
 
   set(PLATFORM_LIBRARIES
@@ -64,41 +94,9 @@ set(LIBRARIES
 
 set(INCLUDES
   ${PLATFORM_INCLUDES}
-<<<<<<< HEAD
-  "${CMAKE_SOURCE_DIR}/include"
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-  "${CMAKE_BINARY_DIR}/config"
-
-  "${SDL2_INCUDE_DIRS}"
-  "${SDL2_NET_INCLUDE_DIRS}"
-  "${PNG_INCLUDE_DIRS}"
-  "${FLUIDSYNTH_INCLUDE_DIR}"
-  "${OPENGL_INCLUDE_DIRS}"
-
-  automap/
-  common/
-  console/
-  doom_main/
-  finale/
-  fmt/
-  game/
-  gfx/
-  intermission/
-  misc/
-  net/
-  opengl/
-  parser/
-  playloop/
-  renderer/
-  sound/
-  statusbar/
-  system/
-  wadgen/
-  zone/)
-=======
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_BINARY_DIR}/config
-  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
 
   ${SDL2_INCUDE_DIRS}
   ${SDL2_NET_INCLUDE_DIRS}
@@ -126,7 +124,6 @@ set(INCLUDES
   system
   wadgen
   zone)
->>>>>>> parent of b854c24... Revert "Add optional GTK+3 windows"
 
 set(SOURCES
   ${PLATFORM_SOURCES}
@@ -184,9 +181,6 @@ set(SOURCES
   misc/m_password.cc
   misc/m_random.cc
   misc/m_shift.cc
-
-  # native_ui
-  native_ui/Gtk3.cc
 
   # net
   net/net_client.cc
@@ -267,31 +261,10 @@ set(SOURCES
   wad/RomWad.cc
   wad/ZipWad.cc
 
-  # wadgen
-  wadgen/deflate-N64.cc
-  wadgen/deflate-N64.h
-  wadgen/gfx.cc
-  wadgen/gfx.h
-  wadgen/level.cc
-  wadgen/level.h
-  wadgen/png.cc
-  wadgen/rom.cc
-  wadgen/rom.h
-  wadgen/sndfont.cc
-  wadgen/sndfont.h
-  wadgen/sound.cc
-  wadgen/sound.h
-  wadgen/sprite.cc
-  wadgen/sprite.h
-  wadgen/texture.cc
-  wadgen/texture.h
-  wadgen/wad.cc
-  wadgen/wad.h
-  wadgen/wadgen.cc
-  wadgen/wadgen.h
-
   # zone
   zone/z_zone.cc)
+
+message(STATUS ">>>>> ${LIBRARIES}")
 
 ##------------------------------------------------------------------------------
 ## Build target

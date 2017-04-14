@@ -32,10 +32,10 @@ namespace imp {
   { return _byteswap_ulong(x); }
 
   inline int64 swap_bytes(int64 x) noexcept
-  { return __bswap_64(x); }
+  { return _byteswap_uint64(x); }
 
   inline uint64 swap_bytes(uint64 x) noexcept
-  { return __bswap_64(x); }
+  { return _byteswap_uint64(x); }
 }
 #elif defined(__APPLE__)
 # include <libkern/OSByteOrder.h>

@@ -319,7 +319,7 @@ public:
             // Prepare SDL's GL attributes
             init_gl_();
 
-            uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
+            uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
             switch (copy.fullscreen) {
             case Fullscreen::none:
                 break;
@@ -400,7 +400,7 @@ public:
         SDL_GL_GetAttribute(SDL_GL_BUFFER_SIZE, &mode.buffer_size);
         SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &mode.depth_size);
 
-        uint flags = SDL_GetWindowFlags(sdl_window_);
+        uint32 flags = SDL_GetWindowFlags(sdl_window_);
         if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
             mode.fullscreen = Fullscreen::noborder;
         } else if (flags & SDL_WINDOW_FULLSCREEN) {

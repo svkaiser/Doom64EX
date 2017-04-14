@@ -84,7 +84,7 @@ namespace {
       constexpr int64 max_size = 65536 + end_size;
       s.seekg(0, std::ios::end);
       int64 file_size = s.tellg();
-      int64 minimum = std::max(0l, file_size - max_size);
+      int64 minimum = std::max(0ll, file_size - max_size);
 
       s.seekg(-end_size, std::ios::end);
       for (int64 pos = s.tellg(); pos >= minimum; --pos) {

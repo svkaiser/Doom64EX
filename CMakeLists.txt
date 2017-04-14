@@ -71,7 +71,8 @@ endif()
 # endif()
 
 if(MINGW)
-  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows")
+  add_definitions(-DFMT_USE_WINDOWS_H=0)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++ -mwindows")
 endif(MINGW)
 
 ##------------------------------------------------------------------------------
