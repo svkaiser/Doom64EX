@@ -36,6 +36,10 @@ void native_ui::init()
     init_();
 }
 
+void native_ui::console_show(bool)
+{
+}
+
 void native_ui::console_add_line(StringView line)
 {
     if (!handle_)

@@ -46,26 +46,26 @@ if(WIN32)
 else()
 
   set(WADGEN_SOURCES
-    wadgen/deflate-N64.c
+    wadgen/deflate-N64.cc
     wadgen/deflate-N64.h
-    wadgen/gfx.c
+    wadgen/gfx.cc
     wadgen/gfx.h
-    wadgen/level.c
+    wadgen/level.cc
     wadgen/level.h
-    wadgen/png.c
-    wadgen/rom.c
+    wadgen/png.cc
+    wadgen/rom.cc
     wadgen/rom.h
-    wadgen/sndfont.c
+    wadgen/sndfont.cc
     wadgen/sndfont.h
-    wadgen/sound.c
+    wadgen/sound.cc
     wadgen/sound.h
-    wadgen/sprite.c
+    wadgen/sprite.cc
     wadgen/sprite.h
-    wadgen/texture.c
+    wadgen/texture.cc
     wadgen/texture.h
-    wadgen/wad.c
+    wadgen/wad.cc
     wadgen/wad.h
-    wadgen/wadgen.c
+    wadgen/wadgen.cc
     wadgen/wadgen.h)
 
   set(PLATFORM_SOURCES
@@ -263,8 +263,6 @@ set(SOURCES
 
   # zone
   zone/z_zone.cc)
-
-message(STATUS ">>>>> ${LIBRARIES}")
 
 ##------------------------------------------------------------------------------
 ## Build target
