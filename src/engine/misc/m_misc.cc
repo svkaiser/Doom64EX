@@ -285,7 +285,6 @@ void M_LoadDefaults(void) {
 void M_ScreenShot(void) {
     char    name[13];
     int     shotnum=0;
-    byte    *buff;
     std::ofstream file;
 
     while(shotnum < 1000) {
@@ -301,14 +300,8 @@ void M_ScreenShot(void) {
         return;
     }
 
-    buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
-
-    // Get PNG image
-
-    gfx::Image image(gfx::PixelFormat::rgb, video_width, video_height, buff);
-    image.save(file, "png");
-
-    Z_Free(buff);
+    auto image = GL_GetScreenBuffer(0, 0, video_width, video_height);
+    image.save(file, ImageFormat::png);
 
     fmt::print("Saved Screenshot {}\n", name);
 }
@@ -320,19 +313,17 @@ void M_ScreenShot(void) {
 //
 
 int M_CacheThumbNail(byte** data) {
-    byte* buff;
-    byte* tbn;
+    char* tbn;
 
-    buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
-    tbn = reinterpret_cast<byte*>(Z_Calloc(SAVEGAMETBSIZE, PU_STATIC, 0));
+    auto image = GL_GetScreenBuffer(0, 0, video_width, video_height);
+    //image.align(1);
+    //image.scale(128, 128, ScaleFlag::keep_ratio);
 
-    gfx::Image image(gfx::PixelFormat::rgb, video_width, video_height, buff);
-    image.scale(128, 128);
-    std::copy_n(image.data_ptr(), SAVEGAMETBSIZE, tbn);
+    tbn = new char[SAVEGAMESIZE];
 
-    Z_Free(buff);
+    std::copy_n(image.data(), SAVEGAMETBSIZE, tbn);
 
-    *data = tbn;
+    *data = reinterpret_cast<byte*>(tbn);
     return SAVEGAMETBSIZE;
 }
 

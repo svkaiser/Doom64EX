@@ -57,7 +57,7 @@ d_inline static byte I_GetRGBGamma(int c) {
 // Increases the palette RGB based on gamma settings
 //
 
-static void I_TranslatePalette(gfx::Palette &dest) {
+static void I_TranslatePalette(Pal &dest) {
     if (i_gamma == 0)
         return;
 
@@ -65,9 +65,9 @@ static void I_TranslatePalette(gfx::Palette &dest) {
     auto color_size = dest.traits().bytes;
 
     for(size_t i = 0; i < color_count; i += color_size) {
-        dest.data_ptr()[i + 0] = I_GetRGBGamma(dest.data_ptr()[i + 0]);
-        dest.data_ptr()[i + 1] = I_GetRGBGamma(dest.data_ptr()[i + 1]);
-        dest.data_ptr()[i + 2] = I_GetRGBGamma(dest.data_ptr()[i + 2]);
+        dest.data()[i + 0] = I_GetRGBGamma(dest.data()[i + 0]);
+        dest.data()[i + 1] = I_GetRGBGamma(dest.data()[i + 1]);
+        dest.data()[i + 2] = I_GetRGBGamma(dest.data()[i + 2]);
     }
 }
 

@@ -53,7 +53,7 @@ int         lightningCounter = 0;
 int         thundertic = 1;
 dboolean    skyfadeback = false;
 int         fireLump = -1;
-gfx::Image  fireImage {};
+Image       fireImage {};
 
 static word CloudOffsetY = 0;
 static word CloudOffsetX = 0;
@@ -577,19 +577,19 @@ static void R_DrawClouds(void) {
 // R_SpreadFire
 //
 
-static void R_SpreadFire(byte* src1, byte* src2, int pixel, int counter, int* rand) {
+static void R_SpreadFire(char* src1, char* src2, int pixel, int counter, int* rand) {
     int randIdx = 0;
-    byte *tmpSrc;
+    char *tmpSrc;
 
     if(pixel != 0) {
         randIdx = rndtable[*rand];
         *rand = ((*rand+2) & 0xff);
 
         tmpSrc = (src1 + (((counter - (randIdx & 3)) + 1) & (FIRESKY_WIDTH-1)));
-        *(byte*)(tmpSrc - FIRESKY_WIDTH) = pixel - ((randIdx & 1));
+        *(char*)(tmpSrc - FIRESKY_WIDTH) = pixel - ((randIdx & 1));
     }
     else {
-        *(byte*)(src2 - FIRESKY_WIDTH) = 0;
+        *(char*)(src2 - FIRESKY_WIDTH) = 0;
     }
 }
 
@@ -602,11 +602,11 @@ static void R_Fire() {
     int rand = 0;
     int step = 0;
     int pixel = 0;
-    byte *src;
-    byte *srcoffset;
+    char *src;
+    char *srcoffset;
 
     rand = (M_Random() & 0xff);
-    src = fireImage.data_ptr();
+    src = fireImage.data();
     counter = 0;
     src += FIRESKY_WIDTH;
 
@@ -654,23 +654,24 @@ static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
     int i;
-    byte *pixdata;
+    char *pixdata;
 
     auto lump = wad::find("FIRE");
     fireLump = lump->section_index();
-    fireImage = I_ReadImage(lump->lump_index(), true, true, false, 0);
+    fireImage = std::move(I_ReadImage(lump->lump_index(), true, true, false, 0));
 
-    pixdata = fireImage.data_ptr();
+    pixdata = fireImage.data();
     for (i = 0; i < 4096; i++)
         pixdata[i] >>= 4;
 
+    /*
     uint8 j = 0;
-    gfx::Palette paldata { gfx::PixelFormat::rgba, 16, nullptr };
-    for(auto& c : paldata.map<gfx::Rgba>()) {
-        c = gfx::Rgba { j, j, j, 0xff };
+    RgbaPalette paldata { 16 };
+    for(auto& c : paldata) {
+        c = Rgba { j, j, j, 0xff };
         j += 16;
     }
-    fireImage.set_palette(paldata);
+    fireImage.set_palette(paldata);*/
 }
 
 //
@@ -701,8 +702,8 @@ static void R_DrawFire(void) {
        But right now I can't be arsed. Talk to me in 2030 when I still haven't done it.
        -dotfloat
        TODO: Rewrite this */
-    firePal16 = fireImage.palette()->data_ptr();
-    fireBuffer = fireImage.data_ptr();
+    // firePal16 = fireImage.palette()->data_ptr();
+    // fireBuffer = fireImage.data_ptr();
 
     //
     // copy fire pixel data to texture data array

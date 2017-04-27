@@ -27,7 +27,7 @@
 
 #include <imp/Image>
 
-gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex);
+Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex);
 
 void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
                     int* w, int* h, int* offset, int palindex);

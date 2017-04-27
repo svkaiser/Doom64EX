@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <imp/Image>
 
 #include "SDL.h"
 
@@ -242,7 +243,7 @@ void GL_SwapBuffers(void) {
 // GL_GetScreenBuffer
 //
 
-byte* GL_GetScreenBuffer(int x, int y, int width, int height) {
+Image GL_GetScreenBuffer(int16 x, int16 y, int16 width, int16 height) {
     byte* buffer;
     byte* data;
     int i;
@@ -264,25 +265,13 @@ byte* GL_GetScreenBuffer(int x, int y, int width, int height) {
     dglFlush();
     dglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
     dglPixelStorei(GL_PACK_ALIGNMENT, pack);
+    RgbImage image { width, height };
 
-    //
-    // Need to vertically flip the image
-    // 20120313 villsa - better method to flip image. uses one buffer instead of two
-    //
-    for(i = 0; i < height / 2; i++) {
-        for(j = 0; j < col; j++) {
-            offset1 = (i * col) + j;
-            offset2 = ((height - (i + 1)) * col) + j;
-
-            buffer[j] = data[offset1];
-            data[offset1] = data[offset2];
-            data[offset2] = buffer[j];
-        }
-    }
+    //image.flip(Flip::vertical);
 
     Z_Free(buffer);
 
-    return data;
+    return image;
 }
 
 //

@@ -249,45 +249,51 @@ void GL_SetNewPalette(int id, byte palID) {
 
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
-    if(r_texnonpowresize > 0) {
-        int wp;
-        int hp;
-
-        // pad the width and heights
-        wp = GL_PadTextureDims(*origwidth);
-        hp = GL_PadTextureDims(*origheight);
-
-        gfx::Image image(format == GL_RGBA8 ? gfx::PixelFormat::rgba : gfx::PixelFormat::rgb, *origwidth, *origheight, data);
-        image.resize(wp, hp);
-
-        *origwidth = wp;
-        *origheight = hp;
-
-        dglTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                format,
-                wp,
-                hp,
-                0,
-                type,
-                GL_UNSIGNED_BYTE,
-                image.data()
-        );
-    }
-    else {
-        dglTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            format,
-            *origwidth,
-            *origheight,
-            0,
-            type,
-            GL_UNSIGNED_BYTE,
-            data
-        );
-    }
+//    if(r_texnonpowresize > 0) {
+//        int wp;
+//        int hp;
+//
+//        // pad the width and heights
+//        wp = GL_PadTextureDims(*origwidth);
+//        hp = GL_PadTextureDims(*origheight);
+//
+//        Image image(format == GL_RGBA8 ? PixelFormat::rgba : PixelFormat::rgb, *origwidth, *origheight, data);
+//
+//        if (format == GL_RGBA8) {
+//            RgbaImage i(*origwidth, *origheight);
+//            std::copy_n(data);
+//        }
+//
+//        image.resize(wp, hp);
+//
+//        *origwidth = wp;
+//        *origheight = hp;
+//
+//        dglTexImage2D(
+//                GL_TEXTURE_2D,
+//                0,
+//                format,
+//                wp,
+//                hp,
+//                0,
+//                type,
+//                GL_UNSIGNED_BYTE,
+//                image.data()
+//        );
+//    }
+//    else {
+//        dglTexImage2D(
+//            GL_TEXTURE_2D,
+//            0,
+//            format,
+//            *origwidth,
+//            *origheight,
+//            0,
+//            type,
+//            GL_UNSIGNED_BYTE,
+//            data
+//        );
+//    }
 
     GL_CheckFillMode();
     GL_SetTextureFilter();

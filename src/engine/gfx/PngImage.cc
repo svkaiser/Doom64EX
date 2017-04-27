@@ -28,7 +28,7 @@
 namespace {
   constexpr const char magic[] = "\x89PNG\r\n\x1a\n";
 
-  struct PngImage : ImageFormatIO {
+  struct PngImage : IImageFormat {
       StringView mimetype() const override;
       bool is_format(std::istream &) const override;
       Image load(std::istream &) const override;

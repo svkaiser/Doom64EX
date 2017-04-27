@@ -99,6 +99,14 @@ else ()
 endif ()
 
 ##------------------------------------------------------------------------------
+## Headers
+##
+
+set(HEADERS
+  ${CMAKE_SOURCE_DIR}/include/imp/detail/image.hh
+  )
+
+##------------------------------------------------------------------------------
 ## Sources
 ##
 
@@ -310,7 +318,7 @@ set(KEXLIB_SOURCES
 ## Build target
 ##
 
-add_executable(doom64ex MACOSX_BUNDLE ${SOURCES} ${KEXLIB_SOURCES})
+add_executable(doom64ex MACOSX_BUNDLE ${HEADERS} ${SOURCES} ${KEXLIB_SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES} "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/engine")
 target_link_libraries(doom64ex ${LIBRARIES} ${CONAN_LIBS})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)

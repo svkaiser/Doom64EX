@@ -70,13 +70,13 @@ namespace imp {
   using Array = std::array<T, N>;
 
   template <class T, class... Args>
-  UniquePtr<T> unique(Args&&... args)
+  UniquePtr<T> make_unique(Args&&... args)
   {
       return std::make_unique<T>(std::forward<Args>(args)...);
   }
 
   template <class T, class... Args>
-  SharedPtr<T> shared(Args&&... args)
+  SharedPtr<T> make_shared(Args&&... args)
   {
       return std::make_shared<T>(std::forward<Args>(args)...);
   }

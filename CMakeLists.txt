@@ -58,7 +58,7 @@ endif()
 
 if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Debug mode: Enabling stricter warnings")
-  set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing")
+  #set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 

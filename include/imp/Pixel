@@ -36,7 +36,6 @@
  */
 
 namespace imp {
-  namespace gfx {
     class Palette;
 
     enum struct PixelFormat {
@@ -185,6 +184,7 @@ namespace imp {
           static constexpr bool is_index = false;
           static constexpr bool is_pixel = false;
           static constexpr size_t depth = 0;
+          static constexpr size_t width = 0;
       };
 
       template<PixelFormat F, size_t R, size_t G, size_t B, size_t A>
@@ -194,6 +194,7 @@ namespace imp {
           static constexpr bool is_index = false;
           static constexpr bool is_pixel = true;
           static constexpr size_t depth = R + G + B + A;
+          static constexpr size_t width = (depth + 7) / 8;
       };
 
       template<PixelFormat F, size_t D>
@@ -203,6 +204,7 @@ namespace imp {
           static constexpr bool is_index = true;
           static constexpr bool is_pixel = true;
           static constexpr size_t depth = D;
+          static constexpr size_t width = (depth + 7) / 8;
       };
 
       template <class T>
@@ -229,7 +231,7 @@ namespace imp {
     struct PixelInfo {
         PixelFormat format = PixelFormat::none;
         bool color = false;
-        size_t bytes = 0;
+        size_t width = 0;
         bool alpha = false;
 
         size_t pal_size = 0;
@@ -634,7 +636,6 @@ namespace imp {
 
         return decltype(func1(Rgb{})) {};
     }
-  }
 }
 
 #endif //__IMP_PIXEL__13206666
