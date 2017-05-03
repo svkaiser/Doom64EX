@@ -606,7 +606,7 @@ static void R_Fire() {
     char *srcoffset;
 
     rand = (M_Random() & 0xff);
-    src = fireImage.data();
+    src = fireImage.data_ptr();
     counter = 0;
     src += FIRESKY_WIDTH;
 
@@ -660,7 +660,7 @@ void R_InitFire(void) {
     fireLump = lump->section_index();
     fireImage = std::move(I_ReadImage(lump->lump_index(), true, true, false, 0));
 
-    pixdata = fireImage.data();
+    pixdata = fireImage.data_ptr();
     for (i = 0; i < 4096; i++)
         pixdata[i] >>= 4;
 

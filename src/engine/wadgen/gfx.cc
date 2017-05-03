@@ -54,7 +54,7 @@ static const romLumpSpecial_t GfxNames[] = {
 //**************************************************************
 //      Gfx_CreateRomLump
 //
-//      Creates a gfx lump from the N64 rom. Width and height are padded
+//      Creates a image lump from the N64 rom. Width and height are padded
 //**************************************************************
 //**************************************************************
 
@@ -109,7 +109,7 @@ void Gfx_CreateRomFireLump(gfxRom_t * gfx, cache data)
 //**************************************************************
 //      Gfx_CreateEXLump
 //
-//      Creates a gfx lump for Doom64 EX. Width and height are padded
+//      Creates a image lump for Doom64 EX. Width and height are padded
 //**************************************************************
 //**************************************************************
 
@@ -223,7 +223,7 @@ void Gfx_Setup(void)
 	for (i = 0; i < MAXGFXEXITEMS; i++)
 		gfxEx[i].data = NULL;
 
-	// Get gfx
+	// Get image
 	for (i = 0; GfxNames[i].name; i++) {
 		if (!Rom_VerifyRomCode(&GfxNames[i]))
 			continue;
@@ -248,7 +248,7 @@ void Gfx_Setup(void)
 			if (!strncmp("FIRE", GfxNames[i].name, 8))
 				Gfx_CreateFirePalette(&gfxEx[i]);
 
-			gfxEx[i].lumpRef = l;	// Need to point where we originally got the gfx from
+			gfxEx[i].lumpRef = l;	// Need to point where we originally got the image from
 		}
 
 		WGen_UpdateProgress("Converting GFX...");

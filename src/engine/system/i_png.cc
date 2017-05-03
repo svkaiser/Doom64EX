@@ -57,21 +57,21 @@ d_inline static byte I_GetRGBGamma(int c) {
 // Increases the palette RGB based on gamma settings
 //
 
-static void I_TranslatePalette(Pal &dest) {
+static void I_TranslatePalette(Palette &dest) {
     if (i_gamma == 0)
         return;
 
     auto color_count = dest.count();
-    auto color_size = dest.traits().bytes;
+    auto color_size = dest.pixel_info().width;
 
     for(size_t i = 0; i < color_count; i += color_size) {
-        dest.data()[i + 0] = I_GetRGBGamma(dest.data()[i + 0]);
-        dest.data()[i + 1] = I_GetRGBGamma(dest.data()[i + 1]);
-        dest.data()[i + 2] = I_GetRGBGamma(dest.data()[i + 2]);
+        dest.data_ptr()[i + 0] = I_GetRGBGamma(dest.data_ptr()[i + 0]);
+        dest.data_ptr()[i + 1] = I_GetRGBGamma(dest.data_ptr()[i + 1]);
+        dest.data_ptr()[i + 2] = I_GetRGBGamma(dest.data_ptr()[i + 2]);
     }
 }
 
-gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
+Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
 {
     // get lump data
     auto l = wad::find(lump);
@@ -85,28 +85,32 @@ gfx::Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha
         char palname[9];
         snprintf(palname, sizeof(palname), "PAL%4.4s%d", l->lump_name().data(), palindex);
 
-        gfx::Palette newpal;
         if (auto pl = wad::find(palname))
         {
             auto bytes = pl->as_bytes();
-            gfx::Rgb *pallump = reinterpret_cast<gfx::Rgb *>(&bytes[0]);
-            newpal = *pal;
+            Rgb *pallump = reinterpret_cast<Rgb *>(&bytes[0]);
+            auto newpal = image.palette().clone_as<Rgba>();
 
             // swap out current palette with the new one
-            for (auto& c : newpal.map<gfx::Rgba>()) {
-                c = gfx::Rgba { pallump->red, pallump->green, pallump->blue, c.alpha };
+            for (auto& c : newpal) {
+                c = Rgba { pallump->red, pallump->green, pallump->blue, c.alpha };
                 pallump++;
             }
-        } else {
-            newpal = gfx::Palette { pal->format(), 16, pal->data_ptr() + (16 * palindex) * pal->traits().bytes };
-        }
 
-        I_TranslatePalette(newpal);
-        image.set_palette(newpal);
+            Palette np = std::move(newpal);
+            I_TranslatePalette(np);
+            image.palette(std::move(np));
+        } else {
+            Palette newpal = { pal.pixel_format(), 16 };
+            std::copy_n(pal.data_ptr(), 16 * palindex * pal.pixel_info().width, newpal.data_ptr());
+
+            I_TranslatePalette(newpal);
+            image.palette(std::move(newpal));
+        }
     }
 
     if (!palette)
-        image.convert(alpha ? gfx::PixelFormat::rgba : gfx::PixelFormat::rgb);
+        image.convert(alpha ? PixelFormat::rgba : PixelFormat::rgb);
 
     return image;
 }
@@ -121,8 +125,8 @@ void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
 
     // look for offset chunk if specified
     if(offset) {
-        offset[0] = image.offsets().x;
-        offset[1] = image.offsets().y;
+        offset[0] = image.sprite_offset().x;
+        offset[1] = image.sprite_offset().y;
     }
 
     if(w) {
@@ -132,7 +136,7 @@ void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
         *h = image.height();
     }
 
-    auto length = image.traits().bytes * image.width() * image.height();
+    auto length = image.size();
     auto retval = reinterpret_cast<byte*>(malloc(length));
     std::copy_n(image.data_ptr(), length, retval);
 

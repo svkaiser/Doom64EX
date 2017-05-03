@@ -90,7 +90,7 @@ void GL_ClearView(rcolor clearcolor);
 dboolean GL_GetBool(int x);
 void GL_CheckFillMode(void);
 void GL_SwapBuffers(void);
-Image GL_GetScreenBuffer(int16 x, int16 y, int16 width, int16 height);
+Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height);
 void GL_SetTextureFilter(void);
 void GL_SetOrtho(dboolean stretch);
 void GL_ResetViewport(void);

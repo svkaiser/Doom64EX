@@ -15,6 +15,8 @@
 #include "util/ArrayView"
 #include "util/StringView"
 #include "util/Guard"
+#include "util/Optional"
+#include "detail/Memory.hh"
 
 #define STUB(msg) fmt::print("STUB {}: {} ({}:{})\n", __FUNCTION__, msg, __LINE__, __FILE__)
 
@@ -55,37 +57,19 @@ namespace fmt {
 }
 
 namespace imp {
+  struct dummy_t {
+      template <class T>
+      operator T() const
+      { return {}; }
+  };
+
   using String = std::string;
   template <class T, class Deleter = std::default_delete<T>>
-  using UniquePtr = std::unique_ptr<T, Deleter>;
-  template <class T>
-  using SharedPtr = std::shared_ptr<T>;
-  template <class T>
-  using WeakPtr = std::weak_ptr<T>;
-  template <class T>
   using Vector = std::vector<T>;
   template <class T>
   using InitList = std::initializer_list<T>;
   template <class T, size_t N>
   using Array = std::array<T, N>;
-
-  template <class T, class... Args>
-  UniquePtr<T> make_unique(Args&&... args)
-  {
-      return std::make_unique<T>(std::forward<Args>(args)...);
-  }
-
-  template <class T, class... Args>
-  SharedPtr<T> make_shared(Args&&... args)
-  {
-      return std::make_shared<T>(std::forward<Args>(args)...);
-  }
-
-  template <class T>
-  decltype(auto) move(T&& x)
-  {
-      return std::move(std::forward<T>(x));
-  }
 
   // Initialisation for various parts of the engine
   void init_image();

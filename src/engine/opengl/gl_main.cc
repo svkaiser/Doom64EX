@@ -243,7 +243,7 @@ void GL_SwapBuffers(void) {
 // GL_GetScreenBuffer
 //
 
-Image GL_GetScreenBuffer(int16 x, int16 y, int16 width, int16 height) {
+Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height) {
     byte* buffer;
     byte* data;
     int i;

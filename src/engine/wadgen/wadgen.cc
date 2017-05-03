@@ -66,7 +66,7 @@ void WGen_AddDigest(char *name, int lump, int size)
 //      WGen_Process
 //
 //      The heart of the application. Opens the N64 rom and begins
-//      extracting all the sprite and gfx data from it and begins
+//      extracting all the sprite and image data from it and begins
 //      converting them into the ex format (Doom64 PC).
 //
 //      Content packages are extracted and added to the output wad.

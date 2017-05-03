@@ -103,7 +103,7 @@ endif ()
 ##
 
 set(HEADERS
-  ${CMAKE_SOURCE_DIR}/include/imp/detail/image.hh
+  #${CMAKE_SOURCE_DIR}/include/imp/detail/image.hh
   )
 
 ##------------------------------------------------------------------------------
@@ -300,10 +300,10 @@ add_sources(zone
 
 # kexlib
 set(KEXLIB_SOURCES
-  gfx/Image.cc
-  gfx/PngImage.cc
-  gfx/DoomImage.cc
-  gfx/Pixel.cc
+  image/Image.cc
+  image/Png.cc
+  image/Doom.cc
+  image/Pixel.cc
   fmt/format.cc
   fmt/ostream.cc
   common/Property.cc

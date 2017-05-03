@@ -321,7 +321,7 @@ int M_CacheThumbNail(byte** data) {
 
     tbn = new char[SAVEGAMESIZE];
 
-    std::copy_n(image.data(), SAVEGAMETBSIZE, tbn);
+    std::copy_n(image.data_ptr(), SAVEGAMETBSIZE, tbn);
 
     *data = reinterpret_cast<byte*>(tbn);
     return SAVEGAMETBSIZE;

@@ -44,7 +44,7 @@ void Sprite_GetPalette(d64RawSprite_t * d64Spr, dPalette_t * palette, int lump);
 void Sprite_GetPaletteLump(dPalette_t * palette, int lump);
 
 // I was surprised to find that some of the GFX (overlay graphic) lumps are stored
-// under the sprite format, which I call them hud gfx.
+// under the sprite format, which I call them hud image.
 // I was even more surprised that the SPACE GFX is using the Doom1/2 playpal palette :)
 // The following below are lumps that needs to be parsed as sprites, but converted to
 // the PC GFX format later on..

@@ -39,14 +39,14 @@ String wad::BasicLump::as_bytes()
     return { std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
 }
 
-gfx::Image wad::BasicLump::as_image()
+Image wad::BasicLump::as_image()
 {
     auto& s = stream();
     s.seekg(0);
     return { s };
 }
 
-gfx::Image wad::Lump::as_image()
+Image wad::Lump::as_image()
 { return data_->as_image(); }
 
 void wad::init()

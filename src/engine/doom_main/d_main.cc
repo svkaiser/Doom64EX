@@ -975,7 +975,8 @@ void D_DoomMain(void) {
     // init subsystems
 
     I_Printf("imp::init_image: Init Image\n");
-    imp::init_image();
+    void init_image();
+    init_image();
 
     I_Printf("Z_Init: Init Zone Memory Allocator\n");
     Z_Init();

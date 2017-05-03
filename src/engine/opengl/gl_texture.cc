@@ -54,7 +54,7 @@ word*       textureheight;
 word*       texturetranslation;
 word*       palettetranslation;
 
-// gfx textures
+// image textures
 
 int         numgfx;
 dtexture*   gfxptr;

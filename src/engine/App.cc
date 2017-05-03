@@ -3,7 +3,7 @@
 #include <imp/App>
 #include <imp/Wad>
 #include <sys/stat.h>
-#include <imp/Pixel>
+#include <imp/detail/Pixel.hh>
 
 #include "SDL.h"
 

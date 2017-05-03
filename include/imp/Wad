@@ -6,9 +6,7 @@
 #include <imp/util/Optional>
 
 namespace imp {
-  namespace gfx {
-    class Image;
-  }
+  class Image;
 
   namespace wad {
     enum struct Section;
@@ -96,7 +94,7 @@ namespace imp {
 
         virtual String as_bytes();
 
-        virtual gfx::Image as_image();
+        virtual Image as_image();
     };
 
     class Lump {
@@ -142,7 +140,7 @@ namespace imp {
             return memory;
         }
 
-        gfx::Image as_image();
+        Image as_image();
     };
 
     class LumpIterator {
