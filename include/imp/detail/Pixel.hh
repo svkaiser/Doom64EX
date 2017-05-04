@@ -275,7 +275,7 @@ namespace imp {
   {
       switch (type) {
       case PixelFormat::none:
-          throw std::logic_error { "Couldn't match colour" };
+          throw std::logic_error { "Couldn't match pixel" };
 
       case PixelFormat::rgb:
           return cfunc(Rgb{});

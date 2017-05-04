@@ -267,7 +267,7 @@ Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height) {
     dglPixelStorei(GL_PACK_ALIGNMENT, pack);
     RgbImage image { width, height };
 
-    //image.flip(Flip::vertical);
+//    image.flip(Flip::vertical);
 
     Z_Free(buffer);
 

@@ -82,6 +82,8 @@ namespace imp {
         BasicLump(std::size_t id):
             id_(id) {}
 
+        virtual ~BasicLump() = default;
+
         StringView lump_name() const;
 
         std::size_t lump_index() const;

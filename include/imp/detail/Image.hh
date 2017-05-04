@@ -15,8 +15,8 @@ namespace imp {
 
   constexpr auto num_image_formats = 2;
   enum class ImageFormat {
-      doom,
-      png
+      png,
+      doom
   };
 
   struct SpriteOffset {
@@ -59,6 +59,7 @@ namespace imp {
 
           if (other.data_) {
               data_ = make_unique<char[]>(size());
+              std::copy_n(other.data_ptr(), size(), data_ptr());
           } else {
               data_ = nullptr;
           }
@@ -182,7 +183,7 @@ namespace imp {
       { return pitch_; }
 
       size_t size() const
-      { return info_ ? pitch_ * height_ * info_->width : 0; }
+      { return info_ ? pitch_ * height_: 0; }
 
       const PixelInfo& pixel_info() const
       { return *info_; }
@@ -235,7 +236,7 @@ namespace imp {
                   return func(this->view_as<index_type, color_type>());
               };
 
-              return match_color(detail::pixel_info<index_type>::format, cmatch);
+              return match_color(this->palette().pixel_format(), cmatch);
           };
 
           return match_pixel(info_->format, imatch, cmatch);
@@ -310,7 +311,7 @@ namespace imp {
       { return pitch_; }
 
       size_t size() const
-      { return pitch_ * height_ * sizeof(PixT); }
+      { return pitch_ * height_; }
 
       BasicScanline<PixT, PalT> operator[](size_t i)
       { return { width_, data_.get() + pitch_ * i, pal_ }; }
@@ -377,7 +378,7 @@ namespace imp {
       { return pitch_; }
 
       size_t size() const
-      { return pitch_ * height_ * sizeof(PixT); }
+      { return pitch_ * height_; }
 
       BasicScanline<PixT, void> operator[](size_t i)
       { return { width_, data_ptr() + pitch_ * i }; }
@@ -430,7 +431,7 @@ namespace imp {
       { return pitch_; }
 
       size_t size() const
-      { return pitch_ * height_ * sizeof(PixT); }
+      { return pitch_ * height_; }
 
       BasicScanlineView<PixT, PalT> operator[](size_t i) const
       { return { width_, data_ + pitch_ * i, pal_ }; }
@@ -477,7 +478,7 @@ namespace imp {
       { return pitch_; }
 
       size_t size() const
-      { return pitch_ * height_ * sizeof(PixT); }
+      { return pitch_ * height_; }
 
       BasicScanlineView<PixT, void> operator[](size_t i) const
       { return { width_, data_ + pitch_ * i }; };

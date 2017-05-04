@@ -37,7 +37,7 @@ namespace {
   {
       auto& i = image_formats_;
       i[0] = init::image_png();
-      i[1] = init::image_doom();
+//      i[1] = init::image_doom();
   }
 }
 
@@ -87,10 +87,10 @@ void Image::convert(PixelFormat format)
         this->match(
             [&copy](const auto& image)
             {
-                for (uint16 y = 0; y < image.width(); ++y) {
+                for (uint16 y = 0; y < image.height(); ++y) {
                     auto from_sc = image[y];
                     auto to_sc = copy[y];
-                    for (uint16 x = 0; x < image.height(); ++x) {
+                    for (uint16 x = 0; x < image.width(); ++x) {
                         to_sc[x] = from_sc[x];
                     }
                 }

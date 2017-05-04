@@ -1,4 +1,5 @@
 // Emacs style mode select   -*- C++ -*-
+
 //-----------------------------------------------------------------------------
 //
 // Copyright(C) 2007-2012 Samuel Villarreal
@@ -148,11 +149,11 @@ static void InitWorldTextures(void) {
         palettetranslation[i] = 0;
 
         // read PNG and setup global width and heights
-        free(I_PNGReadData(lump.lump_index(), true, true, false, &w, &h, NULL, 0));
+        auto image = lump.as_image();
 
         textureptr[i][0] = 0;
-        texturewidth[i] = w;
-        textureheight[i] = h;
+        texturewidth[i] = image.width();
+        textureheight[i] = image.height();
     }
 
     CON_DPrintf("%i world textures initialized\n", numtextures);
@@ -163,10 +164,6 @@ static void InitWorldTextures(void) {
 //
 
 void GL_BindWorldTexture(int texnum, int *width, int *height) {
-    void *image;
-    int w;
-    int h;
-
     if(r_fillmode <= 0) {
         return;
     }
@@ -199,12 +196,11 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     }
 
     // create a new texture
-    image = I_PNGReadData(wad::find(wad::Section::textures, texnum)->lump_index(), false, true, true,
-                          &w, &h, NULL, palettetranslation[texnum]);
+    auto image = I_ReadImage(wad::find(wad::Section::textures, texnum)->lump_index(), false, true, true, palettetranslation[texnum]);
 
     dglGenTextures(1, &textureptr[texnum][palettetranslation[texnum]]);
     dglBindTexture(GL_TEXTURE_2D, textureptr[texnum][palettetranslation[texnum]]);
-    dglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    dglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data_ptr());
 
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -213,8 +209,8 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     GL_SetTextureFilter();
 
     // update global width and heights
-    texturewidth[texnum] = w;
-    textureheight[texnum] = h;
+    texturewidth[texnum] = image.width();
+    textureheight[texnum] = image.height();
 
     if(width) {
         *width = texturewidth[texnum];
@@ -222,8 +218,6 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     if(height) {
         *height = textureheight[texnum];
     }
-
-    free(image);
 
     if(devparm) {
         glBindCalls++;
@@ -249,7 +243,7 @@ void GL_SetNewPalette(int id, byte palID) {
 
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
-//    if(r_texnonpowresize > 0) {
+    if(r_texnonpowresize > 0) {
 //        int wp;
 //        int hp;
 //
@@ -280,20 +274,20 @@ static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheigh
 //                GL_UNSIGNED_BYTE,
 //                image.data()
 //        );
-//    }
-//    else {
-//        dglTexImage2D(
-//            GL_TEXTURE_2D,
-//            0,
-//            format,
-//            *origwidth,
-//            *origheight,
-//            0,
-//            type,
-//            GL_UNSIGNED_BYTE,
-//            data
-//        );
-//    }
+    }
+    else {
+        dglTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            format,
+            *origwidth,
+            *origheight,
+            0,
+            type,
+            GL_UNSIGNED_BYTE,
+            data
+        );
+    }
 
     GL_CheckFillMode();
     GL_SetTextureFilter();
@@ -314,19 +308,14 @@ static void InitGfxTextures(void) {
     for(auto section = wad::section(wad::Section::graphics); section; ++section) {
         auto& lump = *section;
         auto i = lump.section_index();
-        void *image;
-        int w;
-        int h;
 
-        image = I_PNGReadData(lump.lump_index(), true, true, false, &w, &h, NULL, 0);
+        auto image = lump.as_image();
 
         gfxptr[i] = 0;
-        gfxwidth[i] = w;
-        gfxorigwidth[i] = w;
-        gfxorigheight[i] = h;
-        gfxheight[i] = h;
-
-        free(image);
+        gfxwidth[i] = image.width();
+        gfxorigwidth[i] = image.width();
+        gfxorigheight[i] = image.height();
+        gfxheight[i] = image.height();
     }
 
     CON_DPrintf("%i generic textures initialized\n", numgfx);
@@ -337,7 +326,6 @@ static void InitGfxTextures(void) {
 //
 
 int GL_BindGfxTexture(const char* name, dboolean alpha) {
-    void *image;
     dboolean npot;
     int width;
     int height;
@@ -363,7 +351,9 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
         return gfxid;
     }
 
-    image = I_PNGReadData(lump->lump_index(), false, true, alpha, &width, &height, NULL, 0);
+    auto image = I_ReadImage(lump->lump_index(), false, true, alpha, 0);
+    width = image.width();
+    height = image.height();
 
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
@@ -379,8 +369,7 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     format = alpha ? GL_RGBA8 : GL_RGB8;
     type = alpha ? GL_RGBA : GL_RGB;
 
-    SetTextureImage((byte*) image, (alpha ? 4 : 3), &width, &height, format, type);
-    free(image);
+    SetTextureImage(reinterpret_cast<byte*>(image.data_ptr()), (alpha ? 4 : 3), &width, &height, format, type);
 
     gfxwidth[gfxid] = width;
     gfxheight[gfxid] = height;
@@ -401,7 +390,6 @@ static void InitSpriteTextures(void) {
     int j = 0;
     int p = 0;
     int palcnt = 0;
-    int offset[2];
 
     auto section = wad::section(wad::Section::sprites);
     numsprtex           = wad::section_size(wad::Section::sprites);
@@ -441,22 +429,17 @@ static void InitSpriteTextures(void) {
     section = wad::section(wad::Section::sprites);
     for(i = 0; section; ++section, ++i) {
         auto& lump = *section;
-        void *image;
-        int w;
-        int h;
 
         // allocate # of sprites per pointer
         spriteptr[i] = (dtexture*)Z_Calloc(spritecount[i] * sizeof(dtexture), PU_STATIC, 0);
 
         // read data and setup globals
-        image = I_PNGReadData(lump.lump_index(), true, true, false, &w, &h, offset, 0);
+        auto image = lump.as_image();
 
-        spritewidth[i]      = w;
-        spriteheight[i]     = h;
-        spriteoffset[i]     = (float)offset[0];
-        spritetopoffset[i]  = (float)offset[1];
-
-        free(image);
+        spritewidth[i]      = image.width();
+        spriteheight[i]     = image.height();
+        spriteoffset[i]     = image.sprite_offset().x;
+        spritetopoffset[i]  = image.sprite_offset().y;
     }
 }
 
@@ -465,10 +448,7 @@ static void InitSpriteTextures(void) {
 //
 
 void GL_BindSpriteTexture(int spritenum, int pal) {
-    void *image;
     dboolean npot;
-    int w;
-    int h;
 
     if(!r_fillmode) {
         return;
@@ -497,7 +477,7 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
         return;
     }
 
-    image = I_PNGReadData(wad::find(wad::Section::sprites, spritenum)->lump_index(), false, true, true, &w, &h, NULL, pal);
+    auto image = I_ReadImage(wad::find(wad::Section::sprites, spritenum)->lump_index(), false, true, true, pal);
 
     // check for non-power of two textures
     npot = GLAD_GL_ARB_texture_non_power_of_two;
@@ -512,8 +492,8 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DGL_CLAMP);
 
-    SetTextureImage((byte*) image, 4, &w, &h, GL_RGBA8, GL_RGBA);
-    free(image);
+    int w = image.width(), h = image.height();
+    SetTextureImage(reinterpret_cast<byte*>(image.data_ptr()), 4, &w, &h, GL_RGBA8, GL_RGBA);
 
     spritewidth[spritenum] = w;
     spriteheight[spritenum] = h;
