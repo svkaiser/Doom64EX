@@ -66,6 +66,7 @@
 
 #include "net_client.h"
 #include <imp/Wad>
+#include <imp/NativeUI>
 
 //
 // D_DoomLoop()
@@ -993,6 +994,9 @@ void D_DoomMain(void) {
     I_Printf("I_Init: Setting up machine state.\n");
     I_Init();
 
+    I_Printf("native_ui: Setting up Native UI\n");
+    native_ui::init();
+
     I_Printf("D_Init: Init DOOM parameters\n");
     D_Init();
 
@@ -1023,9 +1027,7 @@ void D_DoomMain(void) {
     I_Printf("GL_Init: Init OpenGL\n");
     GL_Init();
 
-#ifdef USESYSCONSOLE
-    I_ShowSysConsole(false);
-#endif
+    native_ui::console_show(false);
 
     // garbage collection
     Z_FreeAlloca();

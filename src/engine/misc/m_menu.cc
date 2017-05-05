@@ -67,6 +67,7 @@
 #include "gl_texture.h"
 #include "gl_draw.h"
 #include <imp/Wad>
+#include <imp/Video>
 //
 // definitions
 //
@@ -122,7 +123,6 @@ static dboolean showfullitemvalue[3] = { false, false, false};
 static int      levelwarp = 0;
 static dboolean wireframeon = false;
 static int      thermowait = 0;
-static int      m_aspectRatio = 0;
 static int      m_ScreenSize = 1;
 
 //------------------------------------------------------------------------
@@ -1630,7 +1630,6 @@ void M_ChangeMouseAccel(int choice) {
         }
         break;
     }
-    I_MouseAccelChange();
 }
 
 void M_ChangeMouseLook(int choice) {
@@ -1896,7 +1895,7 @@ void M_DrawVideo(void);
 
 extern IntProperty v_width;
 extern IntProperty v_height;
-extern BoolProperty v_windowed;
+extern IntProperty v_windowed;
 extern BoolProperty v_vsync;
 extern IntProperty v_depthsize;
 extern IntProperty v_buffersize;
@@ -1914,7 +1913,6 @@ enum {
     vsync,
     depth,
     buffer,
-    ratio,
     resolution,
     v_default,
     video_return,
@@ -1930,7 +1928,6 @@ menuitem_t VideoMenu[]= {
     {2,"Vsync:",M_ChangeVSync, 'v'},
     {2,"Depth Size:",M_ChangeDepthSize, 'd'},
     {2,"Buffer Size:",M_ChangeBufferSize, 'b'},
-    {2,"Aspect Ratio:",M_ChangeRatio, 'a'},
     {2,"Resolution:",M_ChangeResolution, 'r'},
     {-2,"Default",M_DoDefaults, 'e'},
     {1,"/r Return",M_Return, 0x20}
@@ -1971,52 +1968,6 @@ menu_t VideoDef = {
     VideoBars
 };
 
-#define MAX_RES4_3  9
-static const int Resolution4_3[MAX_RES4_3][2] = {
-    {   320,    240     },
-    {   640,    480     },
-    {   768,    576     },
-    {   800,    600     },
-    {   1024,   768     },
-    {   1152,   864     },
-    {   1280,   960     },
-    {   1400,   1050    },
-    {   1600,   1200    }
-};
-
-#define MAX_RES16_9  12
-static const int Resolution16_9[MAX_RES16_9][2] = {
-    {   640,    360     },
-    {   854,    480     },
-    {   1024,   576     },
-    {   1024,   600     },
-    {   1280,   720     },
-    {   1366,   768     },
-    {   1600,   900     },
-    {   1920,   1080    },
-    {   2048,   1152    },
-    {   2560,   1440    },
-    {   2880,   1620    },
-    {   3840,   2160    }
-};
-
-#define MAX_RES16_10  7
-static const int Resolution16_10[MAX_RES16_10][2] = {
-    {   320,    200     },
-    {   1024,   640     },
-    {   1280,   800     },
-    {   1440,   900     },
-    {   1680,   1050    },
-    {   1920,   1200    },
-    {   2560,   1600    }
-};
-
-static const float ratioVal[3] = {
-    4.0f / 3.0f,
-    16.0f / 9.0f,
-    16.0f / 10.0f
-};
-
 static char gammamsg[21][28] = {
     GAMMALVL0,
     GAMMALVL1,
@@ -2042,56 +1993,16 @@ static char gammamsg[21][28] = {
 };
 
 void M_Video(int choice) {
-    float checkratio;
     int i;
 
     M_SetupNextMenu(&VideoDef);
 
-    checkratio = static_cast<float>(v_width) / static_cast<float>(v_height);
-
-    if(dfcmp(checkratio, ratioVal[2])) {
-        m_aspectRatio = 2;
-    }
-    else if(dfcmp(checkratio, ratioVal[1])) {
-        m_aspectRatio = 1;
-    }
-    else {
-        m_aspectRatio = 0;
-    }
-
-    switch(m_aspectRatio) {
-    case 0:
-        for(i = 0; i < MAX_RES4_3; i++) {
-            if(v_width == Resolution4_3[i][0]) {
-                m_ScreenSize = i;
-                return;
-            }
-        }
-        break;
-    case 1:
-        for(i = 0; i < MAX_RES16_9; i++) {
-            if(v_width == Resolution16_9[i][0]) {
-                m_ScreenSize = i;
-                return;
-            }
-        }
-        break;
-    case 2:
-        for(i = 0; i < MAX_RES16_10; i++) {
-            if(v_width == Resolution16_10[i][0]) {
-                m_ScreenSize = i;
-                return;
-            }
-        }
-        break;
-    }
-
-    m_ScreenSize = 1;
+    m_ScreenSize = -1;
 }
 
 void M_DrawVideo(void) {
     static const char* filterType[2] = { "Linear", "Nearest" };
-    static const char* ratioName[3] = { "4 : 3", "16 : 9", "16 : 10" };
+    static const char* windowType[3] = { "Off", "On", "Noborder" };
     static char bitValue[8];
     char res[16];
     int y;
@@ -2114,10 +2025,14 @@ void M_DrawVideo(void) {
 
     DRAWVIDEOITEM2(filter, *r_filter, filterType);
     DRAWVIDEOITEM2(anisotropic, *r_anisotropic, msgNames);
-    DRAWVIDEOITEM2(windowed, *v_windowed, msgNames);
-    DRAWVIDEOITEM2(ratio, m_aspectRatio, ratioName);
+    DRAWVIDEOITEM2(windowed, *v_windowed, windowType);
 
-    sprintf(res, "%ix%i", (int)v_width, (int)v_height);
+    if (m_ScreenSize < 0) {
+        sprintf(res, "%ix%i", (int) v_width, (int) v_height);
+    } else {
+        auto mode = Video->modes()[m_ScreenSize];
+        sprintf(res, "%ix%i", mode.width, mode.height);
+    }
     DRAWVIDEOITEM(resolution, res);
 
     DRAWVIDEOITEM2(vsync, *v_vsync, msgNames);
@@ -2125,13 +2040,13 @@ void M_DrawVideo(void) {
     if(currentMenu->menupageoffset <= depth &&
             depth - currentMenu->menupageoffset < currentMenu->numpageitems) {
         if(v_depthsize == 8) {
-            dsnprintf(bitValue, 1, "8");
+            dsnprintf(bitValue, 2, "8");
         }
         else if(v_depthsize == 16) {
-            dsnprintf(bitValue, 2, "16");
+            dsnprintf(bitValue, 3, "16");
         }
         else if(v_depthsize == 24) {
-            dsnprintf(bitValue, 2, "24");
+            dsnprintf(bitValue, 3, "24");
         }
         else {
             dsnprintf(bitValue, 8, "Invalid");
@@ -2144,16 +2059,16 @@ void M_DrawVideo(void) {
     if(currentMenu->menupageoffset <= buffer &&
             buffer - currentMenu->menupageoffset < currentMenu->numpageitems) {
         if(v_buffersize == 8) {
-            dsnprintf(bitValue, 1, "8");
+            dsnprintf(bitValue, 2, "8");
         }
         else if(v_buffersize == 16) {
-            dsnprintf(bitValue, 2, "16");
+            dsnprintf(bitValue, 3, "16");
         }
         else if(v_buffersize == 24) {
-            dsnprintf(bitValue, 2, "24");
+            dsnprintf(bitValue, 3, "24");
         }
         else if(v_buffersize == 32) {
-            dsnprintf(bitValue, 2, "32");
+            dsnprintf(bitValue, 3, "32");
         }
         else {
             dsnprintf(bitValue, 8, "Invalid");
@@ -2167,9 +2082,35 @@ void M_DrawVideo(void) {
 #undef DRAWVIDEOITEM2
 
     Draw_Text(145, 308, MENUCOLORWHITE, VideoDef.scale, false,
-              "Changes will take effect\nafter restarting the game..");
+              "Changes will take effect\n when exiting this menu.");
 
     GL_SetOrthoScale(VideoDef.scale);
+}
+
+void M_VideoSetMode()
+{
+    VideoMode mode {};
+    mode.width = *v_width;
+    mode.height = *v_height;
+    mode.vsync = *v_vsync;
+    mode.buffer_size = *v_buffersize;
+    mode.depth_size = *v_depthsize;
+
+    switch (*v_windowed) {
+    case 0:
+        mode.fullscreen = Fullscreen::exclusive;
+        break;
+
+    case 2:
+        mode.fullscreen = Fullscreen::noborder;
+        break;
+
+    default:
+        mode.fullscreen = Fullscreen::none;
+        break;
+    }
+
+    Video->set_mode(mode);
 }
 
 void M_ChangeGammaLevel(int choice) {
@@ -2213,80 +2154,20 @@ void M_ChangeAnisotropic(int choice) {
 }
 
 void M_ChangeWindowed(int choice) {
-    M_SetOptionValue(choice, v_windowed);
+    M_SetOptionValue(choice, 0, 2, 1, v_windowed);
 }
 
 static void M_SetResolution(void) {
-    int width = SCREENWIDTH;
-    int height = SCREENHEIGHT;
+    if (m_ScreenSize < 0)
+        return;
 
-    switch(m_aspectRatio) {
-    case 0:
-        width = Resolution4_3[m_ScreenSize][0];
-        height = Resolution4_3[m_ScreenSize][1];
-        break;
-    case 1:
-        width = Resolution16_9[m_ScreenSize][0];
-        height = Resolution16_9[m_ScreenSize][1];
-        break;
-    case 2:
-        width = Resolution16_10[m_ScreenSize][0];
-        height = Resolution16_10[m_ScreenSize][1];
-        break;
-    }
-
-    M_SetCvar(v_width, width);
-    M_SetCvar(v_height, height);
-}
-
-void M_ChangeRatio(int choice) {
-    int max = 0;
-
-    if(choice) {
-        if(++m_aspectRatio > 2) {
-            if(choice == 2) {
-                m_aspectRatio = 0;
-            }
-            else {
-                m_aspectRatio = 2;
-            }
-        }
-    }
-    else {
-        m_aspectRatio = MAX(m_aspectRatio - 1, 0);
-    }
-
-    switch(m_aspectRatio) {
-    case 0:
-        max = MAX_RES4_3;
-        break;
-    case 1:
-        max = MAX_RES16_9;
-        break;
-    case 2:
-        max = MAX_RES16_10;
-        break;
-    }
-
-    m_ScreenSize = MIN(m_ScreenSize, max - 1);
-
-    M_SetResolution();
+    auto mode = Video->modes()[m_ScreenSize];
+    M_SetCvar(v_width, mode.width);
+    M_SetCvar(v_height, mode.height);
 }
 
 void M_ChangeResolution(int choice) {
-    int max = 0;
-
-    switch(m_aspectRatio) {
-    case 0:
-        max = MAX_RES4_3;
-        break;
-    case 1:
-        max = MAX_RES16_9;
-        break;
-    case 2:
-        max = MAX_RES16_10;
-        break;
-    }
+    int max = Video->modes().size();
 
     if(choice) {
         if(++m_ScreenSize > max - 1) {
@@ -3716,6 +3597,9 @@ void M_ReturnToOptions(int choice) {
 //
 
 static void M_Return(int choice) {
+    if (currentMenu == &VideoDef)
+        M_VideoSetMode();
+
     currentMenu->lastOn = itemOn;
     if(currentMenu->prevMenu) {
         menufadefunc = M_MenuFadeOut;
@@ -3729,6 +3613,9 @@ static void M_Return(int choice) {
 //
 
 static void M_ReturnInstant(void) {
+    if (currentMenu == &VideoDef)
+        M_VideoSetMode();
+
     if(currentMenu->prevMenu) {
         currentMenu = currentMenu->prevMenu;
         itemOn = currentMenu->lastOn;

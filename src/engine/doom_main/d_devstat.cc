@@ -251,8 +251,9 @@ dboolean D_DevKeyResponder(event_t* ev) {
                     players[consoleplayer].cheats |= CF_SPECTATOR;
                     players[consoleplayer].message = "Spectator Mode On";
 
-                    freelook = *v_mlook;
-                    v_mlook = true;
+                    // TODO: Enable freelook
+                    // freelook = *v_mlook;
+                    // v_mlook = true;
 
                     players[consoleplayer].mo->flags |= MF_FLOAT;
                     players[consoleplayer].mo->flags |= MF_NOCLIP;
@@ -262,8 +263,9 @@ dboolean D_DevKeyResponder(event_t* ev) {
                     players[consoleplayer].cheats &= ~CF_SPECTATOR;
                     players[consoleplayer].message = "Spectator Mode Off";
 
-                    v_mlook = freelook;
-                    freelook = false;
+                    // TODO: Disable freelook
+                    // v_mlook = freelook;
+                    // freelook = false;
 
                     players[consoleplayer].mo->flags &= ~MF_FLOAT;
                     players[consoleplayer].mo->flags &= ~MF_NOCLIP;

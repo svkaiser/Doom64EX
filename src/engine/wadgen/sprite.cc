@@ -152,6 +152,7 @@ void Sprite_Convert(int lump)
 	readBuf =
 	    (byte *) (romWadFile.lumpcache[lump] + sizeof(d64RawSprite_t));
 
+	rs->width = _SWAP16(rs->width);
 	rs->height = _SWAP16(rs->height);
 	rs->xoffs = _SWAP16(rs->xoffs);
 	rs->yoffs = _SWAP16(rs->yoffs);
@@ -162,7 +163,7 @@ void Sprite_Convert(int lump)
 
 	// Here's where things gets confusing. If the sprite is compressed
 	// then its width is padded by 16, while the uncompressed sprite has the width
-	// padded by 8. On the N64, its a lot easier (and faster) to render a sprite in dimentions
+	// padded by 8. On the N64, its a lot easier (and faster) to render a sprite in dimensions
 	// of 8 or 16. Tile height pieces are always in multiples of 4
 	rs->compressed == -1 ? (_PAD8(rs->width)) : (_PAD16(rs->width));
 

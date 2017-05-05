@@ -25,6 +25,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <doom_main/d_event.h>
 #include "doomstat.h"
 #include "con_console.h"
 #include "z_zone.h"
@@ -35,6 +36,7 @@
 #include "r_main.h"
 #include "i_system.h"
 #include "gl_texture.h"
+#include <imp/NativeUI>
 
 #define CONSOLE_PROMPTCHAR      '>'
 #define MAX_CONSOLE_LINES       256//must be power of 2
@@ -126,18 +128,18 @@ void CON_Init(void) {
     console_cmdhead = 0;
     console_nextcmd = 0;
 
-#ifdef USESYSCONSOLE
-    {
-        extern HWND hwndBuffer;
-        char *buff;
-        int i = SendMessage(hwndBuffer, WM_GETTEXTLENGTH, 0, 0);
+// #ifdef USESYSCONSOLE
+//     {
+//         extern HWND hwndBuffer;
+//         char *buff;
+//         int i = SendMessage(hwndBuffer, WM_GETTEXTLENGTH, 0, 0);
 
-        buff = Z_Alloca(i);
+//         buff = Z_Alloca(i);
 
-        SendMessage(hwndBuffer, WM_GETTEXT, i, (LPARAM)buff);
-        CON_AddText(buff);
-    }
-#endif
+//         SendMessage(hwndBuffer, WM_GETTEXT, i, (LPARAM)buff);
+//         CON_AddText(buff);
+//     }
+// #endif
 
     console_initialized = true;
 }
@@ -201,15 +203,15 @@ void CON_AddText(const char *text) {
     src = text;
     c = *(src++);
     while(c) {
-#ifdef USESYSCONSOLE
-        if(*src == '\r' && *(src + 1) == '\n') {
-            *src = 0x20;
-            *(src + 1) = '\n';
-        }
-        else if(*src == '\r') {
-            *src = '\n';
-        }
-#endif
+// #ifdef USESYSCONSOLE
+//         if(*src == '\r' && *(src + 1) == '\n') {
+//             *src = 0x20;
+//             *(src + 1) = '\n';
+//         }
+//         else if(*src == '\r') {
+//             *src = '\n';
+//         }
+// #endif
 
         if((c == '\n') || (console_linelength >= CON_BUFFERSIZE)) {
             CON_AddLine(console_linebuffer, console_linelength);
@@ -221,6 +223,8 @@ void CON_AddText(const char *text) {
 
         c = *(src++);
     }
+
+    native_ui::console_add_line(text);
 }
 
 //
@@ -374,9 +378,20 @@ dboolean CON_Responder(event_t* ev) {
     }
 
     switch(console_state) {
+    case CST_UP:
+    case CST_RAISE:
+        if (ev->type == ev_keydown && ev->data2 == KEY_GRAVE)
+            CON_ToggleConsole();
+        break;
+
     case CST_DOWN:
     case CST_LOWER:
         if(ev->type == ev_keydown) {
+            if (ev->data2 == KEY_GRAVE) {
+                CON_ToggleConsole();
+                break;
+            }
+
             switch(c) {
             case KEY_ESCAPE:
                 console_inputlength = 1;
@@ -388,18 +403,18 @@ dboolean CON_Responder(event_t* ev) {
                 break;
 
             case KEY_ENTER:
-                if(console_inputlength <= 1) {
+                if (console_inputlength <= 1) {
                     break;
                 }
 
-                console_inputbuffer[console_inputlength]=0;
+                console_inputbuffer[console_inputlength] = 0;
                 CON_AddLine(console_inputbuffer, console_inputlength);
 
                 console_prevcmds[console_cmdhead] = console_head;
                 console_cmdhead++;
                 console_nextcmd = console_cmdhead;
 
-                if(console_cmdhead >= CMD_HISTORY_SIZE) {
+                if (console_cmdhead >= CMD_HISTORY_SIZE) {
                     console_cmdhead = 0;
                 }
 

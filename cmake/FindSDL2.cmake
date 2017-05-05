@@ -66,7 +66,7 @@ endif()
 if(NOT SDL2MAIN_LIBRARY)
     set(SDL2MAIN_FOUND FALSE)
 else()
-    set(SDLMAIN_FOUND TRUE)
+    set(SDL2MAIN_FOUND TRUE)
 endif()
 
 if(SDL2_INCLUDE_DIR AND EXISTS "${SDL2_INCLUDE_DIR}/SDL_version.h")

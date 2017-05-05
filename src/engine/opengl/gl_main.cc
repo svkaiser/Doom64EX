@@ -489,10 +489,10 @@ dboolean GL_GetBool(int x) {
 }
 
 //
-// CalcViewSize
+// GL_CalcViewSize
 //
 
-static void CalcViewSize(void) {
+void GL_CalcViewSize(void) {
     ViewWidth = video_width;
     ViewHeight = video_height;
 
@@ -585,7 +585,7 @@ void GL_Init(void) {
         CON_Warnf("Not enough texture units supported...\n");
     }
 
-    CalcViewSize();
+    GL_CalcViewSize();
 
     dglViewport(0, 0, video_width, video_height);
     dglClearDepth(1.0f);

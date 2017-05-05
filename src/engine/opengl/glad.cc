@@ -25,6 +25,10 @@
         http://glad.dav1d.de/#profile=compatibility&language=c&specification=gl&api=gl%3D1.4&extensions=GL_ARB_multitexture&extensions=GL_ARB_texture_env_combine&extensions=GL_ARB_texture_non_power_of_two&extensions=GL_ARB_vertex_buffer_object&extensions=GL_EXT_compiled_vertex_array&extensions=GL_EXT_fog_coord&extensions=GL_EXT_texture_env_combine&extensions=GL_EXT_texture_filter_anisotropic
 */
 
+#ifdef _WIN32
+#define APIENTRY __stdcall
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

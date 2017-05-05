@@ -3,11 +3,16 @@
 #include <imp/Property>
 
 namespace {
+  struct PropertyLess {
+      bool operator()(StringView a, StringView b) const
+      { return a.icompare(b) < 0; }
+  };
+
   auto& _global()
   {
       static struct {
           // TODO: Write a radix tree for this
-          std::map<StringView, Property*> properties;
+          std::map<StringView, Property*, PropertyLess> properties;
           std::vector<Property*> new_properties;
       } global {};
       return global;

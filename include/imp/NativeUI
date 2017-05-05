@@ -1,9 +1,7 @@
-// Emacs style mode select   -*- C++ -*-
+// -*- mode: c++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 1993-1997 Id Software, Inc.
-// Copyright(C) 2005 Simon Howard
-// Copyright(C) 2007-2012 Samuel Villarreal
+// Copyright(C) 2017 Zohar Malamant
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,36 +20,21 @@
 //
 //-----------------------------------------------------------------------------
 
+#ifndef __IMP_NATIVEUI__92059425
+#define __IMP_NATIVEUI__92059425
 
-#ifndef __I_VIDEO_H__
-#define __I_VIDEO_H__
+#include "Prelude"
 
-#include "SDL.h"
-#include "d_event.h"
+namespace imp {
+  namespace native_ui {
+    void init();
 
-#define SDL_BPP        32
+    void quit();
 
-////////////Video///////////////
+    void console_show(bool);
 
-void I_InitVideo(void);
-void I_ShutdownVideo(void);
-//
-// Called by D_DoomLoop,
-// called before processing each tic in a frame.
-// Quick syncronous operations are performed here.
-// Can call D_PostEvent.
-void I_StartTic(void);
-void I_FinishUpdate(void);
-int I_ShutdownWait(void);
-void I_CenterMouse(void);
+    void console_add_line(StringView line);
+  }
+}
 
-////////////Input//////////////
-
-extern int mouse_x;
-extern int mouse_y;
-
-int I_MouseAccel(int val);
-void I_MouseAccelChange(void);
-
-
-#endif
+#endif //__IMP_NATIVEUI__92059425
