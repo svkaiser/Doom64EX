@@ -96,7 +96,9 @@ void Image::convert(PixelFormat format)
                 }
             });
 
+        auto s = this->sprite_offset();
         *this = std::move(copy);
+        this->sprite_offset(s);
     });
 }
 

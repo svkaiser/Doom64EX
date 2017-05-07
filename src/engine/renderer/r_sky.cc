@@ -628,6 +628,7 @@ static void R_Fire() {
             R_SpreadFire(src, srcoffset, pixel, counter, &rand);
 
             pixel = *(byte*)(srcoffset + FIRESKY_WIDTH);
+
             src += FIRESKY_WIDTH;
             srcoffset += FIRESKY_WIDTH;
 
@@ -653,25 +654,21 @@ static void R_Fire() {
 static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
-    int i;
-    char *pixdata;
-
     auto lump = wad::find("FIRE");
     fireLump = lump->section_index();
     fireImage = std::move(I_ReadImage(lump->lump_index(), true, true, false, 0));
 
-    pixdata = fireImage.data_ptr();
-    for (i = 0; i < 4096; i++)
+    auto pixdata = reinterpret_cast<byte*>(fireImage.data_ptr());
+    for (int i = 0; i < 4096; i++)
         pixdata[i] >>= 4;
 
-    /*
     uint8 j = 0;
     RgbaPalette paldata { 16 };
     for(auto& c : paldata) {
         c = Rgba { j, j, j, 0xff };
         j += 16;
     }
-    fireImage.set_palette(paldata);*/
+    fireImage.palette(std::move(paldata));
 }
 
 //
@@ -702,8 +699,8 @@ static void R_DrawFire(void) {
        But right now I can't be arsed. Talk to me in 2030 when I still haven't done it.
        -dotfloat
        TODO: Rewrite this */
-    // firePal16 = fireImage.palette()->data_ptr();
-    // fireBuffer = fireImage.data_ptr();
+    firePal16 = reinterpret_cast<byte*>(fireImage.palette().data_ptr());
+    fireBuffer = reinterpret_cast<byte*>(fireImage.data_ptr());
 
     //
     // copy fire pixel data to texture data array

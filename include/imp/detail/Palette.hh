@@ -65,10 +65,10 @@ namespace imp {
       { return assign_(other.count(), other.data()); }
 
       PixelFormat pixel_format() const
-      { return detail::pixel_info<T>::format; }
+      { return T::format; }
 
       const PixelInfo& pixel_info() const
-      { return get_pixel_info(pixel_format()); }
+      { return get_pixel_info(T::format); }
 
       char* data_ptr()
       { return data_.get(); }
@@ -137,6 +137,16 @@ namespace imp {
           data_(data) {}
 
   public:
+      using value_type = T;
+      using size_type = std::size_t;
+      using difference_type = std::ptrdiff_t;
+      using const_reference = const T&;
+      using reference = const_reference ;
+      using const_pointer = const T*;
+      using pointer = const_pointer ;
+      using iterator = const_pointer;
+      using const_iterator = const_pointer;
+
       BasicPaletteView() = default;
 
       BasicPaletteView(const BasicPaletteView& other) = default;
@@ -162,6 +172,18 @@ namespace imp {
 
       const T& operator[](size_t i) const
       { return data()[i]; }
+
+      const_iterator begin() const
+      { return data(); }
+
+      const_iterator cbegin() const
+      { return data(); }
+
+      const_iterator end() const
+      { return data() + count_; }
+
+      const_iterator cend() const
+      { return data() + count_; }
   };
 
   class Palette {

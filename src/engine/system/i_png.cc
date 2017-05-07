@@ -114,31 +114,3 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
 
     return image;
 }
-
-//
-// I_PNGReadData
-//
-void *I_PNGReadData(int lump, dboolean palette, dboolean nopack, dboolean alpha,
-                    int* w, int* h, int* offset, int palindex)
-{
-    auto image = I_ReadImage(lump, palette, nopack, alpha, palindex);
-
-    // look for offset chunk if specified
-    if(offset) {
-        offset[0] = image.sprite_offset().x;
-        offset[1] = image.sprite_offset().y;
-    }
-
-    if(w) {
-        *w = image.width();
-    }
-    if(h) {
-        *h = image.height();
-    }
-
-    auto length = image.size();
-    auto retval = reinterpret_cast<byte*>(malloc(length));
-    std::copy_n(image.data_ptr(), length, retval);
-
-    return retval;
-}

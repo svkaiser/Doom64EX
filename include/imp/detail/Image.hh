@@ -5,12 +5,37 @@
 #include "Scanline.hh"
 
 namespace imp {
+  struct SpriteOffset {
+      int x {};
+      int y {};
+
+      SpriteOffset() = default;
+      SpriteOffset(const SpriteOffset&) = default;
+      SpriteOffset(int x, int y): x(x), y(y) {}
+      SpriteOffset& operator=(const SpriteOffset&) = default;
+  };
+
   namespace detail {
     constexpr uint16 image_pitch(uint16 width, uint16 align, size_t pixel_size)
     {
         auto pixel_width = pixel_size * width;
         return static_cast<uint16>(pixel_width + (pixel_width & (align - 1)));
     }
+
+    class ImageAdditional {
+        SpriteOffset sprite_offset_ {};
+
+    public:
+        ImageAdditional() = default;
+        ImageAdditional(const ImageAdditional&) = default;
+        ImageAdditional& operator=(const ImageAdditional&) = default;
+
+        const SpriteOffset& sprite_offset() const
+        { return sprite_offset_; }
+
+        void sprite_offset(const SpriteOffset& x)
+        { sprite_offset_ = x; }
+    };
   }
 
   constexpr auto num_image_formats = 2;
@@ -19,21 +44,15 @@ namespace imp {
       doom
   };
 
-  struct SpriteOffset {
-      int x {};
-      int y {};
-  };
-
   template <class, class> class BasicImage;
 
-  class Image {
+  class Image : public detail::ImageAdditional {
       const PixelInfo* info_ {};
       uint16 width_ {};
       uint16 height_ {};
       uint16 pitch_ {};
       UniquePtr<char[]> data_ {};
       Palette pal_ {};
-      SpriteOffset sprite_offset_ {};
 
       template <class T>
       Image& assign_move_(T&& other)
@@ -71,6 +90,7 @@ namespace imp {
       Image() = default;
       Image(Image&&) = default;
       Image(const Image& other):
+          ImageAdditional(other),
           info_(other.info_),
           pal_(other.pal_)
       { assign_copy_(other); }
@@ -84,12 +104,14 @@ namespace imp {
 
       template <class PixT, class PalT>
       Image(BasicImage<PixT, PalT>&& other):
+          ImageAdditional(other),
           info_(&get_pixel_info<PixT>()),
           pal_(std::move(other.pal_))
       { assign_move_(other); }
 
       template <class PixT, class PalT>
       Image(const BasicImage<PixT, PalT>& other):
+          ImageAdditional(other),
           info_(&get_pixel_info<PixT>()),
           pal_(other.pal_)
       { assign_copy_(other); }
@@ -124,6 +146,7 @@ namespace imp {
       Image& operator=(Image&&) = default;
       Image& operator=(const Image& other)
       {
+          detail::ImageAdditional::operator=(other);
           info_ = other.info_;
           pal_ = other.pal_;
           return assign_copy_(other);
@@ -194,17 +217,14 @@ namespace imp {
       bool is_indexed() const
       { return info_ && info_->index; }
 
+      Palette& palette()
+      { return pal_; }
+
       const Palette& palette() const
       { return pal_; }
 
       void palette(Palette pal)
       { pal_ = std::move(pal); }
-
-      const SpriteOffset& sprite_offset() const
-      { return sprite_offset_; }
-
-      void sprite_offset(SpriteOffset x)
-      { sprite_offset_ = std::move(x); }
 
       void convert(PixelFormat format);
 
@@ -244,7 +264,7 @@ namespace imp {
   };
 
   template <class PixT, class PalT = void>
-  class BasicImage {
+  class BasicImage : public detail::ImageAdditional {
       friend class Image;
 
       uint16 width_ {};
@@ -318,7 +338,7 @@ namespace imp {
   };
 
   template <class PixT>
-  class BasicImage<PixT, void> {
+  class BasicImage<PixT, void> : detail::ImageAdditional {
       friend class Image;
 
       uint16 width_ {};

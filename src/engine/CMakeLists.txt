@@ -171,11 +171,11 @@ set(SOURCES
   game/g_game.cc
   game/g_settings.cc
 
-  # gfx
-  gfx/Image.cc
-  gfx/PngImage.cc
-  gfx/DoomImage.cc
-  gfx/Pixel.cc
+  # image
+  image/Doom.cc
+  image/Image.cc
+  image/Pixel.cc
+  image/Png.cc
 
   # intermission
   intermission/wi_stuff.cc

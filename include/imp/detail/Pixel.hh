@@ -165,6 +165,14 @@ namespace imp {
 
 #pragma pack(pop)
 
+  template<PixelFormat Format, size_t Red, size_t Green, size_t Blue, size_t Alpha>
+  std::ostream& operator<<(std::ostream& s, const Color<Format, Red, Green, Blue, Alpha> &c)
+  { return s << "{ " << c.red << ", " << c.green << ", " << c.blue << ", " << c.alpha << " }"; }
+
+  template<PixelFormat Format, size_t Red, size_t Green, size_t Blue>
+  std::ostream& operator<<(std::ostream& s, const Color<Format, Red, Green, Blue, 0> &c)
+  { return s << "{ " << c.red << ", " << c.green << ", " << c.blue << " }"; }
+
   using Index8 = Index<PixelFormat::index8, 8>;
   using Rgba = Color<PixelFormat::rgba, 8, 8, 8, 8>;
   using Rgb = Color<PixelFormat::rgb, 8, 8, 8, 0>;

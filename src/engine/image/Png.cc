@@ -180,6 +180,8 @@ namespace {
       for (size_t i = 0; i < height; i++)
           scanlines[i] = retval[i].data_ptr();
 
+      Image x = retval;
+
       png_read_image(png_ptr, reinterpret_cast<byte**>(scanlines));
       png_read_end(png_ptr, infop);
 

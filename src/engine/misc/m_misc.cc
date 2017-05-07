@@ -262,12 +262,15 @@ int M_FileExists(char *filename) {
 
 void M_SaveDefaults(void) {
     FILE        *fh;
+    char *config;
 
-    fh=fopen(G_GetConfigFileName(), "wt");
+    config = G_GetConfigFileName();
+    fh = fopen(config, "wt");
     if(fh) {
         G_OutputBindings(fh);
         fclose(fh);
     }
+    free(config);
 }
 
 //
