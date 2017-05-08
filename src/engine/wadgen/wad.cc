@@ -84,6 +84,8 @@ void Wad_Decompress(byte * input, byte * output)
 	byte *source;
 	int idbyte = 0;
 
+	assert(*input != 59);
+
 	/*idbyte plays an important role, it specifies whenever something is compressed or
 	   decompressed by shifting the bits and finding out if there is a 0 or 1. */
 	while (1) {

@@ -37,7 +37,10 @@ namespace {
   {
       auto& i = image_formats_;
       i[0] = init::image_png();
-//      i[1] = init::image_doom();
+      i[1] = init::image_doom();
+      i[2] = init::image_n64gfx();
+      i[3] = init::image_n64texture();
+      i[4] = init::image_n64sprite();
   }
 }
 
@@ -83,6 +86,13 @@ void Image::convert(PixelFormat format)
     [this](auto color)
     {
         BasicImage<decltype(color)> copy { this->width(), this->height() };
+
+        if (this->width() <= 1) {
+            auto s = this->sprite_offset();
+            *this = std::move(copy);
+            this->sprite_offset(s);
+            return;
+        }
 
         this->match(
             [&copy](const auto& image)

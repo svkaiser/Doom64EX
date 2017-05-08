@@ -38,10 +38,13 @@ namespace imp {
     };
   }
 
-  constexpr auto num_image_formats = 2;
+  constexpr auto num_image_formats = 5;
   enum class ImageFormat {
       png,
-      doom
+      doom,
+      n64gfx,
+      n64texture,
+      n64sprite
   };
 
   template <class, class> class BasicImage;
@@ -259,7 +262,7 @@ namespace imp {
               return match_color(this->palette().pixel_format(), cmatch);
           };
 
-          return match_pixel(info_->format, imatch, cmatch);
+          return match_pixel(pixel_format(), imatch, cmatch);
       }
   };
 
@@ -274,7 +277,7 @@ namespace imp {
       BasicPalette<PalT> pal_ {};
 
       template <class T>
-      void assign_(const T& other)
+      BasicImage& assign_(const T& other)
       {
           width_ = other.width();
           height_ = other.height();
@@ -283,6 +286,7 @@ namespace imp {
           if (other.data_ptr()) {
               std::copy_n(other.data_ptr(), size(), data_.get());
           }
+          return *this;
       }
 
   public:
@@ -308,6 +312,9 @@ namespace imp {
           height_(height),
           pitch_(detail::image_pitch(width, align, sizeof(PixT))),
           data_(make_unique<char[]>(size())) {}
+
+      BasicImage& operator=(const BasicImage& other)
+      { return assign_(other); }
 
       char* data_ptr()
       { return data_.get(); }
@@ -381,6 +388,9 @@ namespace imp {
           height_(height),
           pitch_(detail::image_pitch(width, align, sizeof(PixT))),
           data_(make_unique<char[]>(size())) {}
+
+      const PixelInfo& pixel_info() const
+      { return get_pixel_info(PixT::format); }
 
       char* data_ptr()
       { return data_.get(); }
@@ -505,9 +515,13 @@ namespace imp {
   };
 
   using RgbImage = BasicImage<Rgb>;
+  using Rgb565Image = BasicImage<Rgb565>;
   using RgbaImage = BasicImage<Rgba>;
+  using Rgba5551Image = BasicImage<Rgba5551>;
   using I8RgbImage = BasicImage<Index8, Rgb>;
+  using I8Rgb565Image = BasicImage<Index8, Rgb565>;
   using I8RgbaImage = BasicImage<Index8, Rgba>;
+  using I8Rgba5551Image = BasicImage<Index8, Rgba5551>;
 }
 
 #endif //__IMP_IMAGE__94221350

@@ -305,6 +305,8 @@ static void InitGfxTextures(void) {
     gfxheight       = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxorigheight   = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
 
+    println("> numgfx: {}", numgfx);
+
     for(auto section = wad::section(wad::Section::graphics); section; ++section) {
         auto& lump = *section;
         auto i = lump.section_index();

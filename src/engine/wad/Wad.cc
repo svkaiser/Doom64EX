@@ -54,7 +54,7 @@ void wad::init()
     if (iwad_path_ && !wad::mount(iwad_path_.get())) {
         fatal("Could not mount IWAD at {}", iwad_path_.get());
     } else {
-        auto path = app::find_data_file("doom64.wad");
+        auto path = app::find_data_file("doom64.rom");
         if (!path)
             fatal("Could not find IWAD");
         if (!wad::mount(*path))

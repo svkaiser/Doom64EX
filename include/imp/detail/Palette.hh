@@ -282,7 +282,9 @@ namespace imp {
   };
 
   using RgbPalette = BasicPalette<Rgb>;
+  using Rgb565Palette = BasicPalette<Rgb565>;
   using RgbaPalette = BasicPalette<Rgba>;
+  using Rgba5551Palette = BasicPalette<Rgba5551>;
 }
 
 #endif //__IMP_PALETTE__76334850

@@ -30,7 +30,7 @@ namespace {
       return {{ detail::pixel_info<Args> {}... }};
   }
 
-  constexpr auto infos_ = infos_array_<void, Index8, Rgb, Rgba, Rgba5551>();
+  constexpr auto infos_ = infos_array_<void, Index8, Rgb, Rgb565, Rgba, Rgba5551>();
 }
 
 const PixelInfo& imp::get_pixel_info(PixelFormat format)

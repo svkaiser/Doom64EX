@@ -17,6 +17,9 @@ namespace imp {
   namespace init {
     UniquePtr<ImageFormatIO> image_png();
     UniquePtr<ImageFormatIO> image_doom();
+    UniquePtr<ImageFormatIO> image_n64gfx();
+    UniquePtr<ImageFormatIO> image_n64texture();
+    UniquePtr<ImageFormatIO> image_n64sprite();
   }
 }
 

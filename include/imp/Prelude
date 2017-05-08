@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <chrono>
 
 // Include standard utilities
 #include "util/Types"
@@ -79,6 +80,26 @@ namespace imp {
   {
       return s.write(sv.data(), sv.length());
   }
+
+  class Stopwatch {
+      using clock = std::chrono::steady_clock;
+      std::string message_;
+      clock::time_point start_;
+
+  public:
+      Stopwatch(const std::string &message):
+          message_(message),
+          start_(std::chrono::steady_clock::now()) {}
+
+      ~Stopwatch()
+      {
+          using namespace std::chrono_literals;
+          auto timediff = (clock::now() - start_) / 1ms;
+          fmt::println("{}: {}ms", message_, timediff);
+      }
+  };
+
+#define STOPWATCH Stopwatch _stopwatch_##__COUNTER__(__PRETTY_FUNCTION__);
 }
 
 template <class T, class Deleter>

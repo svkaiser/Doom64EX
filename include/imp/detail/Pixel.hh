@@ -40,6 +40,7 @@ namespace imp {
       none,
       index8,
       rgb,
+      rgb565,
       rgba,
       rgba5551
   };
@@ -174,12 +175,14 @@ namespace imp {
   { return s << "{ " << c.red << ", " << c.green << ", " << c.blue << " }"; }
 
   using Index8 = Index<PixelFormat::index8, 8>;
-  using Rgba = Color<PixelFormat::rgba, 8, 8, 8, 8>;
   using Rgb = Color<PixelFormat::rgb, 8, 8, 8, 0>;
+  using Rgb565 = Color<PixelFormat::rgb, 5, 6, 5, 0>;
+  using Rgba = Color<PixelFormat::rgba, 8, 8, 8, 8>;
   using Rgba5551 = Color<PixelFormat::rgba5551, 5, 5, 5, 1>;
 
-  static_assert(sizeof(Rgba) == 4, "Size of RGBA struct must be 4 bytes");
   static_assert(sizeof(Rgb) == 3, "Size of RGB struct must be 3 bytes");
+  static_assert(sizeof(Rgb565) == 2, "Size of RGB565 struct must be 2 bytes");
+  static_assert(sizeof(Rgba) == 4, "Size of RGBA struct must be 4 bytes");
   static_assert(sizeof(Rgba5551) == 2, "Size of RGBA5551 struct must be 2 bytes");
 
   namespace detail {
@@ -287,6 +290,9 @@ namespace imp {
 
       case PixelFormat::rgb:
           return cfunc(Rgb{});
+
+      case PixelFormat::rgb565:
+          return cfunc(Rgb565{});
 
       case PixelFormat::rgba:
           return cfunc(Rgba{});

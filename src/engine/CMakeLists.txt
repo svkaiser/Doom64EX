@@ -174,6 +174,9 @@ set(SOURCES
   # image
   image/Doom.cc
   image/Image.cc
+  image/N64Gfx.cc
+  image/N64Texture.cc
+  image/N64Sprite.cc
   image/Pixel.cc
   image/Png.cc
 
