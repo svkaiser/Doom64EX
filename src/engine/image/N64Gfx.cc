@@ -25,6 +25,12 @@
 #include "Image.hh"
 
 namespace {
+  template<size_t Pad>
+  constexpr size_t int_pad(size_t x)
+  {
+      return x + ((Pad - (x & (Pad - 1))) & (Pad - 1));
+  }
+
   struct N64Gfx : ImageFormatIO {
       Optional<Image> load(std::istream &) const override;
   };
@@ -48,22 +54,38 @@ Optional<Image> N64Gfx::load(std::istream &s) const
 
     assert(header.compressed == 0xffff);
 
-    I8Rgba5551Image image { header.width, header.height, 4 };
+    I8Rgba5551Image image { header.width, header.height };
+    auto palofs = s.tellg() + int_pad<8>(header.width * header.height);
 
-    for (size_t y {}; y < image.height(); ++y) {
-        for (size_t x {}; x < image.width(); ++x) {
+    for (size_t y {}; y < header.height; ++y) {
+        for (size_t x {}; x < header.width; ++x) {
             auto c = s.get();
-            image[y].index(x, static_cast<uint8>(c));
+            if (x < image.width() && y < image.height())
+                image[y].index(x, static_cast<uint8>(c));
         }
     }
 
+    s.seekg(palofs);
+
+    constexpr size_t r_mask = 0b0000'0000'0011'1110;
+    constexpr size_t r_shr  = 1;
+    constexpr size_t g_mask = 0b0000'0111'1100'0000;
+    constexpr size_t g_shr  = 6;
+    constexpr size_t b_mask = 0b1111'1000'0000'0000;
+    constexpr size_t b_shr  = 11;
+    constexpr size_t a_mask = 0b0000'0000'0000'0001;
+    constexpr size_t a_shr  = 0;
+
     Rgba5551Palette pal { 256 };
     for (auto& c : pal) {
-        char texc[2];
-        s.read(texc, 2);
-        std::swap(texc[0], texc[1]);
-        c = *reinterpret_cast<Rgba5551*>(texc);
-        c.alpha = 1;
+        uint16 color;
+        s.read(reinterpret_cast<char*>(&color), 2);
+        color = swap_bytes(color);
+        size_t d = color;
+        c.blue  = (d & r_mask) >> r_shr;
+        c.green = (d & g_mask) >> g_shr;
+        c.red   = (d & b_mask) >> b_shr;
+        c.alpha = (d & a_mask) >> a_shr;
     }
     image.palette(std::move(pal));
 

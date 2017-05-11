@@ -270,6 +270,9 @@ namespace imp {
       case PixelFormat::rgb:
           return func(Rgb{});
 
+      case PixelFormat::rgb565:
+          return func(Rgb565{});
+
       case PixelFormat::rgba:
           return func(Rgba{});
 

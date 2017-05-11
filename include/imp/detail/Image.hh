@@ -18,8 +18,8 @@ namespace imp {
   namespace detail {
     constexpr uint16 image_pitch(uint16 width, uint16 align, size_t pixel_size)
     {
-        auto pixel_width = pixel_size * width;
-        return static_cast<uint16>(pixel_width + (pixel_width & (align - 1)));
+        width *= pixel_size;
+        return static_cast<uint16>(width + ((align - (width & (align - 1))) & (align - 1)));
     }
 
     class ImageAdditional {

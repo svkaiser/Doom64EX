@@ -69,22 +69,33 @@ Optional<Image> N64Sprite::load(std::istream &s) const
 
     I8Rgba5551Image image;
 
-    assert((header.width > 0) && (header.width <= 256) && (header.height > 0) && (header.height <= 256));
+    assert((header.width >= 2) && (header.width <= 256) && (header.height >= 2) && (header.height <= 256));
 
     if (header.compressed >= 0) {
         image = { header.width, header.height, 16 };
 
         for (size_t y {}; y < image.height(); ++y) {
-            for (size_t x {}; x < image.width(); x += 2) {
+
+            for (size_t x {}; x < image.pitch(); x += 2) {
                 auto c = s.get();
                 image[y].index(x, static_cast<uint8>((c & 0xf0) >> 4));
                 image[y].index(x+1, static_cast<uint8>(c & 0x0f));
             }
         }
 
-        image.palette({ 16 });
+        Rgba5551Palette pal { 16 };
+        for (auto &c : pal) {
+            union {
+                char chr[2];
+                Rgba5551 color;
+            } hack;
+            s.read(hack.chr, 2);
+            std::swap(hack.chr[0], hack.chr[1]);
+            c = hack.color;
+        }
+        image.palette(std::move(pal));
     } else {
-        image = { header.width, header.height, 8 };
+        image = { header.width, header.height, 16 };
 
         for (size_t y {}; y < image.height(); ++y) {
             for (size_t x {}; x < image.width(); ++x) {
@@ -93,7 +104,30 @@ Optional<Image> N64Sprite::load(std::istream &s) const
             }
         }
 
-        image.palette({ 256 });
+        Rgba5551Palette pal { 256 };
+        auto z = 0;
+        for (auto&c : pal)
+            c.red = c.green = c.blue = c.alpha = (z++);
+
+        image.palette(std::move(pal));
+    }
+
+    int id {};
+    int inv {};
+    println(": {}x{}", image.width(), image.height());
+    for (size_t y {}; y < image.height(); ++y) {
+        if (id == header.tileheight) {
+            id = 0;
+            inv = 0;
+        }
+
+        if (inv) {
+            for (size_t x {}; x < image.width(); x += 16) {
+                auto data = image[y].data() + x;
+                std::swap_ranges(data, data + 8, data + 8);
+            }
+        }
+        inv ^= 1;
     }
 
     image.sprite_offset({ header.xoffs, header.yoffs });
