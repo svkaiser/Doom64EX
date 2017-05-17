@@ -47,30 +47,26 @@ Optional<Image> N64Texture::load(std::istream &s) const
     header.numpal = big_endian(header.numpal);
     header.wshift = big_endian(header.wshift);
 
-    I8Rgba5551Image image
-        { static_cast<uint16>(1 << header.wshift),
-          static_cast<uint16>(1 << header.hshift) };
+    uint16 width = static_cast<uint16>(1 << header.wshift);
+    uint16 height = static_cast<uint16>(1 << header.hshift);
 
-    println("> {}x{}", image.width(), image.height());
+    I8Rgba5551Image image { width, height };
 
     for (size_t y {}; y < image.height(); ++y) {
-        for (size_t x {}; x < image.width(); x += 2) {
+        for (size_t x {}; x + 2 <= image.width(); x += 2) {
             auto c = s.get();
             image[y].index(x, static_cast<uint8>((c & 0xf0) >> 4));
             image[y].index(x+1, static_cast<uint8>(c & 0x0f));
         }
     }
 
-    auto palsize = static_cast<size_t>(header.numpal) * 16;
-    Rgba5551Palette pal { palsize };
-    for (auto& c : pal) {
-        char texc[2];
-        s.read(texc, 2);
-        std::swap(texc[0], texc[1]);
-        c = *reinterpret_cast<Rgba5551*>(texc);
+    for (size_t i {}; i + 8 <= image.size(); i += 8) {
+        auto pos = image.data_ptr() + i;
+        std::swap_ranges(pos, pos + 4, pos + 4);
     }
 
-    image.palette(std::move(pal));
+    auto palsize = static_cast<size_t>(header.numpal) * 16;
+    image.palette(read_n64palette(s, palsize));
 
     return image;
 }

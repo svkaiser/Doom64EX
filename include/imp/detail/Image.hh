@@ -5,6 +5,10 @@
 #include "Scanline.hh"
 
 namespace imp {
+  namespace wad {
+    class Lump;
+  }
+
   struct SpriteOffset {
       int x {};
       int y {};
@@ -139,6 +143,9 @@ namespace imp {
       Image(const BasicImageView<PixT, void>& other):
           info_(&get_pixel_info<PixT>())
       { assign_copy_(other); }
+
+      /*! Load image from lump */
+      Image(wad::Lump& lump);
 
       Image(std::istream& s)
       { load(s); }
@@ -282,9 +289,11 @@ namespace imp {
           width_ = other.width();
           height_ = other.height();
           pitch_ = other.pitch();
-          data_ = make_unique<char[]>(size());
           if (other.data_ptr()) {
+              data_ = make_unique<char[]>(size());
               std::copy_n(other.data_ptr(), size(), data_.get());
+          } else {
+              data_ = nullptr;
           }
           return *this;
       }
@@ -296,16 +305,8 @@ namespace imp {
 
       BasicImage(BasicImage&&) = default;
 
-      BasicImage(const BasicImage& other):
-          width_(other.width_),
-          height_(other.height_),
-          pitch_(other.pitch_),
-          data_(make_unique<char[]>(size()))
-      {
-          if (other.data_) {
-              std::copy_n(other.data_.get(), size(), data_.get());
-          }
-      }
+      BasicImage(const BasicImage& other)
+      { assign_(other); }
 
       BasicImage(uint16 width, uint16 height, uint16 align = 1):
           width_(width),

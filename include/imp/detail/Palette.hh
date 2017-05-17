@@ -45,7 +45,8 @@ namespace imp {
       using const_pointer = const T*;
       using iterator = pointer;
       using const_iterator = const_pointer;
-      BasicPalette() {}
+
+      BasicPalette() = default;
 
       BasicPalette(BasicPalette &&) = default;
 
@@ -209,7 +210,7 @@ namespace imp {
       }
 
   public:
-      Palette() {}
+      Palette() = default;
 
       Palette(Palette&&) = default;
 

@@ -3,7 +3,7 @@
 #include <utility>
 #include <algorithm>
 #include <imp/detail/Image.hh>
-#include "WadFormat.hh"
+#include "Rom.hh"
 
 void Deflate_Decompress(byte * input, byte * output);
 void Wad_Decompress(byte * input, byte * output);
@@ -106,6 +106,7 @@ namespace {
    * Doom64 only uses this on the Sprites and GFX lumps, but uses
    * a more sophisticated algorithm for everything else.
    */
+  [[gnu::unused]]
   String lzss_decompress_(std::istream& in)
   {
       String out;
@@ -179,8 +180,10 @@ namespace {
           size(size) {}
 
       std::istream& stream(std::istream& rom) {
-          if (!cache.str().empty())
+          if (!cache.str().empty()) {
+              cache.seekg(0);
               return cache;
+          }
 
           String buf;
           String lump;
@@ -234,29 +237,7 @@ namespace {
       }
   };
 
-  class RomLump : public wad::BasicLump {
-      std::istream& stream_;
-      ImageFormat format_;
-
-  public:
-      RomLump(size_t lump_id, std::istream& stream, ImageFormat format):
-          wad::BasicLump(lump_id),
-          stream_(stream),
-          format_(format) {}
-
-      std::istream &stream() override
-      {
-          stream_.seekg(0);
-          return stream_;
-      }
-
-      Image as_image() override
-      {
-           return { stream(), format_ };
-      }
-  };
-
-  class RomFormat : public wad::Format {
+  class RomFormat : public wad::Mount {
       std::istringstream rom_ {};
       std::vector<Info> infos_ {};
       Header header_ {};
@@ -314,8 +295,6 @@ namespace {
           if (memcmp(wad_header_.id, "IWAD", 4) != 0)
               fatal("Not an IWAD");
       }
-
-      ~RomFormat() override {}
 
       Vector<wad::LumpInfo> read_all() override
       {
@@ -394,10 +373,11 @@ namespace {
                   special = Special::gfx_cloud;
               else if (name == "FIRE")
                   special = Special::gfx_fire;
-              else if (name.substr(0, 3) == "PAL")
+              else if (name.substr(0, 3) == "PAL") {
                   section = wad::Section::normal;
+              }
 
-              lumps.emplace_back(name, section, infos_.size());
+              lumps.push_back({ name, section, infos_.size() });
               infos_.emplace_back(name, compression, format, special, dir.filepos + wad_pos_, dir.size);
               section = section1;
           }
@@ -405,16 +385,17 @@ namespace {
           return lumps;
       }
 
-      UniquePtr<wad::BasicLump> find(size_t mount_id, size_t lump_id) override
+      bool set_buffer(wad::Lump& lump, size_t index) override
       {
-          auto& l = infos_[lump_id];
-//          println("> {} {}", l.name, static_cast<int>(l.compression));
-          return imp::make_unique<RomLump>(mount_id, infos_[lump_id].stream(rom_), infos_[lump_id].format);
+          auto& l = infos_[index];
+          lump.buffer(std::make_unique<wad::RomBuffer>(l.stream(rom_), l.format));
+
+          return true;
       }
   };
 }
 
-UniquePtr<wad::Format> wad::rom_loader(StringView name)
+UniquePtr<wad::Mount> wad::rom_loader(StringView name)
 {
     std::ifstream rom(name);
     if (!rom.is_open())

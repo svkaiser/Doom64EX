@@ -5,7 +5,7 @@
 #include <fstream>
 #include <zlib.h>
 #include <sstream>
-#include "WadFormat.hh"
+#include "Mount.hh"
 
 namespace {
   template<class T>
@@ -126,22 +126,18 @@ namespace {
       wad::Section section;
   };
 
-  class ZipLump : public wad::BasicLump {
+  class ZipLump : public wad::LumpBuffer {
       std::istringstream stream_;
 
   public:
-      ZipLump(size_t lump_id, std::istringstream stream):
-          wad::BasicLump(lump_id),
+      ZipLump(std::istringstream stream):
           stream_(std::move(stream)) {}
 
       std::istream& stream() override
       { return stream_; }
-
-      String as_bytes() override
-      { return stream_.str(); }
   };
 
-  class ZipFormat : public wad::Format {
+  class ZipFormat : public wad::Mount {
       std::ifstream stream_;
       std::vector<ZipInfo> infos_;
       size_t central_dir_pos_ {};
@@ -203,7 +199,7 @@ namespace {
                   auto index = infos_.size();
 
                   infos_.push_back({ entry.method == 8, entry.local_offset, entry.uncompressed, section });
-                  lumps.emplace_back(name, section, index);
+                  lumps.push_back({ name, section, index });
               } else {
                   break;
               }
@@ -212,10 +208,10 @@ namespace {
           return lumps;
       }
 
-      UniquePtr<wad::BasicLump> find(size_t lump_index, size_t zip_index) override
+      bool set_buffer(wad::Lump& lump, size_t index) override
       {
-          assert(zip_index < infos_.size());
-          auto& info = infos_[zip_index];
+          assert(index < infos_.size());
+          auto& info = infos_[index];
 
           char sig[4];
           stream_.seekg(info.filepos);
@@ -254,12 +250,17 @@ namespace {
           if (zs.avail_out != 0)
               throw "truncated deflate stream";
 
-          return std::make_unique<ZipLump>(lump_index, std::istringstream { std::move(cache) });
+          std::istringstream i;
+          i.str(std::move(cache));
+
+          lump.buffer(std::make_unique<ZipLump>(std::move(i)));
+
+          return true;
       }
   };
 }
 
-UniquePtr<wad::Format> wad::zip_loader(StringView name)
+UniquePtr<wad::Mount> wad::zip_loader(StringView name)
 {
     std::ifstream file(name, std::ios::binary);
     file.exceptions(file.badbit | file.failbit);

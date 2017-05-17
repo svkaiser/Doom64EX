@@ -24,6 +24,8 @@
 #include <vector>
 #include <cstring>
 
+#include <imp/Wad>
+#include "wad/Rom.hh"
 #include "Image.hh"
 
 namespace {
@@ -110,6 +112,15 @@ void Image::convert(PixelFormat format)
         *this = std::move(copy);
         this->sprite_offset(s);
     });
+}
+
+Image::Image(wad::Lump &lump)
+{
+    if (auto buf = dynamic_cast<wad::RomBuffer*>(lump.buffer())) {
+        load(buf->stream(), buf->format());
+    } else {
+        load(lump.stream());
+    }
 }
 
 void init_image()

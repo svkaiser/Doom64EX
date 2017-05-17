@@ -1993,8 +1993,6 @@ static char gammamsg[21][28] = {
 };
 
 void M_Video(int choice) {
-    int i;
-
     M_SetupNextMenu(&VideoDef);
 
     m_ScreenSize = -1;

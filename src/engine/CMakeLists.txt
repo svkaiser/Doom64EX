@@ -175,8 +175,9 @@ set(SOURCES
   image/Doom.cc
   image/Image.cc
   image/N64Gfx.cc
-  image/N64Texture.cc
+  image/N64Palette.cc
   image/N64Sprite.cc
+  image/N64Texture.cc
   image/Pixel.cc
   image/Png.cc
 
@@ -267,13 +268,13 @@ set(SOURCES
   system/SdlVideo.cc
 
   # wad
-  wad/Wad.cc
+  wad/Mount.cc
   wad/DoomWad.cc
-  wad/RomWad.cc
+  wad/Rom.cc
   wad/ZipWad.cc
 
   # zone
-  zone/z_zone.cc)
+  zone/z_zone.cc filesystem/Path.cc filesystem/Path.hh wad/Rom.hh)
 
 ##------------------------------------------------------------------------------
 ## Build target

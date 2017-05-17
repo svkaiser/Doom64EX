@@ -166,7 +166,7 @@ void R_InitSprites(const char** namelist) {
 
         auto section = wad::section(wad::Section::sprites);
         for(; section; ++section) {
-            auto& l = *section;
+            auto l = *section;
             auto name = l.lump_name();
             if(*(const int *)name.data() == intname) {
                 frame = name[4] - 'A';

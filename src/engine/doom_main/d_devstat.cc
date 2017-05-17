@@ -224,7 +224,8 @@ void D_BoyISuck(void) {
 // Special debug actions when pressing the F## keys
 //
 
-static bool freelook = false;
+// FIXME: Figure out why this is unused
+//static bool freelook = false;
 dboolean D_DevKeyResponder(event_t* ev) {
     if(ev->type == ev_keydown) {
         switch(ev->data1) {

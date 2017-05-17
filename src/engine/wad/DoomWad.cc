@@ -1,6 +1,6 @@
 #include <fstream>
 #include <sstream>
-#include "WadFormat.hh"
+#include "Mount.hh"
 
 namespace {
   template <class T>
@@ -34,22 +34,18 @@ namespace {
           size(size) {}
   };
 
-  class DoomLump : public wad::BasicLump {
-      std::istringstream &stream_;
+  class DoomLump : public wad::LumpBuffer {
+      std::istream &stream_;
 
   public:
-      DoomLump(size_t lump_id, std::istringstream& stream):
-          wad::BasicLump(lump_id),
+      DoomLump(std::istream& stream):
           stream_(stream) {}
 
       std::istream& stream() override
       { return stream_; }
-
-      String as_bytes() override
-      { return stream_.str(); }
   };
 
-  class DoomFormat : public wad::Format {
+  class DoomFormat : public wad::Mount {
       std::ifstream stream_;
       Vector<Info> table_;
 
@@ -59,8 +55,6 @@ namespace {
       {
           stream_.exceptions(stream_.failbit | stream_.badbit);
       }
-
-      ~DoomFormat() override {}
 
       Vector<wad::LumpInfo> read_all() override
       {
@@ -106,17 +100,17 @@ namespace {
                   continue;
               }
 
-              lumps.emplace_back(name, section, table_.size());
+              lumps.push_back({ name, section, table_.size() });
               table_.emplace_back(dir.filepos, dir.size);
           }
 
           return lumps;
       }
 
-      UniquePtr<wad::BasicLump> find(size_t lump_id, size_t mount_id) override
+      bool set_buffer(wad::Lump& lump, size_t index) override
       {
           std::istringstream ss;
-          auto& info = table_[mount_id];
+          auto& info = table_[index];
 
           if (info.size && !info.cache.str().size()) {
               stream_.seekg(info.filepos);
@@ -125,12 +119,14 @@ namespace {
               info.cache.str(std::move(str));
           }
 
-          return std::make_unique<DoomLump>(lump_id, info.cache);
+          lump.buffer(std::make_unique<DoomLump>(info.cache));
+
+          return true;
       }
   };
 }
 
-UniquePtr<wad::Format> wad::doom_loader(StringView path)
+UniquePtr<wad::Mount> wad::doom_loader(StringView path)
 {
     std::ifstream file(path, std::ios::binary);
     Header header;

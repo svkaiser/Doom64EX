@@ -22,6 +22,7 @@
 
 #include <imp/util/Endian>
 #include <ostream>
+#include <imp/Wad>
 
 #include "Image.hh"
 
@@ -67,13 +68,12 @@ Optional<Image> N64Sprite::load(std::istream &s) const
     header.height = big_endian(header.height);
     header.tileheight = big_endian(header.tileheight);
 
-    I8Rgba5551Image image;
-
+    println(" > {}x{}", header.width, header.height);
     assert((header.width >= 2) && (header.width <= 256) && (header.height >= 2) && (header.height <= 256));
 
-    if (header.compressed >= 0) {
-        image = { header.width, header.height, 16 };
+    I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), 16 };
 
+    if (header.compressed >= 0) {
         for (size_t y {}; y < image.height(); ++y) {
 
             for (size_t x {}; x < image.pitch(); x += 2) {
@@ -83,20 +83,8 @@ Optional<Image> N64Sprite::load(std::istream &s) const
             }
         }
 
-        Rgba5551Palette pal { 16 };
-        for (auto &c : pal) {
-            union {
-                char chr[2];
-                Rgba5551 color;
-            } hack;
-            s.read(hack.chr, 2);
-            std::swap(hack.chr[0], hack.chr[1]);
-            c = hack.color;
-        }
-        image.palette(std::move(pal));
+        image.palette(read_n64palette(s, 16));
     } else {
-        image = { header.width, header.height, 16 };
-
         for (size_t y {}; y < image.height(); ++y) {
             for (size_t x {}; x < image.width(); ++x) {
                 auto c = s.get();
@@ -105,7 +93,7 @@ Optional<Image> N64Sprite::load(std::istream &s) const
         }
 
         Rgba5551Palette pal { 256 };
-        auto z = 0;
+        auto z = 0U;
         for (auto&c : pal)
             c.red = c.green = c.blue = c.alpha = (z++);
 
@@ -114,7 +102,6 @@ Optional<Image> N64Sprite::load(std::istream &s) const
 
     int id {};
     int inv {};
-    println(": {}x{}", image.width(), image.height());
     for (size_t y {}; y < image.height(); ++y) {
         if (id == header.tileheight) {
             id = 0;

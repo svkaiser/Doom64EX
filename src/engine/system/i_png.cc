@@ -76,7 +76,7 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
     // get lump data
     auto l = wad::find(lump);
 
-    auto image = l->as_image();
+    Image image { *l };
 
     if (palindex && image.is_indexed())
     {

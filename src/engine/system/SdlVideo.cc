@@ -180,7 +180,7 @@ class SdlVideo : public IVideo {
     bool has_focus_ { false };
     bool has_mouse_ { false };
     Vector<VideoMode> modes_ {};
-    int lastmbtn_ {};
+    Uint32 lastmbtn_ {};
 
     void init_gl_() {
         switch (opengl_) {

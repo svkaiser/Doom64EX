@@ -154,7 +154,8 @@ static std::map<wad::LumpHash, int> texturehashlist;
 static void P_InitTextureHashTable(void) {
     auto section = wad::section(wad::Section::textures);
     for(int i = 0; section; ++section, ++i) {
-        texturehashlist.emplace(wad::LumpHash { section->lump_name() }, i);
+        auto lump = *section;
+        texturehashlist.emplace(wad::LumpHash { lump.lump_name() }, i);
     }
 }
 
@@ -164,7 +165,12 @@ static void P_InitTextureHashTable(void) {
 
 static word P_GetTextureHashKey(int hash) {
     auto it = texturehashlist.find(hash);
-    return it != texturehashlist.end() ? it->second : 0;
+    if (it == texturehashlist.end()) {
+        auto l = wad::find(wad::Section::textures, hash);
+        return l ? hash : 0;
+    } else {
+        return it->second;
+    }
 }
 
 //

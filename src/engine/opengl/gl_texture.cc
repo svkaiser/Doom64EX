@@ -132,10 +132,8 @@ static void InitWorldTextures(void) {
     textureheight       = (word*) Z_Calloc(numtextures * sizeof(word), PU_STATIC, NULL);
 
     for(auto it = wad::section(wad::Section::textures); it; ++it) {
-        auto& lump = *it;
+        auto lump = *it;
         auto i = lump.section_index();
-        int w;
-        int h;
 
         // allocate at least one slot for each texture pointer
         textureptr[i] = (dtexture*)Z_Malloc(1 * sizeof(dtexture), PU_STATIC, 0);
@@ -149,7 +147,7 @@ static void InitWorldTextures(void) {
         palettetranslation[i] = 0;
 
         // read PNG and setup global width and heights
-        auto image = lump.as_image();
+        Image image { lump };
 
         textureptr[i][0] = 0;
         texturewidth[i] = image.width();
@@ -308,10 +306,10 @@ static void InitGfxTextures(void) {
     println("> numgfx: {}", numgfx);
 
     for(auto section = wad::section(wad::Section::graphics); section; ++section) {
-        auto& lump = *section;
+        auto lump = *section;
         auto i = lump.section_index();
 
-        auto image = lump.as_image();
+        Image image { lump };
 
         gfxptr[i] = 0;
         gfxwidth[i] = image.width();
@@ -404,7 +402,7 @@ static void InitSpriteTextures(void) {
 
     // gather # of sprites per texture pointer
     for(i = 0; section; ++section, ++i) {
-        auto& lump = *section;
+        auto lump = *section;
         spritecount[i]++;
 
         for(j = 0; j < NUMSPRITES; j++) {
@@ -430,13 +428,16 @@ static void InitSpriteTextures(void) {
 
     section = wad::section(wad::Section::sprites);
     for(i = 0; section; ++section, ++i) {
-        auto& lump = *section;
+        auto lump = *section;
 
         // allocate # of sprites per pointer
         spriteptr[i] = (dtexture*)Z_Calloc(spritecount[i] * sizeof(dtexture), PU_STATIC, 0);
 
+        if (lump.lump_name() == "PLAYA0")
+            println("> PLAYA0");
+
         // read data and setup globals
-        auto image = lump.as_image();
+        Image image { lump };
 
         spritewidth[i]      = image.width();
         spriteheight[i]     = image.height();

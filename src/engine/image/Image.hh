@@ -14,6 +14,8 @@ namespace imp {
       { throw std::logic_error { "Saving is not implemented for this image format" }; }
   };
 
+  Rgba5551Palette read_n64palette(std::istream&, size_t count);
+
   namespace init {
     UniquePtr<ImageFormatIO> image_png();
     UniquePtr<ImageFormatIO> image_doom();

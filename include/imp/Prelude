@@ -64,6 +64,15 @@ namespace imp {
       { return {}; }
   };
 
+  struct UserData {
+      virtual ~UserData() {}
+  };
+
+  /*! Pad an integer so it's divisible by N */
+  template <size_t N>
+  constexpr size_t pad(size_t x)
+  { return x + ((N - (x & (N - 1))) & (N - 1)); }
+
   using String = std::string;
   template <class T, class Deleter = std::default_delete<T>>
   using Vector = std::vector<T>;
