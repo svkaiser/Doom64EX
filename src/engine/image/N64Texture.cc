@@ -22,11 +22,12 @@
 
 #include <imp/util/Endian>
 
+#include <imp/Wad>
 #include "Image.hh"
 
 namespace {
   struct N64Texture : ImageFormatIO {
-      Optional<Image> load(std::istream &) const override;
+      Optional<Image> load(wad::Lump&) const override;
   };
 
   struct Header {
@@ -37,8 +38,9 @@ namespace {
   };
 }
 
-Optional<Image> N64Texture::load(std::istream &s) const
+Optional<Image> N64Texture::load(wad::Lump& lump) const
 {
+    auto& s = lump.stream();
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
 

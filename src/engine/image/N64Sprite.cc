@@ -28,7 +28,7 @@
 
 namespace {
   struct N64Sprite : ImageFormatIO {
-      Optional<Image> load(std::istream &) const override;
+      Optional<Image> load(wad::Lump& lump) const override;
   };
 
   struct Header {
@@ -54,8 +54,9 @@ namespace {
   static_assert(sizeof(Header) == 16, "N64Sprite header must be 16 bytes");
 }
 
-Optional<Image> N64Sprite::load(std::istream &s) const
+Optional<Image> N64Sprite::load(wad::Lump& lump) const
 {
+    auto& s = lump.stream();
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
 
@@ -68,7 +69,6 @@ Optional<Image> N64Sprite::load(std::istream &s) const
     header.height = big_endian(header.height);
     header.tileheight = big_endian(header.tileheight);
 
-    println(" > {}x{}", header.width, header.height);
     assert((header.width >= 2) && (header.width <= 256) && (header.height >= 2) && (header.height <= 256));
 
     I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), 16 };
@@ -92,12 +92,20 @@ Optional<Image> N64Sprite::load(std::istream &s) const
             }
         }
 
-        Rgba5551Palette pal { 256 };
-        auto z = 0U;
-        for (auto&c : pal)
-            c.red = c.green = c.blue = c.alpha = (z++);
-
-        image.palette(std::move(pal));
+        auto name = format("PAL{}0", lump.lump_name().substr(4));
+        auto pal = wad::find(name);
+        if (pal.have_value()) {
+            image.palette(read_n64palette(pal->stream(), 256));
+        } else {
+            println("Palette {} not found for {}", name, lump.lump_name());
+            Rgba5551Palette p { 256 };
+            size_t size = 0;
+            for (auto& c : p) {
+                c.red = c.green = c.blue = size++;
+                c.alpha = 1;
+            }
+            image.palette(p);
+        }
     }
 
     int id {};

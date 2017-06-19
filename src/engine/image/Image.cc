@@ -46,12 +46,13 @@ namespace {
   }
 }
 
-void Image::load(std::istream &s)
+void Image::load(wad::Lump& lump)
 {
+    auto& s = lump.stream();
     auto pos = s.tellg();
     for (auto fmt : auto_order_) {
         auto io = image_formats_[static_cast<int>(fmt)].get();
-        auto opt = io->load(s);
+        auto opt = io->load(lump);
         if (opt) {
             *this = std::move(*opt);
             return;
@@ -61,10 +62,10 @@ void Image::load(std::istream &s)
     throw std::runtime_error { "Couldn't detect image type" };
 }
 
-void Image::load(std::istream &s, ImageFormat format)
+void Image::load(wad::Lump& lump, ImageFormat format)
 {
     auto io = image_formats_[static_cast<int>(format)].get();
-    auto opt = io->load(s);
+    auto opt = io->load(lump);
     if (opt) {
         *this = std::move(*opt);
         return;
@@ -114,12 +115,12 @@ void Image::convert(PixelFormat format)
     });
 }
 
-Image::Image(wad::Lump &lump)
+Image::Image(wad::Lump& lump)
 {
     if (auto buf = dynamic_cast<wad::RomBuffer*>(lump.buffer())) {
-        load(buf->stream(), buf->format());
+        load(lump, buf->format());
     } else {
-        load(lump.stream());
+        load(lump);
     }
 }
 

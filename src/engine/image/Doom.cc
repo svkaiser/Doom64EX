@@ -20,11 +20,12 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <imp/Wad>
 #include "Image.hh"
 
 namespace {
   struct Doom : ImageFormatIO {
-      Optional<Image> load(std::istream&) const override;
+      Optional<Image> load(wad::Lump&) const override;
   };
 
   struct Header {
@@ -37,8 +38,9 @@ namespace {
   static_assert(sizeof(Header) == 8, "Incorrect packing");
 }
 
-Optional<Image> Doom::load(std::istream &s) const
+Optional<Image> Doom::load(wad::Lump& lump) const
 {
+    auto& s = lump.stream();
     size_t fstart = static_cast<size_t>(s.tellg());
 
     Header header;

@@ -376,11 +376,16 @@ namespace {
               else if (name == "FIRE")
                   special = Special::gfx_fire;
               else if (name.substr(0, 3) == "PAL") {
+                  println("> {}", name);
                   section = wad::Section::normal;
               }
 
               if (section == wad::Section::textures) {
                   rom_textures.push_back(name);
+              }
+
+              if (section == wad::Section::sprites) {
+                  println(">>> {}", name);
               }
 
               lumps.push_back({ name, section, infos_.size() });

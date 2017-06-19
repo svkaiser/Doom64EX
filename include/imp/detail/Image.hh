@@ -147,11 +147,11 @@ namespace imp {
       /*! Load image from lump */
       Image(wad::Lump& lump);
 
-      Image(std::istream& s)
-      { load(s); }
-
-      Image(std::istream& s, ImageFormat f)
-      { load(s, f); }
+//      Image(std::istream& s)
+//      { load(s); }
+//
+//      Image(std::istream& s, ImageFormat f)
+//      { load(s, f); }
 
       Image& operator=(Image&&) = default;
       Image& operator=(const Image& other)
@@ -194,9 +194,9 @@ namespace imp {
           return assign_copy_(other);
       }
 
-      void load(std::istream&);
+      void load(wad::Lump&);
 
-      void load(std::istream&, ImageFormat);
+      void load(wad::Lump&, ImageFormat);
 
       void save(std::ostream&, ImageFormat) const;
 
