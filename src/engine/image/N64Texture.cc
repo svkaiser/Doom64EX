@@ -52,17 +52,19 @@ Optional<Image> N64Texture::load(std::istream &s) const
 
     I8Rgba5551Image image { width, height };
 
-    for (size_t y {}; y < image.height(); ++y) {
-        for (size_t x {}; x + 2 <= image.width(); x += 2) {
-            auto c = s.get();
-            image[y].index(x, static_cast<uint8>((c & 0xf0) >> 4));
-            image[y].index(x+1, static_cast<uint8>(c & 0x0f));
-        }
+    for (size_t i = 0; i + 2 <= image.size(); i += 2) {
+        auto p = image.data_ptr() + i;
+        auto c = s.get();
+        p[0] = static_cast<uint8>((c & 0xf0) >> 4);
+        p[1] = static_cast<uint8>(c & 0x0f);
     }
 
-    for (size_t i {}; i + 8 <= image.size(); i += 8) {
-        auto pos = image.data_ptr() + i;
-        std::swap_ranges(pos, pos + 4, pos + 4);
+    auto mask = image.width() / 8;
+    for (size_t i {}; i + 16 <= image.size(); i += 16) {
+        if ((i / 8) & mask) {
+            auto pos = image.data_ptr() + i;
+            std::swap_ranges(pos, pos + 8, pos + 8);
+        }
     }
 
     auto palsize = static_cast<size_t>(header.numpal) * 16;

@@ -217,3 +217,8 @@ char *wad::Lump::bytes_ptr()
 
     return buf;
 }
+
+wad::Mount &wad::Lump::source()
+{
+    return *mounts_[info_->mount_index];
+}

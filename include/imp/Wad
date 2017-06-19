@@ -12,6 +12,7 @@ namespace imp {
     enum struct Section;
     class Lump;
     class LumpIterator;
+    class Mount;
 
     void init();
 
@@ -123,6 +124,8 @@ namespace imp {
         { return buffer_->stream(); }
 
         String as_bytes();
+
+        wad::Mount& source();
 
         char* bytes_ptr();
     };

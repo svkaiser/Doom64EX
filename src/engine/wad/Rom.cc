@@ -8,6 +8,8 @@
 void Deflate_Decompress(byte * input, byte * output);
 void Wad_Decompress(byte * input, byte * output);
 
+Vector<String> rom_textures;
+
 namespace {
   template <class T>
   void read_into(std::istream& s, T& x)
@@ -375,6 +377,10 @@ namespace {
                   special = Special::gfx_fire;
               else if (name.substr(0, 3) == "PAL") {
                   section = wad::Section::normal;
+              }
+
+              if (section == wad::Section::textures) {
+                  rom_textures.push_back(name);
               }
 
               lumps.push_back({ name, section, infos_.size() });
