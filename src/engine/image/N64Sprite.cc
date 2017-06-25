@@ -71,12 +71,14 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
 
     assert((header.width >= 2) && (header.width <= 256) && (header.height >= 2) && (header.height <= 256));
 
-    I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), 16 };
+    uint16 align = static_cast<uint16>(header.compressed == -1 ? 8 : 16);
+
+    I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), align };
 
     if (header.compressed >= 0) {
         for (size_t y {}; y < image.height(); ++y) {
 
-            for (size_t x {}; x < image.pitch(); x += 2) {
+            for (size_t x {}; x + 2 <= image.pitch(); x += 2) {
                 auto c = s.get();
                 image[y].index(x, static_cast<uint8>((c & 0xf0) >> 4));
                 image[y].index(x+1, static_cast<uint8>(c & 0x0f));
@@ -85,17 +87,16 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
 
         image.palette(read_n64palette(s, 16));
     } else {
-        for (size_t y {}; y < image.height(); ++y) {
-            for (size_t x {}; x < image.width(); ++x) {
-                auto c = s.get();
-                image[y].index(x, static_cast<uint8>(c));
-            }
-        }
+        for (size_t y = 0; y < image.height(); ++y)
+            for (size_t x = 0; x < image.pitch(); ++x)
+                s.get(image[y].data_ptr()[x]);
 
         auto name = format("PAL{}0", lump.lump_name().substr(4));
         auto pal = wad::find(name);
         if (pal.have_value()) {
-            image.palette(read_n64palette(pal->stream(), 256));
+            auto& ps = pal->stream();
+            ps.seekg(8, ps.cur);
+            image.palette(read_n64palette(ps, 256));
         } else {
             println("Palette {} not found for {}", name, lump.lump_name());
             Rgba5551Palette p { 256 };
@@ -110,16 +111,16 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
 
     int id {};
     int inv {};
-    for (size_t y {}; y < image.height(); ++y) {
+    for (size_t y {}; y < image.height(); ++y, ++id) {
         if (id == header.tileheight) {
             id = 0;
             inv = 0;
         }
 
         if (inv) {
-            for (size_t x {}; x < image.width(); x += 16) {
+            for (size_t x{}; x + align <= image.pitch(); x += align) {
                 auto data = image[y].data() + x;
-                std::swap_ranges(data, data + 8, data + 8);
+                std::swap_ranges(data, data + align/2, data + align/2);
             }
         }
         inv ^= 1;
