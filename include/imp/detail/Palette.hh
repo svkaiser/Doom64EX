@@ -16,14 +16,14 @@ namespace imp {
       friend class Palette;
 
       size_t count_ {};
-      UniquePtr<char[]> data_ {};
+      SharedPtr<char> data_ {};
 
       BasicPalette& assign_(size_t count, const char* data)
       {
           count_ = count;
 
           if (data) {
-              data_ = make_unique<char[]>(count_ * sizeof(T));
+              data_ = make_shared_array<char>(count_ * sizeof(T));
               std::copy_n(data, count_ * sizeof(T), data_.get());
           } else {
               data_ = nullptr;
@@ -58,7 +58,7 @@ namespace imp {
 
       BasicPalette(size_t count):
           count_(count),
-          data_(make_unique<char[]>(count_ * sizeof(T))) {}
+          data_(make_shared_array<char>(count_ * sizeof(T))) {}
 
       BasicPalette& operator=(BasicPalette&&) = default;
 
@@ -192,7 +192,7 @@ namespace imp {
 
       const PixelInfo* info_ {};
       size_t count_ {};
-      UniquePtr<char[]> data_ {};
+      SharedPtr<char> data_ {};
 
       template <class T>
       Palette& assign_(const T& other)
@@ -201,7 +201,7 @@ namespace imp {
           count_ = other.count();
           if (count_) {
               auto size = count_ * info_->width;
-              data_ = make_unique<char[]>(size);
+              data_ = make_shared_array<char>(size);
               std::copy_n(other.data_ptr(), size, data_.get());
           } else {
               data_ = nullptr;
@@ -239,7 +239,7 @@ namespace imp {
           count_(count)
       {
           if (info_) {
-              data_ = make_unique<char[]>(count_ * info_->width);
+              data_ = make_shared_array<char>(count_ * info_->width);
           }
       }
 
@@ -280,6 +280,12 @@ namespace imp {
 
       size_t count() const
       { return count_; }
+
+      operator bool() const
+      { return !!data_; }
+
+      bool operator!() const
+      { return !data_; }
   };
 
   using RgbPalette = BasicPalette<Rgb>;

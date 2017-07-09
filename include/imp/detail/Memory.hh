@@ -29,6 +29,10 @@ namespace imp {
   { return std::make_shared<T>(std::forward<Args>(args)...); }
 
   template <class T>
+  SharedPtr<T> make_shared_array(size_t size)
+  { return { new T[size], [](T *mem) { delete[] mem; } }; }
+
+  template <class T>
   decltype(auto) move(T&& x)
   { return std::move(std::forward<T>(x)); }
 

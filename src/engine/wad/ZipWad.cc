@@ -144,6 +144,7 @@ namespace {
 
   public:
       ZipFormat(std::ifstream &&stream):
+          Mount(Type::rom),
           stream_(std::move(stream)) {}
 
       Vector<wad::LumpInfo> read_all() override

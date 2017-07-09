@@ -447,7 +447,7 @@ static void R_DrawSimpleSky(int lump, int offset) {
     int gfxLmp;
     float row;
 
-    gfxLmp = GL_BindGfxTexture(wad::find(lump)->lump_name().data(), true);
+    gfxLmp = GL_BindGfxTexture(wad::find(lump)->lump_name().data(), false);
     height = gfxheight[gfxLmp];
     lumpheight = gfxorigheight[gfxLmp];
 

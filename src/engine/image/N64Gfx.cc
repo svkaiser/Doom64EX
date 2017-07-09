@@ -40,6 +40,8 @@ namespace {
 
 Optional<Image> N64Gfx::load(wad::Lump& lump) const
 {
+    bool is_fire = lump.lump_name() == "FIRE";
+    bool is_cloud = lump.lump_name() == "CLOUD";
     auto& s = lump.stream();
 
     Header header;
@@ -49,7 +51,7 @@ Optional<Image> N64Gfx::load(wad::Lump& lump) const
     header.width = big_endian(header.width);
     header.height = big_endian(header.height);
 
-    assert(header.compressed == 0xffff);
+    assert(is_fire || header.compressed == 0xffff);
 
     // The palette is located right after the image
     auto palofs = static_cast<size_t>(s.tellg()) + pad<8>(header.width * header.height);
@@ -63,9 +65,21 @@ Optional<Image> N64Gfx::load(wad::Lump& lump) const
         }
     }
 
-    // Seek to the palette and read it
-    s.seekg(palofs);
-    image.palette(read_n64palette(s, 256));
+    if (is_cloud) {
+        constexpr size_t mask = 64;
+        for (size_t i {}; i + 16 <= 64 * 64; i += 8) {
+            if (!(i & mask))
+                continue;
+            auto pos = image.data_ptr() + i;
+            std::swap_ranges(pos, pos + 4, pos + 4);
+        }
+    }
+
+    if (!is_fire) {
+        // Seek to the palette and read it
+        s.seekg(palofs);
+        image.palette(read_n64palette(s, 256));
+    }
 
     return image;
 }

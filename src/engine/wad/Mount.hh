@@ -15,6 +15,13 @@ namespace imp {
     };
 
     struct Mount {
+        enum struct Type {
+            doom,
+            zip,
+            rom
+        } const type;
+
+        Mount(Type type): type(type) {}
         virtual ~Mount() {}
 
         virtual Vector<LumpInfo> read_all() = 0;

@@ -42,7 +42,10 @@ namespace {
           stream_(stream) {}
 
       std::istream& stream() override
-      { return stream_; }
+      {
+          stream_.seekg(0);
+          return stream_;
+      }
   };
 
   class DoomFormat : public wad::Mount {
@@ -51,6 +54,7 @@ namespace {
 
   public:
       DoomFormat(StringView path):
+          Mount(Type::doom),
           stream_(path, std::ios::binary)
       {
           stream_.exceptions(stream_.failbit | stream_.badbit);

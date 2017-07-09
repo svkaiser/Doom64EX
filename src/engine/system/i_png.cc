@@ -37,6 +37,7 @@
 #include <sstream>
 #include <imp/Property>
 #include <imp/Wad>
+#include <image/PaletteCache.hh>
 
 FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
                       [](const FloatProperty&, float, float&)
@@ -57,6 +58,7 @@ d_inline static byte I_GetRGBGamma(int c) {
 // Increases the palette RGB based on gamma settings
 //
 
+/*
 static void I_TranslatePalette(Palette &dest) {
     if (i_gamma == 0)
         return;
@@ -70,6 +72,7 @@ static void I_TranslatePalette(Palette &dest) {
         dest.data_ptr()[i + 2] = I_GetRGBGamma(dest.data_ptr()[i + 2]);
     }
 }
+*/
 
 Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
 {
@@ -85,27 +88,17 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
         char palname[9];
         snprintf(palname, sizeof(palname), "PAL%4.4s%d", l->lump_name().data(), palindex);
 
-        if (auto pl = wad::find(palname))
-        {
-            auto bytes = pl->as_bytes();
-            Rgb *pallump = reinterpret_cast<Rgb *>(&bytes[0]);
-            auto newpal = image.palette().clone_as<Rgba>();
-
-            // swap out current palette with the new one
-            for (auto& c : newpal) {
-                c = Rgba { pallump->red, pallump->green, pallump->blue, c.alpha };
-                pallump++;
-            }
-
-            Palette np = std::move(newpal);
-            I_TranslatePalette(np);
-            image.palette(std::move(np));
+        if (wad::have_lump(palname)) {
+            println("> {}", palname);
+            image.palette(cache::palette(palname));
         } else {
+            /*
             Palette newpal = { pal.pixel_format(), 16 };
             std::copy_n(pal.data_ptr(), 16 * palindex * pal.pixel_info().width, newpal.data_ptr());
 
             I_TranslatePalette(newpal);
             image.palette(std::move(newpal));
+            */
         }
     }
 

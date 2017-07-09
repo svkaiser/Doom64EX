@@ -178,6 +178,7 @@ set(SOURCES
   image/N64Palette.cc
   image/N64Sprite.cc
   image/N64Texture.cc
+  image/PaletteCache.cc
   image/Pixel.cc
   image/Png.cc
 

@@ -47,6 +47,16 @@ namespace {
                                    png_destroy_read_struct(png_ptrp, infopp, nullptr);
                                });
 
+      // Check if the starts with a PNG magic
+      {
+          auto start = s.tellg();
+          char test[sizeof(magic)];
+          s.read(test, sizeof(test));
+          if (!std::equal(test, test + sizeof(test), magic))
+              return nullopt;
+          s.seekg(start);
+      }
+
       png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
       if (png_ptr == nullptr)
           throw std::runtime_error { "Failed to create PNG read struct" };

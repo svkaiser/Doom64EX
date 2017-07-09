@@ -93,11 +93,11 @@ void P_InitTextureHashTable(void) {
         auto a = wad::find(s).value().section_index();
         texturehashlist_.emplace(i, a);
     }
-//    auto section = wad::section(wad::Section::textures);
-//    for(int i = 0; section; ++section, ++i) {
-//        auto lump = *section;
-//        texturehashlist_.emplace(wad::LumpHash { lump.lump_name() }, i);
-//    }
+    auto section = wad::section(wad::Section::textures);
+    for(int i = 0; section; ++section, ++i) {
+        auto lump = *section;
+        texturehashlist_.emplace(wad::LumpHash { lump.lump_name() }.get(), i);
+    }
 }
 
 //

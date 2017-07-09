@@ -27,6 +27,7 @@
 #include <wad/Rom.hh>
 
 #include "Image.hh"
+#include "PaletteCache.hh"
 
 extern std::set<String> rom_weapon_sprites;
 
@@ -85,6 +86,7 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
     uint16 align = header.compressed == -1 ? 8_US : 16_US;
 
     I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), align };
+    Palette palette;
 
     if (header.compressed >= 0) {
         for (size_t y {}; y < image.height(); ++y) {
@@ -102,7 +104,7 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
             for (size_t x = 0; x < image.pitch(); ++x)
                 s.get(image[y].data_ptr()[x]);
 
-        if (sprite_lump->sprite_info().is_weapon) {
+        if (sprite_lump->sprite_info().is_weapon || lump.section() == wad::Section::graphics) {
             static Rgba5551Palette cached_pal;
             static String cached;
 
@@ -113,21 +115,7 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
             image.palette(cached_pal);
         } else {
             auto name = format("PAL{}0", lump.lump_name().substr(4));
-            auto pal = wad::find(name);
-            if (pal.have_value()) {
-                auto &ps = pal->stream();
-                ps.seekg(8, ps.cur);
-                image.palette(read_n64palette(ps, 256));
-            } else {
-                println("Palette {} not found for {}", name, lump.lump_name());
-                Rgba5551Palette p{256};
-                size_t size = 0;
-                for (auto &c : p) {
-                    c.red = c.green = c.blue = size++;
-                    c.alpha = 1;
-                }
-                image.palette(p);
-            }
+            palette = cache::palette(name);
         }
     }
 
@@ -155,7 +143,9 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
 
     image.sprite_offset({ header.xoffs, header.yoffs });
 
-    return image;
+    Image ret { std::move(image) };
+    if (palette) ret.palette(palette);
+    return ret;
 }
 
 std::unique_ptr<ImageFormatIO> init::image_n64sprite()

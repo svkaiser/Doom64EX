@@ -237,6 +237,7 @@ namespace {
               break;
 
           case Special::gfx_fire:
+              //lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"_sv);
               break;
           }
 
@@ -254,7 +255,8 @@ namespace {
       String palette_name {};
 
   public:
-      RomFormat(StringView name)
+      RomFormat(StringView name):
+          Mount(Type::rom)
       {
           rom_.exceptions(rom_.failbit | rom_.badbit);
 
