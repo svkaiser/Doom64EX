@@ -3,12 +3,14 @@
 #include <utility>
 #include <algorithm>
 #include <imp/detail/Image.hh>
+#include <set>
 #include "Rom.hh"
 
 void Deflate_Decompress(byte * input, byte * output);
 void Wad_Decompress(byte * input, byte * output);
 
 Vector<String> rom_textures;
+std::set<String> rom_weapon_sprites;
 
 namespace {
   template <class T>
@@ -172,14 +174,18 @@ namespace {
       std::istringstream cache;
       size_t pos;
       size_t size;
+      bool is_weapon;
+      String palette_name;
 
-      Info(String name, Compression compression, ImageFormat format, Special special, size_t pos, size_t size):
+      Info(String name, Compression compression, ImageFormat format, Special special, size_t pos, size_t size, bool is_weapon, String palette_name):
           name(name),
           compression(compression),
           format(format),
           special(special),
           pos(pos),
-          size(size) {}
+          size(size),
+          is_weapon(is_weapon),
+          palette_name(palette_name) {}
 
       std::istream& stream(std::istream& rom) {
           if (!cache.str().empty()) {
@@ -245,6 +251,7 @@ namespace {
       Header header_ {};
       WadHeader wad_header_ {};
       size_t wad_pos_ {};
+      String palette_name {};
 
   public:
       RomFormat(StringView name)
@@ -303,6 +310,7 @@ namespace {
           Vector<wad::LumpInfo> lumps;
           wad::Section section {};
           ImageFormat format {};
+          bool recto0_hack {};
 
           rom_.seekg(wad_pos_ + wad_header_.infotableofs);
           for (std::size_t i = 0; i < wad_header_.numlumps; ++i) {
@@ -376,20 +384,23 @@ namespace {
               else if (name == "FIRE")
                   special = Special::gfx_fire;
               else if (name.substr(0, 3) == "PAL") {
-                  println("> {}", name);
                   section = wad::Section::normal;
+                  palette_name = name;
               }
 
               if (section == wad::Section::textures) {
                   rom_textures.push_back(name);
               }
 
-              if (section == wad::Section::sprites) {
-                  println(">>> {}", name);
-              }
+              bool is_weapon {};
+              if (section == wad::Section::sprites && recto0_hack)
+                  is_weapon = true;
+
+              if (section == wad::Section::sprites && name == "RECTO0")
+                  recto0_hack = true;
 
               lumps.push_back({ name, section, infos_.size() });
-              infos_.emplace_back(name, compression, format, special, dir.filepos + wad_pos_, dir.size);
+              infos_.emplace_back(name, compression, format, special, dir.filepos + wad_pos_, dir.size, is_weapon, palette_name);
               section = section1;
           }
 
@@ -399,7 +410,8 @@ namespace {
       bool set_buffer(wad::Lump& lump, size_t index) override
       {
           auto& l = infos_[index];
-          lump.buffer(std::make_unique<wad::RomBuffer>(l.stream(rom_), l.format));
+          wad::RomSpriteInfo info { l.is_weapon, l.palette_name };
+          lump.buffer(std::make_unique<wad::RomBuffer>(l.stream(rom_), l.format, info));
 
           return true;
       }

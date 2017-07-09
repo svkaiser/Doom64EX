@@ -23,8 +23,12 @@
 #include <imp/util/Endian>
 #include <ostream>
 #include <imp/Wad>
+#include <set>
+#include <wad/Rom.hh>
 
 #include "Image.hh"
+
+extern std::set<String> rom_weapon_sprites;
 
 namespace {
   struct N64Sprite : ImageFormatIO {
@@ -54,8 +58,15 @@ namespace {
   static_assert(sizeof(Header) == 16, "N64Sprite header must be 16 bytes");
 }
 
+constexpr short operator""_S(unsigned long long int x)
+{ return static_cast<short>(x); }
+
+constexpr unsigned short operator""_US(unsigned long long int x)
+{ return static_cast<unsigned short>(x); }
+
 Optional<Image> N64Sprite::load(wad::Lump& lump) const
 {
+    auto sprite_lump = dynamic_cast<wad::RomBuffer*>(lump.buffer());
     auto& s = lump.stream();
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
@@ -71,7 +82,7 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
 
     assert((header.width >= 2) && (header.width <= 256) && (header.height >= 2) && (header.height <= 256));
 
-    uint16 align = static_cast<uint16>(header.compressed == -1 ? 8 : 16);
+    uint16 align = header.compressed == -1 ? 8_US : 16_US;
 
     I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), align };
 
@@ -91,21 +102,32 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
             for (size_t x = 0; x < image.pitch(); ++x)
                 s.get(image[y].data_ptr()[x]);
 
-        auto name = format("PAL{}0", lump.lump_name().substr(4));
-        auto pal = wad::find(name);
-        if (pal.have_value()) {
-            auto& ps = pal->stream();
-            ps.seekg(8, ps.cur);
-            image.palette(read_n64palette(ps, 256));
-        } else {
-            println("Palette {} not found for {}", name, lump.lump_name());
-            Rgba5551Palette p { 256 };
-            size_t size = 0;
-            for (auto& c : p) {
-                c.red = c.green = c.blue = size++;
-                c.alpha = 1;
+        if (sprite_lump->sprite_info().is_weapon) {
+            static Rgba5551Palette cached_pal;
+            static String cached;
+
+            if (cached != lump.lump_name().substr(4)) {
+                cached_pal = read_n64palette(s, 256);
+                cached = lump.lump_name().substr(4);
             }
-            image.palette(p);
+            image.palette(cached_pal);
+        } else {
+            auto name = format("PAL{}0", lump.lump_name().substr(4));
+            auto pal = wad::find(name);
+            if (pal.have_value()) {
+                auto &ps = pal->stream();
+                ps.seekg(8, ps.cur);
+                image.palette(read_n64palette(ps, 256));
+            } else {
+                println("Palette {} not found for {}", name, lump.lump_name());
+                Rgba5551Palette p{256};
+                size_t size = 0;
+                for (auto &c : p) {
+                    c.red = c.green = c.blue = size++;
+                    c.alpha = 1;
+                }
+                image.palette(p);
+            }
         }
     }
 
@@ -124,6 +146,11 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
             }
         }
         inv ^= 1;
+    }
+
+    if (sprite_lump->sprite_info().is_weapon) {
+        header.xoffs -= 160;
+        header.yoffs -= 208;
     }
 
     image.sprite_offset({ header.xoffs, header.yoffs });
