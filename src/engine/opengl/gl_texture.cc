@@ -147,11 +147,8 @@ static void InitWorldTextures(void) {
         palettetranslation[i] = 0;
 
         // read PNG and setup global width and heights
-        Image image { lump };
 
         textureptr[i][0] = 0;
-        texturewidth[i] = image.width();
-        textureheight[i] = image.height();
     }
 
     CON_DPrintf("%i world textures initialized\n", numtextures);
@@ -309,13 +306,13 @@ static void InitGfxTextures(void) {
         auto lump = *section;
         auto i = lump.section_index();
 
-        Image image { lump };
+        // Image image { lump };
 
         gfxptr[i] = 0;
-        gfxwidth[i] = image.width();
-        gfxorigwidth[i] = image.width();
-        gfxorigheight[i] = image.height();
-        gfxheight[i] = image.height();
+        // gfxwidth[i] = image.width();
+        // gfxorigwidth[i] = image.width();
+        // gfxorigheight[i] = image.height();
+        // gfxheight[i] = image.height();
     }
 
     CON_DPrintf("%i generic textures initialized\n", numgfx);
@@ -432,17 +429,6 @@ static void InitSpriteTextures(void) {
 
         // allocate # of sprites per pointer
         spriteptr[i] = (dtexture*)Z_Calloc(spritecount[i] * sizeof(dtexture), PU_STATIC, 0);
-
-        if (lump.lump_name() == "PLAYA0")
-            println("> PLAYA0");
-
-        // read data and setup globals
-        Image image { lump };
-
-        spritewidth[i]      = image.width();
-        spriteheight[i]     = image.height();
-        spriteoffset[i]     = image.sprite_offset().x;
-        spritetopoffset[i]  = image.sprite_offset().y;
     }
 }
 
@@ -500,6 +486,8 @@ void GL_BindSpriteTexture(int spritenum, int pal) {
 
     spritewidth[spritenum] = w;
     spriteheight[spritenum] = h;
+    spriteoffset[spritenum] = image.sprite_offset().x;
+    spritetopoffset[spritenum] = image.sprite_offset().y;
 
     if(devparm) {
         glBindCalls++;
