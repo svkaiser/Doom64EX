@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <imp/detail/Image.hh>
 #include <set>
-#include "Rom.hh"
+#include "RomWad.hh"
 
 void Deflate_Decompress(byte * input, byte * output);
 void Wad_Decompress(byte * input, byte * output);
@@ -19,22 +19,6 @@ namespace {
       s.read(reinterpret_cast<char*>(&x), sizeof(T));
   }
 
-  constexpr const char _z64_name[] = "Doom64";
-  constexpr const char _n64_name[] = "oDmo46";
-
-  struct RomIwad {
-      std::size_t position;
-      char country_id;
-      char version;
-  };
-
-  RomIwad _rom_iwad[4] {
-      { 0x6df60, 'P', 0 },
-      { 0x64580, 'J', 0 },
-      { 0x63d10, 'E', 0 },
-      { 0x63dc0, 'E', 1 }
-  };
-
   struct WadHeader {
       char id[4];
       uint32 numlumps;
@@ -46,30 +30,6 @@ namespace {
       uint32 size;
       char name[8];
   };
-
-  struct Header {
-      byte x1;		/* initial PI_BSB_DOM1_LAT_REG value */
-      byte x2;		/* initial PI_BSB_DOM1_PGS_REG value */
-      byte x3;		/* initial PI_BSB_DOM1_PWD_REG value */
-      byte x4;		/* initial PI_BSB_DOM1_RLS_REG value */
-      uint32 clock_rate;
-      uint32 boot_address;
-      uint32 release;
-      uint32 crc1;
-      uint32 crc2;
-      uint32 unknown0;
-      uint32 unknown1;
-      char name[20];
-      uint32 unknown2;
-      uint16 unknown3;
-      byte unknown4;
-      byte manufacturer;
-      uint16 cart_id;
-      char country_id;
-      byte version_id;
-  };
-
-  static_assert(sizeof(Header) == 64, "N64 ROM header struct must be sizeof 64");
 
   /* Graphics lumps aren't located in the graphics directory, so we have to manually put them there */
   const StringView gfx_names_[] = {
@@ -249,58 +209,15 @@ namespace {
   class RomFormat : public wad::Mount {
       std::istringstream rom_ {};
       std::vector<Info> infos_ {};
-      Header header_ {};
       WadHeader wad_header_ {};
-      size_t wad_pos_ {};
       String palette_name {};
 
   public:
-      RomFormat(StringView name):
-          Mount(Type::rom)
+      RomFormat():
+          Mount(Type::rom),
+          rom_(rom::wad())
       {
           rom_.exceptions(rom_.failbit | rom_.badbit);
-
-          String rom_data;
-
-          {
-              std::ifstream file(name, std::ios::binary);
-
-              file.seekg(0, file.end);
-              rom_data.resize(static_cast<size_t>(file.tellg()));
-              file.seekg(0, file.beg);
-
-              file.read(&rom_data[0], rom_data.size());
-          }
-
-          if (rom_data.size() < sizeof(Header))
-              throw "ROM is too small";
-
-          std::copy_n(rom_data.data(), sizeof(Header), reinterpret_cast<char*>(&header_));
-
-          // Swap bytes if the ROM is big-endian.
-          if (memcmp(header_.name, _n64_name, 6) == 0) {
-              for (size_t i = 0; i < rom_data.size(); i += 2)
-                  std::swap(rom_data[i], rom_data[i+1]);
-          }
-
-          if (memcmp(header_.name, _z64_name, 6) != 0)
-              fatal("Not a valid Doom 64 ROM");
-
-          // Put the entire rom into the string stream
-          rom_.str(std::move(rom_data));
-
-          // Find the location of the WAD
-          for (const auto& loc : _rom_iwad) {
-              if (loc.country_id == header_.country_id && loc.version == header_.version_id) {
-                  rom_.seekg(loc.position);
-                  wad_pos_ = loc.position;
-              }
-          }
-
-          if (wad_pos_ == 0) {
-              fatal("WAD not found in Doom 64 ROM");
-          }
-
           read_into(rom_, wad_header_);
 
           if (memcmp(wad_header_.id, "IWAD", 4) != 0)
@@ -314,12 +231,15 @@ namespace {
           ImageFormat format {};
           bool recto0_hack {};
 
-          rom_.seekg(wad_pos_ + wad_header_.infotableofs);
+          rom_.seekg(wad_header_.infotableofs);
           for (std::size_t i = 0; i < wad_header_.numlumps; ++i) {
               WadDir dir;
               read_into(rom_, dir);
               std::size_t len = 0;
               while (len < 8 && dir.name[len]) ++len;
+
+              if (wad_header_.numlumps == i + 1)
+                  println("> WAD End: {:x}", static_cast<size_t>(rom_.tellg()));
 
               bool compressed = dir.name[0] < 0;
               dir.name[0] &= 0x7f;
@@ -402,7 +322,7 @@ namespace {
                   recto0_hack = true;
 
               lumps.push_back({ name, section, infos_.size() });
-              infos_.emplace_back(name, compression, format, special, dir.filepos + wad_pos_, dir.size, is_weapon, palette_name);
+              infos_.emplace_back(name, compression, format, special, dir.filepos, dir.size, is_weapon, palette_name);
               section = section1;
           }
 
@@ -420,17 +340,7 @@ namespace {
   };
 }
 
-UniquePtr<wad::Mount> wad::rom_loader(StringView name)
+UniquePtr<wad::Mount> wad::rom_loader(StringView)
 {
-    std::ifstream rom(name);
-    if (!rom.is_open())
-        return nullptr;
-
-    Header header;
-    read_into(rom, header);
-
-    if (memcmp(header.name, _z64_name, 6) && memcmp(header.name, _n64_name, 6))
-        return nullptr;
-
-    return std::make_unique<RomFormat>(name);
+    return std::make_unique<RomFormat>();
 }

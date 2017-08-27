@@ -24,7 +24,7 @@
 #include <ostream>
 #include <imp/Wad>
 #include <set>
-#include <wad/Rom.hh>
+#include <wad/RomWad.hh>
 
 #include "Image.hh"
 #include "PaletteCache.hh"

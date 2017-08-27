@@ -25,7 +25,7 @@
 #include <cstring>
 
 #include <imp/Wad>
-#include "wad/Rom.hh"
+#include "wad/RomWad.hh"
 #include "Image.hh"
 
 namespace {

@@ -107,6 +107,14 @@ namespace imp {
 #else
 #error "Unknown or unsupported byte order"
 #endif
+
+  template <class T>
+  inline void set_big_endian(T& x) noexcept
+  { x = big_endian(x); }
+
+  template <class T>
+  inline void set_little_endian(T& x) noexcept
+  { x = little_endian(x); }
 }
 
 #endif //__IMP_ENDIAN__41348837

@@ -254,6 +254,7 @@ set(SOURCES
   renderer/r_wipe.cc
 
   # sound
+  sound/RomSource.cc
   sound/s_sound.cc
 
   # statusbar
@@ -266,16 +267,18 @@ set(SOURCES
   system/i_swap.h
   system/i_system.cc
   system/i_video.cc
+  system/Rom.cc
   system/SdlVideo.cc
 
   # wad
   wad/Mount.cc
   wad/DoomWad.cc
-  wad/Rom.cc
+  wad/RomWad.cc
   wad/ZipWad.cc
 
   # zone
-  zone/z_zone.cc filesystem/Path.cc filesystem/Path.hh wad/Rom.hh)
+  zone/z_zone.cc
+  )
 
 ##------------------------------------------------------------------------------
 ## Build target

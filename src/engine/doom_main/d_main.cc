@@ -969,6 +969,10 @@ static int D_CheckDemo(void) {
 // D_DoomMain
 //
 
+namespace imp {
+  namespace rom { void init(); }
+}
+
 [[noreturn]]
 void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
@@ -1000,8 +1004,12 @@ void D_DoomMain(void) {
     I_Printf("D_Init: Init DOOM parameters\n");
     D_Init();
 
+    I_Printf("rom::init: Init ROM.\n");
+    rom::init();
+
     I_Printf("W_Init: Init WADfiles.\n");
     wad::init();
+    exit(42);
 
     I_Printf("M_Init: Init miscellaneous info.\n");
     M_Init();

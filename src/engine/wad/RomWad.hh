@@ -3,6 +3,8 @@
 #include <imp/Image>
 #include "Mount.hh"
 
+#include <system/Rom.hh>
+
 namespace imp {
   namespace wad {
     struct RomSpriteInfo {

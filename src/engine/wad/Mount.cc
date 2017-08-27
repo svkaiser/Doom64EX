@@ -20,6 +20,7 @@ namespace {
   app::StringParam iwad_path_("iwad");
 }
 
+void load_soundfont();
 void wad::init()
 {
     if (iwad_path_ && !wad::mount(iwad_path_.get())) {
@@ -41,6 +42,8 @@ void wad::init()
     }
 
     wad::merge();
+
+    load_soundfont();
 }
 
 bool wad::mount(StringView path)
