@@ -1,0 +1,20 @@
+// -*- C++ -*-
+#ifndef __IMP_SIGNAL__18039976
+#define __IMP_SIGNAL__18039976
+
+#include <set>
+#include "Delegate"
+
+namespace imp {
+
+template <class>
+class Signal;
+
+template <class... Args>
+class Signal<void (Args...)> {
+    std::set<Delegate> delegates_;
+};
+
+}
+
+#endif //__IMP_SIGNAL__18039976

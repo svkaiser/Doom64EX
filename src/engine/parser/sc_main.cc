@@ -78,6 +78,7 @@ static void SC_Open(const char* name) {
 //
 
 static void SC_Close(void) {
+    delete[] sc_parser.buffer;
     sc_parser.buffer         = NULL;
     sc_parser.buffsize       = 0;
     sc_parser.pointer_start  = NULL;

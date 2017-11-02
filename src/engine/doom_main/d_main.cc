@@ -969,6 +969,10 @@ static int D_CheckDemo(void) {
 // D_DoomMain
 //
 
+namespace imp {
+  namespace rom { void init(); }
+}
+
 [[noreturn]]
 void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
@@ -976,7 +980,8 @@ void D_DoomMain(void) {
     // init subsystems
 
     I_Printf("imp::init_image: Init Image\n");
-    imp::init_image();
+    void init_image();
+    init_image();
 
     I_Printf("Z_Init: Init Zone Memory Allocator\n");
     Z_Init();
@@ -996,8 +1001,12 @@ void D_DoomMain(void) {
     I_Printf("D_Init: Init DOOM parameters\n");
     D_Init();
 
+    I_Printf("rom::init: Init ROM.\n");
+    rom::init();
+
     I_Printf("W_Init: Init WADfiles.\n");
     wad::init();
+    exit(42);
 
     I_Printf("I_Init: Setting up machine state.\n");
     I_Init();

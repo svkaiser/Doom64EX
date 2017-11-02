@@ -4,7 +4,7 @@
 #define MAXGFXEXITEMS	128
 
 typedef struct {
-	word compressed;	//-1 = not compressed (all gfx lumps are not compressed anyways)
+	word compressed;	//-1 = not compressed (all image lumps are not compressed anyways)
 	word u2;		//unknown
 	word width;		//width (short swapped)
 	word height;		//height (short swapped)

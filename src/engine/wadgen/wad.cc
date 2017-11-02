@@ -22,7 +22,7 @@
 // $Date: 2012-06-10 17:18:31 -0700 (Sun, 10 Jun 2012) $
 //
 // DESCRIPTION: General Wad handling mechanics.
-//                              Wad output and sprite/gfx/data writing also included
+//                              Wad output and sprite/image/data writing also included
 //
 //-----------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ int pngsize;
 //
 //      Doom64 only uses this on the Sprites and GFX lumps, but uses
 //      a more sophisticated algorithm for everything else, which is
-//      why only the sprites and gfx are gathered from the rom as
+//      why only the sprites and image are gathered from the rom as
 //      I have yet to understand the new compression method used.
 //**************************************************************
 //**************************************************************
@@ -83,6 +83,8 @@ void Wad_Decompress(byte * input, byte * output)
 	int i;
 	byte *source;
 	int idbyte = 0;
+
+	assert(*input != 59);
 
 	/*idbyte plays an important role, it specifies whenever something is compressed or
 	   decompressed by shifting the bits and finding out if there is a 0 or 1. */
@@ -582,19 +584,19 @@ void Wad_AddOutputGfx(gfxEx_t * gfx)
 	int pos = 0;
 	int i = 0;
 
-	size = (8 + 768) + (gfx->width * gfx->height);
-	strncpy(name, romWadFile.lump[gfx->lumpRef].name, 8);
+	size = (8 + 768) + (image->width * image->height);
+	strncpy(name, romWadFile.lump[image->lumpRef].name, 8);
 
 	data = (byte *) Mem_Alloc(size);
 
-	memcpy(data, gfx, 8);
+	memcpy(data, image, 8);
 	pos += 8;
 
-	memcpy((data + pos), gfx->data, (gfx->width * gfx->height));
-	pos += (gfx->width * gfx->height);
+	memcpy((data + pos), image->data, (image->width * image->height));
+	pos += (image->width * image->height);
 
 	for (i = 0; i < 256; i++) {
-		memcpy((data + pos), &gfx->palette[i], 3);
+		memcpy((data + pos), &image->palette[i], 3);
 		pos += 3;
 	}
 

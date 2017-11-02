@@ -1,5 +1,6 @@
 #include <sstream>
 #include <imp/Wad>
+#include <map>
 #include "Map.hh"
 
 namespace {
@@ -21,12 +22,19 @@ namespace {
       char name[8];
   };
 
-  std::vector<String> _lumps;
+  struct MapLump {
+      String data;
+      wad::Mount& source;
+  };
+
+  std::vector<MapLump> _lumps;
+
+  std::map<int, int> texturehashlist_;
 }
 
 void* W_GetMapLump(int lump)
 {
-    return &_lumps[lump][0];
+    return &_lumps[lump].data[0];
 }
 
 void W_CacheMapLump(int map)
@@ -56,9 +64,11 @@ void W_CacheMapLump(int map)
 
         auto pos = ss.tellg();
         ss.seekg(dir.filepos);
-        _lumps.emplace_back(dir.size, 0);
-        ss.read(&_lumps.back()[0], dir.size);
+        String str(dir.size, 0);
+        ss.read(&str[0], dir.size);
         ss.seekg(pos);
+
+        _lumps.push_back({ std::move(str), file->source() });
     }
 }
 
@@ -69,5 +79,36 @@ void W_FreeMapLump()
 
 int W_MapLumpLength(int lump)
 {
-    return _lumps[lump].size();
+    return _lumps[lump].data.size();
+}
+
+//
+// P_InitTextureHashTable
+//
+
+extern Vector<String> rom_textures;
+void P_InitTextureHashTable(void) {
+    for (size_t i = 0; i < rom_textures.size(); ++i) {
+        auto& s = rom_textures[i];
+        auto a = wad::find(s).value().section_index();
+        texturehashlist_.emplace(i, a);
+    }
+    auto section = wad::section(wad::Section::textures);
+    for(int i = 0; section; ++section, ++i) {
+        auto lump = *section;
+        texturehashlist_.emplace(wad::LumpHash { lump.lump_name() }.get(), i);
+    }
+}
+
+//
+// P_GetTextureHashKey
+//
+
+uint32 P_GetTextureHashKey(int hash) {
+    auto it = texturehashlist_.find(hash);
+    if (it == texturehashlist_.end()) {
+        return 0;
+    } else {
+        return it->second;
+    }
 }

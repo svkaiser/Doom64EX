@@ -6,14 +6,13 @@
 #include <imp/util/Optional>
 
 namespace imp {
-  namespace gfx {
-    class Image;
-  }
+  class Image;
 
   namespace wad {
     enum struct Section;
     class Lump;
     class LumpIterator;
+    class Mount;
 
     void init();
 
@@ -77,12 +76,41 @@ namespace imp {
 
     constexpr size_t num_sections = 5;
 
-    class BasicLump {
-        std::size_t id_;
+    struct LumpInfo;
+
+    struct LumpBuffer {
+        virtual ~LumpBuffer() {}
+        virtual std::istream& stream() = 0;
+    };
+
+    class Lump {
+        LumpInfo* info_ {};
+        UniquePtr<LumpBuffer> buffer_ {};
 
     public:
-        BasicLump(std::size_t id):
-            id_(id) {}
+        Lump() = default;
+
+        Lump(Lump&&) = default;
+
+        Lump(const Lump&) = delete;
+
+        Lump(StringView name);
+
+        Lump(LumpInfo& info):
+            info_(&info) {}
+
+        Lump& operator=(Lump&&) = default;
+
+        Lump& operator=(const Lump&) = delete;
+
+        void buffer(UniquePtr<LumpBuffer> ptr)
+        { buffer_ = std::move(ptr); }
+
+        LumpBuffer* buffer()
+        { return buffer_.get(); }
+
+        const LumpBuffer* buffer() const
+        { return buffer_.get(); }
 
         StringView lump_name() const;
 
@@ -92,71 +120,24 @@ namespace imp {
 
         std::size_t section_index() const;
 
-        virtual std::istream& stream() = 0;
-
-        virtual String as_bytes();
-
-        virtual gfx::Image as_image();
-    };
-
-    class Lump {
-        UniquePtr<BasicLump> data_ {};
-
-    public:
-        Lump() = default;
-
-        Lump(UniquePtr<BasicLump> data):
-            data_(std::move(data)) {}
-
-        Lump(Lump&&) = default;
-
-        Lump(const Lump&) = delete;
-
-        Lump& operator=(Lump&&) = default;
-
-        Lump& operator=(const Lump&) = delete;
-
-        StringView lump_name() const
-        { return data_->lump_name(); }
-
-        std::size_t lump_index() const
-        { return data_->lump_index(); }
-
-        Section section() const
-        { return data_->section(); }
-
-        std::size_t section_index() const
-        { return data_->section_index(); }
-
         std::istream& stream()
-        { return data_->stream(); }
+        { return buffer_->stream(); }
 
-        String as_bytes()
-        { return data_->as_bytes(); }
+        String as_bytes();
 
-        char* bytes_ptr()
-        {
-            auto bytes = as_bytes();
-            char *memory = new char[bytes.size()];
-            std::copy(bytes.begin(), bytes.end(), memory);
-            return memory;
-        }
+        wad::Mount& source();
 
-        gfx::Image as_image();
+        char* bytes_ptr();
     };
 
     class LumpIterator {
         std::size_t index_ {};
         Section section_ {};
-        Lump lump_;
 
     public:
         LumpIterator(Section section);
 
-        Lump& operator*();
-
-        Lump* operator->()
-        { return &**this; }
+        Lump operator*();
 
         bool has_next() const;
 

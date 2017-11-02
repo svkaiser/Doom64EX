@@ -21,33 +21,23 @@
 //-----------------------------------------------------------------------------
 
 #include <cstring>
-#include <imp/Image>
-#include <imp/util/Endian>
 #include <png.h>
+#include <imp/util/Endian>
+
+#include <imp/Wad>
+#include "Image.hh"
 
 namespace {
   constexpr const char magic[] = "\x89PNG\r\n\x1a\n";
 
-  struct PngImage : ImageFormatIO {
-      StringView mimetype() const override;
-      bool is_format(std::istream &) const override;
-      Image load(std::istream &) const override;
-      void save(std::ostream &, const Image &) const override;
+  struct Png : ImageFormatIO {
+      Optional<Image> load(wad::Lump&) const override;
+      void save(std::ostream&, const Image&) const override;
   };
 
-  StringView PngImage::mimetype() const
-  { return "png"; }
-
-  bool PngImage::is_format(std::istream &stream) const
+  Optional<Image> Png::load(wad::Lump& lump) const
   {
-      char buf[sizeof magic] = {};
-
-      stream.read(buf, sizeof magic);
-      return std::memcmp(magic, buf, sizeof magic) == 0;
-  }
-
-  Image PngImage::load(std::istream &s) const
-  {
+      auto& s = lump.stream();
       png_structp png_ptr = nullptr;
       png_infop infop = nullptr;
       auto _guard = make_guard([&png_ptr, &infop]()
@@ -57,44 +47,54 @@ namespace {
                                    png_destroy_read_struct(png_ptrp, infopp, nullptr);
                                });
 
+      // Check if the starts with a PNG magic
+      {
+          auto start = s.tellg();
+          char test[sizeof(magic)];
+          s.read(test, sizeof(test));
+          if (!std::equal(test, test + sizeof(test), magic))
+              return nullopt;
+          s.seekg(start);
+      }
+
       png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
       if (png_ptr == nullptr)
-          throw ImageLoadError("Failed to create PNG read struct");
+          throw std::runtime_error { "Failed to create PNG read struct" };
 
       infop = png_create_info_struct(png_ptr);
       if (infop == nullptr)
       {
           png_destroy_read_struct(&png_ptr, nullptr, nullptr);
-          throw ImageLoadError("Failed to create PNG info struct");
+          throw std::runtime_error { "Failed to create PNG info struct" };
       }
 
       if (setjmp(png_jmpbuf(png_ptr)))
       {
           png_destroy_read_struct(&png_ptr, &infop, nullptr);
-          throw ImageLoadError("An error occurred in libpng");
+          throw std::runtime_error { "An error occurred in libpng" };
       }
 
       png_set_read_fn(png_ptr, &s,
                       [](png_structp ctx, png_bytep area, png_size_t size) {
-                          auto s = static_cast<std::istream *>(png_get_io_ptr(ctx));
-                          s->read(reinterpret_cast<char *>(area), size);
+                          auto st = static_cast<std::istream *>(png_get_io_ptr(ctx));
+                          st->read(reinterpret_cast<char *>(area), size);
                       });
 
       /* Grab offset information if available. This seems like a hack since this is
        * probably only used by Doom64EX and not a general thing as this file might imply. */
-      SpriteOffsets offsets;
-      auto chunkFn = [](png_structp png_ptr, png_unknown_chunkp chunk) -> int {
+      SpriteOffset offset;
+      auto chunk_fn = [](png_structp p, png_unknown_chunkp chunk) -> int {
           if (std::strncmp((char*)chunk->name, "grAb", 4) == 0 && chunk->size >= 8) {
-              auto offsets = reinterpret_cast<SpriteOffsets*>(png_get_user_chunk_ptr(png_ptr));
+              auto so = static_cast<SpriteOffset*>(png_get_user_chunk_ptr(p));
               auto data = reinterpret_cast<int*>(chunk->data);
-              offsets->x = big_endian(data[0]);
-              offsets->y = big_endian(data[1]);
+              so->x = big_endian(data[0]);
+              so->y = big_endian(data[1]);
               return 1;
           }
 
           return 0;
       };
-      png_set_read_user_chunk_fn(png_ptr, &offsets, chunkFn);
+      png_set_read_user_chunk_fn(png_ptr, &offset, chunk_fn);
 
       png_uint_32 width, height;
       int bitDepth, colorType, interlaceMethod;
@@ -103,7 +103,7 @@ namespace {
 
       png_uint_32 sizeLimit = std::numeric_limits<uint16>::max();
       if (width < 1 || width > sizeLimit || height < 1 || height > sizeLimit)
-          throw ImageLoadError(fmt::format("Invalid image dimensions: {}x{}", width, height));
+          throw std::runtime_error { fmt::format("Invalid image dimensions: {}x{}", width, height) };
 
       png_set_strip_16(png_ptr);
       png_set_packing(png_ptr);
@@ -135,15 +135,15 @@ namespace {
                   break;
 
               default:
-                  throw ImageLoadError(fmt::format("Invalid PNG bit depth: {}", bitDepth));
+                  throw std::runtime_error { fmt::format("Invalid PNG bit depth: {}", bitDepth) };
               }
               break;
 
           default:
-              throw ImageLoadError(fmt::format("Unknown PNG image color type: {}", colorType));
+              throw std::runtime_error { fmt::format("Unknown PNG image color type: {}", colorType) };
       }
 
-      Image retval(format, static_cast<uint16>(width), static_cast<uint16>(height), noinit_tag());
+      Image retval { format, static_cast<uint16>(width), static_cast<uint16>(height) };
 
       if (colorType == PNG_COLOR_TYPE_PALETTE)
       {
@@ -154,10 +154,10 @@ namespace {
               int palNum, transNum;
               png_get_tRNS(png_ptr, infop, &alpha, &transNum, nullptr);
               png_get_PLTE(png_ptr, infop, &colors, &palNum);
-              Palette palette(PixelFormat::rgba, palNum, nullptr);
+              RgbaPalette palette(palNum);
 
               int i = 0;
-              for (auto &c : palette.map<Rgba>())
+              for (auto &c : palette)
               {
                   c.red   = colors[i].red;
                   c.green = colors[i].green;
@@ -167,14 +167,14 @@ namespace {
                   i++;
               }
 
-              retval.set_palette(std::move(palette));
+              retval.palette(std::move(palette));
           } else {
               png_colorp pal = nullptr;
-              int palNum = 0;
-              png_get_PLTE(png_ptr, infop, &pal, &palNum);
-              Palette palette(PixelFormat::rgb, palNum, nullptr);
+              int num_colors = 0;
+              png_get_PLTE(png_ptr, infop, &pal, &num_colors);
+              RgbPalette palette { static_cast<size_t>(num_colors) };
 
-              for (auto &c : palette.map<Rgb>())
+              for (auto &c : palette)
               {
                   auto p = *pal++;
                   c.red = p.red;
@@ -182,39 +182,41 @@ namespace {
                   c.blue = p.blue;
               }
 
-              retval.set_palette(std::move(palette));
+              retval.palette(std::move(palette));
           }
       }
 
-      retval.set_offsets(offsets);
+      retval.sprite_offset(offset);
 
-      byte *scanlines[height];
+      char *scanlines[height];
       for (size_t i = 0; i < height; i++)
-          scanlines[i] = retval.scanline_ptr(i);
+          scanlines[i] = retval[i].data_ptr();
 
-      png_read_image(png_ptr, scanlines);
+      Image x = retval;
+
+      png_read_image(png_ptr, reinterpret_cast<byte**>(scanlines));
       png_read_end(png_ptr, infop);
 
-      return retval;
+      return make_optional<Image>(retval);
   }
 
-  void PngImage::save(std::ostream &s, const Image &image) const
+  void Png::save(std::ostream &s, const Image &image) const
   {
       png_structp writep = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
       if (writep == nullptr)
-          throw ImageSaveError("Failed getting png_structp");
+          throw std::runtime_error { "Failed getting png_structp" };
 
       png_infop infop = png_create_info_struct(writep);
       if (infop == nullptr)
       {
           png_destroy_write_struct(&writep, nullptr);
-          throw ImageSaveError("Failed getting png_infop");
+          throw std::runtime_error { "Failed getting png_infop"};
       }
 
       if (setjmp(png_jmpbuf(writep)))
       {
           png_destroy_write_struct(&writep, &infop);
-          throw ImageSaveError("Error occurred in libpng");
+          throw std::runtime_error { "Error occurred in libpng"};
       }
 
       png_set_write_fn(writep, &s,
@@ -226,10 +228,9 @@ namespace {
                        });
 
       Image copy;
-      const Image *im = &image;
 
       int format;
-      switch (image.format()) {
+      switch (image.pixel_format()) {
           case PixelFormat::rgb:
               format = PNG_COLOR_TYPE_RGB;
               break;
@@ -239,24 +240,24 @@ namespace {
               break;
 
           default:
-              throw ImageSaveError("Saving image with incompatible pixel format");
+              throw std::runtime_error { "Saving image with incompatible pixel format" };
       }
 
-      png_set_IHDR(writep, infop, im->width(), im->height(), 8,
+      png_set_IHDR(writep, infop, image.width(), image.height(), 8,
                    format, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
       png_write_info(writep, infop);
 
-      const uint8_t *scanlines[im->height()];
-      for (int i = 0; i < im->height(); i++)
-          scanlines[i] = im->scanline_ptr(i);
+      char *scanlines[image.height()];
+      for (int i = 0; i < image.height(); i++)
+          scanlines[i] = const_cast<char*>(image[i].data_ptr());
 
-      png_write_image(writep, const_cast<png_bytepp>(scanlines));
+      png_write_image(writep, reinterpret_cast<png_bytepp>(scanlines));
       png_write_end(writep, infop);
       png_destroy_write_struct(&writep, &infop);
   }
 }
 
-std::unique_ptr<ImageFormatIO> __initialize_png()
+std::unique_ptr<ImageFormatIO> init::image_png()
 {
-    return std::make_unique<PngImage>();
+    return std::make_unique<Png>();
 }

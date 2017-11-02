@@ -9,12 +9,15 @@
 #include <cstdint>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <chrono>
 
 // Include standard utilities
 #include "util/Types"
 #include "util/ArrayView"
 #include "util/StringView"
 #include "util/Guard"
+#include "util/Optional"
+#include "detail/Memory.hh"
 
 #define STUB(msg) fmt::print("STUB {}: {} ({}:{})\n", __FUNCTION__, msg, __LINE__, __FILE__)
 
@@ -60,37 +63,28 @@ namespace fmt {
 }
 
 namespace imp {
+  struct dummy_t {
+      template <class T>
+      operator T() const
+      { return {}; }
+  };
+
+  struct UserData {
+      virtual ~UserData() {}
+  };
+
+  /*! Pad an integer so it's divisible by N */
+  template <size_t N>
+  constexpr size_t pad(size_t x)
+  { return x + ((N - (x & (N - 1))) & (N - 1)); }
+
   using String = std::string;
   template <class T, class Deleter = std::default_delete<T>>
-  using UniquePtr = std::unique_ptr<T, Deleter>;
-  template <class T>
-  using SharedPtr = std::shared_ptr<T>;
-  template <class T>
-  using WeakPtr = std::weak_ptr<T>;
-  template <class T>
   using Vector = std::vector<T>;
   template <class T>
   using InitList = std::initializer_list<T>;
   template <class T, size_t N>
   using Array = std::array<T, N>;
-
-  template <class T, class... Args>
-  UniquePtr<T> unique(Args&&... args)
-  {
-      return std::make_unique<T>(std::forward<Args>(args)...);
-  }
-
-  template <class T, class... Args>
-  SharedPtr<T> shared(Args&&... args)
-  {
-      return std::make_shared<T>(std::forward<Args>(args)...);
-  }
-
-  template <class T>
-  decltype(auto) move(T&& x)
-  {
-      return std::move(std::forward<T>(x));
-  }
 
   // Initialisation for various parts of the engine
   void init_image();
@@ -100,6 +94,26 @@ namespace imp {
   {
       return s.write(sv.data(), sv.length());
   }
+
+  class Stopwatch {
+      using clock = std::chrono::steady_clock;
+      std::string message_;
+      clock::time_point start_;
+
+  public:
+      Stopwatch(const std::string &message):
+          message_(message),
+          start_(std::chrono::steady_clock::now()) {}
+
+      ~Stopwatch()
+      {
+          using namespace std::chrono_literals;
+          auto timediff = (clock::now() - start_) / 1ms;
+          fmt::println("{}: {}ms", message_, timediff);
+      }
+  };
+
+#define STOPWATCH Stopwatch _stopwatch_##__COUNTER__(__PRETTY_FUNCTION__);
 }
 
 template <class T, class Deleter>

@@ -1,7 +1,7 @@
 // -*- mode: c++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2016-2017 Zohar Malamant
+// Copyright(C) 2017 Zohar Malamant
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,10 +20,32 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __IMP_IMAGE__96112498
-#define __IMP_IMAGE__96112498
+#include <imp/util/Endian>
 
-#include "imp/detail/Image.hh"
-#include "imp/detail/Functions.hh"
+#include "Image.hh"
 
-#endif //__IMP_IMAGE__96112498
+Rgba5551Palette imp::read_n64palette(std::istream &s, size_t count)
+{
+    constexpr size_t r_mask = 0b0000'0000'0011'1110;
+    constexpr size_t r_shr  = 1;
+    constexpr size_t g_mask = 0b0000'0111'1100'0000;
+    constexpr size_t g_shr  = 6;
+    constexpr size_t b_mask = 0b1111'1000'0000'0000;
+    constexpr size_t b_shr  = 11;
+    constexpr size_t a_mask = 0b0000'0000'0000'0001;
+    constexpr size_t a_shr  = 0;
+
+    Rgba5551Palette pal { count };
+    for (auto& c : pal) {
+        uint16 color;
+        s.read(reinterpret_cast<char*>(&color), 2);
+        color = swap_bytes(color);
+        size_t d = color;
+        c.blue  = (d & r_mask) >> r_shr;
+        c.green = (d & g_mask) >> g_shr;
+        c.red   = (d & b_mask) >> b_shr;
+        c.alpha = (d & a_mask) >> a_shr;
+    }
+
+    return pal;
+}

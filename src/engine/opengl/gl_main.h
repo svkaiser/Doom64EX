@@ -85,6 +85,10 @@ extern int DGL_CLAMP;
 extern dboolean usingGL;
 
 void GL_CalcViewSize();
+namespace imp {
+  class Image;
+}
+
 dboolean GL_CheckExtension(const char *ext);
 void* GL_RegisterProc(const char *address);
 void GL_Init(void);
@@ -92,7 +96,7 @@ void GL_ClearView(rcolor clearcolor);
 dboolean GL_GetBool(int x);
 void GL_CheckFillMode(void);
 void GL_SwapBuffers(void);
-byte* GL_GetScreenBuffer(int x, int y, int width, int height);
+Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height);
 void GL_SetTextureFilter(void);
 void GL_SetOrtho(dboolean stretch);
 void GL_ResetViewport(void);

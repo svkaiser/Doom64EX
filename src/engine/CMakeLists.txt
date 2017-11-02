@@ -80,6 +80,14 @@ else()
 endif()
 
 ##------------------------------------------------------------------------------
+## Headers
+##
+
+set(HEADERS
+  #${CMAKE_SOURCE_DIR}/include/imp/detail/image.hh
+  )
+
+##------------------------------------------------------------------------------
 ## Sources
 ##
 
@@ -163,11 +171,16 @@ set(SOURCES
   game/g_game.cc
   game/g_settings.cc
 
-  # gfx
-  gfx/Image.cc
-  gfx/PngImage.cc
-  gfx/DoomImage.cc
-  gfx/Pixel.cc
+  # image
+  image/Doom.cc
+  image/Image.cc
+  image/N64Gfx.cc
+  image/N64Palette.cc
+  image/N64Sprite.cc
+  image/N64Texture.cc
+  image/PaletteCache.cc
+  image/Pixel.cc
+  image/Png.cc
 
   # intermission
   intermission/wi_stuff.cc
@@ -244,6 +257,7 @@ set(SOURCES
   renderer/r_wipe.cc
 
   # sound
+  sound/RomSource.cc
   sound/s_sound.cc
 
   # statusbar
@@ -256,16 +270,18 @@ set(SOURCES
   system/i_swap.h
   system/i_system.cc
   system/i_video.cc
+  system/Rom.cc
   system/SdlVideo.cc
 
   # wad
-  wad/Wad.cc
+  wad/Mount.cc
   wad/DoomWad.cc
   wad/RomWad.cc
   wad/ZipWad.cc
 
   # zone
-  zone/z_zone.cc)
+  zone/z_zone.cc
+  )
 
 ##------------------------------------------------------------------------------
 ## Build target

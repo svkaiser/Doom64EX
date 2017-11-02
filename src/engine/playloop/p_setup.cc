@@ -32,26 +32,16 @@
 
 #include "doomdef.h"
 #include "i_swap.h"
-#include "m_fixed.h"
 #include "g_game.h"
-#include "i_system.h"
 #include "p_local.h"
-#include "s_sound.h"
 #include "doomstat.h"
-#include "t_bsp.h"
 #include "p_macros.h"
-#include "info.h"
 #include "m_misc.h"
-#include "tables.h"
-#include "r_local.h"
-#include "gl_texture.h"
 #include "r_sky.h"
 #include "con_console.h"
 #include "m_random.h"
 #include "z_zone.h"
 #include "sc_main.h"
-#include <map>
-#include <imp/Wad>
 #include "Map.hh"
 
 void P_SpawnMapThing(mapthing_t *mthing);
@@ -144,28 +134,6 @@ byte*               rejectmatrix;
 mapthing_t          deathmatchstarts[MAX_DEATHMATCH_STARTS];
 mapthing_t*         deathmatch_p;
 mapthing_t          playerstarts[MAXPLAYERS];
-
-//
-// P_InitTextureHashTable
-//
-
-static std::map<wad::LumpHash, int> texturehashlist;
-
-static void P_InitTextureHashTable(void) {
-    auto section = wad::section(wad::Section::textures);
-    for(int i = 0; section; ++section, ++i) {
-        texturehashlist.emplace(wad::LumpHash { section->lump_name() }, i);
-    }
-}
-
-//
-// P_GetTextureHashKey
-//
-
-static word P_GetTextureHashKey(int hash) {
-    auto it = texturehashlist.find(hash);
-    return it != texturehashlist.end() ? it->second : 0;
-}
 
 //
 // P_LoadVertexes

@@ -1091,7 +1091,7 @@ void Sound_Setup(void)
 				continue;
 
 			wavtable = &sfx[subpatch->id];
-
+      
 			if (wavtabledata[wavtable->ptrindex])
 				continue;
 

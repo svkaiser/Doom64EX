@@ -208,7 +208,8 @@ bool IN_Ticker(void) {
 
         if(!fcluster->enteronly) {
             fstopmusic = false;
-            return ga_finale;
+            //return ga_finale;
+            return true;
         }
 
         return 1;

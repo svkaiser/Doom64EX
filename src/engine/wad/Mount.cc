@@ -2,16 +2,16 @@
 #include <imp/App>
 #include <imp/Image>
 #include <algorithm>
-#include "WadFormat.hh"
+#include "Mount.hh"
 
 namespace {
-  wad::Format::loader loaders_[] {
+  wad::mount_loader *loaders_[] {
       wad::doom_loader,
       wad::rom_loader,
       wad::zip_loader
   };
 
-  Vector<UniquePtr<wad::Format>> mounts_;
+  Vector<UniquePtr<wad::Mount>> mounts_;
 
   Vector<wad::LumpInfo> lumps_;
 
@@ -20,41 +20,13 @@ namespace {
   app::StringParam iwad_path_("iwad");
 }
 
-StringView wad::BasicLump::lump_name() const
-{ return lumps_[id_].lump_name; }
-
-std::size_t wad::BasicLump::lump_index() const
-{ return lumps_[id_].lump_index; }
-
-wad::Section wad::BasicLump::section() const
-{ return lumps_[id_].section; }
-
-size_t wad::BasicLump::section_index() const
-{ return lumps_[id_].section_index; }
-
-String wad::BasicLump::as_bytes()
-{
-    auto& s = stream();
-    s.seekg(0);
-    return { std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
-}
-
-gfx::Image wad::BasicLump::as_image()
-{
-    auto& s = stream();
-    s.seekg(0);
-    return { s };
-}
-
-gfx::Image wad::Lump::as_image()
-{ return data_->as_image(); }
-
+void load_soundfont();
 void wad::init()
 {
     if (iwad_path_ && !wad::mount(iwad_path_.get())) {
         fatal("Could not mount IWAD at {}", iwad_path_.get());
     } else {
-        auto path = app::find_data_file("doom64.wad");
+        auto path = app::find_data_file("doom64.rom");
         if (!path)
             fatal("Could not find IWAD");
         if (!wad::mount(*path))
@@ -70,11 +42,13 @@ void wad::init()
     }
 
     wad::merge();
+
+    load_soundfont();
 }
 
 bool wad::mount(StringView path)
 {
-    wad::Format *format {};
+    wad::Mount *format {};
     for (auto l : loaders_) {
         if (auto f = l(path)) {
             format = f.get();
@@ -89,7 +63,7 @@ bool wad::mount(StringView path)
     auto mount = mounts_.size() - 1;
     auto new_lumps = format->read_all();
     for (auto& l : new_lumps)
-        l.mount = mount;
+        l.mount_index = mount;
     lumps_.insert(lumps_.begin(), std::make_move_iterator(new_lumps.begin()), std::make_move_iterator(new_lumps.end()));
 
     return true;
@@ -99,7 +73,7 @@ void wad::merge()
 {
     // Use a stable sort to allow different versions of lumps.
     std::stable_sort(lumps_.begin(), lumps_.end(),
-                     [](const LumpInfo &a, const LumpInfo &b) { return a.lump_name < b.lump_name; });
+                     [](const LumpInfo &a, const LumpInfo &b) { return a.name < b.name; });
 
     // Clear the sections
     sections_.fill({});
@@ -107,7 +81,7 @@ void wad::merge()
     LumpInfo *prev_lump {};
     size_t index {};
     for (auto& l : lumps_) {
-        if (!prev_lump || prev_lump->lump_name != l.lump_name) {
+        if (!prev_lump || prev_lump->name != l.name) {
             auto &s = sections_[static_cast<size_t>(l.section)];
             l.section_index = s.size();
             s.emplace_back(&l);
@@ -130,20 +104,13 @@ Optional<wad::Lump> wad::find(StringView name)
 {
     auto it = std::lower_bound(lumps_.begin(), lumps_.end(), name,
                                [](const LumpInfo& a, const StringView& b) {
-                                   return a.lump_name < b;
+                                   return a.name < b;
                                });
 
-    if (it == lumps_.end() || it->lump_name != name)
+    if (it == lumps_.end() || it->name != name)
         return nullopt;
 
-    const auto& mount = mounts_[it->mount];
-
-    if (auto l = mount->find(std::distance(lumps_.begin(), it), it->mount_index)) {
-        assert(it->lump_name == l->lump_name());
-        return { inplace, std::move(l) };
-    }
-
-    return nullopt;
+    return wad::find(it->lump_index);
 }
 
 Optional<wad::Lump> wad::find(size_t lump_id)
@@ -156,13 +123,12 @@ Optional<wad::Lump> wad::find(size_t lump_id)
     if (it == lumps_.end() || it->lump_index != lump_id)
         return nullopt;
 
-    auto& lump = *it;
-    const auto& mount = mounts_[lump.mount];
+    const auto& mount = mounts_[it->mount_index];
+    Lump lump { *it };
 
-    size_t index = static_cast<size_t>(std::distance(lumps_.begin(), it));
-    if (auto l = mount->find(index, lump.mount_index)) {
-        assert(lump.lump_index == l->lump_index());
-        return { inplace, std::move(l) };
+    if (mount->set_buffer(lump, it->index)) {
+        assert(it->name == lump.lump_name());
+        return std::move(lump);
     }
 
     return nullopt;
@@ -185,17 +151,11 @@ size_t wad::section_size(wad::Section section)
 }
 
 wad::LumpIterator::LumpIterator(Section section):
-    section_(section),
-    lump_(std::move(*wad::find(section_, 0)))
-{
-}
+    section_(section) {}
 
-wad::Lump& wad::LumpIterator::operator*()
+wad::Lump wad::LumpIterator::operator*()
 {
-    if (lump_.section_index() != index_) {
-        lump_ = std::move(*wad::find(section_, index_));
-    }
-    return lump_;
+    return wad::find(section_, index_).value();
 }
 
 bool wad::LumpIterator::has_next() const
@@ -206,4 +166,62 @@ bool wad::LumpIterator::has_next() const
 void wad::LumpIterator::next()
 {
     ++index_;
+}
+
+wad::Lump::Lump(StringView name):
+    Lump(std::move(wad::find(name).value()))
+{
+}
+
+StringView wad::Lump::lump_name() const
+{
+    return info_->name;
+}
+
+std::size_t wad::Lump::lump_index() const
+{
+    return info_->lump_index;
+}
+
+wad::Section wad::Lump::section() const
+{
+    return info_->section;
+}
+
+std::size_t wad::Lump::section_index() const
+{
+    return info_->section_index;
+}
+
+String wad::Lump::as_bytes()
+{
+    auto& s = stream();
+    s.seekg(0, s.end);
+    auto size = static_cast<size_t>(s.tellg());
+    s.seekg(0);
+
+    String buf;
+    buf.resize(size);
+
+    s.read(&buf[0], size);
+
+    return buf;
+}
+
+char *wad::Lump::bytes_ptr()
+{
+    auto& s = stream();
+    s.seekg(0, s.end);
+    auto size = static_cast<size_t>(s.tellg());
+    s.seekg(0);
+
+    auto buf = new char[size];
+    s.read(buf, size);
+
+    return buf;
+}
+
+wad::Mount &wad::Lump::source()
+{
+    return *mounts_[info_->mount_index];
 }
