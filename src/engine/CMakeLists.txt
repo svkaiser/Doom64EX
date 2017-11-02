@@ -182,6 +182,9 @@ set(SOURCES
   misc/m_random.cc
   misc/m_shift.cc
 
+  # native_ui
+  native_ui/Sdl2.cc
+
   # net
   net/net_client.cc
   net/net_common.cc

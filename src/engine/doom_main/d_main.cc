@@ -990,9 +990,6 @@ void D_DoomMain(void) {
     I_Printf("M_LoadDefaults: Loading game configuration\n");
     M_LoadDefaults();
 
-    I_Printf("I_Init: Setting up machine state.\n");
-    I_Init();
-
     I_Printf("native_ui: Setting up Native UI\n");
     native_ui::init();
 
@@ -1001,6 +998,9 @@ void D_DoomMain(void) {
 
     I_Printf("W_Init: Init WADfiles.\n");
     wad::init();
+
+    I_Printf("I_Init: Setting up machine state.\n");
+    I_Init();
 
     I_Printf("M_Init: Init miscellaneous info.\n");
     M_Init();
