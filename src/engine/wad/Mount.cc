@@ -7,9 +7,9 @@
 namespace {
   wad::mount_loader *loaders_[] {
       wad::doom_loader,
-      wad::rom_loader,
-      wad::zip_loader
-  };
+          wad::rom_loader,
+          wad::zip_loader
+          };
 
   Vector<UniquePtr<wad::Mount>> mounts_;
 
@@ -123,15 +123,8 @@ Optional<wad::Lump> wad::find(size_t lump_id)
     if (it == lumps_.end() || it->lump_index != lump_id)
         return nullopt;
 
-    const auto& mount = mounts_[it->mount_index];
-    Lump lump { *it };
 
-    if (mount->set_buffer(lump, it->index)) {
-        assert(it->name == lump.lump_name());
-        return std::move(lump);
-    }
-
-    return nullopt;
+    return { *it };
 }
 
 Optional<wad::Lump> wad::find(wad::Section section, size_t index)
@@ -171,6 +164,17 @@ void wad::LumpIterator::next()
 wad::Lump::Lump(StringView name):
     Lump(std::move(wad::find(name).value()))
 {
+}
+
+wad::LumpBuffer* wad::Lump::buffer()
+{
+    if (buffer_)
+        return buffer_.get();
+
+    const auto& mount = mounts_[info_->mount_index];
+
+    mount->set_buffer(*this, info_->index);
+    return buffer_.get();
 }
 
 StringView wad::Lump::lump_name() const

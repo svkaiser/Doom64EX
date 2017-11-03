@@ -107,11 +107,7 @@ namespace imp {
         void buffer(UniquePtr<LumpBuffer> ptr)
         { buffer_ = std::move(ptr); }
 
-        LumpBuffer* buffer()
-        { return buffer_.get(); }
-
-        const LumpBuffer* buffer() const
-        { return buffer_.get(); }
+        LumpBuffer* buffer();
 
         StringView lump_name() const;
 
@@ -122,7 +118,7 @@ namespace imp {
         std::size_t section_index() const;
 
         std::istream& stream()
-        { return buffer_->stream(); }
+        { return buffer()->stream(); }
 
         String as_bytes();
 
