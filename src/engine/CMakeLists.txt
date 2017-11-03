@@ -98,7 +98,8 @@ set(LIBRARIES
   ${PNG_LIBRARIES}
   ${FLUIDSYNTH_LIBRARIES}
   ${OPENGL_LIBRARIES}
-  ${CONAN_LIBS})
+  ${CONAN_LIBS}
+  easy_profiler)
 
 set(INCLUDES
   ${PLATFORM_INCLUDES}
@@ -287,6 +288,7 @@ set(SOURCES
 ## Build target
 ##
 
+add_definitions(-DBUILD_WITH_EASY_PROFILER=1)
 add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES})
 target_link_libraries(doom64ex ${LIBRARIES})

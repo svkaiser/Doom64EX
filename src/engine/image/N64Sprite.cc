@@ -25,6 +25,7 @@
 #include <imp/Wad>
 #include <set>
 #include <wad/RomWad.hh>
+#include <easy/profiler.h>
 
 #include "Image.hh"
 #include "PaletteCache.hh"
@@ -59,6 +60,7 @@ constexpr unsigned short operator""_US(unsigned long long int x)
 
 Optional<Image> N64Sprite::load(wad::Lump& lump) const
 {
+    EASY_FUNCTION(profiler::colors::Green50);
     auto sprite_lump = dynamic_cast<wad::RomBuffer*>(lump.buffer());
     auto& s = lump.stream();
     Header header;

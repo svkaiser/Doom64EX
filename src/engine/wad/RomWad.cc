@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <imp/detail/Image.hh>
 #include <set>
+#include <easy/profiler.h>
 #include "RomWad.hh"
 
 void Deflate_Decompress(byte * input, byte * output);
@@ -226,6 +227,7 @@ namespace {
 
       Vector<wad::LumpInfo> read_all() override
       {
+          EASY_FUNCTION(profiler::colors::Green);
           Vector<wad::LumpInfo> lumps;
           wad::Section section {};
           ImageFormat format {};
@@ -331,6 +333,7 @@ namespace {
 
       bool set_buffer(wad::Lump& lump, size_t index) override
       {
+          EASY_FUNCTION(profiler::colors::Green);
           auto& l = infos_[index];
           wad::RomSpriteInfo info { l.is_weapon, l.palette_name };
           lump.buffer(std::make_unique<wad::RomBuffer>(l.stream(rom_), l.format, info));

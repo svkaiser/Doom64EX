@@ -25,6 +25,8 @@
 #include <cstring>
 
 #include <imp/Wad>
+#include <easy/profiler_colors.h>
+#include <easy/profiler.h>
 #include "wad/RomWad.hh"
 #include "Image.hh"
 
@@ -48,6 +50,7 @@ namespace {
 
 void Image::load(wad::Lump& lump)
 {
+    EASY_FUNCTION(profiler::colors::Magenta);
     auto& s = lump.stream();
     auto pos = s.tellg();
     for (auto fmt : auto_order_) {
@@ -64,6 +67,7 @@ void Image::load(wad::Lump& lump)
 
 void Image::load(wad::Lump& lump, ImageFormat format)
 {
+    EASY_FUNCTION(profiler::colors::Magenta);
     auto io = image_formats_[static_cast<int>(format)].get();
     auto opt = io->load(lump);
     if (opt) {
@@ -82,6 +86,7 @@ void Image::save(std::ostream &s, ImageFormat format) const
 
 void Image::convert(PixelFormat format)
 {
+    EASY_FUNCTION(profiler::colors::Blue);
     if (pixel_format() == format)
         return;
 
@@ -117,6 +122,7 @@ void Image::convert(PixelFormat format)
 
 Image::Image(wad::Lump& lump)
 {
+    EASY_FUNCTION(profiler::colors::DarkMagenta);
     if (auto buf = dynamic_cast<wad::RomBuffer*>(lump.buffer())) {
         load(lump, buf->format());
     } else {

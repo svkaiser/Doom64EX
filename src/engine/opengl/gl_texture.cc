@@ -37,6 +37,7 @@
 #include "con_console.h"
 #include "g_actions.h"
 #include <imp/Wad>
+#include <easy/profiler.h>
 
 #define GL_MAX_TEX_UNITS    4
 
@@ -159,6 +160,7 @@ static void InitWorldTextures(void) {
 //
 
 void GL_BindWorldTexture(int texnum, int *width, int *height) {
+    EASY_FUNCTION(profiler::colors::Amber);
     if(r_fillmode <= 0) {
         return;
     }
@@ -323,6 +325,7 @@ static void InitGfxTextures(void) {
 //
 
 int GL_BindGfxTexture(const char* name, dboolean alpha) {
+    EASY_FUNCTION(profiler::colors::Amber);
     dboolean npot;
     int width;
     int height;
@@ -437,6 +440,7 @@ static void InitSpriteTextures(void) {
 //
 
 void GL_BindSpriteTexture(int spritenum, int pal) {
+    EASY_FUNCTION(profiler::colors::Amber);
     dboolean npot;
 
     if(!r_fillmode) {
@@ -549,6 +553,7 @@ dtexture GL_ScreenToTexture(void) {
 static dtexture dummytexture = 0;
 
 void GL_BindDummyTexture(void) {
+    EASY_FUNCTION(profiler::colors::Amber);
     if(dummytexture == 0) {
         //
         // build dummy texture
@@ -579,6 +584,7 @@ void GL_BindDummyTexture(void) {
 static dtexture envtexture = 0;
 
 void GL_BindEnvTexture(void) {
+    EASY_FUNCTION(profiler::colors::Amber);
     rcolor rgb[16];
 
     if(!r_fillmode) {

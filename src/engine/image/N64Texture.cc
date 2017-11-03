@@ -23,6 +23,7 @@
 #include <imp/util/Endian>
 
 #include <imp/Wad>
+#include <easy/profiler.h>
 #include "Image.hh"
 
 namespace {
@@ -40,6 +41,7 @@ namespace {
 
 Optional<Image> N64Texture::load(wad::Lump& lump) const
 {
+    EASY_FUNCTION(profiler::colors::Green50);
     auto& s = lump.stream();
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));

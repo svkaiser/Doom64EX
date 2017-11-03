@@ -37,7 +37,7 @@ option(VERSION_DEV "Add git commit hash to window title" ON)
 # If fluidsynth-lite wasn't cloned, fall back to using system fluidsynth.
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/fluidsynth/CMakeLists.txt" AND NOT ENABLE_SYSTEM_FLUIDSYNTH)
   set(ENABLE_SYSTEM_FLUIDSYNTH ON)
-  message(WARNING "The fluidsynth submodule wasn't initialised. Run `git submodule --init --recursive` to use fluidsynth-lite, or add -DENABLE_SYSTEM_FLUIDSYNTH=ON to use the system-provided FluidSynth library.")
+  message(WARNING "The fluidsynth submodule wasn't initialised. Run `git submodule update --init --recursive` to use fluidsynth-lite, or add -DENABLE_SYSTEM_FLUIDSYNTH=ON to use the system-provided FluidSynth library.")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
@@ -46,6 +46,8 @@ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
 set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
+
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vendor/easy_profiler")
 
 if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
   set(USE_CONAN ON)
@@ -120,6 +122,9 @@ if (NOT USE_CONAN)
 
   # OpenGL
   find_package(OpenGL REQUIRED)
+
+  # easy_profiler
+  find_package(easy_profiler REQUIRED)
 
   # GTK3
   if(ENABLE_GTK3)

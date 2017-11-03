@@ -27,6 +27,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <easy/profiler.h>
 
 #include "doomstat.h"
 #include "r_lights.h"
@@ -269,6 +270,7 @@ static void R_DrawSkyDome(int tiles, float rows, int height,
 //
 
 static void R_DrawSkyboxCloud(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     rcolor color;
     vtx_t v[4];
 
@@ -440,6 +442,7 @@ static void R_DrawSkyboxCloud(void) {
 //
 
 static void R_DrawSimpleSky(int lump, int offset) {
+    EASY_FUNCTION(profiler::colors::Red);
     float pos1;
     float width;
     int height;
@@ -470,6 +473,7 @@ static void R_DrawSimpleSky(int lump, int offset) {
 //
 
 static void R_DrawVoidSky(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     GL_SetOrtho(1);
 
     dglDisable(GL_TEXTURE_2D);
@@ -485,6 +489,7 @@ static void R_DrawVoidSky(void) {
 //
 
 static void R_DrawTitleSky(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     R_DrawSimpleSky(skypicnum, 240);
     Draw_GfxImage(63, 25, sky->backdrop, D_RGBA(255, 255, 255, logoAlpha), false);
 }
@@ -494,6 +499,7 @@ static void R_DrawTitleSky(void) {
 //
 
 static void R_DrawClouds(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     rfloat pos = 0.0f;
     vtx_t v[4];
 
@@ -578,6 +584,7 @@ static void R_DrawClouds(void) {
 //
 
 static void R_SpreadFire(char* src1, char* src2, int pixel, int counter, int* rand) {
+    EASY_FUNCTION(profiler::colors::Red);
     int randIdx = 0;
     char *tmpSrc;
 
@@ -598,6 +605,7 @@ static void R_SpreadFire(char* src1, char* src2, int pixel, int counter, int* ra
 //
 
 static void R_Fire() {
+    EASY_FUNCTION(profiler::colors::Red);
     int counter = 0;
     int rand = 0;
     int step = 0;
@@ -654,6 +662,7 @@ static void R_Fire() {
 static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     auto lump = wad::find("FIRE");
     fireLump = lump->section_index();
     fireImage = I_ReadImage(lump->lump_index(), true, true, false, 0);
@@ -676,6 +685,7 @@ void R_InitFire(void) {
 //
 
 static void R_FireTicker(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     if(leveltime & 1) {
         R_Fire();
     }
@@ -686,6 +696,7 @@ static void R_FireTicker(void) {
 //
 
 static void R_DrawFire(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     float pos1;
     vtx_t v[4];
     dtexture t = gfxptr[fireLump];
@@ -788,6 +799,7 @@ static void R_DrawFire(void) {
 //
 
 void R_DrawSky(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     if(!sky) {
         return;
     }
@@ -868,6 +880,7 @@ void R_DrawSky(void) {
 //
 
 void R_SkyTicker(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     if(menuactive) {
         return;
     }

@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <imp/detail/Pixel.hh>
 
+#include <easy/profiler.h>
+
 #include "SDL.h"
 
 #ifdef main
@@ -83,6 +85,9 @@ namespace {
 [[noreturn]]
 void app::main(int argc, char **argv)
 {
+    EASY_PROFILER_ENABLE;
+    EASY_MAIN_THREAD;
+
     using Arity = app::Param::Arity;
     myargc = argc;
     myargv = argv;

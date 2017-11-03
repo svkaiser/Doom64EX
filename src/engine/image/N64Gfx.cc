@@ -23,6 +23,7 @@
 #include <imp/util/Endian>
 
 #include <imp/Wad>
+#include <easy/profiler.h>
 #include "Image.hh"
 
 namespace {
@@ -40,6 +41,7 @@ namespace {
 
 Optional<Image> N64Gfx::load(wad::Lump& lump) const
 {
+    EASY_FUNCTION(profiler::colors::Green50);
     bool is_fire = lump.lump_name() == "FIRE";
     bool is_cloud = lump.lump_name() == "CLOUD";
     auto& s = lump.stream();

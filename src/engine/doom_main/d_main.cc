@@ -36,6 +36,7 @@
 #endif
 
 #include <stdlib.h>
+#include <easy/profiler.h>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -244,6 +245,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
     }
 
     while(!action) {
+        //EASY_BLOCK("Mainloop");
         int i = 0;
         int lowtic = 0;
         int entertic = 0;
@@ -429,7 +431,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
             NetUpdate();   // check for new console commands
         }
 
-drawframe:
+    drawframe:
 
         S_UpdateSounds();
 
@@ -446,7 +448,7 @@ drawframe:
         D_DrawInterface();
         D_FinishDraw();
 
-freealloc:
+    freealloc:
 
         // force garbage collection
         Z_FreeAlloca();
@@ -824,12 +826,12 @@ static void FindResponseFile(void) {
             do {
                 myargv[indexinfile++] = infile+k;
                 while(k < size &&
-                        ((*(infile+k)>= ' '+1) && (*(infile+k)<='z'))) {
+                      ((*(infile+k)>= ' '+1) && (*(infile+k)<='z'))) {
                     k++;
                 }
                 *(infile+k) = 0;
                 while(k < size &&
-                        ((*(infile+k)<= ' ') || (*(infile+k)>'z'))) {
+                      ((*(infile+k)<= ' ') || (*(infile+k)>'z'))) {
                     k++;
                 }
             }
@@ -977,67 +979,70 @@ namespace imp {
 void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
 
-    // init subsystems
+    {
+        // init subsystems
+        EASY_BLOCK("D_DoomMain");
 
-    I_Printf("imp::init_image: Init Image\n");
-    void init_image();
-    init_image();
+        I_Printf("imp::init_image: Init Image\n");
+        void init_image();
+        init_image();
 
-    I_Printf("Z_Init: Init Zone Memory Allocator\n");
-    Z_Init();
+        I_Printf("Z_Init: Init Zone Memory Allocator\n");
+        Z_Init();
 
-    I_Printf("CON_Init: Init Game Console\n");
-    CON_Init();
+        I_Printf("CON_Init: Init Game Console\n");
+        CON_Init();
 
-    I_Printf("G_Init: Setting up game input and commands\n");
-    G_Init();
+        I_Printf("G_Init: Setting up game input and commands\n");
+        G_Init();
 
-    I_Printf("M_LoadDefaults: Loading game configuration\n");
-    M_LoadDefaults();
+        I_Printf("M_LoadDefaults: Loading game configuration\n");
+        M_LoadDefaults();
 
-    I_Printf("native_ui: Setting up Native UI\n");
-    native_ui::init();
+        I_Printf("native_ui: Setting up Native UI\n");
+        native_ui::init();
 
-    I_Printf("D_Init: Init DOOM parameters\n");
-    D_Init();
+        I_Printf("D_Init: Init DOOM parameters\n");
+        D_Init();
 
-    I_Printf("rom::init: Init ROM.\n");
-    rom::init();
+        I_Printf("rom::init: Init ROM.\n");
+        rom::init();
 
-    I_Printf("W_Init: Init WADfiles.\n");
-    wad::init();
+        I_Printf("W_Init: Init WADfiles.\n");
+        wad::init();
 
-    I_Printf("I_Init: Setting up machine state.\n");
-    I_Init();
+        I_Printf("I_Init: Setting up machine state.\n");
+        I_Init();
 
-    I_Printf("M_Init: Init miscellaneous info.\n");
-    M_Init();
+        I_Printf("M_Init: Init miscellaneous info.\n");
+        M_Init();
 
-    I_Printf("R_Init: Init DOOM refresh daemon.\n");
-    R_Init();
+        I_Printf("R_Init: Init DOOM refresh daemon.\n");
+        R_Init();
 
-    I_Printf("P_Init: Init Playloop state.\n");
-    P_Init();
+        I_Printf("P_Init: Init Playloop state.\n");
+        P_Init();
 
-    I_Printf("NET_Init: Init network subsystem.\n");
-    NET_Init();
+        I_Printf("NET_Init: Init network subsystem.\n");
+        NET_Init();
 
-    I_Printf("S_Init: Setting up sound.\n");
-    S_Init();
+        I_Printf("S_Init: Setting up sound.\n");
+        S_Init();
 
-    I_Printf("D_CheckNetGame: Checking network game status.\n");
-    D_CheckNetGame();
+        I_Printf("D_CheckNetGame: Checking network game status.\n");
+        D_CheckNetGame();
 
-    I_Printf("ST_Init: Init status bar.\n");
-    ST_Init();
+        I_Printf("ST_Init: Init status bar.\n");
+        ST_Init();
 
-    I_Printf("GL_Init: Init OpenGL\n");
-    GL_Init();
+        I_Printf("GL_Init: Init OpenGL\n");
+        GL_Init();
 
-    native_ui::console_show(false);
+        native_ui::console_show(false);
 
-    // garbage collection
-    Z_FreeAlloca();
+        // garbage collection
+        Z_FreeAlloca();
+    }
 
     if(!D_CheckDemo()) {
         if(!autostart) {
