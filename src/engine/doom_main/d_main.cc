@@ -1006,7 +1006,6 @@ void D_DoomMain(void) {
 
     I_Printf("W_Init: Init WADfiles.\n");
     wad::init();
-    exit(42);
 
     I_Printf("I_Init: Setting up machine state.\n");
     I_Init();

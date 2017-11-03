@@ -6,6 +6,7 @@
 
 #include <system/Rom.hh>
 
+#if 0
 #define ASSERT_SIZEOF(_Struct, _Sizeof)                                 \
     static_assert(sizeof(_Struct) == _Sizeof, #_Struct " must be " #_Sizeof " bytes")
 
@@ -264,9 +265,9 @@ void load_soundfont()
 
         MidiHeader midi;
         std::copy_n("MThd", 4, midi.id);
-        midi.chunk_size = swap_bytes<int32>(6);
-        midi.type       = swap_bytes<int16>(1);
-        midi.num_tracks = swap_bytes<uint16>(entry.num_tracks);
+        midi.chunk_size = swap_bytes(6_i32);
+        midi.type       = swap_bytes(1_i16);
+        midi.num_tracks = swap_bytes(entry.num_tracks);
         midi.size       = midi_header_size;
 
         size_t track_offset {};
@@ -309,3 +310,6 @@ void load_soundfont()
 
     std::exit(1);
 }
+#endif
+
+void load_soundfont() {}

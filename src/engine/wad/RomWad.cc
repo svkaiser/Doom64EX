@@ -340,7 +340,16 @@ namespace {
   };
 }
 
-UniquePtr<wad::Mount> wad::rom_loader(StringView)
+UniquePtr<wad::Mount> wad::rom_loader(StringView path)
 {
+    String basename = path;
+    auto it = basename.rfind('/');
+    if (it != String::npos) {
+        basename.erase(0, it + 1);
+    }
+
+    if (basename != "doom64.rom")
+        return nullptr;
+
     return std::make_unique<RomFormat>();
 }

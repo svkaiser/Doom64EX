@@ -45,14 +45,6 @@ namespace {
       int16 width;		///< draw width
       int16 height;
 
-      friend std::ostream &operator<<(std::ostream &os, const Header &header)
-      {
-          os << "tiles: " << header.tiles << " compressed: " << header.compressed << " cmpsize: " << header.cmpsize
-             << " xoffs: " << header.xoffs << " yoffs: " << header.yoffs << " width: " << header.width << " height: "
-             << header.height << " tileheight: " << header.tileheight;
-          return os;
-      }
-
       ///< draw height
       int16 tileheight;	///< y height per tile piece
   };

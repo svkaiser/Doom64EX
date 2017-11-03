@@ -19,6 +19,24 @@ namespace imp {
   using uint32 = std::uint32_t;
   using uint64 = std::uint64_t;
 
+  inline namespace int_literals {
+#define __IMP_INT_LITERAL(_Type, _Literal) \
+    constexpr _Type operator"" _Literal(unsigned long long int x) \
+    { return static_cast<_Type>(x); }
+
+    __IMP_INT_LITERAL(int8, _i8)
+    __IMP_INT_LITERAL(int16, _i16)
+    __IMP_INT_LITERAL(int32, _i32)
+    __IMP_INT_LITERAL(int64, _i64)
+
+    __IMP_INT_LITERAL(uint8, _u8)
+    __IMP_INT_LITERAL(uint16, _u16)
+    __IMP_INT_LITERAL(uint32, _u32)
+    __IMP_INT_LITERAL(uint64, _u64)
+
+#undef __IMP_INT_LITERAL
+  }
+
   // Standard library aliasing
   template<bool Val>
   using bool_type = std::integral_constant<bool, Val>;

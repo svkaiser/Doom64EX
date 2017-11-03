@@ -90,6 +90,7 @@ void app::main(int argc, char **argv)
     _program = argv[0];
 
     auto base_dir = SDL_GetBasePath();
+    println(">>> {}", base_dir);
     if (base_dir) {
         _base_dir = base_dir;
         SDL_free(base_dir);

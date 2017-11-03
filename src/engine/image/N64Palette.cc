@@ -20,6 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <istream>
 #include <imp/util/Endian>
 
 #include "Image.hh"

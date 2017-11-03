@@ -2,6 +2,7 @@
 #ifndef __IMP_WAD__45443636
 #define __IMP_WAD__45443636
 
+#include <istream>
 #include <imp/Prelude>
 #include <imp/util/Optional>
 
@@ -12,7 +13,7 @@ namespace imp {
     enum struct Section;
     class Lump;
     class LumpIterator;
-    class Mount;
+    struct Mount;
 
     void init();
 

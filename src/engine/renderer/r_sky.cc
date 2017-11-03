@@ -656,7 +656,7 @@ static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 void R_InitFire(void) {
     auto lump = wad::find("FIRE");
     fireLump = lump->section_index();
-    fireImage = std::move(I_ReadImage(lump->lump_index(), true, true, false, 0));
+    fireImage = I_ReadImage(lump->lump_index(), true, true, false, 0);
 
     auto pixdata = reinterpret_cast<byte*>(fireImage.data_ptr());
     for (int i = 0; i < 4096; i++)

@@ -89,14 +89,14 @@ namespace imp {
       reference at(size_type i)
       {
           if (i >= count_)
-              throw std::out_of_range {};
+              throw std::out_of_range { "Palette out of range" };
           return data()[i];
       }
 
       const_reference at(size_type i) const
       {
           if (i >= count_)
-              throw std::out_of_range {};
+              throw std::out_of_range { "Palette out of range" };
           return data()[i];
       }
 

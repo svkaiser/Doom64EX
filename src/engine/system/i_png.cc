@@ -49,9 +49,11 @@ FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
 // I_GetRGBGamma
 //
 
+#if 0
 d_inline static byte I_GetRGBGamma(int c) {
     return (byte)MIN(pow((float)c, (1.0f + (0.01f * i_gamma))), 255);
 }
+#endif
 
 //
 // I_TranslatePalette
