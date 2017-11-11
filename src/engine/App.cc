@@ -48,6 +48,7 @@ namespace {
 
       void process(StringView arg)
       {
+          EASY_FUNCTION();
           if (arg[0] == '-') {
               arg.remove_prefix(1);
               auto it = _params.find(arg);

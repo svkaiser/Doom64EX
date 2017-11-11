@@ -50,8 +50,7 @@ namespace imp {
 
       BasicPalette(BasicPalette &&) = default;
 
-      BasicPalette(const BasicPalette& other)
-      { assign_(other.count(), other.data_ptr()); }
+      BasicPalette(const BasicPalette& other) = default;
 
       BasicPalette(const BasicPaletteView<T>& other)
       { assign_(other.count(), other.data_ptr()); }
@@ -62,8 +61,7 @@ namespace imp {
 
       BasicPalette& operator=(BasicPalette&&) = default;
 
-      BasicPalette& operator=(const BasicPalette& other)
-      { return assign_(other.count(), other.data()); }
+      BasicPalette& operator=(const BasicPalette& other) = default;
 
       PixelFormat pixel_format() const
       { return T::format; }

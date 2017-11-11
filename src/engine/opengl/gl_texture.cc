@@ -195,12 +195,16 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     // create a new texture
     auto image = I_ReadImage(wad::find(wad::Section::textures, texnum)->lump_index(), false, true, true, palettetranslation[texnum]);
 
-    dglGenTextures(1, &textureptr[texnum][palettetranslation[texnum]]);
-    dglBindTexture(GL_TEXTURE_2D, textureptr[texnum][palettetranslation[texnum]]);
-    dglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data_ptr());
+    {
+        EASY_BLOCK("Bind texture");
+        dglGenTextures(1, &textureptr[texnum][palettetranslation[texnum]]);
+        dglBindTexture(GL_TEXTURE_2D, textureptr[texnum][palettetranslation[texnum]]);
+        dglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                      image.data_ptr());
 
-    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
 
     GL_CheckFillMode();
     GL_SetTextureFilter();
@@ -240,6 +244,7 @@ void GL_SetNewPalette(int id, byte palID) {
 
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
+    EASY_FUNCTION();
     if(r_texnonpowresize > 0) {
 //        int wp;
 //        int hp;

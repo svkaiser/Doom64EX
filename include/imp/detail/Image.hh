@@ -233,8 +233,8 @@ namespace imp {
       const Palette& palette() const
       { return pal_; }
 
-      void palette(Palette pal)
-      { pal_ = std::move(pal); }
+      void palette(const Palette& pal)
+      { pal_ = pal; }
 
       void convert(PixelFormat format);
 
@@ -326,8 +326,8 @@ namespace imp {
       const BasicPalette<PalT>& palette() const
       { return pal_; }
 
-      void palette(BasicPalette<PalT> pal)
-      { pal_ = std::move(pal); }
+      void palette(const BasicPalette<PalT>& pal)
+      { pal_ = pal; }
 
       uint16 width() const
       { return width_; }

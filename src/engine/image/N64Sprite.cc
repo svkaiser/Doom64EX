@@ -26,6 +26,7 @@
 #include <set>
 #include <wad/RomWad.hh>
 #include <easy/profiler.h>
+#include <map>
 
 #include "Image.hh"
 #include "PaletteCache.hh"
@@ -99,14 +100,13 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
                 s.get(image[y].data_ptr()[x]);
 
         if (sprite_lump->sprite_info().is_weapon || lump.section() == wad::Section::graphics) {
-            static Rgba5551Palette cached_pal;
-            static String cached;
+            static std::map<String, Rgba5551Palette> cached_pal;
+            auto substr = lump.lump_name().substr(4).to_string();
 
-            if (cached != lump.lump_name().substr(4)) {
-                cached_pal = read_n64palette(s, 256);
-                cached = lump.lump_name().substr(4);
+            if (!cached_pal.count(substr)) {
+                cached_pal[substr] = read_n64palette(s, 256);
             }
-            image.palette(cached_pal);
+            image.palette(cached_pal[substr]);
         } else {
             auto name = format("PAL{}0", lump.lump_name().substr(4));
             palette = cache::palette(name);
