@@ -253,6 +253,12 @@ namespace imp {
           return __h_constexpr_strcmp(mData, mLength, other.mData, other.mLength);
       }
 
+      template <size_t N>
+      constexpr int compare(const char (&other)[N]) const
+      {
+          return __h_constexpr_strcmp(mData, mLength, other, N);
+      }
+
       /*! Case insensitive (Latin-1 only) comparison */
       constexpr int icompare(const BasicStringView &other) const
       {

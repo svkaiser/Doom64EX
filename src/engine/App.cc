@@ -158,7 +158,7 @@ void app::main(int argc, char **argv)
 
 bool app::file_exists(StringView path)
 {
-    struct stat st;
+    struct stat st {};
     return !stat(path.data(), &st) && S_ISREG(st.st_mode);
 }
 
@@ -208,7 +208,7 @@ StringView app::program()
 
 bool app::have_param(StringView name)
 {
-    return _params.count(name);
+    return _params.count(name) == 1;
 }
 
 const app::Param *app::param(StringView name)
