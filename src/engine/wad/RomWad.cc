@@ -34,16 +34,16 @@ namespace {
 
   /* Graphics lumps aren't located in the graphics directory, so we have to manually put them there */
   const StringView gfx_names_[] = {
-      "SYMBOLS", "USLEGAL", "TITLE", "EVIL",
-      "FIRE", "CLOUD", "IDCRED1", "IDCRED2",
+      "SYMBOLS",  "USLEGAL",  "TITLE",   "EVIL",
+      "FIRE",     "CLOUD",    "IDCRED1", "IDCRED2",
       "WMSCRED1", "WMSCRED2", "FINAL",
-      "JPCPAK", "PLLEGAL", "JPLEGAL", "JAPFONT"
-      };
+      "JPCPAK",   "PLLEGAL",  "JPLEGAL", "JAPFONT"
+  };
 
   /* These are also graphics lumps, but they use the sprite format */
   const StringView gfx_sprites_[] = {
-      "SFONT", "STATUS", "SPACE", "MOUNTA",
-      "MOUNTB", "MOUNTC", "JPMSG01", "JPMSG02",
+      "SFONT",   "STATUS",  "SPACE",   "MOUNTA",
+      "MOUNTB",  "MOUNTC",  "JPMSG01", "JPMSG02",
       "JPMSG03", "JPMSG04", "JPMSG05", "JPMSG06",
       "JPMSG07", "JPMSG08", "JPMSG09", "JPMSG10",
       "JPMSG11", "JPMSG12", "JPMSG13", "JPMSG14",
@@ -55,6 +55,39 @@ namespace {
       "JPMSG36", "JPMSG37", "JPMSG38", "JPMSG39",
       "JPMSG40", "JPMSG41", "JPMSG42", "JPMSG43",
       "JPMSG44", "JPMSG45"
+  };
+
+  const StringView snd_names_[] = {
+      "NOSOUND",  "SNDPUNCH", "SNDSPAWN", "SNDEXPLD",
+      "SNDIMPCT", "SNDPSTOL", "SNDSHTGN", "SNDPLSMA",
+      "SNDBFG",   "SNDSAWUP", "SNDSWIDL", "SNDSAW1",
+      "SNDSAW2",  "SNDMISLE", "SNDBFGXP", "SNDPSTRT",
+      "SNDPSTOP", "SNDDORUP", "SNDDORDN", "SNDSCMOV",
+      "SNDSWCH1", "SNDSWCH2", "SNDITEM",  "SNDSGCK",
+      "SNDOOF1",  "SNDTELPT", "SNDOOF2",  "SNDSHT2F",
+      "SNDLOAD1", "SNDLOAD2", "SNDPPAIN", "SNDPLDIE",
+      "SNDSLOP",  "SNDZSIT1", "SNDZSIT2", "SNDZSIT3",
+      "SNDZDIE1", "SNDZDIE2", "SNDZDIE3", "SNDZACT",
+      "SNDPAIN1", "SNDPAIN2", "SNDDBACT", "SNDSCRCH",
+      "SNDISIT1", "SNDISIT2", "SNDIDIE1", "SNDIDIE2",
+      "SNDIACT",  "SNDSGSIT", "SNDSGATK", "SNDSGDIE",
+      "SNDB1SIT", "SNDB1DIE", "SNDHDSIT", "SNDHDDIE",
+      "SNDSKATK", "SNDB2SIT", "SNDB2DIE", "SNDPESIT",
+      "SNDPEPN",  "SNDPEDIE", "SNDBSSIT", "SNDBSDIE",
+      "SNDBSLFT", "SNDBSSMP", "SNDFTATK", "SNDFTSIT",
+      "SNDFTHIT", "SNDFTDIE", "SNDBDMSL", "SNDRVACT",
+      "SNDTRACR", "SNDDART",  "SNDRVHIT", "SNDCYSIT",
+      "SNDCYDTH", "SNDCYHOF", "SNDMETAL", "SNDDOR2U",
+      "SNDDOR2D", "SNDPWRUP", "SNDLASER", "SNDBUZZ",
+      "SNDTHNDR", "SNDLNING", "SNDQUAKE", "SNDDRTHT",
+      "SNDRCACT", "SNDRCATK", "SNDRCDIE", "SNDRCPN",
+      "SNDRCSIT", "MUSAMB01", "MUSAMB02", "MUSAMB03",
+      "MUSAMB04", "MUSAMB05", "MUSAMB06", "MUSAMB07",
+      "MUSAMB08", "MUSAMB09", "MUSAMB10", "MUSAMB11",
+      "MUSAMB12", "MUSAMB13", "MUSAMB14", "MUSAMB15",
+      "MUSAMB16", "MUSAMB17", "MUSAMB18", "MUSAMB19",
+      "MUSAMB20", "MUSFINAL", "MUSDONE",  "MUSINTRO",
+      "MUSTITLE"
   };
 
   enum struct Special {

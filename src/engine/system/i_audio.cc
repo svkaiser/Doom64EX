@@ -1167,6 +1167,7 @@ static int SDLCALL Thread_PlayerHandler(void *param) {
 // I_InitSequencer
 //
 
+fluid_sfloader_t* rom_soundfont();
 void I_InitSequencer(void) {
     dboolean sffound;
     Optional<String> sfpath;
@@ -1225,6 +1226,8 @@ void I_InitSequencer(void) {
         CON_Warnf("I_InitSequencer: failed to create synthesizer");
         return;
     }
+
+    fluid_synth_add_sfloader(doomseq.synth, rom_soundfont());
 
     sffound = false;
     if (!s_soundfont->empty()) {
