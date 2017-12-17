@@ -13,6 +13,7 @@ void Wad_Decompress(byte * input, byte * output);
 Vector<String> rom_textures;
 std::set<String> rom_weapon_sprites;
 
+std::string get_midi(size_t midi);
 namespace {
   template <class T>
   void read_into(std::istream& s, T& x)
@@ -161,17 +162,18 @@ namespace {
   };
 
   struct Info {
-      String name;
-      Compression compression;
-      ImageFormat format;
-      Special special;
-      std::istringstream cache;
-      size_t pos;
-      size_t size;
-      bool is_weapon;
-      String palette_name;
+      String name {};
+      Compression compression {};
+      ImageFormat format {};
+      Special special {};
+      std::istringstream cache {};
+      size_t pos {};
+      size_t size {};
+      size_t midi {};
+      bool is_weapon {};
+      String palette_name {};
 
-      Info(String name, Compression compression, ImageFormat format, Special special, size_t pos, size_t size, bool is_weapon, String palette_name):
+      Info(const String& name, Compression compression, ImageFormat format, Special special, size_t pos, size_t size, bool is_weapon, String palette_name):
           name(name),
           compression(compression),
           format(format),
@@ -181,61 +183,69 @@ namespace {
           is_weapon(is_weapon),
           palette_name(palette_name) {}
 
+      Info(const String& name, size_t midi):
+          name(name),
+          midi(midi + 1) {}
+
       std::istream& stream(std::istream& rom) {
           if (!cache.str().empty()) {
               cache.seekg(0);
               return cache;
           }
 
-          String buf;
-          String lump;
-          rom.seekg(pos);
+          if (midi > 0) {
+              cache.str(get_midi(midi - 1));
+          } else {
+              String lump;
+              String buf;
+              rom.seekg(pos);
 
-          switch (compression) {
-          case Compression::none:
-              lump.resize(size);
-              rom.read(&lump[0], size);
-              break;
+              switch (compression) {
+              case Compression::none:
+                  lump.resize(size);
+                  rom.read(&lump[0], size);
+                  break;
 
-          case Compression::lzss:
-              buf.resize(size);
-              lump.resize(size);
-              rom.read(&buf[0], size);
-              Wad_Decompress(reinterpret_cast<byte *>(&buf[0]), reinterpret_cast<byte *>(&lump[0]));
-              break;
+              case Compression::lzss:
+                  buf.resize(size);
+                  lump.resize(size);
+                  rom.read(&buf[0], size);
+                  Wad_Decompress(reinterpret_cast<byte *>(&buf[0]), reinterpret_cast<byte *>(&lump[0]));
+                  break;
 
-          case Compression::n64:
-              buf.resize(size);
-              lump.resize(size);
-              rom.read(&buf[0], size);
-              Deflate_Decompress(reinterpret_cast<byte *>(&buf[0]), reinterpret_cast<byte *>(&lump[0]));
-              break;
+              case Compression::n64:
+                  buf.resize(size);
+                  lump.resize(size);
+                  rom.read(&buf[0], size);
+                  Deflate_Decompress(reinterpret_cast<byte *>(&buf[0]), reinterpret_cast<byte *>(&lump[0]));
+                  break;
+              }
+
+              switch (special) {
+              case Special::none:
+                  break;
+
+              case Special::gfx_cloud:
+                  /*
+                   * CLOUD lump has an invalid header, but is otherwise an 8bpp
+                   * image with Rgba5551 palette just like the other Graphics
+                   * images.
+                   */
+
+                  /* word 0: compression (0xffff is -1) */
+                  /* word 1: unused (zeroes) */
+                  /* word 2: width 64px (big endian 0x40) */
+                  /* word 3: height 64px (big endian 0x40) */
+                  lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"_sv);
+                  break;
+
+              case Special::gfx_fire:
+                  //lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"_sv);
+                  break;
+              }
+              cache.str(std::move(lump));
           }
 
-          switch (special) {
-          case Special::none:
-              break;
-
-          case Special::gfx_cloud:
-              /*
-               * CLOUD lump has an invalid header, but is otherwise an 8bpp
-               * image with Rgba5551 palette just like the other Graphics
-               * images.
-               */
-
-              /* word 0: compression (0xffff is -1) */
-              /* word 1: unused (zeroes) */
-              /* word 2: width 64px (big endian 0x40) */
-              /* word 3: height 64px (big endian 0x40) */
-              lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"_sv);
-              break;
-
-          case Special::gfx_fire:
-              //lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"_sv);
-              break;
-          }
-
-          cache.str(std::move(lump));
           return cache;
       }
   };
@@ -359,6 +369,12 @@ namespace {
               lumps.push_back({ name, section, infos_.size() });
               infos_.emplace_back(name, compression, format, special, dir.filepos, dir.size, is_weapon, palette_name);
               section = section1;
+          }
+
+          for (size_t i {}; i < sizeof(snd_names_) / sizeof(*snd_names_); ++i) {
+              auto& s = snd_names_[i];
+              lumps.push_back({ s, wad::Section::sounds, infos_.size() });
+              infos_.emplace_back(s, i);
           }
 
           return lumps;

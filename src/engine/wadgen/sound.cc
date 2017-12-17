@@ -364,6 +364,7 @@ Sound_CreateMidiTrack(midiheader_t * mthd, track_t * track, byte * data,
 	tracksize += 4;
 
 	while (1) {
+//        WGen_Printf(">> %d", *midi);
 		do {
 			*buff++ = *midi;
 			tracksize++;
@@ -377,6 +378,7 @@ Sound_CreateMidiTrack(midiheader_t * mthd, track_t * track, byte * data,
 			break;
 		}
 
+//		WGen_Printf("<< %d", *midi);
 		switch (*midi) {
 		case 0x02:	// unknown 0x02
 			PRINTSTRING(*midi);
@@ -1010,6 +1012,7 @@ static void Sound_ProcessSSEQ(void)
 		// process tracks
 		//
 		for (j = 0; j < entries[i].ntrack; j++) {
+			WGen_Printf("^ Position: %d", ptr + tptr);
 			track = (track_t *) ((sseqfile + ptr) + tptr);
 
 			track->flag = WGen_Swap16(track->flag);
@@ -1031,6 +1034,14 @@ static void Sound_ProcessSSEQ(void)
 				data =
 				    ((sseqfile + ptr) + tptr) + sizeof(track_t);
 
+            WGen_Printf("@ Track %d (loop: %d, size: %d)", i, track->loop, track->datalen);
+            if (i == 116) {
+				int z;
+				for (z = 0; z < track->datalen; ++z) {
+					WGen_Printf("[%d]: %d", z, data[z]);
+				}
+			}
+
 			//
 			// something went off-sync somewhere...
 			//
@@ -1047,6 +1058,9 @@ static void Sound_ProcessSSEQ(void)
 			if (track->loop)
 				tptr += 4;
 		}
+
+        if (i == 116)
+            exit(0);
 
 		ptr += entries[i].length;
 		tptr = 0;

@@ -235,7 +235,7 @@ int Rom_Verify(char *path)
 	if (strstr(path, ".v64"))	// byte swapped
 		return 3;
 
-	return 0;
+	return 1;
 }
 
 //**************************************************************
