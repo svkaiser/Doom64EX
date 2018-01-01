@@ -83,7 +83,7 @@ Optional<Image> N64Gfx::load(wad::Lump& lump) const
         image.palette(read_n64palette(s, 256));
     }
 
-    return image;
+    return Image { image };
 }
 
 std::unique_ptr<ImageFormatIO> init::image_n64gfx()

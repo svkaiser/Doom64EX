@@ -94,7 +94,7 @@ void wad::merge()
 
 bool wad::have_lump(StringView name)
 {
-    return wad::find(name).have_value();
+    return bool(wad::find(name));
 }
 
 Optional<wad::Lump> wad::find(StringView name)
@@ -121,7 +121,7 @@ Optional<wad::Lump> wad::find(size_t lump_id)
         return nullopt;
 
 
-    return { *it };
+    return wad::Lump { *it };
 }
 
 Optional<wad::Lump> wad::find(wad::Section section, size_t index)

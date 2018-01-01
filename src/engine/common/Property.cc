@@ -72,7 +72,7 @@ std::vector<Property *> Property::all()
     return v;
 }
 
-Optional<Property&> Property::find(StringView name)
+Property* Property::find(StringView name)
 {
     auto it = _global().properties.find(name);
     return it != _global().properties.end() ? it->second : nullptr;

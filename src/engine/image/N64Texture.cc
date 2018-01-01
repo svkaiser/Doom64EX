@@ -74,7 +74,7 @@ Optional<Image> N64Texture::load(wad::Lump& lump) const
     auto palsize = static_cast<size_t>(header.numpal) * 16;
     image.palette(read_n64palette(s, palsize));
 
-    return image;
+    return Image { image };
 }
 
 std::unique_ptr<ImageFormatIO> init::image_n64texture()

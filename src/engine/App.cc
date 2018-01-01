@@ -169,16 +169,16 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
     if (!dir_hint.empty()) {
         path = format("{}{}", dir_hint, name);
         if (app::file_exists(path))
-            return { inplace, path };
+            return path;
     }
 
     path = format("{}{}", _base_dir, name);
     if (app::file_exists(path))
-        return { inplace, path };
+        return path;
 
     path = format("{}{}", _data_dir, name);
     if (app::file_exists(path))
-        return { inplace, path };
+        return path;
 
 #if defined(__LINUX__) || defined(__OpenBSD__)
     const char *paths[] = {
@@ -194,7 +194,7 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
     for (auto p : paths) {
         path = format("{}{}", p, name);
         if (app::file_exists(path))
-            return { inplace, path };
+            return path;
     }
 #endif
 

@@ -40,7 +40,7 @@ namespace imp {
        * \param name Property name
        * \return A Property instance or nullptr if not found
        */
-      static Optional<Property&> find(StringView name);
+      static Property* find(StringView name);
 
       /*!
        * \brief Look for a typed property
@@ -49,13 +49,12 @@ namespace imp {
        * \return A TypeProperty instance or nullptr if not found
        */
       template <class T>
-      static Optional<TypedProperty<T>&> find(StringView name)
+      static TypedProperty<T>* find(StringView name)
       {
-          return find(name).if_value([](auto p)
-                                     {
-                                         auto p2 = dynamic_cast<TypedProperty<T> *>(p);
-                                         return Optional<TypedProperty<T>&> { p2 ? *p2 : nullopt };
-                                     });
+          if (auto p = find(name)) {
+              return dynamic_cast<TypedProperty<T>*>(p);
+          }
+          return nullptr;
       }
 
       /*!
