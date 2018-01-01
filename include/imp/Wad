@@ -3,8 +3,8 @@
 #define __IMP_WAD__45443636
 
 #include <istream>
-#include <imp/Prelude>
-#include <imp/util/Optional>
+#include <prelude.hh>
+#include <utility/optional.hh>
 
 namespace imp {
   class Image;

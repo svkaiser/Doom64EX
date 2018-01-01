@@ -1,6 +1,6 @@
 #pragma once
 
-#include <imp/Prelude>
+#include <prelude.hh>
 
 namespace imp {
   enum class UriSchema {

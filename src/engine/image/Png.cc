@@ -22,7 +22,7 @@
 
 #include <cstring>
 #include <png.h>
-#include <imp/util/Endian>
+#include <utility/endian.hh>
 
 #include <imp/Wad>
 #include "Image.hh"

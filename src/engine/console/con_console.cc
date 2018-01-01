@@ -75,7 +75,7 @@ char        console_inputbuffer[MAX_CONSOLE_INPUT_LEN];
 int         console_inputlength;
 int     console_autocomplete = 0;
 bool    console_initialized = false;
-std::vector<Property*> console_autocomplete_list;
+std::vector<Cvar*> console_autocomplete_list;
 
 //
 // CON_AutoComplete
@@ -86,7 +86,7 @@ static void CON_AutoComplete()
         return;
 
     if (console_autocomplete == 0) {
-        console_autocomplete_list = Property::partial(&console_inputbuffer[1]);
+        console_autocomplete_list = Cvar::partial(&console_inputbuffer[1]);
     }
 
     if (console_autocomplete_list.empty())

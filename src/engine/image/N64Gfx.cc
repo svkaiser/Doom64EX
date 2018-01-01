@@ -20,7 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <imp/util/Endian>
+#include <utility/endian.hh>
 
 #include <imp/Wad>
 #include <easy/profiler.h>

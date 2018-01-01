@@ -149,7 +149,7 @@ set(SOURCES
   common/info.cc
   common/md5.cc
   common/tables.cc
-  common/Property.cc
+        core/cvar.cc
 
   # console
   console/con_console.cc

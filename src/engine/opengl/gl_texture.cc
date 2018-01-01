@@ -89,11 +89,11 @@ typedef struct {
 static gl_env_state_t gl_env_state[GL_MAX_TEX_UNITS];
 static int curunit = 0;
 
-extern BoolProperty r_texnonpowresize;
-extern BoolProperty r_fillmode;
+extern BoolCvar r_texnonpowresize;
+extern BoolCvar r_fillmode;
 
-BoolProperty r_texturecombiner("r_texturecombiner", "", true, 0,
-                               [](const BoolProperty &, bool, bool&) {
+BoolCvar r_texturecombiner("r_texturecombiner", "", true, 0,
+                               [](const BoolCvar &, bool, bool&) {
                                    int i;
 
                                    curunit = 0;

@@ -1,6 +1,6 @@
 #include <map>
 #include <fstream>
-#include <imp/App>
+#include <platform/app.hh>
 #include <imp/Wad>
 #include <sys/stat.h>
 #include <imp/detail/Pixel.hh>
@@ -145,15 +145,7 @@ void app::main(int argc, char **argv)
         println("");
     }
 
-#ifndef _WIN32
-    if (_wadgen_param) {
-        WGen_WadgenMain();
-    } else {
-        D_DoomMain();
-    }
-#else
     D_DoomMain();
-#endif
 }
 
 bool app::file_exists(StringView path)

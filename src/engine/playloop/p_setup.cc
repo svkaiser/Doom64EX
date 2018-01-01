@@ -83,13 +83,13 @@ clusterdef_t*       clusterdefs;
 // [kex] cvars
 //
 
-BoolProperty p_features("p_features", "");
-BoolProperty p_autorun("p_autorun", "");
-BoolProperty p_fdoubleclick("p_fdoubleclick", "");
-BoolProperty p_sdoubleclick("p_sdoubleclick", "");
-BoolProperty p_usecontext("p_usecontext", "");
-BoolProperty p_damageindicator("p_damageindicator", "");
-IntProperty p_regionmode("p_regionmode", "");
+BoolCvar p_features("p_features", "");
+BoolCvar p_autorun("p_autorun", "");
+BoolCvar p_fdoubleclick("p_fdoubleclick", "");
+BoolCvar p_sdoubleclick("p_sdoubleclick", "");
+BoolCvar p_usecontext("p_usecontext", "");
+BoolCvar p_damageindicator("p_damageindicator", "");
+IntCvar p_regionmode("p_regionmode", "");
 
 //
 // [kex] sky definition stuff

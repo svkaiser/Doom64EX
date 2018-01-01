@@ -52,19 +52,19 @@
 #include "gl_draw.h"
 #include "g_demo.h"
 
-IntProperty st_drawhud("st_drawhud", "", true);
-BoolProperty st_crosshair("st_crosshair", "", false);
-FloatProperty st_crosshairopacity("st_crosshairopacity", "", 80.0f);
-BoolProperty st_flashoverlay("st_flashoverlay", "", false);
-BoolProperty st_regionmsg("st_regionmsg", "", false);
-BoolProperty m_messages("m_messages", "", true);
-StringProperty m_playername("m_playername", "");
-BoolProperty st_showpendingweapon("st_showpendingweapon", "", true);
-BoolProperty st_showstats("st_showstats", "", false);
+IntCvar st_drawhud("st_drawhud", "", true);
+BoolCvar st_crosshair("st_crosshair", "", false);
+FloatCvar st_crosshairopacity("st_crosshairopacity", "", 80.0f);
+BoolCvar st_flashoverlay("st_flashoverlay", "", false);
+BoolCvar st_regionmsg("st_regionmsg", "", false);
+BoolCvar m_messages("m_messages", "", true);
+StringCvar m_playername("m_playername", "");
+BoolCvar st_showpendingweapon("st_showpendingweapon", "", true);
+BoolCvar st_showstats("st_showstats", "", false);
 
-extern BoolProperty p_usecontext;
-extern BoolProperty p_damageindicator;
-extern BoolProperty r_texturecombiner;
+extern BoolCvar p_usecontext;
+extern BoolCvar p_damageindicator;
+extern BoolCvar r_texturecombiner;
 
 //
 // STATUS BAR DATA

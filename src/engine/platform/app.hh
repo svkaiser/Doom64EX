@@ -2,14 +2,14 @@
 #ifndef __IMP_APP__27387470
 #define __IMP_APP__27387470
 
-#include "Prelude"
-#include "util/Convert"
-#include "Property"
+#include "prelude.hh"
+#include "utility/convert.hh"
+#include "core/cvar.hh"
 
 namespace imp {
-  class Property;
+  class Cvar;
   template <class T>
-  class TypedProperty;
+  class BasicCvar;
 
   namespace app {
     class Param;
@@ -107,32 +107,32 @@ namespace imp {
     };
 
     template <class T>
-    class TypedPropertyParam : public TypedProperty<T>, private Param {
+    class BasicCvarParam : public BasicCvar<T>, private Param {
     public:
         using Arity = Param::Arity;
-        using setter_func = typename TypedProperty<T>::setter_func;
+        using setter_func = typename BasicCvar<T>::setter_func;
 
-        TypedPropertyParam(StringView name, StringView description):
-            TypedProperty<T>(name, description),
+        BasicCvarParam(StringView name, StringView description):
+            BasicCvar<T>(name, description),
             Param(name, Arity::unary) {}
 
-        TypedPropertyParam(StringView name, StringView description, T def, int flags = 0, setter_func setter = nullptr):
-            TypedProperty<T>(name, description, def, flags, setter),
+        BasicCvarParam(StringView name, StringView description, T def, int flags = 0, setter_func setter = nullptr):
+            BasicCvar<T>(name, description, def, flags, setter),
             Param(name, Arity::unary) {}
 
-        TypedPropertyParam(std::pair<StringView, StringView> name, StringView description):
-            TypedProperty<T>(name.first, description),
+        BasicCvarParam(std::pair<StringView, StringView> name, StringView description):
+            BasicCvar<T>(name.first, description),
             Param(name.second, Arity::unary) {}
 
-        TypedPropertyParam(std::pair<StringView, StringView> name, StringView description, T def, int flags = 0, setter_func setter = nullptr):
-            TypedProperty<T>(name.first, description, def, flags, setter),
+        BasicCvarParam(std::pair<StringView, StringView> name, StringView description, T def, int flags = 0, setter_func setter = nullptr):
+            BasicCvar<T>(name.first, description, def, flags, setter),
             Param(name.second, Arity::unary) {}
 
     private:
         void add(StringView val) override
         {
-            *static_cast<TypedProperty<T>*>(this) = from_string<T>(val);
-            this->set_flag(Property::from_param);
+            *static_cast<BasicCvar<T>*>(this) = from_string<T>(val);
+            this->set_flag(Cvar::from_param);
         }
     };
 
@@ -141,10 +141,10 @@ namespace imp {
     using BoolParam = TypedParam<bool>;
     using StringParam = TypedParam<String>;
 
-    using IntPropertyParam = TypedPropertyParam<int>;
-    using FloatPropertyParam = TypedPropertyParam<float>;
-    using BoolPropertyParam = TypedPropertyParam<bool>;
-    using StringPropertyParam = TypedPropertyParam<String>;
+    using IntCvarParam = BasicCvarParam<int>;
+    using FloatCvarParam = BasicCvarParam<float>;
+    using BoolCvarParam = BasicCvarParam<bool>;
+    using StringCvarParam = BasicCvarParam<String>;
   }
 }
 

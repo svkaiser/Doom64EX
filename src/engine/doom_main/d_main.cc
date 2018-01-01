@@ -117,11 +117,11 @@ void G_BuildTiccmd(ticcmd_t* cmd);
 
 #define STRPAUSED    "Paused"
 
-extern BoolProperty sv_nomonsters;
-extern BoolProperty sv_fastmonsters;
-extern BoolProperty sv_respawnitems;
-extern BoolProperty sv_respawn;
-extern IntProperty sv_skill;
+extern BoolCvar sv_nomonsters;
+extern BoolCvar sv_fastmonsters;
+extern BoolCvar sv_respawnitems;
+extern BoolCvar sv_respawn;
+extern IntCvar sv_skill;
 
 //
 // EVENT HANDLING
@@ -190,7 +190,7 @@ void D_IncValidCount(void) {
 // D_MiniLoop
 //
 
-extern BoolProperty i_interpolateframes;
+extern BoolCvar i_interpolateframes;
 
 extern dboolean renderinframe;
 extern int      gametime;
@@ -525,7 +525,7 @@ static void Title_Stop(void) {
 // Legal_Start
 //
 
-extern IntProperty p_regionmode;
+extern IntCvar p_regionmode;
 
 static const char* legalpic = "USLEGAL";
 static int legal_x = 32;
@@ -876,7 +876,7 @@ static void D_Init(void) {
             name = myargv[p++];
             value = myargv[p++];
 
-            if (auto property = Property::find(name)) {
+            if (auto property = Cvar::find(name)) {
                 if (!property->is_from_param()) {
                     property->set_string(value);
                 }

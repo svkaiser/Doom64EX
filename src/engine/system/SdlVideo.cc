@@ -1,6 +1,6 @@
 #include "SDL.h"
 #include <imp/Video>
-#include <imp/Property>
+#include <core/cvar.hh>
 #include <config.hh>
 #include <doomdef.h>
 #include <doom_main/d_main.h>
@@ -158,20 +158,20 @@ int mouse_x {};
 int mouse_y {};
 
 /* Graphics */
-IntProperty v_width { "v_Width", "Video width (-1: desktop width)", -1 };
-IntProperty v_height { "v_Height", "Video height (-1: desktop height)", -1 };
-IntProperty v_depthsize { "v_DepthSize", "Depth buffer fragment size", 24 };
-IntProperty v_buffersize { "v_BufferSize", "Framebuffer fragment size", 32 };
-BoolProperty v_vsync { "v_VSync", "Vertical sync", true };
-IntProperty v_windowed { "v_Windowed", "Window mode", fullscreen_default };
+IntCvar v_width { "v_Width", "Video width (-1: desktop width)", -1 };
+IntCvar v_height { "v_Height", "Video height (-1: desktop height)", -1 };
+IntCvar v_depthsize { "v_DepthSize", "Depth buffer fragment size", 24 };
+IntCvar v_buffersize { "v_BufferSize", "Framebuffer fragment size", 32 };
+BoolCvar v_vsync { "v_VSync", "Vertical sync", true };
+IntCvar v_windowed { "v_Windowed", "Window mode", fullscreen_default };
 
 /* Mouse Input */
-FloatProperty v_msensitivityx { "v_MSensitivityX", "Mouse sensitivity", 5.0f };
-FloatProperty v_msensitivityy { "v_MSensitivityY", "Mouse sensitivity", 5.0f };
-FloatProperty v_macceleration { "v_MAcceleration", "Mouse acceleration", 0.0f };
-BoolProperty v_mlook { "v_MLook", "Mouse-look", true };
-BoolProperty v_mlookinvert { "v_MLookInvert", "Invert Y-Axis", false };
-BoolProperty v_yaxismove { "v_YAxisMove", "Move with the mouse", false };
+FloatCvar v_msensitivityx { "v_MSensitivityX", "Mouse sensitivity", 5.0f };
+FloatCvar v_msensitivityy { "v_MSensitivityY", "Mouse sensitivity", 5.0f };
+FloatCvar v_macceleration { "v_MAcceleration", "Mouse acceleration", 0.0f };
+BoolCvar v_mlook { "v_MLook", "Mouse-look", true };
+BoolCvar v_mlookinvert { "v_MLookInvert", "Invert Y-Axis", false };
+BoolCvar v_yaxismove { "v_YAxisMove", "Move with the mouse", false };
 
 class SdlVideo : public IVideo {
     SDL_Window* sdl_window_ {};

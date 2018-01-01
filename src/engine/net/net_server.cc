@@ -1639,7 +1639,7 @@ void NET_SV_Shutdown(void)
     }
 }
 
-void NET_SV_UpdateCvars(const Property &cvar)
+void NET_SV_UpdateCvars(const Cvar &cvar)
 {
     net_packet_t *packet;
     int i;

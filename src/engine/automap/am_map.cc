@@ -90,17 +90,17 @@ void AM_Start(void);
 
 // automap cvars
 
-BoolProperty am_lines("am_lines", "Draw map with lines", true);
-IntProperty am_nodes("am_nodes", "");
-BoolProperty am_ssect("am_ssect", "");
-BoolProperty am_fulldraw("am_fulldraw", "");
-BoolProperty am_showkeycolors("am_showkeycolors", "Show key colours in automap");
-BoolProperty am_showkeymarkers("am_showkeymarkers", "");
-BoolProperty am_drawobjects("am_drawobjects", "Show objects in automap");
-BoolProperty am_overlay("am_overlay", "Show automap overlay");
+BoolCvar am_lines("am_lines", "Draw map with lines", true);
+IntCvar am_nodes("am_nodes", "");
+BoolCvar am_ssect("am_ssect", "");
+BoolCvar am_fulldraw("am_fulldraw", "");
+BoolCvar am_showkeycolors("am_showkeycolors", "Show key colours in automap");
+BoolCvar am_showkeymarkers("am_showkeymarkers", "");
+BoolCvar am_drawobjects("am_drawobjects", "Show objects in automap");
+BoolCvar am_overlay("am_overlay", "Show automap overlay");
 
-extern FloatProperty v_msensitivityx;
-extern FloatProperty v_msensitivityy;
+extern FloatCvar v_msensitivityx;
+extern FloatCvar v_msensitivityy;
 
 #ifdef _USE_XINPUT  // XINPUT
 CVAR_EXTERNAL(i_rsticksensitivity);

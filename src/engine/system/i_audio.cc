@@ -42,12 +42,12 @@
 #include "i_swap.h"
 #include "con_console.h"    // for cvars
 #include <imp/Wad>
-#include <imp/App>
+#include <platform/app.hh>
 
 #include "SDL.h"
 
 // 20120203 villsa - cvar for soundfont location
-StringProperty s_soundfont("s_soundfont", "doomsnd.sf2 location", "doomsnd.sf2");
+StringCvar s_soundfont("s_soundfont", "doomsnd.sf2 location", "doomsnd.sf2");
 
 //
 // Mutex

@@ -23,7 +23,7 @@
 #ifndef __IMP_NATIVEUI__92059425
 #define __IMP_NATIVEUI__92059425
 
-#include "Prelude"
+#include "prelude.hh"
 
 namespace imp {
   namespace native_ui {

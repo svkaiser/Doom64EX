@@ -1,7 +1,7 @@
 #ifndef __IMP_IMAGE__94221350
 #define __IMP_IMAGE__94221350
 
-#include <imp/util/Types>
+#include <utility/types.hh>
 #include "Scanline.hh"
 
 namespace imp {

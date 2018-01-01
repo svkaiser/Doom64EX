@@ -24,7 +24,7 @@
 #ifndef D3DR_MAIN_H
 #define D3DR_MAIN_H
 
-#include <imp/Property>
+#include <core/cvar.hh>
 
 #include "t_bsp.h"
 #include "d_player.h"
@@ -58,10 +58,10 @@ extern unsigned int glBindCalls;
 
 extern dboolean     bRenderSky;
 
-extern FloatProperty r_fov;
-extern BoolProperty r_fillmode;
-extern BoolProperty r_uniformtime;
-extern BoolProperty r_drawtrace;
+extern FloatCvar r_fov;
+extern BoolCvar r_fillmode;
+extern BoolCvar r_uniformtime;
+extern BoolCvar r_drawtrace;
 
 void R_Init(void);
 void R_RenderPlayerView(player_t *player);

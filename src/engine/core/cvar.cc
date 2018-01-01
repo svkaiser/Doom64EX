@@ -1,9 +1,9 @@
 #include <map>
 #include <algorithm>
+#include <iostream>
 #include <boost/algorithm/string.hpp>
 
-#include <imp/Property>
-#include <iostream>
+#include "cvar.hh"
 
 namespace {
   struct CName {
@@ -28,42 +28,42 @@ namespace {
   {
       static struct {
           // TODO: Write a radix tree for this
-          std::map<CName, Property*> properties;
-          std::vector<Property*> new_properties;
+          std::map<CName, Cvar*> properties;
+          std::vector<Cvar*> new_properties;
       } global {};
       return global;
   }
 }
 
-Property::Property(StringView name, StringView description, int flags):
-    mName(name.to_string()),
-    mDescription(description.to_string()),
-    mFlags(flags)
+Cvar::Cvar(StringView name, StringView description, int flags):
+    name_(name.to_string()),
+    description_(description.to_string()),
+    flags_(flags)
 {
     if (_global().properties.count(name)) {
         // TODO: Replace with an exception
-        println("Property with the name {} already exists!", name);
+        println("Cvar with the name {} already exists!", name);
     }
 
     _global().properties.emplace(name, this);
     _global().new_properties.emplace_back(this);
 }
 
-Property::~Property()
+Cvar::~Cvar()
 {
-    _global().properties.erase({ mName });
+    _global().properties.erase({ name_ });
 }
 
-void Property::update()
+void Cvar::update()
 {
     if (is_network()) {
         STUB("Update networked property");
     }
 }
 
-std::vector<Property *> Property::all()
+std::vector<Cvar *> Cvar::all()
 {
-    std::vector<Property *> v;
+    std::vector<Cvar *> v;
     v.reserve(_global().properties.size());
     for (auto& p : _global().properties) {
         assert(p.second != nullptr);
@@ -72,16 +72,16 @@ std::vector<Property *> Property::all()
     return v;
 }
 
-Property* Property::find(StringView name)
+Cvar* Cvar::find(StringView name)
 {
     auto it = _global().properties.find(name);
     return it != _global().properties.end() ? it->second : nullptr;
 }
 
-Vector<Property *> Property::partial(StringView prefix)
+Vector<Cvar *> Cvar::partial(StringView prefix)
 {
     // Search will be optimised when radix tree gets implemented.
-    Vector<Property *> list;
+    Vector<Cvar *> list;
 
     if (prefix.empty())
         return list;

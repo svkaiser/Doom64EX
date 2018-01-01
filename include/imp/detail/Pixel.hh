@@ -23,8 +23,8 @@
 #ifndef __IMP_PIXEL__13206666
 #define __IMP_PIXEL__13206666
 
-#include "imp/Prelude"
-#include "imp/util/PtrIterator"
+#include "prelude.hh"
+#include "utility/ptr_iterator.hh"
 
 /*
  * This header defines classes for low-level pixel operations,

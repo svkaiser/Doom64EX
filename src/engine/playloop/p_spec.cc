@@ -53,7 +53,7 @@
 #include "r_sky.h"
 #include "sc_main.h"
 
-extern BoolProperty p_features;
+extern BoolCvar p_features;
 
 short globalint = 0;
 static byte tryopentype[3];

@@ -159,7 +159,7 @@ MD5_Final(byte digest[16], md5_context_t *ctx)
 
 #ifndef ASM_MD5
 
-/* The four core functions - F1 is optimized somewhat */
+/* The four platform functions - F1 is optimized somewhat */
 
 /* #define F1(x, y, z) (x & y | ~x & z) */
 #define F1(x, y, z) (z ^ (x & (y ^ z)))
@@ -172,7 +172,7 @@ MD5_Final(byte digest[16], md5_context_t *ctx)
          (w += f(x,y,z) + in, w = (w<<s | w>>(32-s)) + x)
 
 /*
- * The core of the MD5 algorithm, this alters an existing MD5 hash to
+ * The platform of the MD5 algorithm, this alters an existing MD5 hash to
  * reflect the addition of 16 longwords of new data.  MD5_Update blocks
  * the data and converts bytes into longwords for this routine.
  */

@@ -1,5 +1,5 @@
 #include <map>
-#include <imp/App>
+#include <platform/app.hh>
 #include <imp/Image>
 #include <algorithm>
 #include "Mount.hh"

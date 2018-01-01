@@ -60,8 +60,8 @@ typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE, DWORD);
 // I_SetAffinityMask
 //
 // Due to ongoing problems with the SDL_mixer library and/or the SDL audio
-// core, it is necessary to support the restriction of Eternity to a single
-// core or CPU. Apparent thread contention issues cause the library to
+// platform, it is necessary to support the restriction of Eternity to a single
+// platform or CPU. Apparent thread contention issues cause the library to
 // malfunction if multiple threads of the process run simultaneously.
 //
 // I wish SDL would fix their bullshit already.

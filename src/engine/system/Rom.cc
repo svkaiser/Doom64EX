@@ -1,7 +1,7 @@
 
 #include <fstream>
-#include <imp/App>
-#include <imp/Prelude>
+#include <platform/app.hh>
+#include <prelude.hh>
 #include <boost/algorithm/string.hpp>
 
 #include "Rom.hh"

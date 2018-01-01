@@ -12,12 +12,12 @@
 #include <chrono>
 
 // Include standard utilities
-#include "util/Types"
-#include "util/ArrayView"
-#include "util/StringView"
-#include "util/Guard"
-#include "util/Optional"
-#include "detail/Memory.hh"
+#include "utility/types.hh"
+#include "utility/array_view.hh"
+#include "utility/string_view.hh"
+#include "utility/guard.hh"
+#include "utility/optional.hh"
+#include "imp/detail/Memory.hh"
 
 #define STUB(msg) fmt::print("STUB {}: {} ({}:{})\n", __FUNCTION__, msg, __LINE__, __FILE__)
 
@@ -85,10 +85,6 @@ namespace imp {
   using InitList = std::initializer_list<T>;
   template <class T, size_t N>
   using Array = std::array<T, N>;
-
-  // Initialisation for various parts of the engine
-  void init_image();
-  void init_properties();
 
   inline std::ostream& operator<<(std::ostream& s, StringView sv)
   {

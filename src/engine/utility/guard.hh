@@ -12,17 +12,17 @@ namespace imp {
    */
   template <class Deleter>
   class Guard {
-      bool mExecuted = false;
-      Deleter mDeleter;
+      bool executed_ {};
+      Deleter deleter_;
 
   public:
       Guard(Deleter&& deleter):
-          mDeleter(std::move_if_noexcept(deleter)) {}
+          deleter_(std::move_if_noexcept(deleter)) {}
 
       ~Guard()
       {
-          if (!mExecuted)
-              mDeleter();
+          if (!executed_)
+              deleter_();
       }
 
        /*!
@@ -30,9 +30,9 @@ namespace imp {
        */
       void execute()
       {
-          if (!mExecuted) {
-              mDeleter();
-              mExecuted = true;
+          if (!executed_) {
+              deleter_();
+              executed_ = true;
           }
       }
 
@@ -40,7 +40,7 @@ namespace imp {
        * Prevent deleter being executed on destruction
        */
       void release()
-      { mExecuted = true; }
+      { executed_ = true; }
   };
 
   template <class Deleter>

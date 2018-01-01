@@ -35,12 +35,12 @@
 
 #include <imp/Image>
 #include <sstream>
-#include <imp/Property>
+#include <core/cvar.hh>
 #include <imp/Wad>
 #include <image/PaletteCache.hh>
 
-FloatProperty i_gamma("i_gamma", "", 0.0f, 0,
-                      [](const FloatProperty&, float, float&)
+FloatCvar i_gamma("i_gamma", "", 0.0f, 0,
+                      [](const FloatCvar&, float, float&)
                       {
                           GL_DumpTextures();
                       });

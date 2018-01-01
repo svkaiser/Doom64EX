@@ -2,7 +2,7 @@
 #ifndef __IMP_ENDIAN__41348837
 #define __IMP_ENDIAN__41348837
 
-#include "Types"
+#include "types.hh"
 
 #if defined(_WIN32)
 // We assume that Windows only runs on little endian CPUs.

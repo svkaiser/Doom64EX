@@ -61,14 +61,14 @@ int         DGL_CLAMP = GL_CLAMP;
 float       max_anisotropic = 0;
 dboolean    widescreen = false;
 
-extern BoolProperty r_filter;
-extern BoolProperty r_texturecombiner;
-extern BoolProperty r_anisotropic;
-extern BoolProperty st_flashoverlay;
-extern BoolProperty v_vsync;
-extern IntProperty v_depthsize;
-extern IntProperty v_buffersize;
-extern IntProperty r_colorscale;
+extern BoolCvar r_filter;
+extern BoolCvar r_texturecombiner;
+extern BoolCvar r_anisotropic;
+extern BoolCvar st_flashoverlay;
+extern BoolCvar v_vsync;
+extern IntCvar v_depthsize;
+extern IntCvar v_buffersize;
+extern IntCvar r_colorscale;
 
 //
 // CMD_DumpGLExtensions

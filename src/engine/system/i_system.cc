@@ -49,7 +49,7 @@
 #include "i_audio.h"
 #include "gl_draw.h"
 
-BoolProperty i_interpolateframes("i_interpolateframes", "", false);
+BoolCvar i_interpolateframes("i_interpolateframes", "", false);
 
 ticcmd_t        emptycmd;
 

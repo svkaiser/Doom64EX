@@ -4,8 +4,8 @@
 
 #include <istream>
 #include <type_traits>
-#include <imp/util/Endian>
-#include <imp/util/StringView>
+#include <utility/endian.hh>
+#include <utility/string_view.hh>
 
 namespace imp {
   struct magic_error : std::runtime_error {

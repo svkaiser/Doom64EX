@@ -21,7 +21,7 @@
 //-----------------------------------------------------------------------------
 
 #include <istream>
-#include <imp/util/Endian>
+#include <utility/endian.hh>
 #include <easy/profiler.h>
 
 #include "Image.hh"

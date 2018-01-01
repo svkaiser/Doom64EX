@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <fstream>
-#include <imp/App>
-#include <imp/Prelude>
-#include <imp/util/Endian>
+#include <platform/app.hh>
+#include <prelude.hh>
+#include <utility/endian.hh>
 
 #include <system/Rom.hh>
 #include <fluidsynth.h>
@@ -724,7 +724,7 @@ namespace {
 
       fmt::print("!SSEQ: num_entries {}, entry_size {}\n", sseq.num_entries, sseq.entry_size);
 
-      auto track_table = s.tellg();
+      auto track_table = static_cast<size_t>(s.tellg());
       for (size_t i {}; i < sseq.num_entries; ++i) {
           auto& entry = entries[i];
           s.seekg(track_table + entry.offset);
