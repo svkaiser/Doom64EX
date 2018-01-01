@@ -12,6 +12,11 @@ namespace imp {
         size_t lump_index {};
         size_t mount_index {};
         size_t section_index {};
+
+        LumpInfo(StringView name, Section section, size_t index):
+            name(name.to_string()),
+            section(section),
+            index(index) {}
     };
 
     struct Mount {

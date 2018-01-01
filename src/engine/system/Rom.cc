@@ -2,6 +2,7 @@
 #include <fstream>
 #include <imp/App>
 #include <imp/Prelude>
+#include <boost/algorithm/string.hpp>
 
 #include "Rom.hh"
 
@@ -19,16 +20,16 @@ namespace {
   struct VersionLocation {
       char country;
       char version;
-      Location wad;
+      Location iwad;
       Location sn64;
       Location sseq;
   };
 
   const VersionLocation locations_[4] = {
-      { 'P', 0, { 0x63f60, 0x5d6cdc }, { 0x63ac40, 0 }, { 0x646620, 0 } },
+      { 'P', 0, { 0x63f60, 0x5d6cdc }, { 0x63ac40, 0x10000 }, { 0x646620, 0x50000 } },
       { 'J', 0, { 0x64580, 0x5d8478 }, { 0, 0 }, { 0x6483e0, 0 } },
       { 'E', 0, { 0x63d10, 0x5d18b0 }, { 0x6355c0, 0x10000 }, { 0x640fa0, 0x50000 } },
-      { 'E', 1, { 0x63dc0, 0x5d301c }, { 0, 0 }, { 0, 0 } }
+      { 'E', 1, { 0x63dc0, 0x5d301c }, { 0x63ac40, 0x10000 }, { 0x646620, 0x50000 } }
   };
 
   const VersionLocation* location_ {};
@@ -98,11 +99,11 @@ void rom::init()
 
     char country {};
     char version {};
-    if (norm_name.icompare(header.name) == 0) {
+    if (boost::iequals(norm_name, header.name)) {
         country = header.country;
         version = header.version;
         swapped_ = false;
-    } else if (swap_name.icompare(header.name) == 0) {
+    } else if (boost::iequals(swap_name, header.name)) {
         country = header.version;
         version = header.country;
         swapped_ = true;
@@ -113,6 +114,10 @@ void rom::init()
     for (const auto& l : locations_) {
         if (l.country == country && l.version == version) {
             location_ = &l;
+            println("(Country: {}, Version: {:d})", country, version);
+            assert(l.sn64.size != 0 && l.sn64.offset != 0);
+            assert(l.sseq.size != 0 && l.sseq.offset != 0);
+            assert(l.iwad.size != 0 && l.iwad.offset != 0);
             break;
         }
     }
@@ -129,7 +134,7 @@ void rom::init()
 
 std::istringstream rom::wad()
 {
-    return load_(location_->wad);
+    return load_(location_->iwad);
 }
 
 std::istringstream rom::sn64()

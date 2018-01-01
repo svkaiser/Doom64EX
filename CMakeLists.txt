@@ -123,6 +123,8 @@ if (NOT USE_CONAN)
   # OpenGL
   find_package(OpenGL REQUIRED)
 
+  find_package(Boost REQUIRED)
+
   # easy_profiler
   find_package(easy_profiler REQUIRED)
 

@@ -5,8 +5,17 @@
 #include "PaletteCache.hh"
 #include "Image.hh"
 
+template <class T1, class T2>
+struct mutable_pair {
+    T1 first;
+    mutable T2 second;
+};
+
+template <class Key, class T, class Hash = boost::hash<Key>, class KeyEq = std::equal_to<>>
+using HashMap = std::unordered_map<Key, T, Hash, KeyEq>;
+
 namespace {
-  std::unordered_map<String, Palette> palettes_;
+  HashMap<String, Palette> palettes_;
 
   Palette default_palette_()
   {
@@ -25,7 +34,8 @@ namespace {
 
 Palette cache::palette(StringView name)
 {
-    auto it = palettes_.find(name);
+    String sname { name };
+    auto it = palettes_.find(sname);
     if (it != palettes_.cend())
         return it->second;
 
@@ -46,6 +56,6 @@ Palette cache::palette(StringView name)
         pal = default_palette_();
     }
 
-    palettes_[name] = pal;
+    palettes_[sname] = pal;
     return pal;
 }

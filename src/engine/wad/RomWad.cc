@@ -173,8 +173,8 @@ namespace {
       bool is_weapon {};
       String palette_name {};
 
-      Info(const String& name, Compression compression, ImageFormat format, Special special, size_t pos, size_t size, bool is_weapon, String palette_name):
-          name(name),
+      Info(StringView name, Compression compression, ImageFormat format, Special special, size_t pos, size_t size, bool is_weapon, const String& palette_name):
+          name(name.to_string()),
           compression(compression),
           format(format),
           special(special),
@@ -183,8 +183,8 @@ namespace {
           is_weapon(is_weapon),
           palette_name(palette_name) {}
 
-      Info(const String& name, size_t midi):
-          name(name),
+      Info(StringView name, size_t midi):
+          name(name.to_string()),
           midi(midi + 1) {}
 
       std::istream& stream(std::istream& rom) {
@@ -236,7 +236,7 @@ namespace {
                   /* word 1: unused (zeroes) */
                   /* word 2: width 64px (big endian 0x40) */
                   /* word 3: height 64px (big endian 0x40) */
-                  lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"_sv);
+                  lump.replace(0, 8, "\xff\xff\0\0\0\x40\0\x40"s);
                   break;
 
               case Special::gfx_fire:
@@ -394,7 +394,7 @@ namespace {
 
 UniquePtr<wad::Mount> wad::rom_loader(StringView path)
 {
-    String basename = path;
+    String basename = path.to_string();
     auto it = basename.rfind('/');
     if (it != String::npos) {
         basename.erase(0, it + 1);

@@ -112,6 +112,7 @@ set(INCLUDES
   ${PNG_INCLUDE_DIRS}
   ${FLUIDSYNTH_INCLUDE_DIR}
   ${OPENGL_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 
   automap
   common

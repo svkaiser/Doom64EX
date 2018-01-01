@@ -50,7 +50,7 @@ namespace imp {
           s_.read(str, cmp.length());
           str[cmp.length()] = 0;
 
-          if (cmp.compare(str) != 0)
+          if (cmp != str)
               throw magic_error("Magic string doesn't match");
 
           size_ += cmp.length();

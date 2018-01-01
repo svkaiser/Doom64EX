@@ -45,6 +45,6 @@ void native_ui::console_add_line(StringView line)
     if (!handle_)
         return;
 
-    String str = line;
+    String str { line };
     console_add_line_(str.c_str());
 }

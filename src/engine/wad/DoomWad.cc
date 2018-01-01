@@ -55,7 +55,7 @@ namespace {
   public:
       DoomFormat(StringView path):
           Mount(Type::doom),
-          stream_(path, std::ios::binary)
+          stream_(path.to_string(), std::ios::binary)
       {
           stream_.exceptions(stream_.failbit | stream_.badbit);
       }
@@ -132,7 +132,7 @@ namespace {
 
 UniquePtr<wad::Mount> wad::doom_loader(StringView path)
 {
-    std::ifstream file(path, std::ios::binary);
+    std::ifstream file(path.to_string(), std::ios::binary);
     Header header;
     read_into(file, header);
     if (memcmp(header.id, "IWAD", 4) == 0 || memcmp(header.id, "PWAD", 4) == 0) {

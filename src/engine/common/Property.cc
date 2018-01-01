@@ -1,18 +1,34 @@
 #include <map>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
+
 #include <imp/Property>
+#include <iostream>
 
 namespace {
-  struct PropertyLess {
-      bool operator()(StringView a, StringView b) const
-      { return a.icompare(b) < 0; }
+  struct CName {
+      StringView name;
+      String norm;
+
+      CName(StringView name):
+          name(name)
+      {
+          norm.resize(name.size());
+          std::transform(name.begin(), name.end(), norm.begin(), ::toupper);
+      }
+
+      bool operator==(const CName& other) const
+      { return norm == other.norm; }
+
+      bool operator<(const CName& other) const
+      { return norm < other.norm; }
   };
 
   auto& _global()
   {
       static struct {
           // TODO: Write a radix tree for this
-          std::map<StringView, Property*, PropertyLess> properties;
+          std::map<CName, Property*> properties;
           std::vector<Property*> new_properties;
       } global {};
       return global;
@@ -20,8 +36,8 @@ namespace {
 }
 
 Property::Property(StringView name, StringView description, int flags):
-    mName(name),
-    mDescription(description),
+    mName(name.to_string()),
+    mDescription(description.to_string()),
     mFlags(flags)
 {
     if (_global().properties.count(name)) {
@@ -35,7 +51,7 @@ Property::Property(StringView name, StringView description, int flags):
 
 Property::~Property()
 {
-    _global().properties.erase(mName);
+    _global().properties.erase({ mName });
 }
 
 void Property::update()
@@ -70,14 +86,14 @@ Vector<Property *> Property::partial(StringView prefix)
     if (prefix.empty())
         return list;
 
-    auto lower = prefix.trim().to_string();
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    auto lower = boost::trim_copy(prefix.to_string());
+    boost::to_lower(lower);
     bool found = false;
     for (auto it : _global().properties) {
-        if (lower.length() > it.first.length())
+        if (lower.length() > it.first.norm.size())
             continue;
 
-        if (lower == it.first.substr(lower.length())) {
+        if (lower == it.first.norm.substr(lower.length())) {
             list.emplace_back(it.second);
             found = true;
         } else if (found) {
