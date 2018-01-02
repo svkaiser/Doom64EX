@@ -44,32 +44,7 @@ if(WIN32)
     mingw32)
 
 else()
-
-  set(WADGEN_SOURCES
-    wadgen/deflate-N64.cc
-    wadgen/deflate-N64.h
-    wadgen/gfx.cc
-    wadgen/gfx.h
-    wadgen/level.cc
-    wadgen/level.h
-    wadgen/png.cc
-    wadgen/rom.cc
-    wadgen/rom.h
-    wadgen/sndfont.cc
-    wadgen/sndfont.h
-    wadgen/sound.cc
-    wadgen/sound.h
-    wadgen/sprite.cc
-    wadgen/sprite.h
-    wadgen/texture.cc
-    wadgen/texture.h
-    wadgen/wad.cc
-    wadgen/wad.h
-    wadgen/wadgen.cc
-    wadgen/wadgen.h)
-
   set(PLATFORM_SOURCES
-    ${WADGEN_SOURCES}
     native_ui/Gtk3.cc
     system/i_cpu_posix.cc)
 
@@ -132,7 +107,6 @@ set(INCLUDES
   sound
   statusbar
   system
-  wadgen
   zone)
 
 set(SOURCES
@@ -276,6 +250,7 @@ set(SOURCES
   system/SdlVideo.cc
 
   # wad
+  wad/deflate-N64.cc
   wad/Mount.cc
   wad/DoomWad.cc
   wad/RomWad.cc

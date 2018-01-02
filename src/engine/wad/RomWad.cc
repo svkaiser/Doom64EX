@@ -5,7 +5,9 @@
 #include <imp/detail/Image.hh>
 #include <set>
 #include <easy/profiler.h>
+#include <utility/endian.hh>
 #include "RomWad.hh"
+#include "deflate-N64.h"
 
 void Deflate_Decompress(byte * input, byte * output);
 void Wad_Decompress(byte * input, byte * output);
@@ -104,45 +106,61 @@ namespace {
    * on all lumps in JaguardDoom and PSXDoom.
    * Doom64 only uses this on the Sprites and GFX lumps, but uses
    * a more sophisticated algorithm for everything else.
+   *
+   * ---
+   *
+   * As with other members of the LZ- family of compression algorithms, the
+   * compressed data is a stream of "codes". Each code is either a character
+   * literal, or a dictionary pointer. The dictionary is the currently
+   * decompressed buffer, with the rightmost element being the latest
+   * decompressed character. The pointer is an offset-length pair, with the
+   * offset being from the right. Ie. an offset of 0 refers to the latest char.
+   *
+   * This compression scheme prefixes a bitset of size 8 (a byte) which encodes
+   * the type of the next 8 codes. If the bit is 0 then it's a character
+   * literal, otherwise it's a dictionary pointer.
+   *
+   * A character literal is an 1-byte code, which is written as is to the output
+   * buffer.
+   *
+   * A dictionary pointer is a 2-byte code with the first 12 bits being the
+   * offset, and the next 4 being the length. If these 4 bits are all 0s, then
+   * the decompression terminates (EOS). There is little point in encoding a
+   * single character with a dictionary pointer, so the length is incremented by
+   * 1. We get a possible length of [2, 16].
    */
-  [[gnu::unused]]
   String lzss_decompress_(std::istream& in)
   {
       String out;
 
       int getidbyte {};
       int idbyte {};
-      while (!in.eof()) {
-          if (!getidbyte)
+
+      for (;;) {
+          if (getidbyte == 0) {
               idbyte = in.get();
+          }
 
           /* assign a new idbyte every 8th loop */
           getidbyte = (getidbyte + 1) & 7;
 
           if (idbyte & 1) {
-              /* begin decompressing and get position */
-              char c;
+              /* dictionary pointer */
+              int off = (in.get() << 4u) | (in.peek() >> 4u);
+              int len = in.get() & 0xfu;
 
-              in.get(c);
-              uint16 pos = static_cast<uint8>(c) << 4;
-
-              in.get(c);
-              pos |= static_cast<uint8>(c) >> 4;
-
-              /* setup length */
-              int len = (static_cast<uint8>(c) & 0xf) + 1;
-              if (len == 1)
+              /* if length == 0, then we've reached end of stream */
+              if (len == 0)
                   break;
 
-              /* setup string */
-              auto source = out.end() - pos - 1;
+              auto beg = out.size() - off - 1;
+              auto end = beg + len + 1;
 
-              assert(pos < len);
-
-              /* copy source into output */
-              std::copy_n(source, len, out.end());
+              /* copy dictionary into output */
+              for (; beg < end; ++beg)
+                  out.push_back(out.at(beg));
           } else {
-              /* not compressed, just output the byte as is */
+              /* character literal */
               char c;
               in.get(c);
               out.push_back(c);
@@ -207,10 +225,7 @@ namespace {
                   break;
 
               case Compression::lzss:
-                  buf.resize(size);
-                  lump.resize(size);
-                  rom.read(&buf[0], size);
-                  Wad_Decompress(reinterpret_cast<byte *>(&buf[0]), reinterpret_cast<byte *>(&lump[0]));
+                  lump = lzss_decompress_(rom);
                   break;
 
               case Compression::n64:
