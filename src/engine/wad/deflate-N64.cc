@@ -144,14 +144,11 @@ void Deflate_CheckTable(int a0, int a1)
 
     } while (a0 != 1);
 
-    if (array01[1] != 0x7D0)
+    if (array01[1] != 2000)
         return;
 
-    array01[1] >>= 1;
-
-    for (size_t i = 0; i < 1256; ++i) {
-        array01[i] >>= 1;
-    }
+    for (auto& x : array01)
+        x >>= 1;
 }
 
 //**************************************************************
