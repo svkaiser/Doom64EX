@@ -42,11 +42,11 @@ using int16 = signed short;
 #define OVERFLOWCHECK		0x7FFFFFFF
 
 #define TABLESIZE	1280
-byte DecodeTable[TABLESIZE * 4];
+int16 DecodeTable[TABLESIZE * 4];
 
-int16 array01[0xFFFFF];		// 0x800B3660
+int16 array01[0x275*2];		// 0x800B3660
 
-byte allocPtr[0xFFFFFF];
+byte dictionary[0xFFFFFF];
 
 //**************************************************************
 //**************************************************************
@@ -64,38 +64,18 @@ int16 DecodeTable_0x9e0[1258];
 
 void Deflate_InitDecodeTable(void)
 {
-	int a[4];
-	byte *a0p;
-	byte *a1p;
-
 	decoder.var0 = 0;
 	decoder.var1 = 0;
 
-	a0p = (byte*) (array01);
+  std::fill(std::begin(array01), std::end(array01), 1);
 
-	for (int v0 = 0; v0 <= 1258; ++v0) {
-		DecodeTable_0x9e0[v0] = v0 >> 1;
-
-		*(signed short *)a0p = 1;
-
-		a0p += 2;
-
+	for (int v0 = 0; v0 < 1258; ++v0) {
+      DecodeTable_0x9e0[v0] = v0 >> 1;
 	}
 
-	a1p = (byte *) (DecodeTable + 0x4F2);
-	a0p = (byte *) (DecodeTable + 2);
-
-	a[2] = 3;
-
-    for (int v1 = 2; a[2] < 1259; v1 += 2){
-		*(signed short *)a1p = a[2];
-		a[2] += 2;
-
-		*(signed short *)a0p = v1;
-
-		a0p += 2;
-		a1p += 2;
-
+  for (size_t i = 0; i < 0x275; ++i){
+      DecodeTable[i + 0x275] = 2 * i + 1;
+      DecodeTable[i] = 2 * i;
 	}
 }
 
@@ -124,7 +104,7 @@ int Deflate_DecodeScan(void)
 
 	decoder.var0 = (resultbyte - 1);
 	if ((resultbyte < 1)) {
-		resultbyte = Deflate_GetDecodeByte();
+      resultbyte = Deflate_GetDecodeByte();
 
 		decoder.var1 = resultbyte;
 		decoder.var0 = 7;
@@ -142,55 +122,40 @@ int Deflate_DecodeScan(void)
 //**************************************************************
 //**************************************************************
 
-void Deflate_CheckTable(int a0, int a1, int a2)
+void Deflate_CheckTable(int a0, int a1)
 {
-	int i = 0;
-	byte *v0p;
-	int idByte1;
-	int idByte2;
+    int idByte1 = a0;
+    int idByte2;
 
-	idByte1 = (a0 << 1);
+    do {
+        idByte2 = DecodeTable_0x9e0[idByte1];
 
-	do {
-		idByte2 = *(DecodeTable_0x9e0 + (idByte1 >> 1));
+        array01[idByte2] = array01[a1] + array01[idByte1];
 
-		array01[idByte2] = array01[a1] + array01[idByte1 >> 1];
+        a0 = idByte2;
 
-		a0 = idByte2;
+        if (idByte2 != 1) {
+            idByte1 = DecodeTable_0x9e0[idByte2];
+            idByte2 = DecodeTable[idByte1];
 
-		if (idByte2 != 1) {
-			idByte1 = *(DecodeTable_0x9e0 + idByte2);
-			idByte2 =
-			    *(signed short *)(DecodeTable + (idByte1 << 1));
+            a1 = idByte2;
 
-			a1 = idByte2;
+            if (a0 == idByte2)
+                a1 = DecodeTable[idByte1 + 0x275];
+        }
 
-			if (a0 == idByte2)
-				a1 = *(signed short *)((DecodeTable + 0x4F0) +
-						       (idByte1 << 1));
-		}
+        idByte1 = a0;
 
-		idByte1 = (a0 << 1);
+    } while (a0 != 1);
 
-	} while (a0 != 1);
-
-	if (array01[1] != 0x7D0)
-		return;
+    if (array01[1] != 0x7D0)
+        return;
 
     array01[1] >>= 1;
 
-	v0p = (byte *) (array01 + 2);
-
-	do {
-		*(signed short *)(v0p + 6) >>= 1;
-		*(signed short *)(v0p + 4) >>= 1;
-		*(signed short *)(v0p + 2) >>= 1;
-		*(signed short *)(v0p) >>= 1;
-
-		v0p += 8;
-		i += 8;
-
-	} while (i != 2512);
+    for (size_t i = 0; i < 1256; ++i) {
+        array01[i] >>= 1;
+    }
 }
 
 //**************************************************************
@@ -204,92 +169,74 @@ void Deflate_DecodeByte(int a0)
 	int v[2];
 	int a[4];
 	int s[10];
-	byte *s2p;
-	byte *v1p;
-	byte *s1p;
-	byte *s6p;
-	byte *s3p;
-	byte *a1p;
+	int16 *s3p;
 
+  a0 += 0x275;
 
-	s2p = (byte *) (DecodeTable_0x9e0);
+	array01[a0]++;
 
-	v1p = (byte*) (array01 + a0);
-	s[5] = 1;
-
-	a[2] = (a0 + 0x275);
-	(*(signed short *)(v1p + 0x4EA))++;
-
-	if (s[5] == *(signed short *)((s2p + a0 * 2) + 0x4EA))
+	if (DecodeTable_0x9e0[a0] == 1)
 		return;
 
-	v[1] = (a[2] << 1);
+  auto& var0 = DecodeTable_0x9e0[a0];
 
-	s1p = (s2p + v[1]);
-
-	s6p = (byte *) DecodeTable;
-
-	a[3] = (*(signed short *)s1p << 1);
-	a[1] = *(signed short *)(s6p + a[3]);
-	s3p = (byte *) (DecodeTable + 0x4F0);
-
-	if (a[2] == a[1]) {
-		a[1] = *(signed short *)(s3p + a[3]);
-		a[0] = a[2];
-		Deflate_CheckTable(a[0], a[1], a[2]);
-		a[3] = (*(signed short *)s1p << 1);
+	if (a0 == DecodeTable[var0]) {
+		Deflate_CheckTable(a0, DecodeTable[var0 + 0x275]);
 	} else {
-		a[0] = a[2];
-		Deflate_CheckTable(a[0], a[1], a[2]);
-		s3p = (byte *) (DecodeTable + 0x4F0);
-		a[3] = (*(signed short *)s1p << 1);
+		Deflate_CheckTable(a0, DecodeTable[var0]);
 	}
 
+	s3p = DecodeTable + 0x275;
+
+  auto pos0 = a0;
+
+	v[1] = a0;
+	a[1] = DecodeTable[var0];
+	a[2] = a0;
+	a[3] = var0;
 	do {
-		a[0] = (*(signed short *)(s2p + a[3]) << 1);
+      a[0] = DecodeTable_0x9e0[a[3]];
 
-		a1p = (s6p + a[0]);
-		v[0] = *(signed short *)a1p;
-		s[0] = v[0];
+		auto& var1 =DecodeTable[a[0]];
+		s[0] = var1;
 
-		if (*(signed short *)s1p == v[0]) {
-			s[0] = *(signed short *)(s3p + a[0]);
+		if (DecodeTable_0x9e0[pos0] == var1) {
+        s[0] = s3p[a[0]];
 		}
 
-		v1p = (s6p + a[3]);
+		auto& var2 = DecodeTable[a[3]];
 
-		if (array01[s[0]] < array01[v[1] / 2]) {
-			if (*(signed short *)s1p == v[0]) {
-				*(signed short *)(s3p + a[0]) = a[2];
+		if (array01[s[0]] < array01[v[1]]) {
+			if (DecodeTable_0x9e0[pos0] == var1) {
+          s3p[a[0]] = a[2];
 			} else
-				*(signed short *)a1p = a[2];
+				var1 = a[2];
 
-			a[1] = *(signed short *)v1p;
+			a[1] = var2;
 			if (a[2] == a[1]) {
-				a[2] = *(signed short *)(s3p + a[3]);
-				*(signed short *)v1p = s[0];
+          a[2] = s3p[a[3]];
+				var2 = s[0];
 			} else {
-				*(signed short *)(s3p + a[3]) = s[0];
+          s3p[a[3]] = s[0];
 				a[2] = a[1];
 			}
 
-			*(signed short *)(s2p + (s[0] << 1)) =
-			    *(signed short *)s1p;
-			*(signed short *)s1p = *(signed short *)(s2p + a[3]);
+			DecodeTable_0x9e0[s[0]] = DecodeTable_0x9e0[pos0];
+			DecodeTable_0x9e0[pos0] = DecodeTable_0x9e0[a[3]];
 			a[0] = s[0];
 			a[1] = a[2];
 
-			Deflate_CheckTable(a[0], a[1], a[2]);
-			s1p = (s2p + (s[0] << 1));
+			Deflate_CheckTable(a[0], a[1]);
+			pos0 = s[0];
 		}
 
-		a[2] = *(signed short *)s1p;
-		v[1] = (a[2] << 1);
+		a[2] = DecodeTable_0x9e0[pos0];
+		v[1] = a[2];
 
-		s1p = (s2p + v[1]);
-		a[3] = (*(signed short *)s1p << 1);
+		pos0 = a[2];
+		a[3] = DecodeTable_0x9e0[pos0];
 
-	} while (*(signed short *)s1p != s[5]);
+	} while (DecodeTable_0x9e0[pos0] != 1);
 }
 
 //**************************************************************
@@ -301,15 +248,15 @@ void Deflate_DecodeByte(int a0)
 int Deflate_StartDecodeByte(void)
 {
 	int lookup = 1;		// $s0
-	byte *tablePtr1 = DecodeTable;	// $s2
-	byte *tablePtr2 = (byte *) (DecodeTable + 0x4F0);	// $s1
+	auto tablePtr1 = DecodeTable;	// $s2
+	auto tablePtr2 = DecodeTable + 0x275;	// $s1
 
 	while (lookup < 0x275) {
 		if (Deflate_DecodeScan() == 0) {
-			lookup = *(signed short *) (tablePtr1 + (lookup << 1));
+			lookup = tablePtr1[lookup];
 		}
 		else
-			lookup = *(signed short *)(tablePtr2 + (lookup << 1));
+			lookup = tablePtr2[lookup];
 	}
 
 	lookup = (lookup + (signed short)0xFD8B);
@@ -370,28 +317,24 @@ void Deflate_Decompress(byte * input, byte * output)
 	int mul;
 	int incrBit;
 
-	byte *t1p;
-	byte *v0p;
-	byte *t2p;
-	byte *t4p;
-
 	Deflate_InitDecodeTable();
 	incrBit = 0;
 
 	decoder.readPos = input;
 	decoder.writePos = output;
 
-	auto c = Deflate_StartDecodeByte();
-
-	s[0] = c;
-
 	// GhostlyDeath <May 14, 2010> -- loc_8002E058 is part of a while loop
-	while (c != 256) {
+    for (;;) {
+		auto c = Deflate_StartDecodeByte();
+
+		if (c == 256)
+			break;
+
 		// GhostlyDeath <May 15, 2010> -- loc_8002E094 is an if statement
 		if (c < 256) {
 			Deflate_WriteOutput(c);
 
-			allocPtr[incrBit] = c;
+			dictionary[incrBit] = c;
 
 			incrBit += 1;
 			if (incrBit == 0x558f)
@@ -403,8 +346,6 @@ void Deflate_Decompress(byte * input, byte * output)
 			t[2] = (c + 0xfeff) & 0xffff;
 			div = t[2] / 62;	// (62)
 
-			assert(c < 1024);
-
 			s[2] = 0;
 			s[5] = div;
 			t[4] = (t[2] / 31) & 0xfffe;
@@ -415,10 +356,7 @@ void Deflate_Decompress(byte * input, byte * output)
 
 			c = Deflate_RescanByte(t[4] + 4);
 
-			t[6] = tableVar01[div];
-			s[1] = incrBit;
-
-			t[7] = (t[6] + c);
+			t[7] = tableVar01[div] + c;
 
 			a[0] = (incrBit - (t[7] + s[3]));	// subu input, incrBit, $v1
 			s[0] = a[0];	// move $s0, input
@@ -432,28 +370,16 @@ void Deflate_Decompress(byte * input, byte * output)
 			// GhostlyDeath <May 15, 2010> -- loc_8002E184 is an if
 			if (s[3] > 0)
 				// GhostlyDeath <May 15, 2010> -- loc_8002E12C is a while loop (jump back from end)
-				while (s[2] != s[3]) {
-					Deflate_WriteOutput(allocPtr[s[0]]);
+                s[1] = incrBit;
+				for (int s2 {}; s2 < s[3]; ++s2) {
+					Deflate_WriteOutput(dictionary[s[0]]);
 
-					v0p = allocPtr;
 					s[2] += 1;
 
-					t2p = (v0p + s[0]);	// addu $t2, $s0, $v0
-					t[3] = *(byte *) t2p;
+					dictionary[s[1]] = dictionary[s[0]];
 
-					t4p = (v0p + s[1]);
-					*(byte *) t4p = t[3];
-
-					s[1]++;
-					s[0]++;
-
-					// GhostlyDeath <May 15, 2010> -- loc_8002E170 is an if
-					if (s[1] == 0x558f)
-						s[1] = 0;
-
-					// GhostlyDeath <May 15, 2010> -- loc_8002E17C is an if 
-					if (s[0] == 0x558f)
-						s[0] = 0;
+					if (++s[0] == 0x558f) s[0] = 0;
+					if (++s[1] == 0x558f) s[1] = 0;
 				}
 
 			incrBit += s[3];
@@ -462,11 +388,5 @@ void Deflate_Decompress(byte * input, byte * output)
 			if (incrBit >= 0x558f)
 				incrBit -= 0x558f;
 		}
-
-		c = Deflate_StartDecodeByte();
-
-		s[0] = c;
 	}
-
-	a[1] = *(int *)allocPtr;
 }
