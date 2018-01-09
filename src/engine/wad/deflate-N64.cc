@@ -27,6 +27,7 @@
 
 #include <cassert>
 #include <fmt/format.h>
+#include <array>
 using byte = unsigned char;
 
 typedef struct {
@@ -39,14 +40,11 @@ typedef struct {
 static decoder_t decoder;
 
 using int16 = signed short;
-#define OVERFLOWCHECK		0x7FFFFFFF
 
-#define TABLESIZE	1280
-int16 DecodeTable[TABLESIZE * 4];
-
-int16 array01[0x275*2];		// 0x800B3660
-
-byte dictionary[0xFFFFFF];
+std::array<int16, 0x275 * 2> array01;
+std::array<int16, 0x275 * 2> DecodeTable_0x9e0;
+std::array<int16, 0x275> table1, table2;
+std::array<byte, 0x558f> dictionary;
 
 //**************************************************************
 //**************************************************************
@@ -54,13 +52,9 @@ byte dictionary[0xFFFFFF];
 //**************************************************************
 //**************************************************************
 
-const int tableVar01[20] = {
-	0, 16, 80, 336, 1360, 5456,
-	15, 79, 0,
-	21839, 21839, 21839, 21839, 21903
-};
-
-int16 DecodeTable_0x9e0[1258];
+const std::array<int, 6> tableVar01 {{
+    0, 16, 80, 336, 1360, 5456
+}};
 
 void Deflate_InitDecodeTable(void)
 {
@@ -69,13 +63,13 @@ void Deflate_InitDecodeTable(void)
 
   std::fill(std::begin(array01), std::end(array01), 1);
 
-	for (int v0 = 0; v0 < 1258; ++v0) {
-      DecodeTable_0x9e0[v0] = v0 >> 1;
+	for (size_t i = 0; i < 0x275 * 2; ++i) {
+      DecodeTable_0x9e0[i] = i >> 1;
 	}
 
   for (size_t i = 0; i < 0x275; ++i){
-      DecodeTable[i + 0x275] = 2 * i + 1;
-      DecodeTable[i] = 2 * i;
+      table1[i] = 2 * i;
+      table2[i] = 2 * i + 1;
 	}
 }
 
@@ -129,6 +123,7 @@ void Deflate_CheckTable(int a0, int a1)
 
     do {
         idByte2 = DecodeTable_0x9e0[idByte1];
+        assert(idByte2 < 0x275);
 
         array01[idByte2] = array01[a1] + array01[idByte1];
 
@@ -136,12 +131,13 @@ void Deflate_CheckTable(int a0, int a1)
 
         if (idByte2 != 1) {
             idByte1 = DecodeTable_0x9e0[idByte2];
-            idByte2 = DecodeTable[idByte1];
+            assert(idByte1 < 0x275);
 
+            idByte2 = table1[idByte1];
             a1 = idByte2;
 
             if (a0 == idByte2)
-                a1 = DecodeTable[idByte1 + 0x275];
+                a1 = table2[idByte1];
         }
 
         idByte1 = a0;
@@ -166,12 +162,6 @@ void Deflate_CheckTable(int a0, int a1)
 
 void Deflate_DecodeByte(int a0)
 {
-	int v[2];
-	int a[4];
-	int s[10];
-	int16 *s3p;
-
-  a0 += 0x275;
 
 	array01[a0]++;
 
@@ -179,64 +169,59 @@ void Deflate_DecodeByte(int a0)
 		return;
 
   auto& var0 = DecodeTable_0x9e0[a0];
+  assert(var0 < 0x275);
 
-	if (a0 == DecodeTable[var0]) {
-		Deflate_CheckTable(a0, DecodeTable[var0 + 0x275]);
+	if (a0 == table1[var0]) {
+		Deflate_CheckTable(a0, table2[var0]);
 	} else {
-		Deflate_CheckTable(a0, DecodeTable[var0]);
+		Deflate_CheckTable(a0, table1[var0]);
 	}
 
-	s3p = DecodeTable + 0x275;
+  auto pos1 = var0;
+  auto pos3 = a0;
 
-  auto pos0 = a0;
-
-	v[1] = a0;
-	a[1] = DecodeTable[var0];
-	a[2] = a0;
-	a[3] = var0;
 	do {
-      a[0] = DecodeTable_0x9e0[a[3]];
+    auto tmp0 = DecodeTable_0x9e0[pos1];
 
-		auto& var1 =DecodeTable[a[0]];
-		s[0] = var1;
+    assert(tmp0 < 0x275);
+		auto& var1 =table1[tmp0];
+    auto& var1a = table2[tmp0];
+		auto tmp = var1;
 
-		if (DecodeTable_0x9e0[pos0] == var1) {
-        s[0] = s3p[a[0]];
+		if (DecodeTable_0x9e0[pos3] == var1) {
+        tmp = var1a;
 		}
 
-		auto& var2 = DecodeTable[a[3]];
+    assert(pos1 < 0x275);
+		auto& var2 = table1[pos1];
+    auto& var2a = table2[pos1];
 
-		if (array01[s[0]] < array01[v[1]]) {
-			if (DecodeTable_0x9e0[pos0] == var1) {
-          s3p[a[0]] = a[2];
+		if (array01[tmp] < array01[pos3]) {
+			if (DecodeTable_0x9e0[pos3] == var1) {
+          var1a = pos3;
 			} else
-				var1 = a[2];
+          var1 = pos3;
 
-			a[1] = var2;
-			if (a[2] == a[1]) {
-          a[2] = s3p[a[3]];
-				var2 = s[0];
+      int new_pos;
+			if (pos3 == var2) {
+          new_pos = var2a;
+          var2 = tmp;
 			} else {
-          s3p[a[3]] = s[0];
-				a[2] = a[1];
+          new_pos = var2;
+          var2a = tmp;
 			}
 
-			DecodeTable_0x9e0[s[0]] = DecodeTable_0x9e0[pos0];
-			DecodeTable_0x9e0[pos0] = DecodeTable_0x9e0[a[3]];
-			a[0] = s[0];
-			a[1] = a[2];
+			DecodeTable_0x9e0[tmp] = DecodeTable_0x9e0[pos3];
+			DecodeTable_0x9e0[pos3] = DecodeTable_0x9e0[pos1];
 
-			Deflate_CheckTable(a[0], a[1]);
-			pos0 = s[0];
+			Deflate_CheckTable(tmp, new_pos);
+			pos3 = tmp;
 		}
 
-		a[2] = DecodeTable_0x9e0[pos0];
-		v[1] = a[2];
+		pos3 = DecodeTable_0x9e0[pos3];
+		pos1 = DecodeTable_0x9e0[pos3];
 
-		pos0 = a[2];
-		a[3] = DecodeTable_0x9e0[pos0];
-
-	} while (DecodeTable_0x9e0[pos0] != 1);
+	} while (DecodeTable_0x9e0[pos3] != 1);
 }
 
 //**************************************************************
@@ -248,21 +233,18 @@ void Deflate_DecodeByte(int a0)
 int Deflate_StartDecodeByte(void)
 {
 	int lookup = 1;		// $s0
-	auto tablePtr1 = DecodeTable;	// $s2
-	auto tablePtr2 = DecodeTable + 0x275;	// $s1
 
 	while (lookup < 0x275) {
 		if (Deflate_DecodeScan() == 0) {
-			lookup = tablePtr1[lookup];
+			lookup = table1[lookup];
 		}
 		else
-			lookup = tablePtr2[lookup];
+			lookup = table2[lookup];
 	}
 
-	lookup = (lookup + (signed short)0xFD8B);
 	Deflate_DecodeByte(lookup);
 
-	return lookup;
+	return lookup - 0x275;
 }
 
 //**************************************************************
@@ -310,83 +292,62 @@ void Deflate_WriteOutput(byte outByte)
 
 void Deflate_Decompress(byte * input, byte * output)
 {
-	int a[2];
-	int s[10];
 	int t[10];
 	int div;
 	int mul;
-	int incrBit;
+	int dict_top {};
 
 	Deflate_InitDecodeTable();
-	incrBit = 0;
 
 	decoder.readPos = input;
 	decoder.writePos = output;
 
 	// GhostlyDeath <May 14, 2010> -- loc_8002E058 is part of a while loop
     for (;;) {
-		auto c = Deflate_StartDecodeByte();
+		auto code = Deflate_StartDecodeByte();
 
-		if (c == 256)
+    // If code == 256 then we're done
+		if (code == 256)
 			break;
 
-		// GhostlyDeath <May 15, 2010> -- loc_8002E094 is an if statement
-		if (c < 256) {
-			Deflate_WriteOutput(c);
+    // If code < 256 then it's a char literal
+		if (code < 256) {
+			Deflate_WriteOutput(code);
 
-			dictionary[incrBit] = c;
-
-			incrBit += 1;
-			if (incrBit == 0x558f)
-				incrBit = 0;
+			dictionary[dict_top] = code;
+      if (++dict_top == dictionary.size()) dict_top = 0;
 		}
-		// GhostlyDeath <May 15, 2010> -- Since then old shots point to loc_8002E19C the remainder of
-		// loc_8002E094 until loc_8002E19C is an else.
+    // Otherwise code > 256 and it's a dictionary pointer
 		else {
-			t[2] = (c + 0xfeff) & 0xffff;
+			t[2] = code - 257;
 			div = t[2] / 62;	// (62)
 
-			s[2] = 0;
-			s[5] = div;
 			t[4] = (t[2] / 31) & 0xfffe;
 
-			mul = s[5] * 62;
+			mul = div * 62;
 
-			s[3] = (c - mul + 0xff02) & 0xffff;	// move    $s3, $fp
+			auto length = (code - mul + 0xff02) & 0xffff;	// move    $s3, $fp
 
-			c = Deflate_RescanByte(t[4] + 4);
+			auto offset = tableVar01[div] + Deflate_RescanByte(t[4] + 4);
 
-			t[7] = tableVar01[div] + c;
+      auto dict_src = dict_top - offset - length;
 
-			a[0] = (incrBit - (t[7] + s[3]));	// subu input, incrBit, $v1
-			s[0] = a[0];	// move $s0, input
+      // Loop around
+      if (dict_src < 0)
+          dict_src += dictionary.size();
 
-			// GhostlyDeath <May 15, 2010> -- loc_8002E124 is an if
-			if (a[0] < 0)	// bgez input, loc_8002E124
-			{
-				t[8] = 0x558f;
-				s[0] = (a[0] + t[8]);
-			}
-			// GhostlyDeath <May 15, 2010> -- loc_8002E184 is an if
-			if (s[3] > 0)
-				// GhostlyDeath <May 15, 2010> -- loc_8002E12C is a while loop (jump back from end)
-                s[1] = incrBit;
-				for (int s2 {}; s2 < s[3]; ++s2) {
-					Deflate_WriteOutput(dictionary[s[0]]);
+			if (length > 0) {
+          // Copy [length] characters from the dictionary to the output
+				for (int i {}; i < length; ++i) {
+					Deflate_WriteOutput(dictionary[dict_src]);
 
-					s[2] += 1;
+					dictionary[dict_top] = dictionary[dict_src];
 
-					dictionary[s[1]] = dictionary[s[0]];
-
-					if (++s[0] == 0x558f) s[0] = 0;
-					if (++s[1] == 0x558f) s[1] = 0;
+          // wrap around
+					if (++dict_src == dictionary.size()) dict_src = 0;
+					if (++dict_top == dictionary.size()) dict_top = 0;
 				}
-
-			incrBit += s[3];
-
-			// GhostlyDeath <May 15, 2010> -- loc_8002E19C is the end of a while
-			if (incrBit >= 0x558f)
-				incrBit -= 0x558f;
+      }
 		}
 	}
 }
