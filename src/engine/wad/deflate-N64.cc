@@ -47,6 +47,12 @@ std::array<int16, 0x275 * 2> parent_nodes;
 std::array<int16, 0x275> left_child, right_child;
 std::array<byte, 0x558f> dictionary;
 
+int16& sibling_of(int node)
+{
+    auto p = parent_nodes[node];
+    return (node == left_child[p]) ? right_child[p] : left_child[p];
+}
+
 //**************************************************************
 //**************************************************************
 //      Deflate_InitDecodeTable
@@ -119,20 +125,13 @@ int Deflate_DecodeScan(void)
 
 void Deflate_CheckTable(int node, int sibling)
 {
-    int parent;
     while (node != root_node) {
-        parent = parent_nodes[node];
+        auto parent = parent_nodes[node];
 
         freqs[parent] = freqs[sibling] + freqs[node];
 
         if (parent != root_node) {
-            auto grandparent = parent_nodes[parent];
-
-            sibling = left_child[grandparent];
-
-            // parent was actually left child, so select right child as the sibling
-            if (parent == sibling)
-                sibling = right_child[grandparent];
+            sibling = sibling_of(parent);
         }
 
         node = parent;
@@ -168,30 +167,14 @@ void Deflate_DecodeByte(int node)
 	}
 
   while (parent_nodes[node] != root_node) {
-    auto grandparent = parent_nodes[parent];
-
-		auto& left_grandsibling = left_child[grandparent];
-    auto& right_grandsibling = right_child[grandparent];
-		auto grandsibling = left_grandsibling;
-
-		if (parent_nodes[node] == left_grandsibling) {
-        grandsibling = right_grandsibling;
-		}
+    auto grandsibling = sibling_of(parent);
 
     // Balance the tree
 		if (freqs[grandsibling] < freqs[node]) {
-			if (parent_nodes[node] == left_grandsibling)
-          right_grandsibling = node;
-			else
-          left_grandsibling = node;
+        sibling_of(parent) = node;
 
-      auto sibling = left_child[parent];
-			if (node == sibling) {
-          sibling = right_child[parent];
-          left_child[parent] = grandsibling;
-			} else {
-          right_child[parent] = grandsibling;
-			}
+        auto sibling = sibling_of(node);
+        sibling_of(sibling) = grandsibling;
 
 			parent_nodes[grandsibling] = parent_nodes[node];
 			parent_nodes[node] = parent_nodes[parent];
