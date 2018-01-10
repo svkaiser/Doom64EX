@@ -28,6 +28,7 @@
 #include <cassert>
 #include <fmt/format.h>
 #include <array>
+#include <boost/circular_buffer.hpp>
 using byte = unsigned char;
 
 typedef struct {
@@ -45,7 +46,7 @@ constexpr int16 root_node = 1;
 std::array<int16, 0x275 * 2> freqs;
 std::array<int16, 0x275 * 2> parent_nodes;
 std::array<int16, 0x275> left_child, right_child;
-std::array<byte, 0x558f> dictionary;
+boost::circular_buffer<byte> dictionary { 0x558f };
 
 int16& sibling_of(int node)
 {
@@ -251,7 +252,6 @@ void Deflate_WriteOutput(byte outByte)
 void Deflate_Decompress(byte * input, byte * output)
 {
 	int div;
-	int dict_top {};
 
 	Deflate_InitDecodeTable();
 
@@ -270,8 +270,7 @@ void Deflate_Decompress(byte * input, byte * output)
 		if (code < 256) {
 			Deflate_WriteOutput(code);
 
-			dictionary[dict_top] = code;
-      if (++dict_top == dictionary.size()) dict_top = 0;
+      dictionary.push_back(code);
 		}
     // Otherwise code > 256 and it's a dictionary pointer
 		else {
@@ -282,21 +281,13 @@ void Deflate_Decompress(byte * input, byte * output)
 
         auto offset = tableVar01[div] + Deflate_RescanByte(div + 4);
 
-        auto dict_src = dict_top - offset - length;
-
-      // Loop around
-      if (dict_src < 0)
-          dict_src += dictionary.size();
+        auto it = dictionary.end() - offset - length;
 
           // Copy [length] characters from the dictionary to the output
-				for (int i {}; i < length; ++i) {
-					Deflate_WriteOutput(dictionary[dict_src]);
+				for (int i {}; i < length; ++i, ++it) {
+					Deflate_WriteOutput(*it);
 
-					dictionary[dict_top] = dictionary[dict_src];
-
-          // wrap around
-					if (++dict_src == dictionary.size()) dict_src = 0;
-					if (++dict_top == dictionary.size()) dict_top = 0;
+          dictionary.push_back(*it);
 				}
 		}
 	}
