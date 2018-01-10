@@ -32,10 +32,10 @@
 using byte = unsigned char;
 
 typedef struct {
-	int var0;
-	int var1;
-	byte *writePos;
-	byte *readPos;
+    int var0;
+    int var1;
+    byte *writePos;
+    byte *readPos;
 } decoder_t;
 
 static decoder_t decoder;
@@ -62,23 +62,23 @@ int16& sibling_of(int node)
 
 const std::array<int, 6> tableVar01 {{
         0, 16, 80, 336, 1360, 5456
-}};
+            }};
 
 void Deflate_InitDecodeTable(void)
 {
-	decoder.var0 = 0;
-	decoder.var1 = 0;
+    decoder.var0 = 0;
+    decoder.var1 = 0;
 
-  std::fill(std::begin(freqs), std::end(freqs), 1);
+    std::fill(std::begin(freqs), std::end(freqs), 1);
 
-	for (size_t i = 0; i < 0x275 * 2; ++i) {
-      parent_nodes[i] = i >> 1;
-	}
+    for (size_t i = 0; i < 0x275 * 2; ++i) {
+        parent_nodes[i] = i >> 1;
+    }
 
-  for (size_t i = 0; i < 0x275; ++i){
-      left_child[i] = 2 * i;
-      right_child[i] = 2 * i + 1;
-	}
+    for (size_t i = 0; i < 0x275; ++i){
+        left_child[i] = 2 * i;
+        right_child[i] = 2 * i + 1;
+    }
 }
 
 //**************************************************************
@@ -89,7 +89,7 @@ void Deflate_InitDecodeTable(void)
 
 byte Deflate_GetDecodeByte(void)
 {
-	return *decoder.readPos++;
+    return *decoder.readPos++;
 }
 
 //**************************************************************
@@ -100,22 +100,22 @@ byte Deflate_GetDecodeByte(void)
 
 int Deflate_DecodeScan(void)
 {
-	int resultbyte;
+    int resultbyte;
 
-	resultbyte = decoder.var0;
+    resultbyte = decoder.var0;
 
-	decoder.var0 = (resultbyte - 1);
-	if ((resultbyte < 1)) {
-      resultbyte = Deflate_GetDecodeByte();
+    decoder.var0 = (resultbyte - 1);
+    if ((resultbyte < 1)) {
+        resultbyte = Deflate_GetDecodeByte();
 
-		decoder.var1 = resultbyte;
-		decoder.var0 = 7;
-	}
+        decoder.var1 = resultbyte;
+        decoder.var0 = 7;
+    }
 
-	resultbyte = (0 < (decoder.var1 & 0x80));
-	decoder.var1 = (decoder.var1 << 1);
+    resultbyte = (0 < (decoder.var1 & 0x80));
+    decoder.var1 = (decoder.var1 << 1);
 
-	return resultbyte;
+    return resultbyte;
 }
 
 //**************************************************************
@@ -153,40 +153,40 @@ void Deflate_CheckTable(int node, int sibling)
 
 void Deflate_DecodeByte(int node)
 {
-	freqs[node]++;
+    freqs[node]++;
 
-  // If code is the root node, we don't need to update anything.
-	if (parent_nodes[node] == root_node)
-		return;
+    // If code is the root node, we don't need to update anything.
+    if (parent_nodes[node] == root_node)
+        return;
 
-  auto parent = parent_nodes[node];
+    auto parent = parent_nodes[node];
 
-	if (node == left_child[parent]) {
-		Deflate_CheckTable(node, right_child[parent]);
-	} else {
-		Deflate_CheckTable(node, left_child[parent]);
-	}
+    if (node == left_child[parent]) {
+        Deflate_CheckTable(node, right_child[parent]);
+    } else {
+        Deflate_CheckTable(node, left_child[parent]);
+    }
 
-  while (parent_nodes[node] != root_node) {
-    auto grandsibling = sibling_of(parent);
+    while (parent_nodes[node] != root_node) {
+        auto grandsibling = sibling_of(parent);
 
-    // Balance the tree
-		if (freqs[grandsibling] < freqs[node]) {
-        sibling_of(parent) = node;
+        // Balance the tree
+        if (freqs[grandsibling] < freqs[node]) {
+            sibling_of(parent) = node;
 
-        auto sibling = sibling_of(node);
-        sibling_of(sibling) = grandsibling;
+            auto sibling = sibling_of(node);
+            sibling_of(sibling) = grandsibling;
 
-			parent_nodes[grandsibling] = parent_nodes[node];
-			parent_nodes[node] = parent_nodes[parent];
+            parent_nodes[grandsibling] = parent_nodes[node];
+            parent_nodes[node] = parent_nodes[parent];
 
-			Deflate_CheckTable(grandsibling, sibling);
-			node = grandsibling;
-		}
+            Deflate_CheckTable(grandsibling, sibling);
+            node = grandsibling;
+        }
 
-		node = parent_nodes[node];
-		parent = parent_nodes[node];
-	}
+        node = parent_nodes[node];
+        parent = parent_nodes[node];
+    }
 }
 
 //**************************************************************
@@ -216,20 +216,20 @@ int Deflate_StartDecodeByte(void)
 
 int Deflate_RescanByte(int count)
 {
-	int bit = 1;		// $s0
-	int data = 0;	// $s2
+    int bit = 1;		// $s0
+    int data = 0;	// $s2
 
-	if (count <= 0)
-		return data;
+    if (count <= 0)
+        return data;
 
-  for (int i {}; i < count; ++i) {
-		if (!(Deflate_DecodeScan() == 0))
-			data |= bit;
+    for (int i {}; i < count; ++i) {
+        if (!(Deflate_DecodeScan() == 0))
+            data |= bit;
 
-		bit <<= 1;
-	}
+        bit <<= 1;
+    }
 
-	return data;
+    return data;
 }
 
 //**************************************************************
@@ -240,7 +240,7 @@ int Deflate_RescanByte(int count)
 
 void Deflate_WriteOutput(byte outByte)
 {
-	*decoder.writePos++ = outByte;
+    *decoder.writePos++ = outByte;
 }
 
 //**************************************************************
@@ -251,41 +251,41 @@ void Deflate_WriteOutput(byte outByte)
 
 void Deflate_Decompress(byte * input, byte * output)
 {
-	Deflate_InitDecodeTable();
+    Deflate_InitDecodeTable();
 
-	decoder.readPos = input;
-	decoder.writePos = output;
+    decoder.readPos = input;
+    decoder.writePos = output;
 
-	// GhostlyDeath <May 14, 2010> -- loc_8002E058 is part of a while loop
+    // GhostlyDeath <May 14, 2010> -- loc_8002E058 is part of a while loop
     for (;;) {
-		auto code = Deflate_StartDecodeByte();
+        auto code = Deflate_StartDecodeByte();
 
-    // If code == 256 then we're done
-		if (code == 256)
-			break;
+        // If code == 256 then we're done
+        if (code == 256)
+            break;
 
-    // If code < 256 then it's a char literal
-		if (code < 256) {
-			Deflate_WriteOutput(code);
+        // If code < 256 then it's a char literal
+        if (code < 256) {
+            Deflate_WriteOutput(code);
 
-      dictionary.push_back(code);
-		}
-    // Otherwise code > 256 and it's a dictionary pointer
-		else {
-        code -= 257;
+            dictionary.push_back(code);
+        }
+        // Otherwise code > 256 and it's a dictionary pointer
+        else {
+            code -= 257;
 
-        auto len = code % 62 + 3;	// move    $s3, $fp
+            auto len = code % 62 + 3;	// move    $s3, $fp
 
-        auto off = tableVar01[code / 62] + Deflate_RescanByte(code / 62 * 2 + 4);
+            auto off = tableVar01[code / 62] + Deflate_RescanByte(code / 62 * 2 + 4);
 
-        auto it = dictionary.end() - off - len;
+            auto it = dictionary.end() - off - len;
 
-          // Copy [length] characters from the dictionary to the output
-				for (int i {}; i < len; ++i, ++it) {
-					Deflate_WriteOutput(*it);
+            // Copy [length] characters from the dictionary to the output
+            for (int i {}; i < len; ++i, ++it) {
+                Deflate_WriteOutput(*it);
 
-          dictionary.push_back(*it);
-				}
-		}
-	}
+                dictionary.push_back(*it);
+            }
+        }
+    }
 }
