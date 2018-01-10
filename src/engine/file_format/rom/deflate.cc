@@ -23,7 +23,8 @@
 
 #include <algorithm>
 #include <array>
-#include <istream>
+
+#include "rom_private.hh"
 
 namespace {
   class Deflate {
@@ -215,7 +216,7 @@ std::string Deflate::deflate()
     return output;
 }
 
-std::string Deflate_Decompress(std::istream& stream)
+std::string imp::rom::deflate(std::istream& stream)
 {
     return Deflate { stream }.deflate();
 }

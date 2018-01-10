@@ -7,9 +7,8 @@
 #include <easy/profiler.h>
 #include <utility/endian.hh>
 #include "RomWad.hh"
-#include "deflate-N64.h"
 
-String Deflate_Decompress(std::istream&);
+#include <file_format/rom/rom_private.hh>
 
 Vector<String> rom_textures;
 std::set<String> rom_weapon_sprites;
@@ -98,80 +97,6 @@ namespace {
       gfx_fire
   };
 
-  /* From Wadgen's wad.c
-   *
-   * Based off of JaguarDoom's decompression algorithm.
-   * This is a rather simple LZSS-type algorithm that was used
-   * on all lumps in JaguardDoom and PSXDoom.
-   * Doom64 only uses this on the Sprites and GFX lumps, but uses
-   * a more sophisticated algorithm for everything else.
-   *
-   * ---
-   *
-   * As with other members of the LZ- family of compression algorithms, the
-   * compressed data is a stream of "codes". Each code is either a character
-   * literal, or a dictionary pointer. The dictionary is the currently
-   * decompressed buffer, with the rightmost element being the latest
-   * decompressed character. The pointer is an offset-length pair, with the
-   * offset being from the right. Ie. an offset of 0 refers to the latest char.
-   *
-   * This compression scheme prefixes a bitset of size 8 (a byte) which encodes
-   * the type of the next 8 codes. If the bit is 0 then it's a character
-   * literal, otherwise it's a dictionary pointer.
-   *
-   * A character literal is an 1-byte code, which is written as is to the output
-   * buffer.
-   *
-   * A dictionary pointer is a 2-byte code with the first 12 bits being the
-   * offset, and the next 4 being the length. If these 4 bits are all 0s, then
-   * the decompression terminates (EOS). There is little point in encoding a
-   * single character with a dictionary pointer, so the length is incremented by
-   * 1. We get a possible length of [2, 16].
-   */
-  String lzss_decompress_(std::istream& in)
-  {
-      String out;
-
-      int getidbyte {};
-      int idbyte {};
-
-      for (;;) {
-          if (getidbyte == 0) {
-              idbyte = in.get();
-          }
-
-          /* assign a new idbyte every 8th loop */
-          getidbyte = (getidbyte + 1) & 7;
-
-          if (idbyte & 1) {
-              /* dictionary pointer */
-              int off = (in.get() << 4u) | (in.peek() >> 4u);
-              int len = in.get() & 0xfu;
-
-              /* if length == 0, then we've reached end of stream */
-              if (len == 0)
-                  break;
-
-              auto beg = out.size() - off - 1;
-              auto end = beg + len + 1;
-
-              /* copy dictionary into output */
-              for (; beg < end; ++beg)
-                  out.push_back(out[beg]);
-          } else {
-              /* character literal */
-              char c;
-              in.get(c);
-              out.push_back(c);
-          }
-
-          /* shift to next bit and begin the check at the beginning */
-          idbyte >>= 1;
-      }
-
-      return out;
-  }
-
   enum struct Compression {
       none,
       lzss,
@@ -224,11 +149,11 @@ namespace {
                   break;
 
               case Compression::lzss:
-                  lump = lzss_decompress_(rom);
+                  lump = rom::lzss(rom);
                   break;
 
               case Compression::n64:
-                  lump = Deflate_Decompress(rom);
+                  lump = rom::deflate(rom);
                   break;
               }
 

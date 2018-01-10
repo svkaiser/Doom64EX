@@ -250,11 +250,14 @@ set(SOURCES
   system/SdlVideo.cc
 
   # wad
-  wad/deflate-N64.cc
   wad/Mount.cc
   wad/DoomWad.cc
   wad/RomWad.cc
   wad/ZipWad.cc
+
+  # file_format
+  file_format/rom/deflate.cc
+  file_format/rom/lzss.cc
 
   # zone
   zone/z_zone.cc
