@@ -1,27 +1,23 @@
-// Emacs style mode select       -*- C++ -*-
+// -*- mode: c++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: DeflateN64.c 922 2011-08-13 00:49:06Z svkaiser $
+// Copyright(C) 2010 GhostlyDeath
+// Copyright(C) 2011 svkaiser
+// Copyright(C) 2018 dotfloat
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
-
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// $Author: svkaiser $
-// $Revision: 922 $
-// $Date: 2011-08-12 17:49:06 -0700 (Fri, 12 Aug 2011) $
-//
-// DESCRIPTION: Deflate decompression in Doom64. Needs A LOT of cleanup and proper variable naming
 //
 //-----------------------------------------------------------------------------
 
@@ -29,21 +25,19 @@
 #include <array>
 #include <istream>
 
-using int16 = signed short;
-
 namespace {
   class Deflate {
       std::istream &stream;
       std::string output;
 
       /* Balanced binary tree for the Huffman codes */
-      static constexpr int16 root_node = 1;
-      std::array<int16, 0x275 * 2> subtree_size {};
-      std::array<int16, 0x275 * 2> parent_nodes {};
-      std::array<int16, 0x275> left_child       {};
-      std::array<int16, 0x275> right_child      {};
+      static constexpr short root_node = 1;
+      std::array<short, 0x275 * 2> subtree_size {};
+      std::array<short, 0x275 * 2> parent_nodes {};
+      std::array<short, 0x275> left_child       {};
+      std::array<short, 0x275> right_child      {};
 
-      int16& sibling_of(int node);
+      short& sibling_of(int node);
       void update_node(int node);
       void update_node_size(int node, int sibling);
 
@@ -85,7 +79,7 @@ Deflate::Deflate(std::istream& s):
         parent_nodes[i] = i / 2;
 }
 
-int16& Deflate::sibling_of(int node)
+short& Deflate::sibling_of(int node)
 {
     auto p = parent_nodes[node];
     return (left_child[p] == node) ? right_child[p] : left_child[p];
