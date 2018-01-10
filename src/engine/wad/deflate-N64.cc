@@ -41,9 +41,10 @@ static decoder_t decoder;
 
 using int16 = signed short;
 
+constexpr int16 root_node = 1;
 std::array<int16, 0x275 * 2> freqs;
-std::array<int16, 0x275 * 2> DecodeTable_0x9e0;
-std::array<int16, 0x275> table1, table2;
+std::array<int16, 0x275 * 2> parent_nodes;
+std::array<int16, 0x275> left_child, right_child;
 std::array<byte, 0x558f> dictionary;
 
 //**************************************************************
@@ -52,8 +53,8 @@ std::array<byte, 0x558f> dictionary;
 //**************************************************************
 //**************************************************************
 
-const std::array<int, 6> tableVar01 {{
-    0, 16, 80, 336, 1360, 5456
+const std::array<int, 12> tableVar01 {{
+        0, 0, 16, 0, 80, 0, 336, 0, 1360, 0, 5456
 }};
 
 void Deflate_InitDecodeTable(void)
@@ -64,12 +65,12 @@ void Deflate_InitDecodeTable(void)
   std::fill(std::begin(freqs), std::end(freqs), 1);
 
 	for (size_t i = 0; i < 0x275 * 2; ++i) {
-      DecodeTable_0x9e0[i] = i >> 1;
+      parent_nodes[i] = i >> 1;
 	}
 
   for (size_t i = 0; i < 0x275; ++i){
-      table1[i] = 2 * i;
-      table2[i] = 2 * i + 1;
+      left_child[i] = 2 * i;
+      right_child[i] = 2 * i + 1;
 	}
 }
 
@@ -116,35 +117,28 @@ int Deflate_DecodeScan(void)
 //**************************************************************
 //**************************************************************
 
-void Deflate_CheckTable(int a0, int a1)
+void Deflate_CheckTable(int node, int sibling)
 {
-    int idByte1 = a0;
-    int idByte2;
+    int parent;
+    while (node != root_node) {
+        parent = parent_nodes[node];
 
-    do {
-        idByte2 = DecodeTable_0x9e0[idByte1];
-        assert(idByte2 < 0x275);
+        freqs[parent] = freqs[sibling] + freqs[node];
 
-        freqs[idByte2] = freqs[a1] + freqs[idByte1];
+        if (parent != root_node) {
+            auto grandparent = parent_nodes[parent];
 
-        a0 = idByte2;
+            sibling = left_child[grandparent];
 
-        if (idByte2 != 1) {
-            idByte1 = DecodeTable_0x9e0[idByte2];
-            assert(idByte1 < 0x275);
-
-            idByte2 = table1[idByte1];
-            a1 = idByte2;
-
-            if (a0 == idByte2)
-                a1 = table2[idByte1];
+            // parent was actually left child, so select right child as the sibling
+            if (parent == sibling)
+                sibling = right_child[grandparent];
         }
 
-        idByte1 = a0;
+        node = parent;
+    }
 
-    } while (a0 != 1);
-
-    if (freqs[1] != 2000)
+    if (freqs[root_node] != 2000)
         return;
 
     for (auto& x : freqs)
@@ -157,68 +151,58 @@ void Deflate_CheckTable(int a0, int a1)
 //**************************************************************
 //**************************************************************
 
-void Deflate_DecodeByte(int a0)
+void Deflate_DecodeByte(int node)
 {
+	freqs[node]++;
 
-	freqs[a0]++;
-
-	if (DecodeTable_0x9e0[a0] == 1)
+  // If code is the root node, we don't need to update anything.
+	if (parent_nodes[node] == root_node)
 		return;
 
-  auto& var0 = DecodeTable_0x9e0[a0];
-  assert(var0 < 0x275);
+  auto parent = parent_nodes[node];
 
-	if (a0 == table1[var0]) {
-		Deflate_CheckTable(a0, table2[var0]);
+	if (node == left_child[parent]) {
+		Deflate_CheckTable(node, right_child[parent]);
 	} else {
-		Deflate_CheckTable(a0, table1[var0]);
+		Deflate_CheckTable(node, left_child[parent]);
 	}
 
-  auto pos1 = var0;
-  auto pos3 = a0;
+  while (parent_nodes[node] != root_node) {
+    auto grandparent = parent_nodes[parent];
 
-	do {
-    auto tmp0 = DecodeTable_0x9e0[pos1];
+		auto& left_grandsibling = left_child[grandparent];
+    auto& right_grandsibling = right_child[grandparent];
+		auto grandsibling = left_grandsibling;
 
-    assert(tmp0 < 0x275);
-		auto& var1 =table1[tmp0];
-    auto& var1a = table2[tmp0];
-		auto tmp = var1;
-
-		if (DecodeTable_0x9e0[pos3] == var1) {
-        tmp = var1a;
+		if (parent_nodes[node] == left_grandsibling) {
+        grandsibling = right_grandsibling;
 		}
 
-    assert(pos1 < 0x275);
-		auto& var2 = table1[pos1];
-    auto& var2a = table2[pos1];
+    // Balance the tree
+		if (freqs[grandsibling] < freqs[node]) {
+			if (parent_nodes[node] == left_grandsibling)
+          right_grandsibling = node;
+			else
+          left_grandsibling = node;
 
-		if (freqs[tmp] < freqs[pos3]) {
-			if (DecodeTable_0x9e0[pos3] == var1) {
-          var1a = pos3;
-			} else
-          var1 = pos3;
-
-      int new_pos;
-			if (pos3 == var2) {
-          new_pos = var2a;
-          var2 = tmp;
+      auto sibling = left_child[parent];
+			if (node == sibling) {
+          sibling = right_child[parent];
+          left_child[parent] = grandsibling;
 			} else {
-          new_pos = var2;
-          var2a = tmp;
+          right_child[parent] = grandsibling;
 			}
 
-			DecodeTable_0x9e0[tmp] = DecodeTable_0x9e0[pos3];
-			DecodeTable_0x9e0[pos3] = DecodeTable_0x9e0[pos1];
+			parent_nodes[grandsibling] = parent_nodes[node];
+			parent_nodes[node] = parent_nodes[parent];
 
-			Deflate_CheckTable(tmp, new_pos);
-			pos3 = tmp;
+			Deflate_CheckTable(grandsibling, sibling);
+			node = grandsibling;
 		}
 
-		pos3 = DecodeTable_0x9e0[pos3];
-		pos1 = DecodeTable_0x9e0[pos3];
-
-	} while (DecodeTable_0x9e0[pos3] != 1);
+		node = parent_nodes[node];
+		parent = parent_nodes[node];
+	}
 }
 
 //**************************************************************
@@ -229,19 +213,15 @@ void Deflate_DecodeByte(int a0)
 
 int Deflate_StartDecodeByte(void)
 {
-	int lookup = 1;		// $s0
+    int node = 1; // root node
 
-	while (lookup < 0x275) {
-		if (Deflate_DecodeScan() == 0) {
-			lookup = table1[lookup];
-		}
-		else
-			lookup = table2[lookup];
-	}
+    while (node < 0x275) {
+        node = (Deflate_DecodeScan() == 0) ? left_child[node] : right_child[node];
+    }
 
-	Deflate_DecodeByte(lookup);
+    Deflate_DecodeByte(node);
 
-	return lookup - 0x275;
+    return node - 0x275;
 }
 
 //**************************************************************
@@ -250,24 +230,22 @@ int Deflate_StartDecodeByte(void)
 //**************************************************************
 //**************************************************************
 
-int Deflate_RescanByte(int byte)
+int Deflate_RescanByte(int count)
 {
-	int i = 0;		// $s1
-	int shift = 1;		// $s0
-	int resultbyte = 0;	// $s2
+	int bit = 1;		// $s0
+	int data = 0;	// $s2
 
-	if (byte <= 0)
-		return resultbyte;
+	if (count <= 0)
+		return data;
 
-	do {
+  for (int i {}; i < count; ++i) {
 		if (!(Deflate_DecodeScan() == 0))
-			resultbyte |= shift;
+			data |= bit;
 
-		i++;
-		shift = (shift << 1);
-	} while (i != byte);
+		bit <<= 1;
+	}
 
-	return resultbyte;
+	return data;
 }
 
 //**************************************************************
@@ -289,9 +267,7 @@ void Deflate_WriteOutput(byte outByte)
 
 void Deflate_Decompress(byte * input, byte * output)
 {
-	int t[10];
 	int div;
-	int mul;
 	int dict_top {};
 
 	Deflate_InitDecodeTable();
@@ -316,24 +292,19 @@ void Deflate_Decompress(byte * input, byte * output)
 		}
     // Otherwise code > 256 and it's a dictionary pointer
 		else {
-			t[2] = code - 257;
-			div = t[2] / 62;	// (62)
+        code -= 257;
+        div = code / 31 & ~1;	// (62)
 
-			t[4] = (t[2] / 31) & 0xfffe;
+        auto length = code - 31 * div + 3;	// move    $s3, $fp
 
-			mul = div * 62;
+        auto offset = tableVar01[div] + Deflate_RescanByte(div + 4);
 
-			auto length = (code - mul + 0xff02) & 0xffff;	// move    $s3, $fp
-
-			auto offset = tableVar01[div] + Deflate_RescanByte(t[4] + 4);
-
-      auto dict_src = dict_top - offset - length;
+        auto dict_src = dict_top - offset - length;
 
       // Loop around
       if (dict_src < 0)
           dict_src += dictionary.size();
 
-			if (length > 0) {
           // Copy [length] characters from the dictionary to the output
 				for (int i {}; i < length; ++i) {
 					Deflate_WriteOutput(dictionary[dict_src]);
@@ -344,7 +315,6 @@ void Deflate_Decompress(byte * input, byte * output)
 					if (++dict_src == dictionary.size()) dict_src = 0;
 					if (++dict_top == dictionary.size()) dict_top = 0;
 				}
-      }
 		}
 	}
 }
