@@ -9,8 +9,7 @@
 #include "RomWad.hh"
 #include "deflate-N64.h"
 
-void Deflate_Decompress(byte * input, byte * output);
-void Wad_Decompress(byte * input, byte * output);
+String Deflate_Decompress(std::istream&);
 
 Vector<String> rom_textures;
 std::set<String> rom_weapon_sprites;
@@ -229,10 +228,7 @@ namespace {
                   break;
 
               case Compression::n64:
-                  buf.resize(size);
-                  lump.resize(size);
-                  rom.read(&buf[0], size);
-                  Deflate_Decompress(reinterpret_cast<byte *>(&buf[0]), reinterpret_cast<byte *>(&lump[0]));
+                  lump = Deflate_Decompress(rom);
                   break;
               }
 

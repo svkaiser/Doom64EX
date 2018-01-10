@@ -1,6 +1,9 @@
 #ifndef _WADGEN_DEFLATE_H_
 #define _WADGEN_DEFLATE_H_
 
-void Deflate_Decompress(byte * input, byte * output);
+#include <string>
+#include <istream>
+
+std::string Deflate_Decompress(std::istream& stream);
 
 #endif
