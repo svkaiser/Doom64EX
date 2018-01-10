@@ -158,7 +158,7 @@ namespace {
 
               /* copy dictionary into output */
               for (; beg < end; ++beg)
-                  out.push_back(out.at(beg));
+                  out.push_back(out[beg]);
           } else {
               /* character literal */
               char c;

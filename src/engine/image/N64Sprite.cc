@@ -101,14 +101,14 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
 
         if (sprite_lump->sprite_info().is_weapon || lump.section() == wad::Section::graphics) {
             static std::map<String, Rgba5551Palette> cached_pal;
-            auto substr = lump.lump_name().substr(4).to_string();
+            auto substr = lump.lump_name().substr(0, 4).to_string();
 
             if (!cached_pal.count(substr)) {
                 cached_pal[substr] = read_n64palette(s, 256);
             }
             image.palette(cached_pal[substr]);
         } else {
-            auto name = format("PAL{}0", lump.lump_name().substr(4));
+            auto name = format("PAL{}0", lump.lump_name().substr(0, 4));
             palette = cache::palette(name);
         }
     }
