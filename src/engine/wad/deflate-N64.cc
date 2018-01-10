@@ -60,8 +60,8 @@ int16& sibling_of(int node)
 //**************************************************************
 //**************************************************************
 
-const std::array<int, 12> tableVar01 {{
-        0, 0, 16, 0, 80, 0, 336, 0, 1360, 0, 5456
+const std::array<int, 6> tableVar01 {{
+        0, 16, 80, 336, 1360, 5456
 }};
 
 void Deflate_InitDecodeTable(void)
@@ -251,8 +251,6 @@ void Deflate_WriteOutput(byte outByte)
 
 void Deflate_Decompress(byte * input, byte * output)
 {
-	int div;
-
 	Deflate_InitDecodeTable();
 
 	decoder.readPos = input;
@@ -275,16 +273,15 @@ void Deflate_Decompress(byte * input, byte * output)
     // Otherwise code > 256 and it's a dictionary pointer
 		else {
         code -= 257;
-        div = code / 31 & ~1;	// (62)
 
-        auto length = code - 31 * div + 3;	// move    $s3, $fp
+        auto len = code % 62 + 3;	// move    $s3, $fp
 
-        auto offset = tableVar01[div] + Deflate_RescanByte(div + 4);
+        auto off = tableVar01[code / 62] + Deflate_RescanByte(code / 62 * 2 + 4);
 
-        auto it = dictionary.end() - offset - length;
+        auto it = dictionary.end() - off - len;
 
           // Copy [length] characters from the dictionary to the output
-				for (int i {}; i < length; ++i, ++it) {
+				for (int i {}; i < len; ++i, ++it) {
 					Deflate_WriteOutput(*it);
 
           dictionary.push_back(*it);
