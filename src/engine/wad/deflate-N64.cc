@@ -41,7 +41,7 @@ static decoder_t decoder;
 
 using int16 = signed short;
 
-std::array<int16, 0x275 * 2> array01;
+std::array<int16, 0x275 * 2> freqs;
 std::array<int16, 0x275 * 2> DecodeTable_0x9e0;
 std::array<int16, 0x275> table1, table2;
 std::array<byte, 0x558f> dictionary;
@@ -61,7 +61,7 @@ void Deflate_InitDecodeTable(void)
 	decoder.var0 = 0;
 	decoder.var1 = 0;
 
-  std::fill(std::begin(array01), std::end(array01), 1);
+  std::fill(std::begin(freqs), std::end(freqs), 1);
 
 	for (size_t i = 0; i < 0x275 * 2; ++i) {
       DecodeTable_0x9e0[i] = i >> 1;
@@ -125,7 +125,7 @@ void Deflate_CheckTable(int a0, int a1)
         idByte2 = DecodeTable_0x9e0[idByte1];
         assert(idByte2 < 0x275);
 
-        array01[idByte2] = array01[a1] + array01[idByte1];
+        freqs[idByte2] = freqs[a1] + freqs[idByte1];
 
         a0 = idByte2;
 
@@ -144,10 +144,10 @@ void Deflate_CheckTable(int a0, int a1)
 
     } while (a0 != 1);
 
-    if (array01[1] != 2000)
+    if (freqs[1] != 2000)
         return;
 
-    for (auto& x : array01)
+    for (auto& x : freqs)
         x >>= 1;
 }
 
@@ -160,7 +160,7 @@ void Deflate_CheckTable(int a0, int a1)
 void Deflate_DecodeByte(int a0)
 {
 
-	array01[a0]++;
+	freqs[a0]++;
 
 	if (DecodeTable_0x9e0[a0] == 1)
 		return;
@@ -193,7 +193,7 @@ void Deflate_DecodeByte(int a0)
 		auto& var2 = table1[pos1];
     auto& var2a = table2[pos1];
 
-		if (array01[tmp] < array01[pos3]) {
+		if (freqs[tmp] < freqs[pos3]) {
 			if (DecodeTable_0x9e0[pos3] == var1) {
           var1a = pos3;
 			} else
