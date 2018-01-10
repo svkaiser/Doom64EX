@@ -25,11 +25,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <cassert>
-#include <fmt/format.h>
-#include <array>
-#include <boost/circular_buffer.hpp>
 #include <algorithm>
+#include <array>
+#include <istream>
 
 using int16 = signed short;
 
@@ -50,9 +48,6 @@ namespace {
       void update_node_size(int node, int sibling);
 
       int next_code();
-
-      /* Ring buffer for LZSS */
-      boost::circular_buffer<char> dictionary { 0x558f };
 
       /* Bit reading variables */
       int bits_left  {};
@@ -215,15 +210,11 @@ std::string Deflate::deflate()
             auto len = code % 62 + 3;
             auto off = offset_table[code / 62] + read_bits(code / 62 * 2 + 4);
 
-            auto it = dictionary.end() - off - len;
-            for (int i {}; i < len ; ++i, ++it) {
-                output.push_back(*it);
-                dictionary.push_back(*it);
-            }
+            auto str = output.substr(output.size() - off - len, len);
+            output.append(str);
         } else {
             /* Otherwise it's a char literal which we just output back */
             output.push_back(code);
-            dictionary.push_back(code);
         }
     }
 
