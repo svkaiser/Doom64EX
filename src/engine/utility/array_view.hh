@@ -11,8 +11,8 @@ namespace imp {
   template <class T>
   class ArrayView
   {
-      const T *mData { nullptr };
-      std::size_t mLength { 0 };
+      const T *data_ { nullptr };
+      std::size_t length_ { 0 };
 
   public:
       using value_type = const T;
@@ -27,6 +27,8 @@ namespace imp {
       using size_type = std::size_t;
       using difference_type = std::ptrdiff_t;
 
+      using vector_type = std::vector<value_type>;
+
       ArrayView() = default;
 
       ArrayView(const ArrayView&) = default;
@@ -35,27 +37,27 @@ namespace imp {
 
       template <std::size_t N>
       constexpr ArrayView(const T (*arr)[N]) noexcept:
-          mData(arr),
-          mLength(N)
+          data_(arr),
+          length_(N)
       {
       }
 
       constexpr ArrayView(const T arr[], size_type len) noexcept:
-          mData(arr),
-          mLength(len)
+          data_(arr),
+          length_(len)
       {
       }
 
       template <std::size_t N>
       constexpr ArrayView(const std::array<T, N> &arr) noexcept:
-          mData(arr.data()),
-          mLength(arr.length())
+          data_(arr.data()),
+          length_(arr.length())
       {
       }
 
       ArrayView(const std::vector<T> &vec) noexcept:
-          mData(vec.data()),
-          mLength(vec.size())
+          data_(vec.data()),
+          length_(vec.size())
       {
       }
 
@@ -65,57 +67,57 @@ namespace imp {
 
       constexpr const_pointer data() const noexcept
       {
-          return mData;
+          return data_;
       }
 
       constexpr size_type size() const noexcept
       {
-          return mLength;
+          return length_;
       }
 
       constexpr size_type length() const noexcept
       {
-          return mLength;
+          return length_;
       }
 
       constexpr bool empty() const noexcept
       {
-          return mLength == 0;
+          return length_ == 0;
       }
 
       constexpr const_reference front() const noexcept
       {
-          return mData[0];
+          return data_[0];
       }
 
       constexpr const_reference back() const noexcept
       {
-          return mData[mLength - 1];
+          return data_[length_ - 1];
       }
 
       constexpr const_reference operator[](size_type idx) const noexcept
       {
-          return mData[idx];
+          return data_[idx];
       }
 
       constexpr const_iterator begin() const
       {
-          return mData;
+          return data_;
       }
 
       constexpr const_iterator cbegin() const
       {
-          return mData;
+          return data_;
       }
 
       constexpr const_iterator end() const
       {
-          return mData + mLength;
+          return data_ + length_;
       }
 
       constexpr const_iterator cend() const
       {
-          return mData + mLength;
+          return data_ + length_;
       }
 
       constexpr const_reverse_iterator rbegin() const
@@ -137,6 +139,9 @@ namespace imp {
       {
           return { cbegin() };
       }
+
+      vector_type to_vector() const
+      { return { begin(), end() }; }
   };
 }
 

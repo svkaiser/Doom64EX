@@ -24,9 +24,9 @@
 
 set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
-if (CMAKE_VERSION VERSION_LESS 3.1.3)
+# if (CMAKE_VERSION VERSION_LESS 3.1.3)
   add_definitions(-std=c++14)
-endif ()
+# endif ()
 
 ##------------------------------------------------------------------------------
 ## Platform-specific sources
@@ -258,9 +258,13 @@ set(SOURCES
   # file_format
   file_format/rom/deflate.cc
   file_format/rom/lzss.cc
+  file_format/section_iterator.cc
 
   # zone
   zone/z_zone.cc
+
+  # top-level
+  prelude.hh
   )
 
 ##------------------------------------------------------------------------------
