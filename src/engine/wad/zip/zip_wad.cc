@@ -3,9 +3,13 @@
  */
 
 #include <fstream>
-#include <zlib.h>
 #include <sstream>
-#include "Mount.hh"
+#include <zlib.h>
+
+#include "wad/device.hh"
+#include "wad/wad_loaders.hh"
+
+using namespace imp::wad;
 
 namespace {
   template<class T>
@@ -120,38 +124,52 @@ namespace {
   }
 
   struct ZipInfo {
+      String name;
+      String real_name;
       bool compressed;
       size_t filepos;
       size_t size;
       wad::Section section;
   };
 
-  class ZipLump : public wad::LumpBuffer {
-      std::istringstream stream_;
+  class ZipDevice;
+
+  class ZipLump : public wad::ILump {
+      ZipDevice& device_;
+      ZipInfo info_;
 
   public:
-      ZipLump(std::istringstream stream):
-          stream_(std::move(stream)) {}
+      ZipLump(ZipDevice& device, ZipInfo info):
+          device_(device),
+          info_(info) {}
 
-      std::istream& stream() override
-      { return stream_; }
+      String name() const override
+      { return info_.name; }
+
+      Section section() const override
+      { return info_.section; }
+
+      String real_name() const override
+      { return info_.real_name; }
+
+      Device& device() override;
+
+      UniquePtr<std::istream> stream() override;
   };
 
-  class ZipFormat : public wad::Mount {
+  class ZipDevice : public Device {
       std::ifstream stream_;
-      std::vector<ZipInfo> infos_;
       size_t central_dir_pos_ {};
 
   public:
-      ZipFormat(std::ifstream &&stream):
-          Mount(Type::rom),
+      explicit ZipDevice(std::ifstream&& stream):
           stream_(std::move(stream)) {}
 
-      Vector<wad::LumpInfo> read_all() override
+      Vector<ILumpPtr> read_all() override
       {
           _find_first_central_dir(stream_);
           central_dir_pos_ = static_cast<size_t>(stream_.tellg());
-          Vector<wad::LumpInfo> lumps;
+          Vector<ILumpPtr> lumps;
 
           while (!stream_.eof()) {
               char sig[4];
@@ -197,10 +215,10 @@ namespace {
                       loc = 0;
                   }
                   auto name = _normalize(filename.substr(loc)).substr(0, 8);
-                  auto index = infos_.size();
 
-                  infos_.push_back({ entry.method == 8, entry.local_offset, entry.uncompressed, section });
-                  lumps.push_back({ name, section, index });
+                  auto lump_info = ZipInfo { name, "", entry.method == 8, entry.local_offset, entry.uncompressed, section };
+                  auto lump_ptr = std::make_unique<ZipLump>(*this, lump_info);
+                  lumps.emplace_back(std::move(lump_ptr));
               } else {
                   break;
               }
@@ -209,59 +227,60 @@ namespace {
           return lumps;
       }
 
-      bool set_buffer(wad::Lump& lump, size_t index) override
-      {
-          assert(index < infos_.size());
-          auto& info = infos_[index];
-
-          char sig[4];
-          stream_.seekg(info.filepos);
-          stream_.read(sig, 4);
-          if (memcmp(sig, _local_file_sig, 4) != 0)
-              throw "Not a LocalFileHeader";
-
-          LocalFileHeader header;
-          read_into(stream_, header);
-
-          stream_.seekg(header.name_length + header.extra_length, std::ios::cur);
-
-          String cache(header.uncompressed, 0);
-          z_stream zs {};
-          char buffer[32] {};
-
-          inflateInit2(&zs, -MAX_WBITS);
-          zs.next_out = reinterpret_cast<byte*>(&cache[0]);
-          zs.avail_out = header.uncompressed;
-
-          int code {};
-          do {
-              if (zs.avail_in == 0) {
-                  stream_.read(buffer, sizeof(buffer));
-                  zs.next_in = reinterpret_cast<byte*>(buffer);
-                  zs.avail_in = sizeof(buffer);
-              }
-              code = inflate(&zs, Z_SYNC_FLUSH);
-          } while(code == Z_OK && zs.avail_out);
-
-          inflateEnd(&zs);
-
-          if (code != Z_OK && code != Z_STREAM_END)
-              throw "invalid inflate stream";
-
-          if (zs.avail_out != 0)
-              throw "truncated deflate stream";
-
-          std::istringstream i;
-          i.str(std::move(cache));
-
-          lump.buffer(std::make_unique<ZipLump>(std::move(i)));
-
-          return true;
-      }
+      std::istream& stream()
+      { return stream_; }
   };
 }
 
-UniquePtr<wad::Mount> wad::zip_loader(StringView name)
+Device& ZipLump::device()
+{ return device_; }
+
+UniquePtr<std::istream> ZipLump::stream()
+{
+        auto& s = device_.stream();
+
+        // Check file signature
+        char sig[4];
+        s.seekg(info_.filepos);
+        s.read(sig, 4);
+        if (memcmp(sig, _local_file_sig, 4) != 0)
+            throw std::runtime_error("Not a LocalFileHeader");
+
+        LocalFileHeader header {};
+        read_into(s, header);
+
+        s.seekg(header.name_length + header.extra_length, std::ios::cur);
+
+        String bytes(header.uncompressed, 0);
+        z_stream zs {};
+        char buffer[32] {};
+
+        inflateInit2(&zs, -MAX_WBITS);
+        zs.next_out = reinterpret_cast<Bytef*>(&bytes[0]);
+        zs.avail_out = header.uncompressed;
+
+        int code {};
+        do {
+            if (zs.avail_in == 0) {
+                s.read(buffer, sizeof(buffer));
+                zs.next_in = reinterpret_cast<Bytef*>(buffer);
+                zs.avail_in = sizeof(buffer);
+            }
+            code = inflate(&zs, Z_SYNC_FLUSH);
+        } while(code == Z_OK && zs.avail_out);
+
+        inflateEnd(&zs);
+
+        if (code != Z_OK && code != Z_STREAM_END)
+            throw std::runtime_error("invalid inflate stream");
+
+        if (zs.avail_out != 0)
+            throw std::runtime_error("truncated deflate stream");
+
+        return std::make_unique<std::istringstream>(std::move(bytes));
+}
+
+DevicePtr wad::zip_loader(StringView name)
 {
     std::ifstream file(name.to_string(), std::ios::binary);
     file.exceptions(file.badbit | file.failbit);
@@ -274,5 +293,5 @@ UniquePtr<wad::Mount> wad::zip_loader(StringView name)
     if (memcmp(signature, _local_file_sig, 4) != 0 && memcmp(signature, _end_of_dir_sig, 4) != 0)
         return nullptr;
 
-    return std::make_unique<ZipFormat>(std::move(file));
+    return std::make_unique<ZipDevice>(std::move(file));
 }

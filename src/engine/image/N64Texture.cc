@@ -22,13 +22,12 @@
 
 #include <utility/endian.hh>
 
-#include <imp/Wad>
 #include <easy/profiler.h>
 #include "Image.hh"
 
 namespace {
   struct N64Texture : ImageFormatIO {
-      Optional<Image> load(wad::Lump&) const override;
+      Optional<Image> load(std::istream& s) const override;
   };
 
   struct Header {
@@ -39,10 +38,9 @@ namespace {
   };
 }
 
-Optional<Image> N64Texture::load(wad::Lump& lump) const
+Optional<Image> N64Texture::load(std::istream& s) const
 {
     EASY_FUNCTION(profiler::colors::Green50);
-    auto& s = lump.stream();
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
 

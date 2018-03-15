@@ -31,6 +31,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdio.h>
+#include <wad.hh>
 #include "doomdef.h"
 #include "g_game.h"
 #include "st_stuff.h"
@@ -694,7 +695,7 @@ void ST_DrawCrosshair(int x, int y, int slot, byte scalefactor, rcolor color) {
 static void ST_DrawJMessage(int pic) {
     int lump = st_jmessages[pic];
 
-    GL_BindGfxTexture(wad::find(lump)->lump_name().data(), true);
+    GL_BindGfxTexture(wad::open(wad::Section::graphics, lump).value().name().data(), true);
     GL_SetState(GLSTATE_BLEND, 1);
 
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
@@ -1084,7 +1085,7 @@ void ST_Init(void) {
 
     st_crosshairs = 0;
 
-    if(auto lump = wad::find("CRSHAIRS")) {
+    if(auto lump = wad::open(wad::Section::graphics, "CRSHAIRS")) {
         st_crosshairs = (gfxwidth[lump->section_index()] / ST_CROSSHAIRSIZE);
     }
 
@@ -1097,7 +1098,7 @@ void ST_Init(void) {
 
         sprintf(name, "JPMSG%02d", i + 1);
         st_jmessages[i] = -1;
-        if (auto lump = wad::find(name))
+        if (auto lump = wad::open(wad::Section::graphics, name))
             st_jmessages[i] = lump->section_index();
 
         if(st_jmessages[i] != -1) {

@@ -24,20 +24,18 @@
 #include <png.h>
 #include <utility/endian.hh>
 
-#include <imp/Wad>
 #include "Image.hh"
 
 namespace {
   constexpr const char magic[] = "\x89PNG\r\n\x1a\n";
 
   struct Png : ImageFormatIO {
-      Optional<Image> load(wad::Lump&) const override;
+      Optional<Image> load(std::istream& s) const override;
       void save(std::ostream&, const Image&) const override;
   };
 
-  Optional<Image> Png::load(wad::Lump& lump) const
+  Optional<Image> Png::load(std::istream& s) const
   {
-      auto& s = lump.stream();
       png_structp png_ptr = nullptr;
       png_infop infop = nullptr;
       auto _guard = make_guard([&png_ptr, &infop]()

@@ -1,6 +1,10 @@
 #include <fstream>
 #include <sstream>
-#include "Mount.hh"
+#include "../device.hh"
+#include "../wad_loaders.hh"
+
+using namespace imp::wad;
+Vector<String> iwad_textures;
 
 namespace {
   template <class T>
@@ -25,52 +29,57 @@ namespace {
   static_assert(sizeof(Directory) == 16, "WAD Directory must have a sizeof of 16 bytes");
 
   struct Info {
+      String name;
+      Section section;
       size_t filepos;
       size_t size;
-      std::istringstream cache;
-
-      Info(size_t filepos, size_t size):
-          filepos(filepos),
-          size(size) {}
   };
 
-  class DoomLump : public wad::LumpBuffer {
-      std::istream &stream_;
+  class DoomDevice;
+
+  class DoomLump : public ILump {
+      DoomDevice& device_;
+      Info info_;
 
   public:
-      DoomLump(std::istream& stream):
-          stream_(stream) {}
+      DoomLump(DoomDevice& device, Info info):
+          device_(device),
+          info_(info) {}
 
-      std::istream& stream() override
-      {
-          stream_.seekg(0);
-          return stream_;
-      }
+      String name() const override
+      { return info_.name; }
+
+      String real_name() const override
+      { return info_.name; }
+
+      Section section() const override
+      { return info_.section; }
+
+      UniquePtr<std::istream> stream() override;
+
+      Device& device() override;
   };
 
-  class DoomFormat : public wad::Mount {
+  class DoomDevice : public Device {
       std::ifstream stream_;
-      Vector<Info> table_;
 
   public:
-      DoomFormat(StringView path):
-          Mount(Type::doom),
+      DoomDevice(StringView path):
           stream_(path.to_string(), std::ios::binary)
       {
           stream_.exceptions(stream_.failbit | stream_.badbit);
       }
 
-      Vector<wad::LumpInfo> read_all() override
+      Vector<ILumpPtr> read_all() override
       {
-          Vector<wad::LumpInfo> lumps;
-          wad::Section section {};
+          Vector<ILumpPtr> lumps;
+          Section section {};
           Header header;
           read_into(stream_, header);
 
           stream_.seekg(header.infotableofs);
           size_t numlumps = header.numlumps;
 
-          table_.clear();
           for (size_t i = 0; i < numlumps; ++i) {
               Directory dir;
               read_into(stream_, dir);
@@ -104,39 +113,47 @@ namespace {
                   continue;
               }
 
-              lumps.push_back({ name, section, table_.size() });
-              table_.emplace_back(dir.filepos, dir.size);
+              if (section == Section::textures)
+                  iwad_textures.emplace_back(name);
+
+              auto lump_info = Info { name, section, dir.filepos, dir.size };
+              auto lump_ptr = std::make_unique<DoomLump>(*this, lump_info);
+              lumps.emplace_back(std::move(lump_ptr));
           }
 
           return lumps;
       }
 
-      bool set_buffer(wad::Lump& lump, size_t index) override
-      {
-          std::istringstream ss;
-          auto& info = table_[index];
-
-          if (info.size && !info.cache.str().size()) {
-              stream_.seekg(info.filepos);
-              String str(info.size, 0);
-              stream_.read(&str[0], info.size);
-              info.cache.str(std::move(str));
-          }
-
-          lump.buffer(std::make_unique<DoomLump>(info.cache));
-
-          return true;
-      }
+      std::istream& stream()
+      { return stream_; }
   };
 }
 
-UniquePtr<wad::Mount> wad::doom_loader(StringView path)
+UniquePtr<std::istream> DoomLump::stream()
+{
+    auto iss = std::make_unique<std::istringstream>();
+
+    if (info_.size) {
+        auto& s = device_.stream();
+        s.seekg(info_.filepos);
+        String buff(info_.size, 0);
+        s.read(&buff[0], info_.size);
+        iss->str(buff);
+    }
+
+    return iss;
+}
+
+Device& DoomLump::device()
+{ return device_; }
+
+DevicePtr wad::doom_loader(StringView path)
 {
     std::ifstream file(path.to_string(), std::ios::binary);
     Header header;
     read_into(file, header);
     if (memcmp(header.id, "IWAD", 4) == 0 || memcmp(header.id, "PWAD", 4) == 0) {
-        return std::make_unique<DoomFormat>(path);
+        return std::make_unique<DoomDevice>(path);
     } else {
         return nullptr;
     }

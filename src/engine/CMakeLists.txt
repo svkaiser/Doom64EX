@@ -250,15 +250,16 @@ set(SOURCES
   system/SdlVideo.cc
 
   # wad
-  wad/Mount.cc
-  wad/DoomWad.cc
-  wad/RomWad.cc
-  wad/ZipWad.cc
+  wad/device.cc
+  wad/doom/doom_wad.cc
+  wad/ilump.cc
+  wad/lump.cc
+  wad/wad.cc
+  wad/zip/zip_wad.cc
 
   # file_format
   file_format/rom/deflate.cc
   file_format/rom/lzss.cc
-  file_format/section_iterator.cc
 
   # zone
   zone/z_zone.cc

@@ -6,7 +6,7 @@
 #include <set>
 #include <easy/profiler.h>
 #include <utility/endian.hh>
-#include "RomWad.hh"
+#include "n64_private.hh"
 
 #include <file_format/rom/rom_private.hh>
 

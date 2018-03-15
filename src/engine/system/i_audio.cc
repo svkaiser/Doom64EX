@@ -41,8 +41,8 @@
 #include "z_zone.h"
 #include "i_swap.h"
 #include "con_console.h"    // for cvars
-#include <imp/Wad>
 #include <platform/app.hh>
+#include <wad.hh>
 
 #include "SDL.h"
 
@@ -1033,22 +1033,16 @@ static bool Seq_RegisterSongs(doomseq_t* seq) {
     size_t fail {};
     size_t i {};
     for(auto name : audio_lumps_) {
-        auto opt = wad::find(name);
+        auto opt = wad::open(wad::Section::sounds, name);
 
-        if (!opt || opt->section() != wad::Section::sounds) {
+        if (!opt) {
             fail++;
             continue;
         }
 
         auto& lump = *opt;
-        song_t* song;
-
-        auto bytes = lump.as_bytes();
-        auto memory = new char[bytes.size()];
-        std::copy(bytes.begin(), bytes.end(), memory);
-        song = &seq->songs[i++];
-        song->data = (byte*) memory;
-        song->length = bytes.size();
+        song_t* song = &seq->songs[i++];
+        song->data = reinterpret_cast<byte *>(lump.read_bytes_ccompat(song->length));
 
         if(!song->length) {
             continue;

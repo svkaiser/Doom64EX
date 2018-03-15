@@ -43,7 +43,6 @@
 #include "p_setup.h"
 #include "i_audio.h"
 #include "con_console.h"
-#include <imp/Wad>
 
 // Adjustable by menu.
 #define NORM_VOLUME     127

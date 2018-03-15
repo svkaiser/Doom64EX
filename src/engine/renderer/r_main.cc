@@ -27,6 +27,7 @@
 
 #include <math.h>
 #include <t_bsp.h>
+#include <wad.hh>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -372,7 +373,7 @@ void R_PrecacheLevel(void) {
     mobj_t* mo;
 
     CON_DPrintf("--------R_PrecacheLevel--------\n");
-    GL_DumpTextures();
+    //GL_DumpTextures();
 
     texturepresent = (char*)Z_Alloca(numtextures);
     spritepresent = (char*)Z_Alloca(NUMSPRITES);
@@ -400,8 +401,8 @@ void R_PrecacheLevel(void) {
             num++;
 
             for(p = 0; p < numanimdef; p++) {
-                auto l = wad::find(animdefs[p].name);
-                int lump = l->section_index();
+                auto l = wad::open(wad::Section::textures, animdefs[p].name).value();
+                int lump = l.section_index();
 
                 if(lump != i) {
                     continue;

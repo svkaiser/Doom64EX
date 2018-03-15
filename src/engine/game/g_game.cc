@@ -58,7 +58,6 @@
 #include "m_password.h"
 #include "i_video.h"
 #include "g_demo.h"
-#include <imp/Wad>
 
 #define DCLICK_TIME     20
 

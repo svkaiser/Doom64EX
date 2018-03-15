@@ -144,14 +144,11 @@ namespace imp {
           info_(&get_pixel_info<PixT>())
       { assign_copy_(other); }
 
-      /*! Load image from lump */
-      Image(wad::Lump& lump);
+      Image(std::istream& s)
+      { load(s); }
 
-//      Image(std::istream& s)
-//      { load(s); }
-//
-//      Image(std::istream& s, ImageFormat f)
-//      { load(s, f); }
+      Image(std::istream& s, ImageFormat f)
+      { load(s, f); }
 
       Image& operator=(Image&&) = default;
       Image& operator=(const Image& other)
@@ -194,9 +191,9 @@ namespace imp {
           return assign_copy_(other);
       }
 
-      void load(wad::Lump&);
+      void load(std::istream& s);
 
-      void load(wad::Lump&, ImageFormat);
+      void load(std::istream& s, ImageFormat);
 
       void save(std::ostream&, ImageFormat) const;
 

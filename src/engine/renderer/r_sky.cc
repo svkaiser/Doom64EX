@@ -28,6 +28,7 @@
 
 #include <stdlib.h>
 #include <easy/profiler.h>
+#include <wad.hh>
 
 #include "doomstat.h"
 #include "r_lights.h"
@@ -43,7 +44,6 @@
 #include "gl_texture.h"
 #include "gl_draw.h"
 #include "r_drawlist.h"
-#include <imp/Wad>
 
 skydef_t*   sky;
 int         skypicnum = -1;
@@ -364,7 +364,7 @@ static void R_DrawSkyboxCloud(void) {
     // bind cloud texture and set blending
     //
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), false);
+    GL_BindGfxTexture(wad::open(wad::Section::textures, skypicnum).value().name().data(), false);
     GL_SetState(GLSTATE_BLEND, 1);
 
     //
@@ -450,7 +450,7 @@ static void R_DrawSimpleSky(int lump, int offset) {
     int gfxLmp;
     float row;
 
-    gfxLmp = GL_BindGfxTexture(wad::find(lump)->lump_name().data(), false);
+    gfxLmp = GL_BindGfxTexture(wad::open(lump).value().name().data(), false);
     height = gfxheight[gfxLmp];
     lumpheight = gfxorigheight[gfxLmp];
 
@@ -504,7 +504,7 @@ static void R_DrawClouds(void) {
     vtx_t v[4];
 
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), false);
+    GL_BindGfxTexture(wad::open(wad::Section::graphics, skypicnum).value().name().data(), false);
 
     pos = (TRUEANGLES(viewangle) / 360.0f) * 2.0f;
 
@@ -663,9 +663,9 @@ static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
     EASY_FUNCTION(profiler::colors::Red);
-    auto lump = wad::find("FIRE");
-    fireLump = lump->section_index();
-    fireImage = I_ReadImage(lump->lump_index(), true, true, false, 0);
+    auto lump = wad::open(wad::Section::textures, "FIRE").value();
+    fireLump = lump.section_index();
+    fireImage = I_ReadImage(lump.lump_index(), true, true, false, 0);
 
     auto pixdata = reinterpret_cast<byte*>(fireImage.data_ptr());
     for (int i = 0; i < 4096; i++)
@@ -822,7 +822,7 @@ void R_DrawSky(void) {
             }
             else {
                 GL_SetTextureUnit(0, true);
-                GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), true);
+                GL_BindGfxTexture(wad::open(wad::Section::graphics, skypicnum).value().name().data(), true);
 
                 //
                 // drawer will assume that the texture's
@@ -855,7 +855,7 @@ void R_DrawSky(void) {
                 float base;
 
                 GL_SetTextureUnit(0, true);
-                l = GL_BindGfxTexture(wad::find(skybackdropnum)->lump_name().data(), true);
+                l = GL_BindGfxTexture(wad::open(wad::Section::textures, skybackdropnum).value().name().data(), true);
 
                 //
                 // handle the case for non-powers of 2 texture

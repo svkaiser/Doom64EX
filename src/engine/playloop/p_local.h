@@ -31,7 +31,6 @@
 #include "m_menu.h"
 #include "t_bsp.h"
 #include "d_main.h"
-#include <imp/Wad>
 
 #define FLOATSPEED        (FRACUNIT*4)
 

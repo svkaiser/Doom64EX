@@ -66,8 +66,8 @@
 #include "p_setup.h"
 #include "gl_texture.h"
 #include "gl_draw.h"
-#include <imp/Wad>
 #include <imp/Video>
+#include <wad.hh>
 //
 // definitions
 //
@@ -5359,17 +5359,17 @@ void M_Init(void) {
 
     // setup region menu
 
-    if(wad::have_lump("BLUDA0")) {
+    if(wad::exists("BLUDA0")) {
         m_regionblood = 0;
         RegionMenu[region_blood].status = 1;
     }
 
-    if(!wad::have_lump("JPMSG01")) {
+    if(!wad::exists("JPMSG01")) {
         st_regionmsg = false;
         RegionMenu[region_lang].status = 1;
     }
 
-    if(!wad::have_lump("PLLEGAL") && !wad::have_lump("JPLEGAL")) {
+    if(!wad::exists("PLLEGAL") && !wad::exists("JPLEGAL")) {
         p_regionmode = 0;
         RegionMenu[region_mode].status = 1;
     }

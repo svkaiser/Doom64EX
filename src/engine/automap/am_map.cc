@@ -47,7 +47,6 @@
 #include "gl_draw.h"
 #include "g_actions.h"
 #include "g_controls.h"
-#include <imp/Wad>
 
 // automap flags
 

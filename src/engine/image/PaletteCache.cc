@@ -1,9 +1,9 @@
 #include <unordered_map>
 
-#include "wad/RomWad.hh"
-#include "wad/Mount.hh"
 #include "PaletteCache.hh"
 #include "Image.hh"
+
+#include <wad.hh>
 
 template <class T1, class T2>
 struct mutable_pair {
@@ -39,19 +39,12 @@ Palette cache::palette(StringView name)
     if (it != palettes_.cend())
         return it->second;
 
+    Optional<wad::Lump> optlump;
+    Optional<Palette> optpal;
+
     Palette pal {};
-    if (auto lump = wad::find(name)) {
-        if (lump->source().type == wad::Mount::Type::rom) {
-            auto& s = lump->stream();
-            s.seekg(8, s.cur);
-            auto n64pal = read_n64palette(s, 256);
-            pal = n64pal;
-        } else {
-            RgbaPalette rgbpal { 256 };
-            auto& s = lump->stream();
-            s.read(rgbpal.data_ptr(), 256 * 4);
-            pal = std::move(rgbpal);
-        }
+    if ((optlump = wad::open(name)) && (optpal = optlump->read_palette())) {
+        pal = optpal.value();
     } else {
         pal = default_palette_();
     }

@@ -1,7 +1,6 @@
 #include <map>
 #include <fstream>
 #include <platform/app.hh>
-#include <imp/Wad>
 #include <sys/stat.h>
 #include <imp/detail/Pixel.hh>
 

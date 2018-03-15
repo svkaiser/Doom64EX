@@ -36,8 +36,8 @@
 #include <imp/Image>
 #include <sstream>
 #include <core/cvar.hh>
-#include <imp/Wad>
 #include <image/PaletteCache.hh>
+#include <wad.hh>
 
 FloatCvar i_gamma("i_gamma", "", 0.0f, 0,
                       [](const FloatCvar&, float, float&)
@@ -79,19 +79,18 @@ static void I_TranslatePalette(Palette &dest) {
 Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
 {
     // get lump data
-    auto l = wad::find(lump);
+    auto l = wad::open(lump).value();
 
-    Image image { *l };
+    Image image { l.stream() };
 
     if (palindex && image.is_indexed())
     {
         auto pal = image.palette();
 
         char palname[9];
-        snprintf(palname, sizeof(palname), "PAL%4.4s%d", l->lump_name().data(), palindex);
+        snprintf(palname, sizeof(palname), "PAL%4.4s%d", l.name().data(), palindex);
 
-        if (wad::have_lump(palname)) {
-            println("> {}", palname);
+        if (wad::exists(palname)) {
             image.palette(cache::palette(palname));
         } else {
             /*

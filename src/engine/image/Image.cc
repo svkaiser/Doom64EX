@@ -24,10 +24,8 @@
 #include <vector>
 #include <cstring>
 
-#include <imp/Wad>
 #include <easy/profiler_colors.h>
 #include <easy/profiler.h>
-#include "wad/RomWad.hh"
 #include "Image.hh"
 
 namespace {
@@ -48,14 +46,13 @@ namespace {
   }
 }
 
-void Image::load(wad::Lump& lump)
+void Image::load(std::istream& s)
 {
     EASY_FUNCTION(profiler::colors::Magenta);
-    auto& s = lump.stream();
     auto pos = s.tellg();
     for (auto fmt : auto_order_) {
         auto io = image_formats_[static_cast<int>(fmt)].get();
-        auto opt = io->load(lump);
+        auto opt = io->load(s);
         if (opt) {
             *this = std::move(*opt);
             return;
@@ -65,11 +62,11 @@ void Image::load(wad::Lump& lump)
     throw std::runtime_error { "Couldn't detect image type" };
 }
 
-void Image::load(wad::Lump& lump, ImageFormat format)
+void Image::load(std::istream& s, ImageFormat format)
 {
     EASY_FUNCTION(profiler::colors::Magenta);
     auto io = image_formats_[static_cast<int>(format)].get();
-    auto opt = io->load(lump);
+    auto opt = io->load(s);
     if (opt) {
         *this = std::move(*opt);
         return;
@@ -118,16 +115,6 @@ void Image::convert(PixelFormat format)
         *this = std::move(copy);
         this->sprite_offset(s);
     });
-}
-
-Image::Image(wad::Lump& lump)
-{
-    EASY_FUNCTION(profiler::colors::DarkMagenta);
-    if (auto buf = dynamic_cast<wad::RomBuffer*>(lump.buffer())) {
-        load(lump, buf->format());
-    } else {
-        load(lump);
-    }
 }
 
 void init_image()

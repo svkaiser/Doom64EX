@@ -22,13 +22,12 @@
 
 #include <utility/endian.hh>
 
-#include <imp/Wad>
 #include <easy/profiler.h>
 #include "Image.hh"
 
 namespace {
   struct N64Gfx : ImageFormatIO {
-      Optional<Image> load(wad::Lump&) const override;
+      Optional<Image> load(std::istream& s) const override;
   };
 
   struct Header {
@@ -39,12 +38,11 @@ namespace {
   };
 }
 
-Optional<Image> N64Gfx::load(wad::Lump& lump) const
+Optional<Image> N64Gfx::load(std::istream& s) const
 {
     EASY_FUNCTION(profiler::colors::Green50);
-    bool is_fire = lump.lump_name() == "FIRE";
-    bool is_cloud = lump.lump_name() == "CLOUD";
-    auto& s = lump.stream();
+    bool is_fire = false; //lump.lump_name() == "FIRE";
+    bool is_cloud = false; //lump.lump_name() == "CLOUD";
 
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));

@@ -41,7 +41,6 @@
 #include "net_structrw.h"
 
 #include "st_stuff.h"
-#include <imp/Wad>
 
 extern BoolCvar sv_nomonsters;
 extern BoolCvar sv_fastmonsters;

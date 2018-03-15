@@ -7,7 +7,7 @@ namespace imp {
   struct ImageFormatIO {
       virtual ~ImageFormatIO() {}
 
-      virtual Optional<Image> load(wad::Lump& lump) const
+      virtual Optional<Image> load(std::istream&) const
       { throw std::logic_error { "Loading is not implemented for this image format" }; }
 
       virtual void save(std::ostream&, const Image&) const

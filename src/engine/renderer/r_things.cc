@@ -38,9 +38,9 @@
 #include "r_clipper.h"
 #include "m_misc.h"
 #include "con_console.h"
-#include <imp/Wad>
 
 #include <stdlib.h>
+#include <wad.hh>
 
 #define MAX_SPRITES    1024
 
@@ -164,15 +164,15 @@ void R_InitSprites(const char** namelist) {
         // scan the lumps,
         //  filling in the frames for whatever is found
 
-        auto section = wad::section(wad::Section::sprites);
-        for(; section; ++section) {
-            auto l = *section;
-            auto name = l.lump_name();
+        auto section = wad::list_section(wad::Section::sprites);
+        for(auto& l : section) {
+            auto name = l->name();
             if(*(const int *)name.data() == intname) {
+                print(">> {}\n", name);
                 frame = name[4] - 'A';
                 rotation = name[5] - '0';
 
-                patched = l.section_index();
+                patched = l->section_index();
 
                 R_InstallSpriteLump(patched, frame, rotation, false);
 
@@ -224,7 +224,7 @@ void R_InitSprites(const char** namelist) {
     // [kex] set regional blood if needed
     //
 
-    if(!wad::have_lump("BLUDA0")) {
+    if(!wad::exists(wad::Section::sprites, "BLUDA0")) {
         int lump = (int)m_regionblood;
 
         if(lump > 1) {
@@ -296,7 +296,7 @@ static void R_AddVisSprite(visspritelist_t* vissprite) {
     }
 
     if(thing->flags & MF_RENDERLASER) {
-        spritenum = wad::find("BOLTA0")->section_index();
+        spritenum = wad::open(wad::Section::sprites, "BOLTA0").value().section_index();
     }
     else {
         sprdef = &spriteinfo[thing->sprite];
@@ -484,7 +484,7 @@ static dboolean R_GenerateLaserPlane(void *data, vtx_t* vertex) {
 
     laser = (laser_t*)thing->extradata;
 
-    spritenum = wad::find("BOLTA0")->section_index();
+    spritenum = wad::open(wad::Section::sprites, "BOLTA0").value().section_index();
 
     dglSetVertexColor(vertex, D_RGBA(255, 0, 0, thing->alpha), 4);
 

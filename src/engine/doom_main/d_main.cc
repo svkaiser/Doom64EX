@@ -66,7 +66,7 @@
 #include "gl_draw.h"
 
 #include "net_client.h"
-#include <imp/Wad>
+#include <wad.hh>
 #include <imp/NativeUI>
 
 //
@@ -532,8 +532,8 @@ static int legal_x = 32;
 static int legal_y = 72;
 
 static void Legal_Start(void) {
-    bool pllump = wad::have_lump("PLLEGAL");
-    bool jllump = wad::have_lump("JPLEGAL");
+    bool pllump = wad::exists("PLLEGAL");
+    bool jllump = wad::exists("JPLEGAL");
 
     if(!pllump && !jllump) {
         return;

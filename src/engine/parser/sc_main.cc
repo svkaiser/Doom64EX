@@ -31,13 +31,13 @@
 #endif
 
 #include <ctype.h>
+#include <wad.hh>
 #include "doomdef.h"
 #include "doomtype.h"
 #include "z_zone.h"
 #include "m_misc.h"
 #include "sc_main.h"
 #include "con_console.h"
-#include <imp/Wad>
 
 scparser_t sc_parser;
 
@@ -48,7 +48,7 @@ scparser_t sc_parser;
 static void SC_Open(const char* name) {
     CON_DPrintf("--------SC_Open: Reading %s--------\n", name);
 
-    auto lump = wad::find(name);
+    auto lump = wad::open(name);
     if (!lump) {
         sc_parser.buffsize   = M_ReadFile(name, &sc_parser.buffer);
 
@@ -57,11 +57,7 @@ static void SC_Open(const char* name) {
         }
     }
     else {
-        auto bytes = lump->as_bytes();
-        auto memory = new char[bytes.size()];
-        std::copy(bytes.begin(), bytes.end(), memory);
-        sc_parser.buffer = reinterpret_cast<byte*>(memory);
-        sc_parser.buffsize = bytes.size();
+        sc_parser.buffer = reinterpret_cast<byte*>(lump->read_bytes_ccompat(sc_parser.buffsize));
     }
 
     CON_DPrintf("%s size: %ikb\n", name, sc_parser.buffsize >> 10);

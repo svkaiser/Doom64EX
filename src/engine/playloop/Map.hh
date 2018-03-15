@@ -2,7 +2,7 @@
 #ifndef __DOOM64EX_MAP__59976677
 #define __DOOM64EX_MAP__59976677
 
-#include <imp/Wad>
+#include <prelude.hh>
 
 void* W_GetMapLump(int lump);
 

@@ -22,9 +22,7 @@
 
 #include <utility/endian.hh>
 #include <ostream>
-#include <imp/Wad>
 #include <set>
-#include <wad/RomWad.hh>
 #include <easy/profiler.h>
 #include <map>
 
@@ -35,7 +33,7 @@ extern std::set<String> rom_weapon_sprites;
 
 namespace {
   struct N64Sprite : ImageFormatIO {
-      Optional<Image> load(wad::Lump& lump) const override;
+      Optional<Image> load(std::istream& s) const override;
   };
 
   struct Header {
@@ -59,11 +57,10 @@ constexpr short operator""_S(unsigned long long int x)
 constexpr unsigned short operator""_US(unsigned long long int x)
 { return static_cast<unsigned short>(x); }
 
-Optional<Image> N64Sprite::load(wad::Lump& lump) const
+Optional<Image> N64Sprite::load(std::istream& s) const
 {
     EASY_FUNCTION(profiler::colors::Green50);
-    auto sprite_lump = dynamic_cast<wad::RomBuffer*>(lump.buffer());
-    auto& s = lump.stream();
+    //auto sprite_lump = dynamic_cast<wad::RomBuffer*>(lump.buffer());
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
 
@@ -99,18 +96,18 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
             for (size_t x = 0; x < image.pitch(); ++x)
                 s.get(image[y].data_ptr()[x]);
 
-        if (sprite_lump->sprite_info().is_weapon || lump.section() == wad::Section::graphics) {
-            static std::map<String, Rgba5551Palette> cached_pal;
-            auto substr = lump.lump_name().substr(0, 4).to_string();
-
-            if (!cached_pal.count(substr)) {
-                cached_pal[substr] = read_n64palette(s, 256);
-            }
-            image.palette(cached_pal[substr]);
-        } else {
-            auto name = format("PAL{}0", lump.lump_name().substr(0, 4));
-            palette = cache::palette(name);
-        }
+//        if (sprite_lump->sprite_info().is_weapon || lump.section() == wad::Section::graphics) {
+//            static std::map<String, Rgba5551Palette> cached_pal;
+//            auto substr = lump.lump_name().substr(0, 4).to_string();
+//
+//            if (!cached_pal.count(substr)) {
+//                cached_pal[substr] = read_n64palette(s, 256);
+//            }
+//            image.palette(cached_pal[substr]);
+//        } else {
+//            auto name = format("PAL{}0", lump.lump_name().substr(0, 4));
+//            palette = cache::palette(name);
+//        }
     }
 
     int id {};
@@ -130,10 +127,10 @@ Optional<Image> N64Sprite::load(wad::Lump& lump) const
         inv ^= 1;
     }
 
-    if (sprite_lump->sprite_info().is_weapon) {
-        header.xoffs -= 160;
-        header.yoffs -= 208;
-    }
+//    if (sprite_lump->sprite_info().is_weapon) {
+//        header.xoffs -= 160;
+//        header.yoffs -= 208;
+//    }
 
     image.sprite_offset({ header.xoffs, header.yoffs });
 

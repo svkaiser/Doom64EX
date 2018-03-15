@@ -29,6 +29,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <wad.hh>
 
 #include "doomdef.h"
 #include "i_swap.h"
@@ -278,7 +279,7 @@ void P_LoadSectors(int lump) {
         ss->frame_z2[1] = ss->ceilingheight;
 
         for(j = 0; j < numskydef; j++) {
-            if(ss->ceilingpic == wad::find(skydefs[j].flat)->section_index()) {
+            if(ss->ceilingpic == wad::open(wad::Section::textures, skydefs[j].flat).value().section_index()) {
                 skyflatnum = j;
                 break;
             }
@@ -934,14 +935,15 @@ void P_SetupSky(void) {
 
     skyindex    = skyflatnum;
     sky         = &skydefs[skyindex];
-    skyflatnum  = wad::find(sky->flat)->section_index();
+    skyflatnum  = wad::open(wad::Section::textures, sky->flat).value().section_index();
 
     if(sky->pic[0]) {
-        skypicnum = wad::find(sky->pic)->lump_index();
+        print("> {}\n", sky->pic);
+        skypicnum = wad::open(wad::Section::graphics, sky->pic).value().lump_index();
     }
 
     if(sky->backdrop[0]) {
-        skybackdropnum = wad::find(sky->backdrop)->lump_index();
+        skybackdropnum = wad::open(wad::Section::graphics, sky->backdrop).value().lump_index();
     }
 
     if(sky->flags & SKF_FIRE) {
@@ -1153,13 +1155,13 @@ static void P_InitMapInfo(void) {
 
                         text = sc_parser.getstring();
 
-                        auto lump = wad::find(text);
-                        if(!lump || lump->section() != wad::Section::sounds) {
+                        auto lump = wad::open(wad::Section::sounds, text);
+                        if(!lump) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             mapdef.music = -1;
                         }
                         else {
-                            mapdef.music = Seq_SoundLookup(lump->lump_name());
+                            mapdef.music = Seq_SoundLookup(lump->name());
                         }
                     }
                     else if(!dstricmp(sc_parser.token, "COMPAT_COLLISION")) {
@@ -1234,12 +1236,12 @@ static void P_InitMapInfo(void) {
                     if(!dstricmp(sc_parser.token, "MUSIC")) {
                         text = sc_parser.getstring();
 
-                        auto lump = wad::find(text);
-                        if(!lump || lump->section() != wad::Section::sounds) {
+                        auto lump = wad::open(wad::Section::sounds, text);
+                        if(!lump) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             cluster.music = -1;
                         } else {
-                            cluster.music = Seq_SoundLookup(lump->lump_name());
+                            cluster.music = Seq_SoundLookup(lump->name());
                         }
                     }
                     //
