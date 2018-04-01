@@ -81,7 +81,7 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
     // get lump data
     auto l = wad::open(lump).value();
 
-    Image image { l.stream() };
+    auto image = l.read_image().value();
 
     if (palindex && image.is_indexed())
     {

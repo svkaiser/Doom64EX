@@ -168,7 +168,6 @@ void R_InitSprites(const char** namelist) {
         for(auto& l : section) {
             auto name = l->name();
             if(*(const int *)name.data() == intname) {
-                print(">> {}\n", name);
                 frame = name[4] - 'A';
                 rotation = name[5] - '0';
 

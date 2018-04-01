@@ -7,18 +7,18 @@
 using namespace imp::wad;
 
 namespace {
-  Vector<DeviceLoader*> device_loaders_;
+  Vector<IDeviceLoader*> device_loaders_;
 
   bool dirty_ {};
 
-  Vector<DevicePtr> devices_;
+  Vector<IDevicePtr> devices_;
 
   Array<Vector<ILumpPtr>, num_sections> section_lumps_;
 
   app::StringParam iwad_path_("iwad");
 }
 
-bool wad::add_device(DevicePtr device)
+bool wad::add_device(IDevicePtr device)
 {
     dirty_ = true;
 
@@ -53,7 +53,7 @@ bool wad::add_device(StringView path)
     return true;
 }
 
-bool wad::add_device_loader(DeviceLoader& device_loader)
+bool wad::add_device_loader(IDeviceLoader& device_loader)
 {
     device_loaders_.emplace_back(&device_loader);
     return false;

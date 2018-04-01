@@ -9,7 +9,7 @@ namespace imp {
   class Palette;
 
   namespace wad {
-    class Device;
+    class IDevice;
 
     class ILump {
         size_t section_index_ {};
@@ -40,7 +40,7 @@ namespace imp {
          * Get the device object that owns this lump.
          * @return Reference to device
          */
-        virtual Device& device() = 0;
+        virtual IDevice& device() = 0;
 
         /*!
          * Create a stream for reading. Must create a new stream object every time this function is called.

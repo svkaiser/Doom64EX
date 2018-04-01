@@ -21,8 +21,6 @@
 
 #include "rom_private.hh"
 
-using namespace imp;
-
 /* From Wadgen's wad.c
  *
  * Based off of JaguarDoom's decompression algorithm.
@@ -53,7 +51,7 @@ using namespace imp;
  * single character with a dictionary pointer, so the length is incremented by
  * 1. We get a possible length of [2, 16].
  */
-std::string rom::lzss(std::istream &in)
+std::string wad::rom::lzss(std::istream &in)
 {
     std::string out;
 

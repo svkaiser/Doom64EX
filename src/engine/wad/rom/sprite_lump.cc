@@ -26,16 +26,14 @@
 #include <easy/profiler.h>
 #include <map>
 
-#include "Image.hh"
-#include "PaletteCache.hh"
+#include "rom_private.hh"
+#include <image/PaletteCache.hh>
+
+using namespace imp::wad::rom;
 
 extern std::set<String> rom_weapon_sprites;
 
 namespace {
-  struct N64Sprite : ImageFormatIO {
-      Optional<Image> load(std::istream& s) const override;
-  };
-
   struct Header {
       int16 tiles;		///< how many tiles the sprite is divided into
       int16 compressed;	///< >=0 = 'two for one' byte compression, -1 = not compressed
@@ -48,7 +46,7 @@ namespace {
       ///< draw height
       int16 tileheight;	///< y height per tile piece
   };
-  static_assert(sizeof(Header) == 16, "N64Sprite header must be 16 bytes");
+  static_assert(sizeof(Header) == 16, "Sprite header must be 16 bytes");
 }
 
 constexpr short operator""_S(unsigned long long int x)
@@ -57,8 +55,10 @@ constexpr short operator""_S(unsigned long long int x)
 constexpr unsigned short operator""_US(unsigned long long int x)
 { return static_cast<unsigned short>(x); }
 
-Optional<Image> N64Sprite::load(std::istream& s) const
+Optional<Image> SpriteLump::read_image()
 {
+    auto s = this->p_stream();
+
     EASY_FUNCTION(profiler::colors::Green50);
     //auto sprite_lump = dynamic_cast<wad::RomBuffer*>(lump.buffer());
     Header header;
@@ -96,18 +96,18 @@ Optional<Image> N64Sprite::load(std::istream& s) const
             for (size_t x = 0; x < image.pitch(); ++x)
                 s.get(image[y].data_ptr()[x]);
 
-//        if (sprite_lump->sprite_info().is_weapon || lump.section() == wad::Section::graphics) {
-//            static std::map<String, Rgba5551Palette> cached_pal;
-//            auto substr = lump.lump_name().substr(0, 4).to_string();
-//
-//            if (!cached_pal.count(substr)) {
-//                cached_pal[substr] = read_n64palette(s, 256);
-//            }
-//            image.palette(cached_pal[substr]);
-//        } else {
-//            auto name = format("PAL{}0", lump.lump_name().substr(0, 4));
-//            palette = cache::palette(name);
-//        }
+       if (is_weapon_ || this->section() == wad::Section::graphics) {
+           static std::map<String, Rgba5551Palette> cached_pal;
+           auto substr = this->name().substr(0, 4);
+
+           if (!cached_pal.count(substr)) {
+               cached_pal[substr] = read_n64palette(s, 256);
+           }
+           image.palette(cached_pal[substr]);
+       } else {
+           auto name = format("PAL{}0", this->name().substr(0, 4));
+           palette = cache::palette(name);
+       }
     }
 
     int id {};
@@ -127,19 +127,14 @@ Optional<Image> N64Sprite::load(std::istream& s) const
         inv ^= 1;
     }
 
-//    if (sprite_lump->sprite_info().is_weapon) {
-//        header.xoffs -= 160;
-//        header.yoffs -= 208;
-//    }
+   if (is_weapon_) {
+       header.xoffs -= 160;
+       header.yoffs -= 208;
+   }
 
     image.sprite_offset({ header.xoffs, header.yoffs });
 
     Image ret { std::move(image) };
     if (palette) ret.palette(palette);
     return ret;
-}
-
-std::unique_ptr<ImageFormatIO> init::image_n64sprite()
-{
-    return std::make_unique<N64Sprite>();
 }

@@ -150,10 +150,6 @@ set(SOURCES
   # image
   image/Doom.cc
   image/Image.cc
-  image/N64Gfx.cc
-  image/N64Palette.cc
-  image/N64Sprite.cc
-  image/N64Texture.cc
   image/PaletteCache.cc
   image/Pixel.cc
   image/Png.cc
@@ -257,9 +253,14 @@ set(SOURCES
   wad/wad.cc
   wad/zip/zip_wad.cc
 
-  # file_format
-  file_format/rom/deflate.cc
-  file_format/rom/lzss.cc
+  # wad/rom
+  wad/rom/deflate.cc
+  wad/rom/lzss.cc
+  wad/rom/device.cc
+  wad/rom/gfx_lump.cc
+  wad/rom/sprite_lump.cc
+  wad/rom/texture_lump.cc
+  wad/rom/palette.cc
 
   # zone
   zone/z_zone.cc

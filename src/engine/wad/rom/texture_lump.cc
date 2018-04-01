@@ -23,13 +23,12 @@
 #include <utility/endian.hh>
 
 #include <easy/profiler.h>
-#include "Image.hh"
+
+#include "rom_private.hh"
+
+using namespace imp::wad::rom;
 
 namespace {
-  struct N64Texture : ImageFormatIO {
-      Optional<Image> load(std::istream& s) const override;
-  };
-
   struct Header {
       uint16 id;
       uint16 numpal;
@@ -38,8 +37,10 @@ namespace {
   };
 }
 
-Optional<Image> N64Texture::load(std::istream& s) const
+Optional<Image> TextureLump::read_image()
 {
+    auto s = this->p_stream();
+
     EASY_FUNCTION(profiler::colors::Green50);
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
@@ -73,9 +74,4 @@ Optional<Image> N64Texture::load(std::istream& s) const
     image.palette(read_n64palette(s, palsize));
 
     return Image { image };
-}
-
-std::unique_ptr<ImageFormatIO> init::image_n64texture()
-{
-    return std::make_unique<N64Texture>();
 }

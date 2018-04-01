@@ -6,7 +6,7 @@
 #include <sstream>
 #include <zlib.h>
 
-#include "wad/device.hh"
+#include "wad/idevice.hh"
 #include "wad/wad_loaders.hh"
 
 using namespace imp::wad;
@@ -152,12 +152,12 @@ namespace {
       String real_name() const override
       { return info_.real_name; }
 
-      Device& device() override;
+      IDevice& device() override;
 
       UniquePtr<std::istream> stream() override;
   };
 
-  class ZipDevice : public Device {
+  class ZipDevice : public IDevice {
       std::ifstream stream_;
       size_t central_dir_pos_ {};
 
@@ -232,7 +232,7 @@ namespace {
   };
 }
 
-Device& ZipLump::device()
+IDevice& ZipLump::device()
 { return device_; }
 
 UniquePtr<std::istream> ZipLump::stream()
@@ -280,7 +280,7 @@ UniquePtr<std::istream> ZipLump::stream()
         return std::make_unique<std::istringstream>(std::move(bytes));
 }
 
-DevicePtr wad::zip_loader(StringView name)
+IDevicePtr wad::zip_loader(StringView name)
 {
     std::ifstream file(name.to_string(), std::ios::binary);
     file.exceptions(file.badbit | file.failbit);

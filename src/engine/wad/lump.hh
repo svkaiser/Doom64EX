@@ -66,7 +66,7 @@ namespace imp {
          * Get the device object that owns this lump.
          * @return Reference to device
          */
-        Device& device()
+        IDevice& device()
         { return context_->device(); }
 
         /*!

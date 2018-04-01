@@ -40,9 +40,6 @@ namespace {
       auto& i = image_formats_;
       i[0] = init::image_png();
       i[1] = init::image_doom();
-      i[2] = init::image_n64gfx();
-      i[3] = init::image_n64texture();
-      i[4] = init::image_n64sprite();
   }
 }
 

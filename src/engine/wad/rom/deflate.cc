@@ -216,7 +216,7 @@ std::string Deflate::deflate()
     return output;
 }
 
-std::string imp::rom::deflate(std::istream& stream)
+std::string wad::rom::deflate(std::istream& stream)
 {
     return Deflate { stream }.deflate();
 }

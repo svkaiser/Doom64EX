@@ -1,12 +1,13 @@
 #ifndef DOOM64EX_WAD_LOADERS_HH
 #define DOOM64EX_WAD_LOADERS_HH
 
-#include "device.hh"
+#include "idevice.hh"
 
 namespace imp {
   namespace wad {
-    DevicePtr zip_loader(StringView);
-    DevicePtr doom_loader(StringView);
+    IDevicePtr zip_loader(StringView);
+    IDevicePtr doom_loader(StringView);
+    IDevicePtr rom_loader(StringView);
   }
 }
 

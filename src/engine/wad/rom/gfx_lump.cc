@@ -23,13 +23,13 @@
 #include <utility/endian.hh>
 
 #include <easy/profiler.h>
-#include "Image.hh"
+#include "rom_private.hh"
+
+#include <imp/Image>
+
+using namespace imp::wad::rom;
 
 namespace {
-  struct N64Gfx : ImageFormatIO {
-      Optional<Image> load(std::istream& s) const override;
-  };
-
   struct Header {
       uint16 compressed; /**< If -1, then not compressed. None of the lumps in D64 are compressed. */
       uint16 unused;
@@ -38,8 +38,10 @@ namespace {
   };
 }
 
-Optional<Image> N64Gfx::load(std::istream& s) const
+Optional<Image> GfxLump::read_image()
 {
+    auto s = this->p_stream();
+
     EASY_FUNCTION(profiler::colors::Green50);
     bool is_fire = false; //lump.lump_name() == "FIRE";
     bool is_cloud = false; //lump.lump_name() == "CLOUD";
@@ -82,9 +84,4 @@ Optional<Image> N64Gfx::load(std::istream& s) const
     }
 
     return Image { image };
-}
-
-std::unique_ptr<ImageFormatIO> init::image_n64gfx()
-{
-    return std::make_unique<N64Gfx>();
 }

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <sstream>
-#include "../device.hh"
+#include "../idevice.hh"
 #include "../wad_loaders.hh"
 
 using namespace imp::wad;
@@ -57,10 +57,10 @@ namespace {
 
       UniquePtr<std::istream> stream() override;
 
-      Device& device() override;
+      IDevice& device() override;
   };
 
-  class DoomDevice : public Device {
+  class DoomDevice : public IDevice {
       std::ifstream stream_;
 
   public:
@@ -144,10 +144,10 @@ UniquePtr<std::istream> DoomLump::stream()
     return iss;
 }
 
-Device& DoomLump::device()
+IDevice& DoomLump::device()
 { return device_; }
 
-DevicePtr wad::doom_loader(StringView path)
+IDevicePtr wad::doom_loader(StringView path)
 {
     std::ifstream file(path.to_string(), std::ios::binary);
     Header header;

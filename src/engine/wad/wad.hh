@@ -1,7 +1,7 @@
 #ifndef __WAD__60795258
 #define __WAD__60795258
 
-#include "device.hh"
+#include "idevice.hh"
 #include "lump.hh"
 
 namespace imp {
@@ -12,13 +12,13 @@ namespace imp {
      * Add a device loader callback
      * @param device_loader
      */
-    bool add_device_loader(DeviceLoader& device_loader);
+    bool add_device_loader(IDeviceLoader& device_loader);
 
     /*!
      *
      * @param device
      */
-    bool add_device(DevicePtr device);
+    bool add_device(IDevicePtr device);
 
     bool add_device(StringView path);
 
