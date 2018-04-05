@@ -292,12 +292,29 @@ namespace {
       uint32 size;
   };
 
+  struct Generator {
+
+  };
+
+  struct Modulator {
+
+  };
+
+  struct Preset {
+      String name;
+      int banknum;
+      int num;
+      Vector<Generator> generators;
+      Vector<Modulator> modulators;
+  };
+
+  std::vector<Preset> presets_;
+
   std::unique_ptr<PatchHeader[]> patches_;
   std::unique_ptr<SubpatchHeader[]> subpatches_;
   std::vector<std::string> midis_;
   int new_bank_offset_ {};
 
-#if 0
   void decode8(std::istream& in, short* out, int index, const short* pred1, short* last_sample)
   {
       constexpr const short itable[16] = {
@@ -370,7 +387,6 @@ namespace {
 
       return samples;
   }
-#endif
 
   const SubpatchHeader& get_subpatch_by_note(const PatchHeader& patch, int note)
   {
@@ -385,6 +401,7 @@ namespace {
 
       return subpatches_[patch.offset];
   }
+
   void load_sn64_()
   {
       auto s = rom::sn64();
@@ -430,6 +447,46 @@ namespace {
       auto predictors = array_from_istream<PredictorTable>(s, sn64.num_sounds);
 
       /* read pcm */
+      fluid_sample_t samples[sn64.num_sounds];
+      for (size_t i {}; i < sn64.num_sounds; ++i) {
+          auto& sample = samples[i];
+          std::fill_n(reinterpret_cast<char*>(&sample), sizeof(sample), 0);
+
+          for (size_t j {}; j < sn64.num_patches; ++j) {
+              auto& subpatch = subpatches_[j];
+
+              if (subpatch.id != j)
+                  continue;
+
+              auto& wavtable = waves[j];
+              auto& predictor = predictors[j];
+              auto name = format("SFX_{:03u}", j);
+
+              wavtable.size -= wavtable.size % 9;
+
+              std::copy_n(name.data(), name.size(), sample.name);
+              sample.start = wavtable.start / 2;
+              sample.end = sample.start + wavtable.size / 2;
+              sample.samplerate = 22050;
+              sample.origpitch = 60;
+              sample.pitchadj = 0;
+
+              // sample.valid = true;
+              // sample.data = new short[wavtable.size];
+              // decode_vadpcm(s, sample.data, wavtable.size, predictor);
+
+              if (wavtable.loop_id == 0xffff) {
+                  sample.loopstart = sample.start;
+                  sample.loopend = sample.end - 1;
+                  sample.sampletype = false;
+              } else {
+                  const auto& loop = loop_table[wavtable.loop_id];
+                  sample.loopstart = sample.start + loop.loop_start;
+                  sample.loopend = sample.start + loop.loop_end;
+                  sample.sampletype = true;
+              }
+          }
+      }
   }
 
   enum struct midi {
@@ -774,27 +831,85 @@ std::string get_midi(size_t midi)
     return midis_.at(midi);
 }
 
+void rom_preset(fluid_sfont_t* sfont, fluid_preset_t* preset, size_t id)
+{
+    constexpr auto free = [](fluid_preset_t* preset) -> int {
+        delete reinterpret_cast<Preset*>(preset->data);
+        delete preset;
+        return 0;
+    };
+
+    constexpr auto get_name = [](fluid_preset_t* preset) -> char* {
+        return strdup(reinterpret_cast<Preset*>(preset)->name.c_str());
+    };
+
+    constexpr auto get_banknum = [](fluid_preset_t* preset) -> int {
+        return reinterpret_cast<Preset*>(preset->data)->banknum;
+    };
+
+    constexpr auto get_num = [](fluid_preset_t* preset) -> int {
+        return reinterpret_cast<Preset*>(preset->data)->num;
+    };
+
+    constexpr auto noteon = [](fluid_preset_t* preset, fluid_synth_t* synth, int chan, int key, int vel) -> int {
+        auto& data = *reinterpret_cast<Preset*>(preset->data);
+        auto sample = data.sample;
+        auto voice = fluid_synth_alloc_voice(synth, sample, chan, key, vel);
+
+        return FLUID_OK;
+    };
+
+    *preset = {
+        &presets[id],
+        sfont,
+        free,
+        get_name,
+        get_banknum,
+        get_num,
+        noteon,
+        nullptr
+    };
+}
+
 fluid_sfont_t* rom_sfont()
 {
+    struct Soundfont {
+        char name[20] = "Doom64EX RomSource";
+        size_t iter;
+    };
+
+    constexpr auto free = [](fluid_sfont_t* sfont) -> int {
+        delete reinterpret_cast<Soundfont*>(sfont->data);
+        delete sfont;
+        return 0;
+    };
+
+    constexpr auto get_name = [](fluid_sfont_t* sfont) -> char * {
+        return reinterpret_cast<Soundfont*>(sfont->data)->name;
+    };
+
+    constexpr auto get_preset = [](fluid_sfont_t*, uint32, uint32) -> fluid_preset_t* {
+        return nullptr;
+    };
+
+    constexpr auto iteration_start = [](fluid_sfont_t* sfont) {
+        reinterpret_cast<Soundfont*>(sfont->data)->iter = 0;
+    };
+
+    constexpr auto iteration_next = [](fluid_sfont_t* sfont, fluid_preset_t* preset) -> int {
+        auto& data = *reinterpret_cast<Soundfont*>(sfont->data);
+        rom_preset(sfont, preset, data.iter);
+        return data.iter < 1;
+    };
+
     return new fluid_sfont_t {
-        .data = nullptr,
-            .id = 0,
-            .free = [](fluid_sfont_t* sf)
-            {
-                delete sf;
-                return 0;
-            },
-            .get_name = [](fluid_sfont_t*)
-                 {
-                     static auto name = "Doom64EX RomSource"_sv;
-                     auto copy_name = new char[name.length() + 1];
-                     std::copy_n(name.data(), name.length(), copy_name);
-                     copy_name[name.length()] = 0;
-                     return copy_name;
-                 },
-                 .get_preset = [](fluid_sfont_t*, uint32 bank, uint32 prenum) -> fluid_preset_t* { return nullptr; },
-                      .iteration_start = [](fluid_sfont_t*) {},
-                           .iteration_next = [](fluid_sfont_t*, fluid_preset_t*) { return 0; }
+        new Soundfont,
+        0,
+        free,
+        get_name,
+        get_preset,
+        iteration_start,
+        iteration_next
     };
 }
 
@@ -803,21 +918,23 @@ fluid_sfloader_t* rom_soundfont()
     load_sn64_();
     load_sseq_();
 
+    constexpr auto free = [](fluid_sfloader_t* sf) {
+        delete sf;
+        return 0;
+    };
+
+    constexpr auto load = [](fluid_sfloader_t*, const char *fname) -> fluid_sfont_t* {
+        fmt::print("Loading font: {}\n", fname);
+        if ("DOOM64.ROM"_sv == fname) {
+            fmt::print("Trying to load DOOM64ROM Soundfont");
+            return rom_sfont();
+        }
+        return nullptr;
+    };
+
     return new fluid_sfloader_t {
-        .data = nullptr,
-            .free = [](fluid_sfloader_t* sf)
-            {
-                delete sf;
-                return 0;
-            },
-            .load = [](fluid_sfloader_t*, const char* fname) -> fluid_sfont_t*
-                 {
-                     fmt::print("Loading font: {}\n", fname);
-                     if ("DOOM64.ROM"_sv == fname) {
-                         fmt::print("Trying to load DOOM64ROM Soundfont");
-                         return rom_sfont();
-                     }
-                     return nullptr;
-                 }
+        nullptr, /* data */
+        free,
+        load
     };
 }

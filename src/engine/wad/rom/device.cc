@@ -331,14 +331,14 @@ public:
             section = section1;
         }
 
-        // for (size_t i {}; i < sizeof(snd_names_) / sizeof(*snd_names_); ++i) {
-        //     auto& name = snd_names_[i];
+        for (size_t i {}; i < sizeof(snd_names_) / sizeof(*snd_names_); ++i) {
+            auto& name = snd_names_[i];
 
-        //     auto lump_info = Info { name.to_string(), Section::sounds, i };
-        //     auto lump_ptr = std::make_unique<SoundLump>(*this, lump_info);
+            auto lump_info = Info { name.to_string(), Section::sounds, 0 };
+            auto lump_ptr = std::make_unique<SoundLump>(*this, lump_info, i);
 
-        //     lumps.emplace_back(std::move(lump_ptr));
-        // }
+            lumps.emplace_back(std::move(lump_ptr));
+        }
 
         return lumps;
     }
@@ -384,6 +384,11 @@ std::istringstream wad::rom::Lump::p_stream()
 IDevice& wad::rom::Lump::device()
 {
     return device_;
+}
+
+UniquePtr<std::istream> wad::rom::SoundLump::stream()
+{
+    return std::make_unique<std::istringstream>(get_midi(track_));
 }
 
 IDevicePtr wad::rom_loader(StringView path)

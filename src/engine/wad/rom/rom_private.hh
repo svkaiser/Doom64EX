@@ -100,8 +100,14 @@ namespace imp {
       };
 
       class SoundLump : public Lump {
+          int track_;
+
       public:
-          using Lump::Lump;
+          SoundLump(Device& device, Info info, int track):
+              Lump(device, info),
+              track_(track) {}
+
+          UniquePtr<std::istream> stream() override;
       };
 
       class NormalLump : public Lump {
