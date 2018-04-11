@@ -157,14 +157,14 @@ else()
   # Build doom64ex.pk3
   add_custom_target(pk3 ALL
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/distrib/doom64ex.pk3"
-    COMMAND ${CMAKE_COMMAND} -E tar "cfv" "${CMAKE_BINARY_DIR}/doom64ex.pk3" --format=zip "*")
+    COMMAND "${CMAKE_COMMAND}" -E tar "cfv" "${CMAKE_BINARY_DIR}/doom64ex.pk3" --format=zip "--files-from=${CMAKE_SOURCE_DIR}/distrib/doom64ex_pk3.txt")
 
   # Install doom64ex.pk3
   if (NOT WIN32)
     if (APPLE)
-      install(FILES ${CMAKE_BINARY_DIR}/doom64ex.pk3 DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
+      install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
     else ()
-      install(FILES ${CMAKE_BINARY_DIR}/doom64ex.pk3 DESTINATION share/games/doom64ex)
+      install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION share/games/doom64ex)
     endif ()
   endif ()
 endif()

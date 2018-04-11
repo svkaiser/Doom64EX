@@ -188,11 +188,11 @@ namespace {
 
       retval.set_offsets(offsets);
 
-      byte *scanlines[height];
+	  auto scanlines = std::make_unique<byte*[]>(height);
       for (size_t i = 0; i < height; i++)
           scanlines[i] = retval.scanline_ptr(i);
 
-      png_read_image(png_ptr, scanlines);
+      png_read_image(png_ptr, scanlines.get());
       png_read_end(png_ptr, infop);
 
       return retval;
@@ -246,11 +246,11 @@ namespace {
                    format, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
       png_write_info(writep, infop);
 
-      const uint8_t *scanlines[im->height()];
+	  auto scanlines = std::make_unique<const uint8_t*[]>(im->height());
       for (int i = 0; i < im->height(); i++)
           scanlines[i] = im->scanline_ptr(i);
 
-      png_write_image(writep, const_cast<png_bytepp>(scanlines));
+      png_write_image(writep, const_cast<png_bytepp>(scanlines.get()));
       png_write_end(writep, infop);
       png_destroy_write_struct(&writep, &infop);
   }

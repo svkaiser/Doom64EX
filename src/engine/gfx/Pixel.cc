@@ -31,11 +31,11 @@ namespace {
   {
       using Traits = pixel_traits<T>;
       return PixelInfo {
-          .format = Traits::format,
-          .color = Traits::color,
-          .bytes = Traits::bytes,
-          .alpha = Traits::alpha,
-          .pal_size = Traits::pal_size
+          Traits::format,
+          Traits::color,
+          Traits::bytes,
+          Traits::alpha,
+          Traits::pal_size
       };
   }
 

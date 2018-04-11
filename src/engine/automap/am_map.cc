@@ -766,7 +766,7 @@ void AM_DrawWalls(void) {
             continue;
         }
 
-        if((l->flags & ML_MAPPED) || am_fulldraw || plr->powers[pw_allmap] || amCheating) {
+        if((l->flags & ML_MAPPED) || *am_fulldraw || plr->powers[pw_allmap] || amCheating) {
             rcolor color = D_RGBA(0x8A, 0x5C, 0x30, 0xFF);  // default color
 
             //
@@ -1017,7 +1017,7 @@ void AM_Drawer(void) {
 
     AM_drawPlayers();
 
-    if(amCheating == 2 || am_showkeymarkers) {
+    if(amCheating == 2 || *am_showkeymarkers) {
         AM_drawThings();
     }
 

@@ -815,8 +815,8 @@ void G_DoCmdMouseMove(int x, int y) {
     playercontrols_t *pc;
 
     pc = &Controls;
-    pc->mousex += ((x * *v_msensitivityx) / 128);
-    pc->mousey += ((y * *v_msensitivityy) / 128);
+    pc->mousex += static_cast<int>((x * *v_msensitivityx) / 128);
+    pc->mousey += static_cast<int>((y * *v_msensitivityy) / 128);
 }
 
 

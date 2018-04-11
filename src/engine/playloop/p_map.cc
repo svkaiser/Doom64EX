@@ -1005,9 +1005,9 @@ extern fixed_t  topslope;
 extern fixed_t  bottomslope;
 
 // [kex]
-extern fixed_t laserhit_x;
-extern fixed_t laserhit_y;
-extern fixed_t laserhit_z;
+extern "C" fixed_t laserhit_x;
+extern "C" fixed_t laserhit_y;
+extern "C" fixed_t laserhit_z;
 
 
 //

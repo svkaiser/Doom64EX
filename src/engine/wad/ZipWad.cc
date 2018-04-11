@@ -112,9 +112,9 @@ namespace {
   {
       String r;
       for (auto ch : filename) {
-          if (!std::isalnum(ch))
+          if (!isalnum(ch))
               break;
-          r.push_back(static_cast<char>(std::toupper(ch)));
+          r.push_back(static_cast<char>(toupper(ch)));
       }
       return r;
   }

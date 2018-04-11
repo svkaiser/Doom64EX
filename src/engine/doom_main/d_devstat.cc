@@ -274,8 +274,8 @@ dboolean D_DevKeyResponder(event_t* ev) {
                 return true;
 
             case KEY_F3:    // freeze all mobj thinkers
-                sv_lockmonsters = !sv_lockmonsters;
-                players[consoleplayer].message = sv_lockmonsters ? "Lock Monsters On" : "Lock Monsters Off";
+                sv_lockmonsters = !*sv_lockmonsters;
+                players[consoleplayer].message = *sv_lockmonsters ? "Lock Monsters On" : "Lock Monsters Off";
                 return true;
 
             case KEY_F4:    // kill everything

@@ -144,9 +144,11 @@ namespace imp {
       const T& value() const
       { return mValue; }
 
-      template <class U>
-      explicit operator U() const
-      { return static_cast<U>(mValue); }
+      operator T&()
+      { return mValue; }
+
+      operator const T&() const
+      { return mValue; }
 
       template <class U>
       TypedProperty& operator=(U value)

@@ -56,7 +56,7 @@ extern BoolProperty r_texturecombiner;
 void AM_BeginDraw(angle_t view, fixed_t x, fixed_t y) {
     am_viewangle = view;
 
-    if(r_texturecombiner && am_overlay) {
+    if(*r_texturecombiner && *am_overlay) {
         GL_SetState(GLSTATE_BLEND, 1);
 
         //
@@ -91,7 +91,7 @@ void AM_EndDraw(void) {
     dglPopMatrix();
     dglDepthRange(0.0f, 1.0f);
 
-    if(r_texturecombiner && am_overlay) {
+    if(*r_texturecombiner && *am_overlay) {
         GL_SetState(GLSTATE_BLEND, 0);
         GL_SetTextureMode(GL_COMBINE);
         GL_SetColorScale();
@@ -219,7 +219,7 @@ void AM_DrawLeafs(float scale) {
             //
             // add to draw list if visible
             //
-            if(!(sub->sector->flags & MS_HIDESSECTOR) || am_fulldraw) {
+            if(!(sub->sector->flags & MS_HIDESSECTOR) || *am_fulldraw) {
                 vtxlist_t *list;
                 vtx_t *v = &drawVertex[0];
 
@@ -250,7 +250,7 @@ void AM_DrawLeafs(float scale) {
     //
     // process draw list
     //
-    DL_BeginDrawList(!am_ssect && r_fillmode, 0);
+    DL_BeginDrawList(!*am_ssect && *r_fillmode, 0);
 
     if(r_texturecombiner) {
         if(!nolights) {

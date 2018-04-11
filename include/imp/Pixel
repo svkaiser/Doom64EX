@@ -228,10 +228,8 @@ namespace imp {
      * - `<tag_type> tag()`: Convenience function that returns an instance of `tag_type`
      */
     template <class T>
-    struct pixel_traits;
-
-    template <>
-    struct pixel_traits<void> {
+	struct pixel_traits {
+		static constexpr bool valid = false;
         static constexpr auto format = PixelFormat::none;
         static constexpr bool color = false;
         static constexpr size_t bytes = 0;
@@ -241,10 +239,11 @@ namespace imp {
 
         struct tag_type {};
         static constexpr auto tag() { return tag_type(); }
-    };
+	};
 
     template <>
     struct pixel_traits<Index8> {
+		static constexpr bool valid = true;
         static constexpr auto format = PixelFormat::index8;
         static constexpr bool color = false;
         static constexpr size_t bytes = 1;
@@ -258,6 +257,7 @@ namespace imp {
 
     template <>
     struct pixel_traits<Rgb> {
+		static constexpr bool valid = true;
         static constexpr auto format = PixelFormat::rgb;
         static constexpr bool color = true;
         static constexpr size_t bytes = 3;
@@ -271,6 +271,7 @@ namespace imp {
 
     template <>
     struct pixel_traits<Rgba> {
+		static constexpr bool valid = true;
         static constexpr auto format = PixelFormat::rgba;
         static constexpr bool color = true;
         static constexpr size_t bytes = 4;
@@ -287,31 +288,21 @@ namespace imp {
      * \tparam T Type to identify
      */
     template <class T>
-    constexpr bool is_pixel = imp::is_any_same<T, Index8, Rgb, Rgba>;
-
-    template <class T, class = void>
-    struct __h_is_color_pixel : std::false_type {};
-
-    /*
-     * We use `imp::void_t` to determine whether `pixel_traits<T>` has a field named `color`
-     * before we attempt to grab its value.
-     */
-    template <class T>
-    struct __h_is_color_pixel<T, void_t<decltype(pixel_traits<T>::color)>> : bool_type<pixel_traits<T>::color> {};
+    constexpr bool is_pixel = pixel_traits<T>::valid;
 
     /**
      * \brief Determine if a type is a colour pixel
      * \tparam T Type to identify
      */
-    template <class T>
-    constexpr bool is_color_pixel = __h_is_color_pixel<T>::value;
+	template <class T>
+	constexpr bool is_color_pixel = pixel_traits<T>::color;
 
     /**
      * \brief Determine if a type is an index pixel
      * \tparam T Type to identify
      */
-    template <class T>
-    constexpr bool is_index_pixel = is_pixel<T> && !is_color_pixel<T>;
+	template <class T>
+	constexpr bool is_index_pixel = is_pixel<T> && !pixel_traits<T>::color;
 
     /**
      * \brief A version of pixel_traits that's available at runtime

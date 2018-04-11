@@ -36,7 +36,7 @@
 #include "con_console.h"
 #include <imp/Wad>
 
-#ifdef _MSVC_VER
+#ifdef _MSC_VER
 #include "i_opndir.h"
 #else
 #include <unistd.h>

@@ -54,7 +54,7 @@
 #include <imp/Wad>
 #include "Map.hh"
 
-void P_SpawnMapThing(mapthing_t *mthing);
+mobj_t* P_SpawnMapThing(mapthing_t *mthing);
 
 //
 // MAP related Lookup tables.

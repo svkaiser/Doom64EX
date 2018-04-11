@@ -150,8 +150,7 @@ void app::main(int argc, char **argv)
 
 bool app::file_exists(StringView path)
 {
-    struct stat st;
-    return !stat(path.data(), &st) && S_ISREG(st.st_mode);
+	return std::ifstream(path.to_string()).is_open();
 }
 
 Optional<String> app::find_data_file(StringView name, StringView dir_hint)
