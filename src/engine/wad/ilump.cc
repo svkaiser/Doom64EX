@@ -26,8 +26,6 @@ char* ILump::read_bytes_ccompat(size_t *size_out = nullptr)
     is->seekg(0, is->beg);
     auto size = to_size(end_pos - is->tellg());
 
-    print("ILump::read_bytes_ccompat(this = {}, size = {})\n", name(), size);
-
     auto bytes = new char[size];
     is->read(&bytes[0], size);
 

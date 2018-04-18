@@ -207,7 +207,7 @@ public:
         read_into(rom_, wad_header_);
 
         if (memcmp(wad_header_.id, "IWAD", 4) != 0)
-            fatal("Not an IWAD");
+            log::fatal("Not an IWAD");
     }
 
     Vector<ILumpPtr> read_all() override
@@ -233,9 +233,6 @@ public:
             std::size_t len = 0;
             while (len < 8 && dir.name[len]) ++len;
 
-            if (wad_header_.numlumps == i + 1)
-                println("> WAD End: {:x}", static_cast<size_t>(rom_.tellg()));
-
             dir.name[0] &= 0x7f;
 
             std::size_t size {};
@@ -245,7 +242,7 @@ public:
             // TODO: It'd be cool to actually be able to read and use the demo
             // files
             if (name.substr(0, 4) == "DEMO") {
-                print("Ignore '{}'\n", name);
+                log::debug("Ignore '{}'", name);
                 continue;
             }
 
@@ -291,7 +288,7 @@ public:
                 } else if (name == "ENDOFWAD") {
                     break;
                 } else {
-                    println("Unknown WAD directory: {}", name);
+                    log::warn("Unknown WAD directory: {}", name);
                 }
                 continue;
             }
@@ -388,7 +385,7 @@ IDevice& wad::rom::Lump::device()
 
 UniquePtr<std::istream> wad::rom::SoundLump::stream()
 {
-    return std::make_unique<std::istringstream>(get_midi(track_));
+    return std::make_unique<std::istringstream>(""); //std::make_unique<std::istringstream>(get_midi(track_));
 }
 
 IDevicePtr wad::rom_loader(StringView path)

@@ -17,14 +17,14 @@ void native_ui::init()
 {
     handle_ = dlopen("./libDoom64EX-gtk3.so", RTLD_LAZY | RTLD_GLOBAL);
     if (!handle_) {
-        println("Gtk3: Could not load libDoom64EX-gtk3.so");
+        log::warn("Gtk3: Could not load libDoom64EX-gtk3.so");
         return;
     }
 
     init_ = reinterpret_cast<Init*>(dlsym(handle_, "init"));
 
     if (!init_) {
-        println("Erro: {}", dlerror());
+        log::fatal("Error loading Gtk3 UI: {}", dlerror());
         exit(0);
     }
     quit_ = reinterpret_cast<Quit*>(dlsym(handle_, "quit"));

@@ -186,7 +186,7 @@ namespace {
                   stream_.seekg(entry.comment_length + entry.extra_length, std::ios::cur);
 
                   if (entry.method != 0 && entry.method != 8) {
-                      println(stderr, "Unsupported compression method for {}", filename);
+                      log::error("Unsupported compression method for '{}'", filename);
                       continue;
                   }
 

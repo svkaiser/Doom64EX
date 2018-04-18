@@ -15,14 +15,14 @@ void wad::init()
     } else if (auto iwad_data_path = app::find_data_file("doom64.wad")) {
         wad::add_device(*iwad_data_path);
     } else {
-        fatal("Couldn't find 'doom64.rom'");
+        log::fatal("Couldn't find 'doom64.rom'");
     }
 
     // Find and add 'doom64ex.pk3'
     if (auto engine_data_path = app::find_data_file("doom64ex.pk3")) {
         wad::add_device(*engine_data_path);
     } else {
-        fatal("Couldn't find 'doom64ex.pk3'");
+        log::fatal("Couldn't find 'doom64ex.pk3'");
     }
 
     wad::merge();

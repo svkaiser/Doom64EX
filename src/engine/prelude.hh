@@ -19,48 +19,11 @@
 #include "utility/optional.hh"
 #include "imp/detail/Memory.hh"
 
-#define STUB(msg) fmt::print("STUB {}: {} ({}:{})\n", __FUNCTION__, msg, __LINE__, __FILE__)
+#include <common/logger.hh>
 
-extern void (*__imp_error)(const std::string&);
-namespace fmt {
-  inline void println(CStringRef fmt, ArgList args)
-  {
-      print(fmt, args);
-      print("\n");
-  }
+#define STUB(msg) log::debug("STUB {}: {} ({}:{})", __FUNCTION__, msg, __LINE__, __FILE__)
 
-  inline void println(std::FILE* fh, CStringRef fmt, ArgList args)
-  {
-      print(fh, fmt, args);
-      print(fh, "\n");
-  }
-
-  inline void fatal(CStringRef fmt, ArgList args)
-  {
-      if (__imp_error) {
-          __imp_error(format(fmt, args));
-      } else {
-          println(stderr, fmt, args);
-      }
-      std::exit(1);
-  }
-
-  FMT_VARIADIC(void, println, CStringRef)
-  FMT_VARIADIC(void, println, std::FILE*, CStringRef)
-  FMT_VARIADIC(void, fatal, CStringRef)
-
-  template <class T>
-  inline void print(const T &x)
-  {
-      print("{}", x);
-  }
-
-  template <class T>
-  inline void println(const T &x)
-  {
-      println("{}", x);
-  }
-}
+#define FIXME(msg) log::debug("FIXME {}: {} ({}:{})", __FUNCTION__, msg, __LINE__, __FILE__)
 
 namespace imp {
   struct dummy_t {
@@ -90,26 +53,6 @@ namespace imp {
   {
       return s.write(sv.data(), sv.length());
   }
-
-  class Stopwatch {
-      using clock = std::chrono::steady_clock;
-      std::string message_;
-      clock::time_point start_;
-
-  public:
-      Stopwatch(const std::string &message):
-          message_(message),
-          start_(std::chrono::steady_clock::now()) {}
-
-      ~Stopwatch()
-      {
-          using namespace std::chrono_literals;
-          auto timediff = (clock::now() - start_) / 1ms;
-          fmt::println("{}: {}ms", message_, timediff);
-      }
-  };
-
-#define STOPWATCH Stopwatch _stopwatch_##__COUNTER__(__PRETTY_FUNCTION__);
 }
 
 template <class T, class Deleter>
@@ -139,27 +82,6 @@ inline std::ostream& operator<<(std::ostream& s, const std::weak_ptr<T>& ptr)
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 using namespace imp;
-
-// clang complains about ambiguity with stuff like sprintf and fprintf, since there exist functions with those names
-// in both the std and fmt namespaces, so we only forward the few functions we actually need, instead of
-// using namespace imp;
-
-template <class... Args>
-inline auto print(Args&&... args)
-{ return fmt::print(std::forward<Args>(args)...); }
-
-template <class... Args>
-inline auto println(Args&&... args)
-{ return fmt::println(std::forward<Args>(args)...); }
-
-template <class... Args>
-inline auto format(Args&&... args)
-{ return fmt::format(std::forward<Args>(args)...); }
-
-template <class... Args>
-inline auto fatal(Args&&... args)
-{ return fmt::fatal(std::forward<Args>(args)...); }
-
 #endif
 
 #endif //__IMP_PRELUDE__56107413

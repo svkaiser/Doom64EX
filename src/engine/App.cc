@@ -52,17 +52,14 @@ namespace {
               arg.remove_prefix(1);
               auto it = _params.find(arg);
               if (it == _params.end()) {
-                  println(stderr, "Unknown parameter -{}", arg);
+                  log::warn("Unknown parameter -{}", arg);
               } else {
                   if (param) {
-                      println("");
                   }
                   param = it->second;
                   param->set_have();
-                  print("{:16s} = ", arg);
                   if (param->arity() == Arity::nullary) {
                       param = nullptr;
-                      println(" true");
                   }
               }
           } else {
@@ -72,10 +69,8 @@ namespace {
               }
 
               param->add(arg);
-              print(" {}", arg);
               if (param->arity() != Arity::nary) {
                   param = nullptr;
-                  println("");
               }
           }
       }
@@ -88,14 +83,12 @@ void app::main(int argc, char **argv)
     EASY_PROFILER_ENABLE;
     EASY_MAIN_THREAD;
 
-    using Arity = app::Param::Arity;
     myargc = argc;
     myargv = argv;
 
     _program = argv[0];
 
     auto base_dir = SDL_GetBasePath();
-    println(">>> {}", base_dir);
     if (base_dir) {
         _base_dir = base_dir;
         SDL_free(base_dir);
@@ -111,7 +104,7 @@ void app::main(int argc, char **argv)
 #endif
 
     /* Process command-line arguments */
-    println("Parameters:");
+    log::debug("Parameters:");
     ParamsParser parser;
     for (int i = 1; i < argc; ++i) {
         auto arg = argv[i];
@@ -120,7 +113,7 @@ void app::main(int argc, char **argv)
             std::ifstream f(arg + 1);
 
             if (!f.is_open()) {
-                // TODO: Print error
+                log::fatal("Could not open '{}'", arg + 1);
                 continue;
             }
 
@@ -133,15 +126,9 @@ void app::main(int argc, char **argv)
             parser.process(arg);
         }
     }
-    if (parser.param && parser.param->arity() == Arity::nary)
-        println("");
 
     /* Print rest params */
     if (!_rest.empty()) {
-        print("{:16s} = ", "rest");
-        for (const auto &s : _rest)
-            print(" {}", s);
-        println("");
     }
 
     D_DoomMain();
@@ -158,16 +145,16 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
     String path;
 
     if (!dir_hint.empty()) {
-        path = format("{}{}", dir_hint, name);
+        path = fmt::format("{}{}", dir_hint, name);
         if (app::file_exists(path))
             return path;
     }
 
-    path = format("{}{}", _base_dir, name);
+    path = fmt::format("{}{}", _base_dir, name);
     if (app::file_exists(path))
         return path;
 
-    path = format("{}{}", _data_dir, name);
+    path = fmt::format("{}{}", _data_dir, name);
     if (app::file_exists(path))
         return path;
 
@@ -183,7 +170,7 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
     };
 
     for (auto p : paths) {
-        path = format("{}{}", p, name);
+        path = fmt::format("{}{}", p, name);
         if (app::file_exists(path))
             return path;
     }

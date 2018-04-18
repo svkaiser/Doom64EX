@@ -460,7 +460,7 @@ namespace {
 
               auto& wavtable = waves[j];
               auto& predictor = predictors[j];
-              auto name = format("SFX_{:03u}", j);
+              auto name = fmt::format("SFX_{:03u}", j);
 
               wavtable.size -= wavtable.size % 9;
 
@@ -779,8 +779,6 @@ namespace {
       auto entries = array_from_istream<EntryHeader>(s, sseq.num_entries);
       assert(EntryHeader::binary_size * sseq.num_entries == sseq.entry_size);
 
-      fmt::print("!SSEQ: num_entries {}, entry_size {}\n", sseq.num_entries, sseq.entry_size);
-
       auto track_table = static_cast<size_t>(s.tellg());
       for (size_t i {}; i < sseq.num_entries; ++i) {
           auto& entry = entries[i];
@@ -924,9 +922,7 @@ fluid_sfloader_t* rom_soundfont()
     };
 
     constexpr auto load = [](fluid_sfloader_t*, const char *fname) -> fluid_sfont_t* {
-        fmt::print("Loading font: {}\n", fname);
         if ("DOOM64.ROM"_sv == fname) {
-            fmt::print("Trying to load DOOM64ROM Soundfont");
             return rom_sfont();
         }
         return nullptr;

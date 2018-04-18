@@ -105,7 +105,7 @@ Optional<Image> SpriteLump::read_image()
            }
            image.palette(cached_pal[substr]);
        } else {
-           auto name = format("PAL{}0", this->name().substr(0, 4));
+           auto name = fmt::format("PAL{}0", this->name().substr(0, 4));
            palette = cache::palette(name);
        }
     }

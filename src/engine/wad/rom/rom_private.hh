@@ -62,7 +62,7 @@ namespace imp {
               info_(info) {}
 
           UniquePtr<std::istream> stream() override
-          { throw std::logic_error(format("rom::Lump::stream() Not implemented for '{}'", info_.name)); }
+          { throw std::logic_error(fmt::format("rom::Lump::stream() Not implemented for '{}'", info_.name)); }
 
           IDevice& device() override;
 

@@ -256,7 +256,7 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
 #endif
 
             if(!al->param[0]) {
-                auto str = format("{}: {} ({})", cvar->name(), cvar->string(), cvar->default_string());
+                auto str = fmt::format("{}: {} ({})", cvar->name(), cvar->string(), cvar->default_string());
                 CON_AddLine(str.c_str(), str.size());
             }
             else {
@@ -731,7 +731,7 @@ void G_OutputBindings(FILE *fh) {
         if (p->is_noconfig())
             continue;
 
-        println(fh, "seta \"{}\" \"{}\"", p->name(), p->string());
+        fmt::print(fh, "seta \"{}\" \"{}\"\n", p->name(), p->string());
     }
 }
 
