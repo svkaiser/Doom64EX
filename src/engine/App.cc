@@ -5,6 +5,7 @@
 #include <imp/detail/Pixel.hh>
 
 #include <easy/profiler.h>
+#include <cxxabi.h>
 
 #include "SDL.h"
 
@@ -13,6 +14,24 @@
 #else
 #define SDL_main main
 #endif
+
+String imp::type_to_string(const std::type_info& type)
+{
+#ifdef __GNUC__
+    int status {};
+    auto real_name = abi::__cxa_demangle(type.name(), nullptr, nullptr, &status);
+
+    if (status == 0) {
+        String name = real_name;
+        std::free(real_name);
+        return name;
+    }
+
+    return type.name();
+#else
+    return type.name();
+#endif
+}
 
 [[noreturn]]
 void D_DoomMain();

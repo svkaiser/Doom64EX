@@ -31,7 +31,7 @@ project(Doom64EX C CXX)
 
 option(ENABLE_TESTING "Compile unit tests" ON)
 option(ENABLE_SYSTEM_FLUIDSYNTH "Link with system-wide fluidsynth and not fluidsynth-lite" OFF)
-option(ENABLE_GTK3 "Display windows using GTK+3" OFF)
+option(ENABLE_GTK3 "Display windows using GTK+3" ON)
 option(VERSION_DEV "Add git commit hash to window title" ON)
 
 # If fluidsynth-lite wasn't cloned, fall back to using system fluidsynth.
@@ -63,7 +63,7 @@ endif()
 
 if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Debug mode: Enabling stricter warnings")
-  set(FLAGS "-Wall -Werror -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing -D_GLIBCXX_DEBUG")
+  set(FLAGS "-Wall -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing -D_GLIBCXX_DEBUG")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 
@@ -130,8 +130,13 @@ if (NOT USE_CONAN)
 
   # GTK3
   if(ENABLE_GTK3)
-    find_package(GTK3 REQUIRED)
-    find_package(Vala REQUIRED)
+    find_package(GTK3)
+
+    if(GTK3_FOUND)
+      find_package(Vala)
+    else()
+      set(ENABLE_GTK3 OFF)
+    endif()
   endif(ENABLE_GTK3)
 endif(NOT USE_CONAN)
 

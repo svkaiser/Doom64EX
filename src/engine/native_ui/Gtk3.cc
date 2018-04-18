@@ -4,10 +4,12 @@
 namespace {
   using Init = void ();
   using Quit = void ();
+  using ConsoleShow = void (bool);
   using ConsoleAddLine = void (const char *);
 
   Init* init_ {};
   Quit* quit_ {};
+  ConsoleShow* console_show_ {};
   ConsoleAddLine* console_add_line_ {};
 
   void *handle_ = nullptr;
@@ -30,14 +32,20 @@ void native_ui::init()
     quit_ = reinterpret_cast<Quit*>(dlsym(handle_, "quit"));
     console_add_line_ = reinterpret_cast<ConsoleAddLine*>(dlsym(handle_, "console_add_line"));
 
+    console_show_ = reinterpret_cast<ConsoleShow*>(dlsym(handle_, "console_show"));
+
     assert(quit_);
     assert(console_add_line_);
 
     init_();
 }
 
-void native_ui::console_show(bool)
+void native_ui::console_show(bool show)
 {
+    if (!handle_)
+        return;
+
+    console_show_(show);
 }
 
 void native_ui::console_add_line(StringView line)

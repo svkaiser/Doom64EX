@@ -27,6 +27,17 @@ public void quit () {
 	console = null;
 }
 
+public void console_show (bool show) {
+	Idle.add (() => {
+			if (show) {
+				console.show ();
+			} else {
+				console.hide ();
+			}
+			return Source.REMOVE;
+		});
+}
+
 public void console_add_line (string line) {
 	Idle.add (() => {
 			console.insert (line);
