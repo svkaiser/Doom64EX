@@ -2,15 +2,12 @@
 #include <imp/NativeUI>
 
 namespace {
-  using Init = void ();
-  using Quit = void ();
-  using ConsoleShow = void (bool);
-  using ConsoleAddLine = void (const char *);
-
-  Init* init_ {};
-  Quit* quit_ {};
-  ConsoleShow* console_show_ {};
-  ConsoleAddLine* console_add_line_ {};
+  struct {
+      void (*init)();
+      void (*quit)();
+      void (*console_show)(bool);
+      void (*console_add_line)(const char*);
+  } ftable;
 
   void *handle_ = nullptr;
 }
@@ -23,21 +20,18 @@ void native_ui::init()
         return;
     }
 
-    init_ = reinterpret_cast<Init*>(dlsym(handle_, "init"));
-
-    if (!init_) {
-        log::fatal("Error loading Gtk3 UI: {}", dlerror());
-        exit(0);
+#define DL_FUNC(name)                                                                     \
+    ftable.name = reinterpret_cast<decltype(ftable.name)>(dlsym(handle_, #name));         \
+    if (!ftable.name) {                                                                   \
+        log::fatal("Symbol '" #name "' not found in libDoom64EX-gtk3.so: {}", dlerror()); \
     }
-    quit_ = reinterpret_cast<Quit*>(dlsym(handle_, "quit"));
-    console_add_line_ = reinterpret_cast<ConsoleAddLine*>(dlsym(handle_, "console_add_line"));
 
-    console_show_ = reinterpret_cast<ConsoleShow*>(dlsym(handle_, "console_show"));
+    DL_FUNC(init);
+    DL_FUNC(quit);
+    DL_FUNC(console_show);
+    DL_FUNC(console_add_line);
 
-    assert(quit_);
-    assert(console_add_line_);
-
-    init_();
+    ftable.init();
 }
 
 void native_ui::console_show(bool show)
@@ -45,7 +39,7 @@ void native_ui::console_show(bool show)
     if (!handle_)
         return;
 
-    console_show_(show);
+    // ftable.console_show(show);
 }
 
 void native_ui::console_add_line(StringView line)
@@ -54,5 +48,5 @@ void native_ui::console_add_line(StringView line)
         return;
 
     String str { line };
-    console_add_line_(str.c_str());
+    ftable.console_add_line(str.c_str());
 }
