@@ -10,6 +10,7 @@ namespace imp {
     std::istringstream wad();
     std::istringstream sn64();
     std::istringstream sseq();
+    std::istringstream pcm();
   }
 }
 

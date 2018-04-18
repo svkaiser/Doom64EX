@@ -1237,6 +1237,15 @@ void I_InitSequencer(void) {
         }
     }
 
+    if (!sffound && (sfpath = app::find_data_file("doom64.rom"))) {
+        I_Printf("Found SoundFont %s\n", sfpath->c_str());
+        doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);
+
+        CON_DPrintf("Loading %s\n", sfpath->c_str());
+
+        sffound = true;
+    }
+
     if (!sffound && (sfpath = app::find_data_file("doomsnd.sf2"))) {
         I_Printf("Found SoundFont %s\n", sfpath->c_str());
         doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);

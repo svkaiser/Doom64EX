@@ -71,7 +71,7 @@ namespace {
 
   const StringView snd_names_[] = {
       "NOSOUND",  "SNDPUNCH", "SNDSPAWN", "SNDEXPLD",
-      "SNDIMPCT", "SNDPSTOL", "SNDSHTG-N", "SNDPLSMA",
+      "SNDIMPCT", "SNDPSTOL", "SNDSHTGN", "SNDPLSMA",
       "SNDBFG",   "SNDSAWUP", "SNDSWIDL", "SNDSAW1",
       "SNDSAW2",  "SNDMISLE", "SNDBFGXP", "SNDPSTRT",
       "SNDPSTOP", "SNDDORUP", "SNDDORDN", "SNDSCMOV",

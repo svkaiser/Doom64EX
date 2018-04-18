@@ -23,13 +23,14 @@ namespace {
       Location iwad;
       Location sn64;
       Location sseq;
+      Location pcm;
   };
 
   const VersionLocation locations_[4] = {
-      { 'P', 0, { 0x63f60, 0x5d6cdc }, { 0x63ac40, 0x10000 }, { 0x646620, 0x50000 } },
-      { 'J', 0, { 0x64580, 0x5d8478 }, { 0, 0 }, { 0x6483e0, 0 } },
-      { 'E', 0, { 0x63d10, 0x5d18b0 }, { 0x6355c0, 0x10000 }, { 0x640fa0, 0x50000 } },
-      { 'E', 1, { 0x63dc0, 0x5d301c }, { 0x63ac40, 0x10000 }, { 0x646620, 0x50000 } }
+      { 'P', 0, { 0x63f60, 0x5d6cdc }, { 0x63ac40, 0x50000 }, { 0x646620, 0x50000 }, {0x83c40, 0x50000} },
+      { 'J', 0, { 0x64580, 0x5d8478 }, { 0, 0 }, { 0x6483e0, 0 }, {0, 0} },
+      { 'E', 0, { 0x63d10, 0x5d18b0 }, { 0x6355c0, 0x50000 }, { 0x640fa0, 0x50000 }, {0x6552a0, 0x500000} },
+      { 'E', 1, { 0x63dc0, 0x5d301c }, { 0x63ac40, 0x50000 }, { 0x646620, 0x50000 }, {0, 0} }
   };
 
   const VersionLocation* location_ {};
@@ -75,6 +76,7 @@ namespace {
 
       std::istringstream s;
       s.str(std::move(b));
+      s.exceptions(s.eofbit | s.failbit | s.badbit);
       return s;
   }
 }
@@ -145,4 +147,9 @@ std::istringstream rom::sn64()
 std::istringstream rom::sseq()
 {
     return load_(location_->sseq);
+}
+
+std::istringstream rom::pcm()
+{
+    return load_(location_->pcm);
 }
