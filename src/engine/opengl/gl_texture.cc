@@ -310,8 +310,6 @@ static void InitGfxTextures(void) {
     gfxheight       = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
     gfxorigheight   = (word*) Z_Calloc(numgfx * sizeof(short), PU_STATIC, NULL);
 
-    println("> numgfx: {}", numgfx);
-
     for(auto& lump_ptr : section) {
         auto& lump = *lump_ptr;
         auto i = lump.section_index();
@@ -419,7 +417,7 @@ static void InitSpriteTextures(void) {
             if(!dstrncmp(lump->name().data(), sprnames[j], 4)) {
                 // increase the count if a palette lump is found
                 for(p = 1; p < 10; p++) {
-                    if(wad::exists(format("PAL{}{}", sprnames[j], p))) {
+                    if(wad::exists(fmt::format("PAL{}{}", sprnames[j], p))) {
                         palcnt++;
                         spritecount[i]++;
                     }

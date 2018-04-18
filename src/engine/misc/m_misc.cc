@@ -306,7 +306,7 @@ void M_ScreenShot(void) {
     auto image = GL_GetScreenBuffer(0, 0, video_width, video_height);
     image.save(file, ImageFormat::png);
 
-    fmt::print("Saved Screenshot {}\n", name);
+    log::info("Saved Screenshot {}", name);
 }
 
 //

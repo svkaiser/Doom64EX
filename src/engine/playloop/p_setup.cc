@@ -938,7 +938,6 @@ void P_SetupSky(void) {
     skyflatnum  = wad::open(wad::Section::textures, sky->flat).value().section_index();
 
     if(sky->pic[0]) {
-        print("> {}\n", sky->pic);
         skypicnum = wad::open(wad::Section::graphics, sky->pic).value().lump_index();
     }
 

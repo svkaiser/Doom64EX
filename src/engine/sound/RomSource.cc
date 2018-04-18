@@ -1037,6 +1037,10 @@ fluid_sfloader_t* rom_soundfont()
         return rom_sfont();
         // }
         // return nullptr;
+        if ("DOOM64.ROM"_sv == fname) {
+            return rom_sfont();
+        }
+        return nullptr;
     };
 
     return new fluid_sfloader_t {

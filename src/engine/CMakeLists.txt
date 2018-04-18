@@ -120,6 +120,7 @@ set(SOURCES
   automap/am_map.cc
 
   # common
+  common/logger.cc
   common/info.cc
   common/md5.cc
   common/tables.cc
@@ -229,7 +230,7 @@ set(SOURCES
   renderer/r_wipe.cc
 
   # sound
-  sound/RomSource.cc
+  # sound/RomSource.cc
   sound/s_sound.cc
 
   # statusbar

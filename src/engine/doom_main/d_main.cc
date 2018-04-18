@@ -64,6 +64,7 @@
 #include "g_demo.h"
 #include "p_saveg.h"
 #include "gl_draw.h"
+#include "logger.hh"
 
 #include "net_client.h"
 #include <wad.hh>

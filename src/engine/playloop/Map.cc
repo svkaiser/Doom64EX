@@ -38,10 +38,10 @@ void* W_GetMapLump(int lump)
 
 void W_CacheMapLump(int map)
 {
-    auto file = wad::open(format("MAP{:02d}", map));
+    auto file = wad::open(fmt::format("MAP{:02d}", map));
 
     if (!file) {
-        fatal("Could not find MAP{:02d}", map);
+        log::fatal("Could not find MAP{:02d}", map);
     }
 
     lumps_.clear();
@@ -52,7 +52,7 @@ void W_CacheMapLump(int map)
     read_into(s, header);
 
     if (memcmp(header.id, "IWAD", 4) != 0 && memcmp(header.id, "PWAD", 4)) {
-        fatal("MAP{:02d} is an invalid WAD", map);
+        log::fatal("MAP{:02d} is an invalid WAD", map);
     }
 
     std::size_t numlumps = header.numlumps;

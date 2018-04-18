@@ -228,7 +228,7 @@ class SdlVideo : public IVideo {
         SDL_DisplayMode prev_mode, mode;
         int index = 0;
         int num_displays = SDL_GetNumVideoDisplays();
-        println("Available video modes:");
+        log::debug("Available video modes:");
         for (int i = 0; i < num_displays; ++i) {
             int num_modes = SDL_GetNumDisplayModes(i);
             for (int j = 0; j < num_modes; ++j) {
@@ -237,7 +237,7 @@ class SdlVideo : public IVideo {
                 if (j > 0 && prev_mode.w == mode.w && prev_mode.h == mode.h)
                     continue;
 
-                println("{}: {}x{} on display #{}", index++, mode.w, mode.h, i);
+                log::debug("{}: {}x{} on display #{}", index++, mode.w, mode.h, i);
                 modes_.push_back({ mode.w, mode.h });
                 prev_mode = mode;
             }
@@ -333,7 +333,7 @@ public:
                 break;
             }
 
-            auto title = format("{} {} - SDL2, OpenGL 1.4", config::name, config::version_full);
+            auto title = fmt::format("{} {} - SDL2, OpenGL 1.4", config::name, config::version_full);
             sdl_window_ = SDL_CreateWindow(title.c_str(),
                                            SDL_WINDOWPOS_CENTERED,
                                            SDL_WINDOWPOS_CENTERED,
@@ -342,12 +342,12 @@ public:
                                            flags);
 
             if (!sdl_window_)
-                throw video_error { format("Couldn't create window: {}", SDL_GetError()) };
+                throw video_error { fmt::format("Couldn't create window: {}", SDL_GetError()) };
 
             sdl_glcontext_ = SDL_GL_CreateContext(sdl_window_);
 
             if (!sdl_glcontext_)
-                throw video_error { format("Couldn't create OpenGL Context: {}", SDL_GetError()) };
+                throw video_error { fmt::format("Couldn't create OpenGL Context: {}", SDL_GetError()) };
         } else {
             SDL_SetWindowSize(sdl_window_, copy.width, copy.height);
 

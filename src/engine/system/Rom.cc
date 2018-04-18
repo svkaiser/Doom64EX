@@ -88,13 +88,13 @@ void rom::init()
     constexpr auto swap_name = "oDmo46              "_sv;
 
     if (was_init_)
-        fatal("Rom already initialized");
+        log::fatal("Rom already initialized");
 
     Header header;
 
     auto path = app::find_data_file("doom64.rom");
     if (!path)
-        fatal("Coultn't find N64 ROM (doom64.rom)");
+        log::fatal("Coultn't find N64 ROM (doom64.rom)");
 
     rom_.open(path.value());
     rom_.read(reinterpret_cast<char*>(&header), sizeof(header));
@@ -110,13 +110,12 @@ void rom::init()
         version = header.country;
         swapped_ = true;
     } else {
-        fatal("Could not detect ROM");
+        log::fatal("Could not detect ROM");
     }
 
     for (const auto& l : locations_) {
         if (l.country == country && l.version == version) {
             location_ = &l;
-            println("(Country: {}, Version: {:d})", country, version);
             assert(l.sn64.size != 0 && l.sn64.offset != 0);
             assert(l.sseq.size != 0 && l.sseq.offset != 0);
             assert(l.iwad.size != 0 && l.iwad.offset != 0);
@@ -125,10 +124,10 @@ void rom::init()
     }
 
     if (!location_) {
-        fatal("WAD not found in Doom 64 ROM. (Country: {}, Version: {})",
+        log::fatal("WAD not found in Doom 64 ROM. (Country: {}, Version: {})",
               country, version);
     } else {
-        println("(Country: {}, Version: {:d})", country, version);
+        log::info("(Country: {}, Version: {:d})", country, version);
     }
 
     was_init_ = true;

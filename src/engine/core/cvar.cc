@@ -41,8 +41,7 @@ Cvar::Cvar(StringView name, StringView description, int flags):
     flags_(flags)
 {
     if (_global().properties.count(name)) {
-        // TODO: Replace with an exception
-        println("Cvar with the name {} already exists!", name);
+        log::warn("Cvar with the name {} already exists!", name);
     }
 
     _global().properties.emplace(name, this);

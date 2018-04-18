@@ -21,6 +21,12 @@ namespace imp {
           throw std::logic_error("Casting negative integer to size_t");
       return static_cast<size_t>(i);
   };
+
+  std::string type_to_string(const std::type_info&);
+
+  template <class T>
+  std::string type_to_string()
+  { return type_to_string(typeid(T)); }
 }
 
 #endif //__IMP_CONVERT__63784703

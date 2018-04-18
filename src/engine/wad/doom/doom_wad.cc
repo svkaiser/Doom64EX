@@ -108,7 +108,7 @@ namespace {
                   } else if (name == "ENDOFWAD") {
                       break;
                   } else {
-                      println("Unknown WAD directory: {}", name);
+                      log::warn("Unknown WAD directory '{}'", name);
                   }
                   continue;
               }

@@ -28,7 +28,7 @@ bool wad::add_device(IDevicePtr device)
         list.emplace_back(std::move(lump));
     }
 
-    print("Added {} lumps from '{}'\n", lumps.size(), "");
+    log::info("Added {} lumps from '{}'", lumps.size(), "");
 
     devices_.emplace_back(std::move(device));
 
@@ -46,7 +46,7 @@ bool wad::add_device(StringView path)
     }
 
     if (!found) {
-        print("Couldn't find an appropriate device loader for '{}'\n", path);
+        log::error("Could not find an appropriate device loader for '{}'", path);
         return false;
     }
 

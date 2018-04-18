@@ -169,7 +169,12 @@ namespace imp {
 
       void set_string(StringView strValue) override
       {
-          *this = from_string<T>(strValue);
+          try {
+              *this = from_string<T>(strValue);
+          } catch (boost::bad_lexical_cast& e) {
+              log::error("Bad lexical cast when converting '{}' to cvar of type '{}'", strValue, type_to_string<T>());
+              *this = mDefault;
+          }
       }
 
       void reset_default() override

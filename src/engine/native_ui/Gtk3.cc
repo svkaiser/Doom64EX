@@ -2,13 +2,12 @@
 #include <imp/NativeUI>
 
 namespace {
-  using Init = void ();
-  using Quit = void ();
-  using ConsoleAddLine = void (const char *);
-
-  Init* init_ {};
-  Quit* quit_ {};
-  ConsoleAddLine* console_add_line_ {};
+  struct {
+      void (*init)();
+      void (*quit)();
+      void (*console_show)(bool);
+      void (*console_add_line)(const char*);
+  } ftable;
 
   void *handle_ = nullptr;
 }
@@ -17,27 +16,30 @@ void native_ui::init()
 {
     handle_ = dlopen("./libDoom64EX-gtk3.so", RTLD_LAZY | RTLD_GLOBAL);
     if (!handle_) {
-        println("Gtk3: Could not load libDoom64EX-gtk3.so");
+        log::warn("Gtk3: Could not load libDoom64EX-gtk3.so");
         return;
     }
 
-    init_ = reinterpret_cast<Init*>(dlsym(handle_, "init"));
-
-    if (!init_) {
-        println("Erro: {}", dlerror());
-        exit(0);
+#define DL_FUNC(name)                                                                     \
+    ftable.name = reinterpret_cast<decltype(ftable.name)>(dlsym(handle_, #name));         \
+    if (!ftable.name) {                                                                   \
+        log::fatal("Symbol '" #name "' not found in libDoom64EX-gtk3.so: {}", dlerror()); \
     }
-    quit_ = reinterpret_cast<Quit*>(dlsym(handle_, "quit"));
-    console_add_line_ = reinterpret_cast<ConsoleAddLine*>(dlsym(handle_, "console_add_line"));
 
-    assert(quit_);
-    assert(console_add_line_);
+    DL_FUNC(init);
+    DL_FUNC(quit);
+    DL_FUNC(console_show);
+    DL_FUNC(console_add_line);
 
-    init_();
+    ftable.init();
 }
 
-void native_ui::console_show(bool)
+void native_ui::console_show(bool show)
 {
+    if (!handle_)
+        return;
+
+    // ftable.console_show(show);
 }
 
 void native_ui::console_add_line(StringView line)
@@ -46,5 +48,5 @@ void native_ui::console_add_line(StringView line)
         return;
 
     String str { line };
-    console_add_line_(str.c_str());
+    ftable.console_add_line(str.c_str());
 }
