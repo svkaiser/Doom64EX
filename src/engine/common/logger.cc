@@ -13,7 +13,7 @@ namespace {
       using namespace std::chrono;
       auto now = steady_clock::now();
       auto sec = duration_cast<seconds>(now - s_program_start).count();
-      return fmt::format("[{:>10}] ", sec);
+      return fmt::format("[{:>6}] ", sec);
   }
 
   auto s_ansi_info = "\x1b[37m"_sv; // ANSI White

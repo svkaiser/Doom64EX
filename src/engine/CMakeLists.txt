@@ -230,7 +230,7 @@ set(SOURCES
   renderer/r_wipe.cc
 
   # sound
-  # sound/RomSource.cc
+  sound/RomSource.cc
   sound/s_sound.cc
 
   # statusbar

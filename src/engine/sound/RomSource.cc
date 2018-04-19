@@ -798,7 +798,7 @@ namespace {
               break;
 
           default:
-              fatal("Unknown MIDI event: {}", static_cast<int>(*m));
+              log::fatal("Unknown MIDI event '{}'", static_cast<int>(*m));
               break;
           }
 
@@ -866,7 +866,7 @@ namespace {
               std::istringstream ss(str);
 
               if (!(track.flag & 0x100) && entry.num_tracks > 1)
-                  fatal("Bad track {} offset [entry {:03d}], {}", j, i, static_cast<size_t>(s.tellg()));
+                  log::fatal("Bad track {} offset [entry {:03d}], {}", j, i, static_cast<size_t>(s.tellg()));
 
               read_midi_(midi_data, track, str, j, i, patches_[track.id]);
           }
@@ -996,7 +996,7 @@ fluid_sfloader_t* rom_soundfont()
 
         auto& wavtable = wavtables[i];
         auto& predictor = predictors[i];
-        auto name = format("SFX_{}", i);
+        auto name = fmt::format("SFX_{}", i);
 
         wavtable.size -= wavtable.size % 9;
 
@@ -1031,16 +1031,7 @@ fluid_sfloader_t* rom_soundfont()
     };
 
     constexpr auto load = [](fluid_sfloader_t*, const char *fname) -> fluid_sfont_t* {
-        fmt::print("Loading font: {}\n", fname);
-        // if ("doom64.rom"_sv == fname) {
-        fmt::print("Trying to load DOOM64ROM Soundfont\n");
         return rom_sfont();
-        // }
-        // return nullptr;
-        if ("DOOM64.ROM"_sv == fname) {
-            return rom_sfont();
-        }
-        return nullptr;
     };
 
     return new fluid_sfloader_t {
