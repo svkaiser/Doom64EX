@@ -385,7 +385,7 @@ IDevice& wad::rom::Lump::device()
 
 UniquePtr<std::istream> wad::rom::SoundLump::stream()
 {
-    return std::make_unique<std::istringstream>(""); //std::make_unique<std::istringstream>(get_midi(track_));
+    return std::make_unique<std::istringstream>(get_midi(track_));
 }
 
 IDevicePtr wad::rom_loader(StringView path)
