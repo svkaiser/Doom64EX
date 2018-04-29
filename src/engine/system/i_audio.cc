@@ -1229,9 +1229,11 @@ void I_InitSequencer(void) {
             I_Printf("Found SoundFont %s\n", s_soundfont->c_str());
             doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont->c_str(), 1);
 
-            CON_DPrintf("Loading %s\n", s_soundfont->c_str());
+            if (doomseq.sfont_id != FLUID_FAILED) {
+                CON_DPrintf("Loading %s\n", s_soundfont->c_str());
 
-            sffound = true;
+                sffound = true;
+            }
         } else {
             CON_Warnf("CVar s_soundfont doesn't point to a file.");
         }
@@ -1241,18 +1243,22 @@ void I_InitSequencer(void) {
         I_Printf("Found SoundFont %s\n", sfpath->c_str());
         doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);
 
-        CON_DPrintf("Loading %s\n", sfpath->c_str());
+        if (doomseq.sfont_id != FLUID_FAILED) {
+            CON_DPrintf("Loading %s\n", s_soundfont->c_str());
 
-        sffound = true;
+            sffound = true;
+        }
     }
 
     if (!sffound && (sfpath = app::find_data_file("doomsnd.sf2"))) {
         I_Printf("Found SoundFont %s\n", sfpath->c_str());
         doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);
 
-        CON_DPrintf("Loading %s\n", sfpath->c_str());
+        if (doomseq.sfont_id != FLUID_FAILED) {
+            CON_DPrintf("Loading %s\n", s_soundfont->c_str());
 
-        sffound = true;
+            sffound = true;
+        }
     }
 
     //

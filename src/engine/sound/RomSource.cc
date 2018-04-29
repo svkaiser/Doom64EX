@@ -4,13 +4,15 @@
 #include <prelude.hh>
 #include <utility/endian.hh>
 
-#include <system/Rom.hh>
+#include <system/n64_rom.hh>
 #include <fluidsynth.h>
 #include <ostream>
 #include <numeric>
 #include "BinaryReader.hh"
 
 namespace {
+  sys::N64Rom g_rom;
+
   struct Sn64Header {
       // char id[4];
       uint32 game_id; //< Must be 2
@@ -435,7 +437,7 @@ namespace {
   UniquePtr<LoopTable[]> loop_table;
   void load_sn64_()
   {
-      auto s = rom::sn64();
+      auto s = g_rom.sn64();
 
       /* read header */
       sn64 = Sn64Header::from_istream(s);
@@ -820,7 +822,7 @@ namespace {
 
   auto load_sseq_()
   {
-      auto s = rom::sseq();
+      auto s = g_rom.sseq();
 
       /* process header */
       auto sseq = SseqHeader::from_istream(s);
@@ -933,6 +935,54 @@ void rom_preset(fluid_sfont_t* sfont, fluid_preset_t* preset, size_t id)
 
 fluid_sfont_t* rom_sfont()
 {
+    load_sn64_();
+    load_sseq_();
+
+    size_t pcm_size {};
+    for (size_t i {}; i < sn64.num_sounds; ++i) {
+        pcm_size += wavtables[i].size/9*16 + 16;
+    }
+    sample_data_.resize(pcm_size);
+
+    /* read pcm */
+    auto s = g_rom.pcm();
+    samples_.resize(sn64.num_sounds);
+    auto pcm_ptr = sample_data_.data();
+    for (size_t i {}; i < sn64.num_sounds; ++i) {
+        auto& sample = samples_[i];
+        std::fill_n(reinterpret_cast<char*>(&sample), sizeof(sample), 0);
+
+        auto& wavtable = wavtables[i];
+        auto& predictor = predictors[i];
+        auto name = fmt::format("SFX_{}", i);
+
+        wavtable.size -= wavtable.size % 9;
+
+        std::copy_n(name.data(), name.size(), sample.name);
+        sample.start = std::distance(sample_data_.data(), pcm_ptr);
+        sample.end = sample.start + wavtable.size / 9 * 16;
+        sample.samplerate = 22050;
+        sample.origpitch = 60;
+        sample.pitchadj = 0;
+        sample.sampletype = FLUID_SAMPLETYPE_MONO;
+
+        sample.valid = true;
+        sample.data = sample_data_.data();
+
+        s.seekg(wavtable.start);
+        decode_vadpcm(s, pcm_ptr, wavtable.size, predictor);
+        pcm_ptr += wavtable.size / 9 * 16 + 16;
+
+        sample.loopstart = sample.start;
+        sample.loopend = sample.end;
+
+        if (wavtable.loop_id != ~0U) {
+            const auto& loop = loop_table[wavtable.loop_id];
+            sample.loopstart = loop.loop_start;
+            sample.loopend = loop.loop_end;
+        }
+    }
+
     struct Soundfont {
         char name[20] = "Doom64EX RomSource";
         size_t iter;
@@ -977,61 +1027,17 @@ fluid_sfont_t* rom_sfont()
 
 fluid_sfloader_t* rom_soundfont()
 {
-    load_sn64_();
-    load_sseq_();
-
-    size_t pcm_size {};
-    for (size_t i {}; i < sn64.num_sounds; ++i) {
-        pcm_size += wavtables[i].size/9*16 + 16;
-    }
-    sample_data_.resize(pcm_size);
-
-    /* read pcm */
-    auto s = rom::pcm();
-    samples_.resize(sn64.num_sounds);
-    auto pcm_ptr = sample_data_.data();
-    for (size_t i {}; i < sn64.num_sounds; ++i) {
-        auto& sample = samples_[i];
-        std::fill_n(reinterpret_cast<char*>(&sample), sizeof(sample), 0);
-
-        auto& wavtable = wavtables[i];
-        auto& predictor = predictors[i];
-        auto name = fmt::format("SFX_{}", i);
-
-        wavtable.size -= wavtable.size % 9;
-
-        std::copy_n(name.data(), name.size(), sample.name);
-        sample.start = std::distance(sample_data_.data(), pcm_ptr);
-        sample.end = sample.start + wavtable.size / 9 * 16;
-        sample.samplerate = 22050;
-        sample.origpitch = 60;
-        sample.pitchadj = 0;
-        sample.sampletype = FLUID_SAMPLETYPE_MONO;
-
-        sample.valid = true;
-        sample.data = sample_data_.data();
-
-        s.seekg(wavtable.start);
-        decode_vadpcm(s, pcm_ptr, wavtable.size, predictor);
-        pcm_ptr += wavtable.size / 9 * 16 + 16;
-
-        sample.loopstart = sample.start;
-        sample.loopend = sample.end;
-
-        if (wavtable.loop_id != ~0U) {
-            const auto& loop = loop_table[wavtable.loop_id];
-            sample.loopstart = loop.loop_start;
-            sample.loopend = loop.loop_end;
-        }
-    }
-
     constexpr auto free = [](fluid_sfloader_t* sf) {
         delete sf;
         return 0;
     };
 
     constexpr auto load = [](fluid_sfloader_t*, const char *fname) -> fluid_sfont_t* {
-        return rom_sfont();
+        if (g_rom.open(fname)) {
+            return rom_sfont();
+        }
+
+        return nullptr;
     };
 
     return new fluid_sfloader_t {

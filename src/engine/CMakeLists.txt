@@ -243,7 +243,7 @@ set(SOURCES
   system/i_swap.h
   system/i_system.cc
   system/i_video.cc
-  system/Rom.cc
+  system/n64_rom.cc
   system/SdlVideo.cc
 
   # wad

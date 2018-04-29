@@ -8,7 +8,7 @@
 #include <utility/endian.hh>
 #include "rom_private.hh"
 #include "../wad_loaders.hh"
-#include <system/Rom.hh>
+#include <system/n64_rom.hh>
 
 using namespace imp::wad;
 
@@ -108,14 +108,15 @@ class imp::wad::rom::Device : public IDevice {
     String palette_name {};
 
 public:
-    Device():
-        rom_(imp::rom::wad())
+    Device(std::istringstream&& iwad):
+        rom_(std::move(iwad))
     {
         rom_.exceptions(rom_.failbit | rom_.badbit);
         read_into(rom_, wad_header_);
 
-        if (memcmp(wad_header_.id, "IWAD", 4) != 0)
+        if (memcmp(wad_header_.id, "IWAD", 4) != 0) {
             log::fatal("Not an IWAD");
+        }
     }
 
     Vector<ILumpPtr> read_all() override
@@ -336,14 +337,9 @@ UniquePtr<std::istream> wad::rom::SoundLump::stream()
 
 IDevicePtr wad::rom_loader(StringView path)
 {
-    String basename = path.to_string();
-    auto it = basename.rfind('/');
-    if (it != String::npos) {
-        basename.erase(0, it + 1);
-    }
-
-    if (basename != "doom64.rom")
+    sys::N64Rom rom(path);
+    if (!rom.is_open())
         return nullptr;
 
-    return std::make_unique<rom::Device>();
+    return std::make_unique<rom::Device>(rom.iwad());
 }

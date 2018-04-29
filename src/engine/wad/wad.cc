@@ -4,17 +4,24 @@
 
 void wad::init()
 {
+    Optional<String> path;
+    bool iwad_loaded {};
+
     // Add device loaders
     wad::add_device_loader(zip_loader);
     wad::add_device_loader(doom_loader);
     wad::add_device_loader(rom_loader);
 
     // Find and add the Doom 64 IWAD
-    if (auto rom_data_path = app::find_data_file("doom64.rom")) {
-        wad::add_device(*rom_data_path);
-    } else if (auto iwad_data_path = app::find_data_file("doom64.wad")) {
-        wad::add_device(*iwad_data_path);
-    } else {
+    if (path = app::find_data_file("doom64.rom")) {
+        iwad_loaded = wad::add_device(*path);
+    }
+
+    if (!iwad_loaded && (path = app::find_data_file("doom64.wad"))) {
+        iwad_loaded = wad::add_device(*path);
+    }
+
+    if (!iwad_loaded) {
         log::fatal("Couldn't find 'doom64.rom'");
     }
 
