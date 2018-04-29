@@ -43,8 +43,6 @@ Optional<Image> GfxLump::read_image()
     auto s = this->p_stream();
 
     EASY_FUNCTION(profiler::colors::Green50);
-    bool is_fire = false; //lump.lump_name() == "FIRE";
-    bool is_cloud = false; //lump.lump_name() == "CLOUD";
 
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
@@ -52,8 +50,6 @@ Optional<Image> GfxLump::read_image()
     header.compressed = big_endian(header.compressed);
     header.width = big_endian(header.width);
     header.height = big_endian(header.height);
-
-    assert(is_fire || header.compressed == 0xffff);
 
     // The palette is located right after the image
     auto palofs = static_cast<size_t>(s.tellg()) + pad<8>(header.width * header.height);
@@ -67,17 +63,16 @@ Optional<Image> GfxLump::read_image()
         }
     }
 
-    if (is_cloud) {
-        constexpr size_t mask = 64;
+    if (info().hack == Hack::cloud) {
         for (size_t i {}; i + 16 <= 64 * 64; i += 8) {
-            if (!(i & mask))
+            if (!(i & 64))
                 continue;
             auto pos = image.data_ptr() + i;
             std::swap_ranges(pos, pos + 4, pos + 4);
         }
     }
 
-    if (!is_fire) {
+    if (info().hack != Hack::fire) {
         // Seek to the palette and read it
         s.seekg(palofs);
         image.palette(read_n64palette(s, 256));

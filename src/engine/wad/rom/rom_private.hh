@@ -41,12 +41,19 @@ namespace imp {
           deflate
       };
 
+      enum struct Hack {
+          none,
+          cloud,
+          fire
+      };
+
       class Device;
 
       struct Info {
           String name;
           Section section;
           std::streampos pos;
+          Hack hack {};
       };
 
       class Lump : public wad::ILump {
@@ -55,6 +62,9 @@ namespace imp {
 
       protected:
           std::istringstream p_stream();
+
+          const Info& info() const
+          { return info_; }
 
       public:
           Lump(Device& device, Info info):
@@ -83,12 +93,17 @@ namespace imp {
       };
 
       class SpriteLump : public Lump {
-          bool is_weapon_;
+          bool m_is_weapon;
+          SpriteLump* m_palette_lump;
+          SharedPtr<Palette> m_palette_ptr;
+
+          SharedPtr<Palette> m_palette();
 
       public:
-          SpriteLump(Device& device, Info info, bool is_weapon):
+          SpriteLump(Device& device, Info info, bool is_weapon, SpriteLump* palette_lump):
               Lump(device, info),
-              is_weapon_(is_weapon) {}
+              m_is_weapon(is_weapon),
+              m_palette_lump(palette_lump) {}
 
           Optional<Image> read_image() override;
       };
@@ -97,6 +112,13 @@ namespace imp {
       public:
           using Lump::Lump;
           Optional<Image> read_image() override;
+      };
+
+      class PaletteLump : public Lump {
+      public:
+          using Lump::Lump;
+
+          Optional<Palette> read_palette() override;
       };
 
       class SoundLump : public Lump {

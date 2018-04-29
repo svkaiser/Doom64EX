@@ -34,7 +34,7 @@ namespace {
 
 Palette cache::palette(StringView name)
 {
-    String sname { name };
+    auto sname = name.to_string();
     auto it = palettes_.find(sname);
     if (it != palettes_.cend())
         return it->second;

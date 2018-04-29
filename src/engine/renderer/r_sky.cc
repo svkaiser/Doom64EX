@@ -504,7 +504,7 @@ static void R_DrawClouds(void) {
     vtx_t v[4];
 
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::open(wad::Section::graphics, skypicnum).value().name().data(), false);
+    GL_BindGfxTexture(wad::open(skypicnum).value().name().data(), false);
 
     pos = (TRUEANGLES(viewangle) / 360.0f) * 2.0f;
 
@@ -663,7 +663,7 @@ static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
     EASY_FUNCTION(profiler::colors::Red);
-    auto lump = wad::open(wad::Section::textures, "FIRE").value();
+    auto lump = wad::open(wad::Section::graphics, "FIRE").value();
     fireLump = lump.section_index();
     fireImage = I_ReadImage(lump.lump_index(), true, true, false, 0);
 

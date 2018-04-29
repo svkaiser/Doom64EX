@@ -31,8 +31,6 @@
 
 using namespace imp::wad::rom;
 
-extern std::set<String> rom_weapon_sprites;
-
 namespace {
   struct Header {
       int16 tiles;		///< how many tiles the sprite is divided into
@@ -47,35 +45,69 @@ namespace {
       int16 tileheight;	///< y height per tile piece
   };
   static_assert(sizeof(Header) == 16, "Sprite header must be 16 bytes");
+
+  Header read_header(std::istream& s)
+  {
+      Header header;
+      s.read(reinterpret_cast<char*>(&header), sizeof(header));
+
+      header.tiles = big_endian(header.tiles);
+      header.compressed = big_endian(header.compressed);
+      header.cmpsize = big_endian(header.cmpsize);
+      header.xoffs = big_endian(header.xoffs);
+      header.yoffs = big_endian(header.yoffs);
+      header.width = big_endian(header.width);
+      header.height = big_endian(header.height);
+      header.tileheight = big_endian(header.tileheight);
+
+      return header;
+  }
+
+  constexpr size_t g_image_pitch(size_t width, size_t align, size_t pixel_size)
+  {
+      width *= pixel_size;
+      return static_cast<uint16>(width + ((align - (width & (align - 1))) & (align - 1)));
+  }
 }
 
-constexpr short operator""_S(unsigned long long int x)
-{ return static_cast<short>(x); }
+SharedPtr<Palette> SpriteLump::m_palette()
+{
+    if (m_palette_ptr) {
+        return m_palette_ptr;
+    }
 
-constexpr unsigned short operator""_US(unsigned long long int x)
-{ return static_cast<unsigned short>(x); }
+    if (m_palette_lump) {
+        return m_palette_lump->m_palette();
+    }
+
+    log::debug("> {}", info().name);
+
+    auto s = p_stream();
+    auto header = read_header(s);
+
+    assert(header.compressed < 0);
+
+    /* Jump to palette, which comes after the bitmap */
+    auto image_size = pad<8>(header.width) * header.height;
+
+    s.seekg(image_size, s.cur);
+
+    auto palette = read_n64palette(s, 256);
+    m_palette_ptr = std::make_shared<Palette>(std::move(palette));
+
+    return m_palette_ptr;
+}
 
 Optional<Image> SpriteLump::read_image()
 {
+    EASY_FUNCTION(profiler::colors::Green50);
     auto s = this->p_stream();
 
-    EASY_FUNCTION(profiler::colors::Green50);
-    //auto sprite_lump = dynamic_cast<wad::RomBuffer*>(lump.buffer());
-    Header header;
-    s.read(reinterpret_cast<char*>(&header), sizeof(header));
-
-    header.tiles = big_endian(header.tiles);
-    header.compressed = big_endian(header.compressed);
-    header.cmpsize = big_endian(header.cmpsize);
-    header.xoffs = big_endian(header.xoffs);
-    header.yoffs = big_endian(header.yoffs);
-    header.width = big_endian(header.width);
-    header.height = big_endian(header.height);
-    header.tileheight = big_endian(header.tileheight);
+    auto header = read_header(s);
 
     assert((header.width >= 2) && (header.width <= 256) && (header.height >= 2) && (header.height <= 256));
 
-    uint16 align = header.compressed == -1 ? 8_US : 16_US;
+    uint16 align = header.compressed == -1 ? 8_u16 : 16_u16;
 
     I8Rgba5551Image image { static_cast<uint16>(header.width), static_cast<uint16>(header.height), align };
     Palette palette;
@@ -96,14 +128,8 @@ Optional<Image> SpriteLump::read_image()
             for (size_t x = 0; x < image.pitch(); ++x)
                 s.get(image[y].data_ptr()[x]);
 
-       if (is_weapon_ || this->section() == wad::Section::graphics) {
-           static std::map<String, Rgba5551Palette> cached_pal;
-           auto substr = this->name().substr(0, 4);
-
-           if (!cached_pal.count(substr)) {
-               cached_pal[substr] = read_n64palette(s, 256);
-           }
-           image.palette(cached_pal[substr]);
+       if (m_is_weapon || this->section() == wad::Section::graphics) {
+           palette = *m_palette();
        } else {
            auto name = fmt::format("PAL{}0", this->name().substr(0, 4));
            palette = cache::palette(name);
@@ -127,7 +153,7 @@ Optional<Image> SpriteLump::read_image()
         inv ^= 1;
     }
 
-   if (is_weapon_) {
+   if (m_is_weapon) {
        header.xoffs -= 160;
        header.yoffs -= 208;
    }
