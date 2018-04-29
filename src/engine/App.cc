@@ -31,8 +31,8 @@ namespace {
 
   auto &_params = _gparams();
 
-  String _base_dir { "." };
-  String _data_dir { "." };
+  String _base_dir { "./" };
+  String _data_dir { "./" };
   StringView _program;
 
   Vector<String> _rest;

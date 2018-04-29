@@ -1351,13 +1351,13 @@ clusterdef_t* P_GetCluster(int map) {
 //
 
 static scdatatable_t skydatatable[] = {
-    {   "PIC", (int64)&((skydef_t*)0)->pic,          'S' },
-    {   "BACKPIC", (int64)&((skydef_t*)0)->backdrop,     'S' },
-    {   "FOGFACTOR", (int64)&((skydef_t*)0)->fognear,      'i' },
-    {   "FOGCOLOR", (int64)&((skydef_t*)0)->fogcolor,     'c' },
-    {   "BASECOLOR", (int64)&((skydef_t*)0)->skycolor[2],  'c' },
-    {   "HIGHCOLOR", (int64)&((skydef_t*)0)->skycolor[0],  'c' },
-    {   "LOWCOLOR", (int64)&((skydef_t*)0)->skycolor[1],  'c' },
+    {   "PIC", (ptrdiff_t)&((skydef_t*)0)->pic,          'S' },
+    {   "BACKPIC", (ptrdiff_t)&((skydef_t*)0)->backdrop,     'S' },
+    {   "FOGFACTOR", (ptrdiff_t)&((skydef_t*)0)->fognear,      'i' },
+    {   "FOGCOLOR", (ptrdiff_t)&((skydef_t*)0)->fogcolor,     'c' },
+    {   "BASECOLOR", (ptrdiff_t)&((skydef_t*)0)->skycolor[2],  'c' },
+    {   "HIGHCOLOR", (ptrdiff_t)&((skydef_t*)0)->skycolor[0],  'c' },
+    {   "LOWCOLOR", (ptrdiff_t)&((skydef_t*)0)->skycolor[1],  'c' },
     {   NULL,           0,                                  0   }
 };
 

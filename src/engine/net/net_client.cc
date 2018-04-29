@@ -1316,12 +1316,15 @@ void NET_CL_Init(void)
     // Try to set from the USER and USERNAME environment variables
     // Otherwise, fallback to "Player"
 
-    if (net_player_name.empty())
-        net_player_name = getenv("USER");
-    if (net_player_name.empty())
-        net_player_name = getenv("USERNAME");
-    if (net_player_name.empty())
-        net_player_name = "Player";
+    if (net_player_name.empty()) {
+        if (getenv("USER")) {
+            net_player_name = getenv("USER");
+        } else if (getenv("USERNAME")) {
+            net_player_name = getenv("USERNAME");
+        } else {
+            net_player_name = "Player";
+        }
+    }
 }
 
 void NET_Init(void)

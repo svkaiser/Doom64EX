@@ -172,6 +172,7 @@ namespace {
 
                   if (entry.method != 0 && entry.method != 8) {
                       println(stderr, "Unsupported compression method for {}", filename);
+					  std::abort();
                       continue;
                   }
 
@@ -214,6 +215,7 @@ namespace {
 
       UniquePtr<wad::BasicLump> find(size_t lump_index, size_t zip_index) override
       {
+		  stream_.exceptions(stream_.failbit | stream_.eofbit | stream_.badbit);
           assert(zip_index < infos_.size());
           auto& info = infos_[zip_index];
 

@@ -118,7 +118,7 @@ namespace imp {
           } else if (mInit) {
               mValue = other.mValue;
           } else {
-              mValue.T(other.mValue);
+              ::new (static_cast<void*>(&mValue)) T(other.mValue);
               mInit = true;
           }
       }
@@ -132,7 +132,7 @@ namespace imp {
               mValue = std::move(other.mValue);
               other.mInit = false;
           } else {
-              mValue.T(std::move(other.mValue));
+			  ::new (static_cast<void*>(&mValue)) T(std::move(other.mValue));
               other.mInit = false;
               mInit = true;
           }

@@ -2,6 +2,7 @@
 #include <imp/App>
 #include <imp/Image>
 #include <algorithm>
+#include <cassert>
 #include "WadFormat.hh"
 
 namespace {
@@ -156,7 +157,9 @@ Optional<wad::Lump> wad::find(size_t lump_id)
     if (it == lumps_.end() || it->lump_index != lump_id)
         return nullopt;
 
+
     auto& lump = *it;
+	assert(lump.mount < mounts_.size());
     const auto& mount = mounts_[lump.mount];
 
     size_t index = static_cast<size_t>(std::distance(lumps_.begin(), it));

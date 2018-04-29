@@ -227,7 +227,6 @@ char *I_GetUserFile(const char *file) {
     path = (char*) malloc(512);
 
     snprintf(path, 511, "%s%s", userdir, file);
-    free(userdir);
     
     return path;
 }
