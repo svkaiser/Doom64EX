@@ -2,6 +2,9 @@
 /.idea/
 /cmake-build-*/
 
+# ignore Visual Studio-specific project files
+/.vs
+
 # extern
 /extern/
 !/extern/CMakeLists.txt

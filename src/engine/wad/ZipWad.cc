@@ -234,11 +234,17 @@ namespace {
           z_stream zs {};
           char buffer[32] {};
 
-          inflateInit2(&zs, -MAX_WBITS);
-          zs.next_out = reinterpret_cast<byte*>(&cache[0]);
-          zs.avail_out = header.uncompressed;
+		  /* inflateInit2 expects zs to be initialised prior to being called. -.- */
+		  stream_.read(buffer, sizeof(buffer));
+		  zs.next_in = reinterpret_cast<byte*>(buffer);
+		  zs.avail_in = sizeof(buffer);
+		  zs.next_out = reinterpret_cast<byte*>(&cache[0]);
+		  zs.avail_out = header.uncompressed;
+		  zs.zalloc = [](voidpf, uInt items, uInt size) -> voidpf { return malloc(items * size); };
+		  zs.zfree = [](voidpf, voidpf address) { free(address); };
 
-          int code {};
+          auto code = inflateInit2(&zs, -MAX_WBITS);
+
           do {
               if (zs.avail_in == 0) {
                   stream_.read(buffer, sizeof(buffer));

@@ -74,7 +74,7 @@ endif()
 
 if(MINGW)
   add_definitions(-DFMT_USE_WINDOWS_H=0)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mconsole")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mconsole -static")
 endif(MINGW)
 
 ##------------------------------------------------------------------------------
