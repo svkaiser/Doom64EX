@@ -37,7 +37,7 @@ if(WIN32)
   set(PLATFORM_SOURCES
     native_ui/WinAPI.cc
     native_ui/WinAPI-windows-is-dumb.c
-    # system/win32/doom64.rc
+    system/win32/doom64.rc
     system/i_cpu.cc)
 
   if(MINGW32)
@@ -270,7 +270,7 @@ set(SOURCES
 ## Build target
 ##
 
-add_executable(doom64ex MACOSX_BUNDLE ${SOURCES})
+add_executable(doom64ex MACOSX_BUNDLE WIN32 ${SOURCES})
 target_include_directories(doom64ex PRIVATE ${INCLUDES})
 target_link_libraries(doom64ex ${LIBRARIES})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
