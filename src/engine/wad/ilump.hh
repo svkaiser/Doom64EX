@@ -15,11 +15,11 @@ namespace imp {
         size_t section_index_ {};
         size_t lump_index_ {};
     public:
-        ~ILump() {}
+        virtual ~ILump() {}
 
         /*!
-         * Get the lump name of the form /^[A-Z0-9_]{1,8}$/
-         * @note Name must not mutate
+         * Get the lump name with the form of /^[A-Z0-9_]{1,8}$/
+         * @note Name must be the same for the lifetime of the Lump
          * @return Lump name
          */
         virtual String name() const = 0;

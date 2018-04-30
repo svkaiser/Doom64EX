@@ -96,16 +96,20 @@ Optional<Lump> wad::open(Section section, StringView name)
     if (it == lumps.end() || it->get()->name() != name)
         return nullopt;
 
-    return make_optional<Lump>(*(it->get()));
+    auto offset = std::distance(lumps.begin(), it);
+    return make_optional<Lump>(offset, *(it->get()));
 }
 
 Optional<Lump> wad::open(Section section, size_t index)
 {
+    assert(!dirty_);
+
     auto& lumps = section_lumps_[static_cast<size_t>(section)];
 
     for (auto& lump : lumps) {
         if (lump->section_index() == index) {
-            return make_optional<Lump>(*lump);
+            auto offset = std::distance(lumps.data(), &lump);
+            return make_optional<Lump>(offset, *lump);
         }
     }
 
@@ -114,12 +118,15 @@ Optional<Lump> wad::open(Section section, size_t index)
 
 Optional<Lump> wad::open(size_t index)
 {
+    assert(!dirty_);
+
     for (size_t i {}; i < num_sections; ++i) {
         auto &lumps = section_lumps_[i];
 
         for (auto &lump : lumps) {
             if (lump->lump_index() == index) {
-                return make_optional<Lump>(*lump);
+                auto offset = std::distance(lumps.data(), &lump);
+                return make_optional<Lump>(offset, *lump);
             }
         }
     }
@@ -129,5 +136,63 @@ Optional<Lump> wad::open(size_t index)
 
 ArrayView<ILumpPtr> wad::list_section(wad::Section section)
 {
+    assert(!dirty_);
+
     return section_lumps_[static_cast<size_t>(section)];
+}
+
+bool Lump::previous()
+{
+    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+
+    if (m_offset >= sect.size())
+        return false;
+
+    auto& lump = sect[m_offset + 1];
+    if (lump_index() == lump->lump_index()) {
+        m_offset++;
+        m_context = lump.get();
+        return true;
+    }
+
+    return false;
+}
+
+bool Lump::has_previous() const
+{
+    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+
+    if (m_offset >= sect.size())
+        return false;
+
+    const auto& lump = sect[m_offset + 1];
+    return lump_index() == lump->lump_index();
+}
+
+bool Lump::next()
+{
+    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+
+    if (m_offset == 0)
+        return false;
+
+    auto& lump = sect[m_offset - 1];
+    if (lump_index() == lump->lump_index()) {
+        m_offset--;
+        m_context = lump.get();
+        return true;
+    }
+
+    return false;
+}
+
+bool Lump::has_next() const
+{
+    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+
+    if (m_offset == 0)
+        return false;
+
+    const auto& lump = sect[m_offset - 1];
+    return lump_index() == lump->lump_index();
 }
