@@ -7,33 +7,32 @@
 #include <prelude.hh>
 #include <utility/optional.hh>
 
-namespace std {
-  inline String to_string(String x)
-  { return x; }
-}
+#include <boost/variant.hpp>
 
 namespace imp {
   template <class T>
   class BasicCvar;
 
   class Cvar {
-      String name_;
-      String description_;
-      int flags_;
+      String m_name;
+      String m_description;
+      uint32 m_flags;
 
   public:
-      /*! Don't save the property in config.cfg */
-      static constexpr int noconfig  = 0x1;
-      /*!  */
-      static constexpr int from_param = 0x2;
-      /*! Readonly if sv_cheats == 0 */
-      static constexpr int cheat   = 0x4;
-      /*! Don't display in console */
+      /*! Save the cvar in config.cfg */
+      static constexpr int user_config = 0x1;
+      /*! Save the cvar in system.cfg */
+      static constexpr int sys_config = 0x2;
+      /*! Default if sv_cheats == 0 */
+      static constexpr int cheat = 0x4;
+      /*! Don't list this cvar */
       static constexpr int hidden  = 0x8;
+      /*! Synchronise the value with the client */
+      static constexpr int net_server = 0x16;
       /*! Synchronise the value with the server */
-      static constexpr int network = 0x16;
+      static constexpr int net_client = 0x32;
 
-      static std::vector<Cvar *> all();
+      static void write_config(FILE*);
 
       /*!
        * \brief Look for a property
@@ -70,34 +69,31 @@ namespace imp {
 
       StringView name() const
       {
-          return name_;
+          return m_name;
       }
 
       StringView description() const
       {
-          return description_;
+          return m_description;
       }
 
       void set_flag(int flag)
-      { flags_ |= flag; }
+      { m_flags |= flag; }
 
       int flags() const
-      { return flags_; }
+      { return m_flags; }
 
-      bool is_noconfig() const
-      { return (flags_ & noconfig) != 0; }
-
-      bool is_from_param() const
-      { return (flags_ & from_param) != 0; }
+      bool is_config() const
+      { return (m_flags & (user_config | sys_config)) != 0; }
 
       bool is_cheat() const
-      { return (flags_ & cheat) != 0; }
+      { return (m_flags & cheat) != 0; }
 
       bool is_hidden() const
-      { return (flags_ & hidden) != 0; }
+      { return (m_flags & hidden) != 0; }
 
       bool is_network() const
-      { return (flags_ & network) != 0; }
+      { return (m_flags & (net_server | net_client)) != 0; }
 
       virtual String string() const = 0;
 
@@ -116,55 +112,54 @@ namespace imp {
       using setter_func = void (*)(const BasicCvar &property, T oldValue, T& value);
 
   protected:
-      setter_func mSetter {};
+      setter_func m_setter {};
 
-      const T mDefault;
+      const T m_default;
 
-      T mValue;
+      T m_value;
 
   public:
       BasicCvar(StringView name, StringView description):
           Cvar(name, description, 0),
-          mDefault(T()),
-          mValue(T()) {}
+          m_default(T()),
+          m_value(T()) {}
 
       BasicCvar(StringView name, StringView description, T def, int flags = 0, setter_func setter = nullptr):
           Cvar(name, description, flags),
-          mSetter(setter),
-          mDefault(def),
-          mValue(def) {}
+          m_setter(setter),
+          m_default(def),
+          m_value(def) {}
 
       const T& operator*() const
-      { return mValue; }
+      { return m_value; }
 
       const T* operator->() const
-      { return &mValue; }
+      { return &m_value; }
 
       const T& value() const
-      { return mValue; }
+      { return m_value; }
 
-      template <class U>
-      explicit operator U() const
-      { return static_cast<U>(mValue); }
+      explicit operator const T&() const
+      { return m_value; }
 
       template <class U>
       BasicCvar& operator=(U value)
       {
-          auto old = mValue;
-          mValue = value;
-          mSetter ? mSetter(*this, old, mValue) : (void) 0;
+          auto old = m_value;
+          m_value = value;
+          m_setter ? m_setter(*this, old, m_value) : (void) 0;
           update();
           return *this;
       }
 
       String string() const override
       {
-          return std::to_string(mValue);
+          return boost::lexical_cast<String>(m_value);
       }
 
       String default_string() const override
       {
-          return std::to_string(mDefault);
+          return boost::lexical_cast<String>(m_default);
       }
 
       void set_string(StringView strValue) override
@@ -173,13 +168,13 @@ namespace imp {
               *this = from_string<T>(strValue);
           } catch (boost::bad_lexical_cast& e) {
               log::error("Bad lexical cast when converting '{}' to cvar of type '{}'", strValue, type_to_string<T>());
-              *this = mDefault;
+              *this = m_default;
           }
       }
 
       void reset_default() override
       {
-          mValue = mDefault;
+          m_value = m_default;
           update();
       }
   };
@@ -188,10 +183,10 @@ namespace imp {
   using FloatCvar  = BasicCvar<float>;
   using BoolCvar   = BasicCvar<bool>;
   using StringCvar = BasicCvar<String>;
-}
 
 #define __BASIC_CVAR_ARITHMETIC_OPERATORS(_Op) \
-template <class T, class U> constexpr T operator _Op(const imp::BasicCvar<T> &l, const U &r) { return *l _Op r; } \
+template <class T, class U> \
+constexpr T operator _Op(const imp::BasicCvar<T> &l, const U &r) { return *l _Op r; } \
 template <class T, class U> constexpr T operator _Op(const T &l, const imp::BasicCvar<U> &r) { return l _Op *r; }
 
 __BASIC_CVAR_ARITHMETIC_OPERATORS(+)
@@ -215,5 +210,6 @@ __BASIC_CVAR_COMPARISON_OPERATORS(<=)
 __BASIC_CVAR_COMPARISON_OPERATORS(>=)
 
 #undef __BASIC_CVAR_COMPARISON_OPERATORS
+}
 
 #endif //__CVAR__90140360

@@ -878,9 +878,7 @@ static void D_Init(void) {
             value = myargv[p++];
 
             if (auto property = Cvar::find(name)) {
-                if (!property->is_from_param()) {
-                    property->set_string(value);
-                }
+                property->set_string(value);
             } else {
                 I_Printf("Error: Couldn't find property (cvar) \"%s\"\n", name);
             }

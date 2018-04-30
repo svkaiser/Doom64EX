@@ -131,22 +131,22 @@ byte forcecollision = 0;
 byte forcejump = 0;
 byte forcefreelook = 0;
 
-BoolCvar sv_nomonsters("sv_nomonsters", "Disable monsters", false, Cvar::network);
-BoolCvar sv_fastmonsters("sv_fastmonsters", "Fast monsters", false, Cvar::network);
-BoolCvar sv_respawnitems("sv_respawnitems", "Allow items to respawn", false, Cvar::network);
-BoolCvar sv_respawn("sv_respawn", "", false, Cvar::network);
-IntCvar sv_skill("sv_skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Cvar::network);
+BoolCvar sv_nomonsters("sv_NoMonsters", "Disable monsters", false, Cvar::net_server);
+BoolCvar sv_fastmonsters("sv_FastMonsters", "Fast monsters", false, Cvar::net_server);
+BoolCvar sv_respawnitems("sv_RespawnItems", "Allow items to respawn", false, Cvar::net_server);
+BoolCvar sv_respawn("sv_Respawn", "", false, Cvar::net_server);
+IntCvar sv_skill("sv_Skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Cvar::net_server);
 
-BoolCvar sv_lockmonsters("sv_lockmonsters", "", false, Cvar::network);
-BoolCvar sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Cvar::network);
-BoolCvar sv_friendlyfire("sv_friendlyfire", "", false, Cvar::network);
-BoolCvar sv_keepitems("sv_keepitems", "", false, Cvar::network);
-BoolCvar p_allowjump("p_allowjump", "", false, Cvar::network);
-BoolCvar p_autoaim("p_autoaim", "", true, Cvar::network);
-BoolCvar compat_collision("compat_collision", "", true, Cvar::network);
-BoolCvar compat_mobjpass("compat_mobjpass", "", true, Cvar::network);
-BoolCvar compat_limitpain("compat_limitpain", "", true, Cvar::network);
-BoolCvar compat_grabitems("compat_grabitems", "", true, Cvar::network);
+BoolCvar sv_lockmonsters("sv_LockMonsters", "", false, Cvar::net_server);
+BoolCvar sv_allowcheats("sv_AllowCheats", "Allow cheats on the server", false, Cvar::net_server);
+BoolCvar sv_friendlyfire("sv_FriendlyFire", "", false, Cvar::net_server);
+BoolCvar sv_keepitems("sv_KeepItems", "", false, Cvar::net_server);
+BoolCvar p_allowjump("p_AllowJump", "", false, Cvar::net_server);
+BoolCvar p_autoaim("p_AutoAim", "", true, Cvar::net_server);
+BoolCvar compat_collision("compat_collision", "", true, Cvar::net_server);
+BoolCvar compat_mobjpass("compat_mobjpass", "", true, Cvar::net_server);
+BoolCvar compat_limitpain("compat_limitpain", "", true, Cvar::net_server);
+BoolCvar compat_grabitems("compat_grabitems", "", true, Cvar::net_server);
 
 extern BoolCvar v_mlook;
 extern BoolCvar v_mlookinvert;
@@ -258,9 +258,7 @@ static CMD(Seta) {
     }
 
     if (auto p = Cvar::find(param[0])) {
-        if (!p->is_from_param()) {
-            p->set_string(param[1]);
-        }
+        p->set_string(param[1]);
     } else {
         I_Printf("Couldn't find property (cvar) %s\n", param[0]);
     }

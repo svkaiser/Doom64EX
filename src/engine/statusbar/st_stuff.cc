@@ -879,7 +879,7 @@ void ST_Drawer(void) {
     if(st_crosshairs && !automapactive) {
         int x = (SCREENWIDTH / 2) - (ST_CROSSHAIRSIZE / 8);
         int y = (SCREENHEIGHT / 2) - (ST_CROSSHAIRSIZE / 8);
-        int alpha = (int)st_crosshairopacity;
+        int alpha = (int)*st_crosshairopacity;
 
         if(alpha > 0xff) {
             alpha = 0xff;
@@ -889,7 +889,7 @@ void ST_Drawer(void) {
             alpha = 0;
         }
 
-        ST_DrawCrosshair(x, y, (int)st_crosshair, 2, WHITEALPHA(alpha));
+        ST_DrawCrosshair(x, y, (int)*st_crosshair, 2, WHITEALPHA(alpha));
     }
 
     //

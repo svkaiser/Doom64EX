@@ -727,12 +727,7 @@ void G_OutputBindings(FILE *fh) {
     }
 
     // cvars
-    for(auto p : Cvar::all()) {
-        if (p->is_noconfig())
-            continue;
-
-        fmt::print(fh, "seta \"{}\" \"{}\"\n", p->name(), p->string());
-    }
+    Cvar::write_config(fh);
 }
 
 //

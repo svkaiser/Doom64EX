@@ -36,12 +36,16 @@ namespace {
 }
 
 Cvar::Cvar(StringView name, StringView description, int flags):
-    name_(name.to_string()),
-    description_(description.to_string()),
-    flags_(flags)
+    m_name(name.to_string()),
+    m_description(description.to_string()),
+    m_flags(flags)
 {
     if (_global().properties.count(name)) {
         log::warn("Cvar with the name {} already exists!", name);
+    }
+
+    if (description.empty()) {
+        log::debug("Cvar '{}' has no description", name);
     }
 
     _global().properties.emplace(name, this);
@@ -50,7 +54,7 @@ Cvar::Cvar(StringView name, StringView description, int flags):
 
 Cvar::~Cvar()
 {
-    _global().properties.erase({ name_ });
+    _global().properties.erase({ m_name });
 }
 
 void Cvar::update()
@@ -60,15 +64,16 @@ void Cvar::update()
     }
 }
 
-std::vector<Cvar *> Cvar::all()
+void Cvar::write_config(FILE *fh)
 {
-    std::vector<Cvar *> v;
-    v.reserve(_global().properties.size());
-    for (auto& p : _global().properties) {
-        assert(p.second != nullptr);
-        v.emplace_back(p.second);
+    for (const auto& pair : _global().properties) {
+        assert(pair.second != nullptr);
+        const auto& p = *(pair.second);
+
+        if (p.is_config()) {
+            fmt::print(fh, "seta \"{}\" \"{}\"\n", p.name(), p.string());
+        }
     }
-    return v;
 }
 
 Cvar* Cvar::find(StringView name)

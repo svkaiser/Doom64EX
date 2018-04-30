@@ -953,7 +953,7 @@ void AM_drawThings(void) {
                         break;
                     }
 
-                    if(am_drawobjects != 1) {
+                    if (am_drawobjects != 1) {
                         AM_DrawTriangle(t, scale, amModeCycle, r, g, b);
                     }
 

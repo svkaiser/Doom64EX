@@ -1784,7 +1784,7 @@ void M_DrawDisplay(void) {
     }
     else {
         ST_DrawCrosshair(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_crosshair,
-                         (int)st_crosshair, 1, MENUCOLORWHITE);
+                         (int)*st_crosshair, 1, MENUCOLORWHITE);
     }
 
     M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(display_opacity+1),
@@ -2138,7 +2138,7 @@ void M_ChangeGammaLevel(int choice) {
             i_gamma = i_gamma + 1;
         }
 
-        players[consoleplayer].message = gammamsg[(int)i_gamma];
+        players[consoleplayer].message = gammamsg[(int)*i_gamma];
         break;
     }
 }
@@ -2556,7 +2556,7 @@ void M_DrawFeaturesMenu(void) {
     M_DrawSmbString(map->mapname, &featuresDef, features_levels);
 
     /*Lock Monsters Mode*/
-    M_DrawSmbString(msgNames[(int)sv_lockmonsters], &featuresDef, features_lockmonsters);
+    M_DrawSmbString(msgNames[(int)*sv_lockmonsters], &featuresDef, features_lockmonsters);
 
     /*Wireframe Mode*/
     M_DrawSmbString(msgNames[wireframeon], &featuresDef, features_wireframe);

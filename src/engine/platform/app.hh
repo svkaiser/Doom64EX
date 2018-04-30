@@ -132,7 +132,6 @@ namespace imp {
         void add(StringView val) override
         {
             *static_cast<BasicCvar<T>*>(this) = from_string<T>(val);
-            this->set_flag(Cvar::from_param);
         }
     };
 

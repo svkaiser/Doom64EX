@@ -1296,17 +1296,23 @@ void I_InitSequencer(void) {
     if (!SDL_WasInit(SDL_INIT_AUDIO))
         SDL_InitSubSystem(SDL_INIT_AUDIO);
 
-    SDL_AudioSpec spec;
+    SDL_AudioSpec spec, obtained;
 
     spec.format = AUDIO_S16;
     spec.freq = 44100;
-    spec.samples = 4096;
+    spec.samples = 2048;
     spec.channels = 2;
     spec.callback = Audio_Play;
     spec.userdata = doomseq.synth;
 
-    SDL_OpenAudio(&spec, NULL);
+    SDL_OpenAudio(&spec, &obtained);
     SDL_PauseAudio(SDL_FALSE);
+
+    log::debug("SDL_OpenAudio settings:");
+    log::debug("\t format   (spec: {:<5}, got: {:<5})", spec.format, obtained.format);
+    log::debug("\t freq     (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
+    log::debug("\t samples  (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
+    log::debug("\t channels (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
 
     // 20120205 villsa - sequencer is now ready
     seqready = true;
