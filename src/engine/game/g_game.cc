@@ -138,16 +138,23 @@ BoolProperty sv_respawnitems("sv_respawnitems", "Allow items to respawn", false,
 BoolProperty sv_respawn("sv_respawn", "", false, Property::network);
 IntProperty sv_skill("sv_skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Property::network);
 
-BoolProperty sv_lockmonsters("sv_lockmonsters", "", false, Property::network);
-BoolProperty sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Property::network);
-BoolProperty sv_friendlyfire("sv_friendlyfire", "", false, Property::network);
-BoolProperty sv_keepitems("sv_keepitems", "", false, Property::network);
-BoolProperty p_allowjump("p_allowjump", "", false, Property::network);
-BoolProperty p_autoaim("p_autoaim", "", true, Property::network);
-BoolProperty compat_collision("compat_collision", "", true, Property::network);
-BoolProperty compat_mobjpass("compat_mobjpass", "", true, Property::network);
-BoolProperty compat_limitpain("compat_limitpain", "", true, Property::network);
-BoolProperty compat_grabitems("compat_grabitems", "", true, Property::network);
+static void G_SetGameFlags();
+
+static void G_SetGameFlagsCvarCallback(const BoolProperty&, bool, bool&)
+{
+    G_SetGameFlags();
+}
+
+BoolProperty sv_lockmonsters("sv_lockmonsters", "", false, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty sv_friendlyfire("sv_friendlyfire", "", false, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty sv_keepitems("sv_keepitems", "", false, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty p_allowjump("p_allowjump", "", false, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty p_autoaim("p_autoaim", "", true, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty compat_collision("compat_collision", "", true, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty compat_mobjpass("compat_mobjpass", "", true, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty compat_limitpain("compat_limitpain", "", true, Property::network, G_SetGameFlagsCvarCallback);
+BoolProperty compat_grabitems("compat_grabitems", "", true, Property::network, G_SetGameFlagsCvarCallback);
 
 extern BoolProperty v_mlook;
 extern BoolProperty v_mlookinvert;
