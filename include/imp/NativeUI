@@ -23,7 +23,7 @@
 #ifndef __IMP_NATIVEUI__92059425
 #define __IMP_NATIVEUI__92059425
 
-#include "Prelude"
+#include "prelude.hh"
 
 namespace imp {
   namespace native_ui {
@@ -33,7 +33,9 @@ namespace imp {
 
     void console_show(bool);
 
-    void console_add_line(StringView line);
+    void console_add_line(StringView message);
+
+    void error(const std::string& line);
   }
 }
 

@@ -41,13 +41,13 @@
 #include "z_zone.h"
 #include "i_swap.h"
 #include "con_console.h"    // for cvars
-#include <imp/Wad>
-#include <imp/App>
+#include <platform/app.hh>
+#include <wad.hh>
 
 #include "SDL.h"
 
 // 20120203 villsa - cvar for soundfont location
-StringProperty s_soundfont("s_soundfont", "doomsnd.sf2 location", "doomsnd.sf2"_sv);
+StringCvar s_soundfont("s_soundfont", "doomsnd.sf2 location", "doomsnd.sf2");
 
 //
 // Mutex
@@ -1033,22 +1033,16 @@ static bool Seq_RegisterSongs(doomseq_t* seq) {
     size_t fail {};
     size_t i {};
     for(auto name : audio_lumps_) {
-        auto opt = wad::find(name);
+        auto opt = wad::open(wad::Section::sounds, name);
 
-        if (!opt || opt->section() != wad::Section::sounds) {
+        if (!opt) {
             fail++;
             continue;
         }
 
         auto& lump = *opt;
-        song_t* song;
-
-        auto bytes = lump.as_bytes();
-        auto memory = new char[bytes.size()];
-        std::copy(bytes.begin(), bytes.end(), memory);
-        song = &seq->songs[i++];
-        song->data = (byte*) memory;
-        song->length = bytes.size();
+        song_t* song = &seq->songs[i++];
+        song->data = reinterpret_cast<byte *>(lump.read_bytes_ccompat(song->length));
 
         if(!song->length) {
             continue;
@@ -1167,6 +1161,7 @@ static int SDLCALL Thread_PlayerHandler(void *param) {
 // I_InitSequencer
 //
 
+fluid_sfloader_t* rom_soundfont();
 void I_InitSequencer(void) {
     dboolean sffound;
     Optional<String> sfpath;
@@ -1226,17 +1221,32 @@ void I_InitSequencer(void) {
         return;
     }
 
+    fluid_synth_add_sfloader(doomseq.synth, rom_soundfont());
+
     sffound = false;
     if (!s_soundfont->empty()) {
         if (app::file_exists(*s_soundfont)) {
             I_Printf("Found SoundFont %s\n", s_soundfont->c_str());
             doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, s_soundfont->c_str(), 1);
 
+            if (doomseq.sfont_id != FLUID_FAILED) {
+                CON_DPrintf("Loading %s\n", s_soundfont->c_str());
+
+                sffound = true;
+            }
+        } else {
+            CON_Warnf("CVar s_soundfont doesn't point to a file.");
+        }
+    }
+
+    if (!sffound && (sfpath = app::find_data_file("doom64.rom"))) {
+        I_Printf("Found SoundFont %s\n", sfpath->c_str());
+        doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);
+
+        if (doomseq.sfont_id != FLUID_FAILED) {
             CON_DPrintf("Loading %s\n", s_soundfont->c_str());
 
             sffound = true;
-        } else {
-            CON_Warnf("CVar s_soundfont doesn't point to a file.");
         }
     }
 
@@ -1244,9 +1254,11 @@ void I_InitSequencer(void) {
         I_Printf("Found SoundFont %s\n", sfpath->c_str());
         doomseq.sfont_id = fluid_synth_sfload(doomseq.synth, sfpath->c_str(), 1);
 
-        CON_DPrintf("Loading %s\n", sfpath->c_str());
+        if (doomseq.sfont_id != FLUID_FAILED) {
+            CON_DPrintf("Loading %s\n", s_soundfont->c_str());
 
-        sffound = true;
+            sffound = true;
+        }
     }
 
     //
@@ -1284,17 +1296,23 @@ void I_InitSequencer(void) {
     if (!SDL_WasInit(SDL_INIT_AUDIO))
         SDL_InitSubSystem(SDL_INIT_AUDIO);
 
-    SDL_AudioSpec spec;
+    SDL_AudioSpec spec, obtained;
 
     spec.format = AUDIO_S16;
     spec.freq = 44100;
-    spec.samples = 4096;
+    spec.samples = 2048;
     spec.channels = 2;
     spec.callback = Audio_Play;
     spec.userdata = doomseq.synth;
 
-    SDL_OpenAudio(&spec, NULL);
+    SDL_OpenAudio(&spec, &obtained);
     SDL_PauseAudio(SDL_FALSE);
+
+    log::debug("SDL_OpenAudio settings:");
+    log::debug("\t format   (spec: {:<5}, got: {:<5})", spec.format, obtained.format);
+    log::debug("\t freq     (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
+    log::debug("\t samples  (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
+    log::debug("\t channels (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
 
     // 20120205 villsa - sequencer is now ready
     seqready = true;

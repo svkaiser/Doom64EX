@@ -35,6 +35,7 @@
 
 #include <stdarg.h>
 #include <sys/stat.h>
+#include <easy/profiler.h>
 #include "doomstat.h"
 #include "doomdef.h"
 #include "m_misc.h"
@@ -48,7 +49,7 @@
 #include "i_audio.h"
 #include "gl_draw.h"
 
-BoolProperty i_interpolateframes("i_interpolateframes", "", false);
+BoolCvar i_interpolateframes("i_interpolateframes", "", false);
 
 ticcmd_t        emptycmd;
 
@@ -283,26 +284,13 @@ void I_Init(void) {
 // I_Error
 //
 
-void I_Error(const char* string, ...) {
-    char buff[1024];
-    va_list    va;
-
+void log_error_callback(StringView message) {
     I_ShutdownSound();
-
-    va_start(va, string);
-    vsprintf(buff, string, va);
-    va_end(va);
-
-    fprintf(stderr, "Error - %s\n", buff);
-    fflush(stderr);
-
-    I_Printf("\n********* ERROR *********\n");
-    I_Printf("%s", buff);
 
     if(usingGL) {
         while(1) {
             GL_ClearView(0xFF000000);
-            Draw_Text(0, 0, WHITE, 1, 1, "Error - %s\n", buff);
+            Draw_Text(0, 0, WHITE, 1, 1, "Error - %s\n", message.to_string().c_str());
             GL_SwapBuffers();
 
             if(I_ShutdownWait()) {
@@ -340,56 +328,9 @@ void I_Quit(void) {
     I_ShutdownSound();
     I_ShutdownVideo();
 
+    profiler::dumpBlocksToFile("doom64ex.prof");
+
     exit(0);
-}
-
-//
-// I_Printf
-//
-
-void I_Printf(const char* string, ...) {
-    char buff[1024];
-    va_list    va;
-
-    dmemset(buff, 0, 1024);
-
-    va_start(va, string);
-    vsprintf(buff, string, va);
-    va_end(va);
-
-// #ifdef USESYSCONSOLE
-//     {
-//         char winBuff[1024];
-//         char *c = buff;
-//         char *b = winBuff;
-
-//         dmemset(winBuff, 0, 1024);
-
-//         do {
-//             if(!*c) {
-//                 break;
-//             }
-
-//             if(*c == '\n') {
-//                 *b = '\r';
-//                 b++;
-//             }
-//             *b = *c;
-//             b++;
-
-//         }
-//         while(c++);
-
-//         SendMessage(hwndBuffer, EM_LINESCROLL, 0, 0xffff);
-//         SendMessage(hwndBuffer, EM_SCROLLCARET, 0, 0);
-//         SendMessage(hwndBuffer, EM_REPLACESEL, 0, (LPARAM)winBuff);
-//     }
-// #endif
-
-    printf("%s", buff);
-    if(console_initialized) {
-        CON_AddText(buff);
-    }
 }
 
 //

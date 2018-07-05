@@ -25,7 +25,7 @@
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
 
-#include <imp/Prelude>
+#include <prelude.hh>
 
 #ifdef _WIN32
 #include "SDL_config.h"

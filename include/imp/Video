@@ -2,7 +2,7 @@
 #ifndef __IMP_VIDEO__38697988
 #define __IMP_VIDEO__38697988
 
-#include "Prelude"
+#include "prelude.hh"
 
 namespace imp {
   struct video_error : std::runtime_error {

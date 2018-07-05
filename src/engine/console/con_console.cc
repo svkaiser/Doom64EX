@@ -75,7 +75,7 @@ char        console_inputbuffer[MAX_CONSOLE_INPUT_LEN];
 int         console_inputlength;
 int     console_autocomplete = 0;
 bool    console_initialized = false;
-std::vector<Property*> console_autocomplete_list;
+std::vector<Cvar*> console_autocomplete_list;
 
 //
 // CON_AutoComplete
@@ -86,7 +86,7 @@ static void CON_AutoComplete()
         return;
 
     if (console_autocomplete == 0) {
-        console_autocomplete_list = Property::partial(&console_inputbuffer[1]);
+        console_autocomplete_list = Cvar::partial(&console_inputbuffer[1]);
     }
 
     if (console_autocomplete_list.empty())
@@ -236,10 +236,11 @@ void CON_Printf(rcolor clr, const char *s, ...) {
     va_list    va;
 
     va_start(va, s);
-    vsprintf(msg, s, va);
+    auto len = vsprintf(msg, s, va);
     va_end(va);
 
     I_Printf("%s", msg);
+    CON_AddLine(msg, len);
     console_buffer[console_head]->color = clr;
 }
 
@@ -252,11 +253,16 @@ void CON_Warnf(const char *s, ...) {
     va_list    va;
 
     va_start(va, s);
-    vsprintf(msg, s, va);
+    auto len = vsprintf(msg, s, va);
     va_end(va);
 
-    CON_Printf(YELLOW, "WARNING: ");
-    CON_Printf(YELLOW, "%s", msg);
+    log::warn("{}", msg);
+
+    CON_AddLine("WARNING: ", 9);
+    console_buffer[console_head]->color = YELLOW;
+
+    CON_AddLine(msg, len);
+    console_buffer[console_head]->color = YELLOW;
 }
 
 //

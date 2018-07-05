@@ -36,6 +36,7 @@
 #endif
 
 #include <stdlib.h>
+#include <easy/profiler.h>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -63,9 +64,10 @@
 #include "g_demo.h"
 #include "p_saveg.h"
 #include "gl_draw.h"
+#include "logger.hh"
 
 #include "net_client.h"
-#include <imp/Wad>
+#include <wad.hh>
 #include <imp/NativeUI>
 
 //
@@ -116,11 +118,11 @@ void G_BuildTiccmd(ticcmd_t* cmd);
 
 #define STRPAUSED    "Paused"
 
-extern BoolProperty sv_nomonsters;
-extern BoolProperty sv_fastmonsters;
-extern BoolProperty sv_respawnitems;
-extern BoolProperty sv_respawn;
-extern IntProperty sv_skill;
+extern BoolCvar sv_nomonsters;
+extern BoolCvar sv_fastmonsters;
+extern BoolCvar sv_respawnitems;
+extern BoolCvar sv_respawn;
+extern IntCvar sv_skill;
 
 //
 // EVENT HANDLING
@@ -189,7 +191,7 @@ void D_IncValidCount(void) {
 // D_MiniLoop
 //
 
-extern BoolProperty i_interpolateframes;
+extern BoolCvar i_interpolateframes;
 
 extern dboolean renderinframe;
 extern int      gametime;
@@ -244,6 +246,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
     }
 
     while(!action) {
+        //EASY_BLOCK("Mainloop");
         int i = 0;
         int lowtic = 0;
         int entertic = 0;
@@ -429,7 +432,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
             NetUpdate();   // check for new console commands
         }
 
-drawframe:
+    drawframe:
 
         S_UpdateSounds();
 
@@ -446,7 +449,7 @@ drawframe:
         D_DrawInterface();
         D_FinishDraw();
 
-freealloc:
+    freealloc:
 
         // force garbage collection
         Z_FreeAlloca();
@@ -523,15 +526,15 @@ static void Title_Stop(void) {
 // Legal_Start
 //
 
-extern IntProperty p_regionmode;
+extern IntCvar p_regionmode;
 
 static const char* legalpic = "USLEGAL";
 static int legal_x = 32;
 static int legal_y = 72;
 
 static void Legal_Start(void) {
-    bool pllump = wad::have_lump("PLLEGAL");
-    bool jllump = wad::have_lump("JPLEGAL");
+    bool pllump = wad::exists("PLLEGAL");
+    bool jllump = wad::exists("JPLEGAL");
 
     if(!pllump && !jllump) {
         return;
@@ -824,12 +827,12 @@ static void FindResponseFile(void) {
             do {
                 myargv[indexinfile++] = infile+k;
                 while(k < size &&
-                        ((*(infile+k)>= ' '+1) && (*(infile+k)<='z'))) {
+                      ((*(infile+k)>= ' '+1) && (*(infile+k)<='z'))) {
                     k++;
                 }
                 *(infile+k) = 0;
                 while(k < size &&
-                        ((*(infile+k)<= ' ') || (*(infile+k)>'z'))) {
+                      ((*(infile+k)<= ' ') || (*(infile+k)>'z'))) {
                     k++;
                 }
             }
@@ -874,10 +877,8 @@ static void D_Init(void) {
             name = myargv[p++];
             value = myargv[p++];
 
-            if (auto property = Property::find(name)) {
-                if (!property->is_from_param()) {
-                    property->set_string(value);
-                }
+            if (auto property = Cvar::find(name)) {
+                property->set_string(value);
             } else {
                 I_Printf("Error: Couldn't find property (cvar) \"%s\"\n", name);
             }
@@ -969,67 +970,75 @@ static int D_CheckDemo(void) {
 // D_DoomMain
 //
 
+namespace imp {
+  namespace rom { void init(); }
+}
+
 [[noreturn]]
 void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
 
-    // init subsystems
+    {
+        // init subsystems
+        EASY_BLOCK("D_DoomMain");
 
-    I_Printf("imp::init_image: Init Image\n");
-    imp::init_image();
+        I_Printf("imp::init_image: Init Image\n");
+        void init_image();
+        init_image();
 
-    I_Printf("Z_Init: Init Zone Memory Allocator\n");
-    Z_Init();
+        I_Printf("Z_Init: Init Zone Memory Allocator\n");
+        Z_Init();
 
-    I_Printf("CON_Init: Init Game Console\n");
-    CON_Init();
+        I_Printf("CON_Init: Init Game Console\n");
+        CON_Init();
 
-    I_Printf("G_Init: Setting up game input and commands\n");
-    G_Init();
+        I_Printf("G_Init: Setting up game input and commands\n");
+        G_Init();
 
-    I_Printf("M_LoadDefaults: Loading game configuration\n");
-    M_LoadDefaults();
+        I_Printf("M_LoadDefaults: Loading game configuration\n");
+        M_LoadDefaults();
 
-    I_Printf("I_Init: Setting up machine state.\n");
-    I_Init();
+        I_Printf("native_ui: Setting up Native UI\n");
+        native_ui::init();
 
-    I_Printf("native_ui: Setting up Native UI\n");
-    native_ui::init();
+        I_Printf("D_Init: Init DOOM parameters\n");
+        D_Init();
 
-    I_Printf("D_Init: Init DOOM parameters\n");
-    D_Init();
+        I_Printf("W_Init: Init WADfiles.\n");
+        wad::init();
 
-    I_Printf("W_Init: Init WADfiles.\n");
-    wad::init();
+        I_Printf("I_Init: Setting up machine state.\n");
+        I_Init();
 
-    I_Printf("M_Init: Init miscellaneous info.\n");
-    M_Init();
+        I_Printf("M_Init: Init miscellaneous info.\n");
+        M_Init();
 
-    I_Printf("R_Init: Init DOOM refresh daemon.\n");
-    R_Init();
+        I_Printf("R_Init: Init DOOM refresh daemon.\n");
+        R_Init();
 
-    I_Printf("P_Init: Init Playloop state.\n");
-    P_Init();
+        I_Printf("P_Init: Init Playloop state.\n");
+        P_Init();
 
-    I_Printf("NET_Init: Init network subsystem.\n");
-    NET_Init();
+        I_Printf("NET_Init: Init network subsystem.\n");
+        NET_Init();
 
-    I_Printf("S_Init: Setting up sound.\n");
-    S_Init();
+        I_Printf("S_Init: Setting up sound.\n");
+        S_Init();
 
-    I_Printf("D_CheckNetGame: Checking network game status.\n");
-    D_CheckNetGame();
+        I_Printf("D_CheckNetGame: Checking network game status.\n");
+        D_CheckNetGame();
 
-    I_Printf("ST_Init: Init status bar.\n");
-    ST_Init();
+        I_Printf("ST_Init: Init status bar.\n");
+        ST_Init();
 
-    I_Printf("GL_Init: Init OpenGL\n");
-    GL_Init();
+        I_Printf("GL_Init: Init OpenGL\n");
+        GL_Init();
 
-    native_ui::console_show(false);
+        native_ui::console_show(false);
 
-    // garbage collection
-    Z_FreeAlloca();
+        // garbage collection
+        Z_FreeAlloca();
+    }
 
     if(!D_CheckDemo()) {
         if(!autostart) {

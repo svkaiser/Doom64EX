@@ -130,6 +130,7 @@ void G_ExecuteFile(char *name) {
 
 void G_LoadSettings(void) {
     int        p;
+    char *config;
 
     p = M_CheckParm("-config");
     if(p && (p < myargc - 1)) {
@@ -138,5 +139,7 @@ void G_LoadSettings(void) {
         }
     }
 
-    G_ExecuteFile(G_GetConfigFileName());
+    config = G_GetConfigFileName();
+    G_ExecuteFile(config);
+    free(config);
 }

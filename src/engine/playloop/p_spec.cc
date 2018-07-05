@@ -32,6 +32,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <wad.hh>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -53,7 +54,7 @@
 #include "r_sky.h"
 #include "sc_main.h"
 
-extern BoolProperty p_features;
+extern BoolCvar p_features;
 
 short globalint = 0;
 static byte tryopentype[3];
@@ -176,7 +177,7 @@ void P_InitPicAnims(void) {
         animinfo[i].delay = 0;
         animinfo[i].tic = 0;
         animinfo[i].isreverse = false;
-        animinfo[i].texnum = wad::find(animdefs[i].name)->section_index();
+        animinfo[i].texnum = wad::open(wad::Section::textures, animdefs[i].name).value().section_index();
         animinfo[i].frame = -1;
 
         // reallocate texture pointers if they contain multiple palettes

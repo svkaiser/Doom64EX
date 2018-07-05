@@ -79,19 +79,19 @@ void I_InitScreen(void) {
 //
 
 int I_ShutdownWait(void) {
-//     static SDL_Event event;
+    static SDL_Event event;
 
-//     while(SDL_PollEvent(&event)) {
-//         if(event.type == SDL_QUIT ||
-//                 (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
-//             I_ShutdownVideo();
-// #ifndef USESYSCONSOLE
-//             exit(0);
-// #else
-//             return 1;
-// #endif
-//         }
-//     }
+    while(SDL_PollEvent(&event)) {
+        if(event.type == SDL_QUIT ||
+           (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
+            I_ShutdownVideo();
+#ifndef USESYSCONSOLE
+            exit(0);
+#else
+            return 1;
+#endif
+        }
+    }
 
     return 0;
 }

@@ -31,6 +31,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdio.h>
+#include <wad.hh>
 #include "doomdef.h"
 #include "g_game.h"
 #include "st_stuff.h"
@@ -52,19 +53,19 @@
 #include "gl_draw.h"
 #include "g_demo.h"
 
-IntProperty st_drawhud("st_drawhud", "", true);
-BoolProperty st_crosshair("st_crosshair", "", false);
-FloatProperty st_crosshairopacity("st_crosshairopacity", "", 80.0f);
-BoolProperty st_flashoverlay("st_flashoverlay", "", false);
-BoolProperty st_regionmsg("st_regionmsg", "", false);
-BoolProperty m_messages("m_messages", "", true);
-StringProperty m_playername("m_playername", "");
-BoolProperty st_showpendingweapon("st_showpendingweapon", "", true);
-BoolProperty st_showstats("st_showstats", "", false);
+IntCvar st_drawhud("st_drawhud", "", true);
+BoolCvar st_crosshair("st_crosshair", "", false);
+FloatCvar st_crosshairopacity("st_crosshairopacity", "", 80.0f);
+BoolCvar st_flashoverlay("st_flashoverlay", "", false);
+BoolCvar st_regionmsg("st_regionmsg", "", false);
+BoolCvar m_messages("m_messages", "", true);
+StringCvar m_playername("m_playername", "");
+BoolCvar st_showpendingweapon("st_showpendingweapon", "", true);
+BoolCvar st_showstats("st_showstats", "", false);
 
-extern BoolProperty p_usecontext;
-extern BoolProperty p_damageindicator;
-extern BoolProperty r_texturecombiner;
+extern BoolCvar p_usecontext;
+extern BoolCvar p_damageindicator;
+extern BoolCvar r_texturecombiner;
 
 //
 // STATUS BAR DATA
@@ -694,7 +695,7 @@ void ST_DrawCrosshair(int x, int y, int slot, byte scalefactor, rcolor color) {
 static void ST_DrawJMessage(int pic) {
     int lump = st_jmessages[pic];
 
-    GL_BindGfxTexture(wad::find(lump)->lump_name().data(), true);
+    GL_BindGfxTexture(wad::open(wad::Section::graphics, lump).value().name().data(), true);
     GL_SetState(GLSTATE_BLEND, 1);
 
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
@@ -878,7 +879,7 @@ void ST_Drawer(void) {
     if(st_crosshairs && !automapactive) {
         int x = (SCREENWIDTH / 2) - (ST_CROSSHAIRSIZE / 8);
         int y = (SCREENHEIGHT / 2) - (ST_CROSSHAIRSIZE / 8);
-        int alpha = (int)st_crosshairopacity;
+        int alpha = (int)*st_crosshairopacity;
 
         if(alpha > 0xff) {
             alpha = 0xff;
@@ -888,7 +889,7 @@ void ST_Drawer(void) {
             alpha = 0;
         }
 
-        ST_DrawCrosshair(x, y, (int)st_crosshair, 2, WHITEALPHA(alpha));
+        ST_DrawCrosshair(x, y, (int)*st_crosshair, 2, WHITEALPHA(alpha));
     }
 
     //
@@ -1084,7 +1085,7 @@ void ST_Init(void) {
 
     st_crosshairs = 0;
 
-    if(auto lump = wad::find("CRSHAIRS")) {
+    if(auto lump = wad::open(wad::Section::graphics, "CRSHAIRS")) {
         st_crosshairs = (gfxwidth[lump->section_index()] / ST_CROSSHAIRSIZE);
     }
 
@@ -1097,7 +1098,7 @@ void ST_Init(void) {
 
         sprintf(name, "JPMSG%02d", i + 1);
         st_jmessages[i] = -1;
-        if (auto lump = wad::find(name))
+        if (auto lump = wad::open(wad::Section::graphics, name))
             st_jmessages[i] = lump->section_index();
 
         if(st_jmessages[i] != -1) {

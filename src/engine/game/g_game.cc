@@ -58,7 +58,6 @@
 #include "m_password.h"
 #include "i_video.h"
 #include "g_demo.h"
-#include <imp/Wad>
 
 #define DCLICK_TIME     20
 
@@ -132,38 +131,22 @@ byte forcecollision = 0;
 byte forcejump = 0;
 byte forcefreelook = 0;
 
-BoolProperty sv_nomonsters("sv_nomonsters", "Disable monsters", false, Property::network);
-BoolProperty sv_fastmonsters("sv_fastmonsters", "Fast monsters", false, Property::network);
-BoolProperty sv_respawnitems("sv_respawnitems", "Allow items to respawn", false, Property::network);
-BoolProperty sv_respawn("sv_respawn", "", false, Property::network);
-IntProperty sv_skill("sv_skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Property::network);
+BoolCvar sv_nomonsters("sv_NoMonsters", "Disable monsters", false, Cvar::net_server);
+BoolCvar sv_fastmonsters("sv_FastMonsters", "Fast monsters", false, Cvar::net_server);
+BoolCvar sv_respawnitems("sv_RespawnItems", "Allow items to respawn", false, Cvar::net_server);
+BoolCvar sv_respawn("sv_Respawn", "", false, Cvar::net_server);
+IntCvar sv_skill("sv_Skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Cvar::net_server);
 
 static void G_SetGameFlags();
 
-static void G_SetGameFlagsCvarCallback(const BoolProperty&, bool, bool&)
-{
-    G_SetGameFlags();
-}
-
-BoolProperty sv_lockmonsters("sv_lockmonsters", "", false, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty sv_friendlyfire("sv_friendlyfire", "", false, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty sv_keepitems("sv_keepitems", "", false, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty p_allowjump("p_allowjump", "", false, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty p_autoaim("p_autoaim", "", true, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty compat_collision("compat_collision", "", true, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty compat_mobjpass("compat_mobjpass", "", true, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty compat_limitpain("compat_limitpain", "", true, Property::network, G_SetGameFlagsCvarCallback);
-BoolProperty compat_grabitems("compat_grabitems", "", true, Property::network, G_SetGameFlagsCvarCallback);
-
-extern BoolProperty v_mlook;
-extern BoolProperty v_mlookinvert;
-extern BoolProperty v_yaxismove;
-extern BoolProperty p_autorun;
-extern BoolProperty p_fdoubleclick;
-extern BoolProperty p_sdoubleclick;
-extern FloatProperty v_msensitivityx;
-extern FloatProperty v_msensitivityy;
+extern BoolCvar v_mlook;
+extern BoolCvar v_mlookinvert;
+extern BoolCvar v_yaxismove;
+extern BoolCvar p_autorun;
+extern BoolCvar p_fdoubleclick;
+extern BoolCvar p_sdoubleclick;
+extern FloatCvar v_msensitivityx;
+extern FloatCvar v_msensitivityy;
 
 //
 // G_CmdButton
@@ -265,10 +248,8 @@ static CMD(Seta) {
         return;
     }
 
-    if (auto p = Property::find(param[0])) {
-        if (!p->is_from_param()) {
-            p->set_string(param[1]);
-        }
+    if (auto p = Cvar::find(param[0])) {
+        p->set_string(param[1]);
     } else {
         I_Printf("Couldn't find property (cvar) %s\n", param[0]);
     }

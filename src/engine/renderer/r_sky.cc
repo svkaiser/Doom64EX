@@ -27,6 +27,8 @@
 //-----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <easy/profiler.h>
+#include <wad.hh>
 
 #include "doomstat.h"
 #include "r_lights.h"
@@ -42,7 +44,6 @@
 #include "gl_texture.h"
 #include "gl_draw.h"
 #include "r_drawlist.h"
-#include <imp/Wad>
 
 skydef_t*   sky;
 int         skypicnum = -1;
@@ -53,7 +54,7 @@ int         lightningCounter = 0;
 int         thundertic = 1;
 dboolean    skyfadeback = false;
 int         fireLump = -1;
-gfx::Image  fireImage {};
+Image       fireImage {};
 
 static word CloudOffsetY = 0;
 static word CloudOffsetX = 0;
@@ -63,8 +64,8 @@ static float sky_cloudpan2 = 0;
 #define FIRESKY_WIDTH   64
 #define FIRESKY_HEIGHT  64
 
-extern BoolProperty r_texturecombiner;
-extern BoolProperty r_skybox;
+extern BoolCvar r_texturecombiner;
+extern BoolCvar r_skybox;
 
 #define SKYVIEWPOS(angle, amount, x) x = -(angle / (float)ANG90 * amount); while(x < 1.0f) x += 1.0f
 
@@ -269,6 +270,7 @@ static void R_DrawSkyDome(int tiles, float rows, int height,
 //
 
 static void R_DrawSkyboxCloud(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     rcolor color;
     vtx_t v[4];
 
@@ -362,7 +364,7 @@ static void R_DrawSkyboxCloud(void) {
     // bind cloud texture and set blending
     //
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), false);
+    GL_BindGfxTexture(wad::open(wad::Section::textures, skypicnum).value().name().data(), false);
     GL_SetState(GLSTATE_BLEND, 1);
 
     //
@@ -440,6 +442,7 @@ static void R_DrawSkyboxCloud(void) {
 //
 
 static void R_DrawSimpleSky(int lump, int offset) {
+    EASY_FUNCTION(profiler::colors::Red);
     float pos1;
     float width;
     int height;
@@ -447,7 +450,7 @@ static void R_DrawSimpleSky(int lump, int offset) {
     int gfxLmp;
     float row;
 
-    gfxLmp = GL_BindGfxTexture(wad::find(lump)->lump_name().data(), true);
+    gfxLmp = GL_BindGfxTexture(wad::open(lump).value().name().data(), false);
     height = gfxheight[gfxLmp];
     lumpheight = gfxorigheight[gfxLmp];
 
@@ -470,6 +473,7 @@ static void R_DrawSimpleSky(int lump, int offset) {
 //
 
 static void R_DrawVoidSky(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     GL_SetOrtho(1);
 
     dglDisable(GL_TEXTURE_2D);
@@ -485,6 +489,7 @@ static void R_DrawVoidSky(void) {
 //
 
 static void R_DrawTitleSky(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     R_DrawSimpleSky(skypicnum, 240);
     Draw_GfxImage(63, 25, sky->backdrop, D_RGBA(255, 255, 255, logoAlpha), false);
 }
@@ -494,11 +499,12 @@ static void R_DrawTitleSky(void) {
 //
 
 static void R_DrawClouds(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     rfloat pos = 0.0f;
     vtx_t v[4];
 
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), false);
+    GL_BindGfxTexture(wad::open(skypicnum).value().name().data(), false);
 
     pos = (TRUEANGLES(viewangle) / 360.0f) * 2.0f;
 
@@ -577,19 +583,20 @@ static void R_DrawClouds(void) {
 // R_SpreadFire
 //
 
-static void R_SpreadFire(byte* src1, byte* src2, int pixel, int counter, int* rand) {
+static void R_SpreadFire(char* src1, char* src2, int pixel, int counter, int* rand) {
+    EASY_FUNCTION(profiler::colors::Red);
     int randIdx = 0;
-    byte *tmpSrc;
+    char *tmpSrc;
 
     if(pixel != 0) {
         randIdx = rndtable[*rand];
         *rand = ((*rand+2) & 0xff);
 
         tmpSrc = (src1 + (((counter - (randIdx & 3)) + 1) & (FIRESKY_WIDTH-1)));
-        *(byte*)(tmpSrc - FIRESKY_WIDTH) = pixel - ((randIdx & 1));
+        *(char*)(tmpSrc - FIRESKY_WIDTH) = pixel - ((randIdx & 1));
     }
     else {
-        *(byte*)(src2 - FIRESKY_WIDTH) = 0;
+        *(char*)(src2 - FIRESKY_WIDTH) = 0;
     }
 }
 
@@ -598,12 +605,13 @@ static void R_SpreadFire(byte* src1, byte* src2, int pixel, int counter, int* ra
 //
 
 static void R_Fire() {
+    EASY_FUNCTION(profiler::colors::Red);
     int counter = 0;
     int rand = 0;
     int step = 0;
     int pixel = 0;
-    byte *src;
-    byte *srcoffset;
+    char *src;
+    char *srcoffset;
 
     rand = (M_Random() & 0xff);
     src = fireImage.data_ptr();
@@ -628,6 +636,7 @@ static void R_Fire() {
             R_SpreadFire(src, srcoffset, pixel, counter, &rand);
 
             pixel = *(byte*)(srcoffset + FIRESKY_WIDTH);
+
             src += FIRESKY_WIDTH;
             srcoffset += FIRESKY_WIDTH;
 
@@ -653,24 +662,22 @@ static void R_Fire() {
 static rcolor firetexture[FIRESKY_WIDTH * FIRESKY_HEIGHT];
 
 void R_InitFire(void) {
-    int i;
-    byte *pixdata;
+    EASY_FUNCTION(profiler::colors::Red);
+    auto lump = wad::open(wad::Section::graphics, "FIRE").value();
+    fireLump = lump.section_index();
+    fireImage = I_ReadImage(lump.lump_index(), true, true, false, 0);
 
-    auto lump = wad::find("FIRE");
-    fireLump = lump->section_index();
-    fireImage = I_ReadImage(lump->lump_index(), true, true, false, 0);
-
-    pixdata = fireImage.data_ptr();
-    for (i = 0; i < 4096; i++)
+    auto pixdata = reinterpret_cast<byte*>(fireImage.data_ptr());
+    for (int i = 0; i < 4096; i++)
         pixdata[i] >>= 4;
 
     uint8 j = 0;
-    gfx::Palette paldata { gfx::PixelFormat::rgba, 16, nullptr };
-    for(auto& c : paldata.map<gfx::Rgba>()) {
-        c = gfx::Rgba { j, j, j, 0xff };
+    RgbaPalette paldata { 16 };
+    for(auto& c : paldata) {
+        c = Rgba { j, j, j, 0xff };
         j += 16;
     }
-    fireImage.set_palette(paldata);
+    fireImage.palette(std::move(paldata));
 }
 
 //
@@ -678,6 +685,7 @@ void R_InitFire(void) {
 //
 
 static void R_FireTicker(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     if(leveltime & 1) {
         R_Fire();
     }
@@ -688,6 +696,7 @@ static void R_FireTicker(void) {
 //
 
 static void R_DrawFire(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     float pos1;
     vtx_t v[4];
     dtexture t = gfxptr[fireLump];
@@ -701,8 +710,8 @@ static void R_DrawFire(void) {
        But right now I can't be arsed. Talk to me in 2030 when I still haven't done it.
        -dotfloat
        TODO: Rewrite this */
-    firePal16 = fireImage.palette()->data_ptr();
-    fireBuffer = fireImage.data_ptr();
+    firePal16 = reinterpret_cast<byte*>(fireImage.palette().data_ptr());
+    fireBuffer = reinterpret_cast<byte*>(fireImage.data_ptr());
 
     //
     // copy fire pixel data to texture data array
@@ -790,6 +799,7 @@ static void R_DrawFire(void) {
 //
 
 void R_DrawSky(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     if(!sky) {
         return;
     }
@@ -812,7 +822,7 @@ void R_DrawSky(void) {
             }
             else {
                 GL_SetTextureUnit(0, true);
-                GL_BindGfxTexture(wad::find(skypicnum)->lump_name().data(), true);
+                GL_BindGfxTexture(wad::open(wad::Section::graphics, skypicnum).value().name().data(), true);
 
                 //
                 // drawer will assume that the texture's
@@ -845,7 +855,7 @@ void R_DrawSky(void) {
                 float base;
 
                 GL_SetTextureUnit(0, true);
-                l = GL_BindGfxTexture(wad::find(skybackdropnum)->lump_name().data(), true);
+                l = GL_BindGfxTexture(wad::open(wad::Section::textures, skybackdropnum).value().name().data(), true);
 
                 //
                 // handle the case for non-powers of 2 texture
@@ -870,6 +880,7 @@ void R_DrawSky(void) {
 //
 
 void R_SkyTicker(void) {
+    EASY_FUNCTION(profiler::colors::Red);
     if(menuactive) {
         return;
     }

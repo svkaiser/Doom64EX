@@ -29,29 +29,20 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <wad.hh>
 
 #include "doomdef.h"
 #include "i_swap.h"
-#include "m_fixed.h"
 #include "g_game.h"
-#include "i_system.h"
 #include "p_local.h"
-#include "s_sound.h"
 #include "doomstat.h"
-#include "t_bsp.h"
 #include "p_macros.h"
-#include "info.h"
 #include "m_misc.h"
-#include "tables.h"
-#include "r_local.h"
-#include "gl_texture.h"
 #include "r_sky.h"
 #include "con_console.h"
 #include "m_random.h"
 #include "z_zone.h"
 #include "sc_main.h"
-#include <map>
-#include <imp/Wad>
 #include "Map.hh"
 
 mobj_t* P_SpawnMapThing(mapthing_t *mthing);
@@ -93,13 +84,13 @@ clusterdef_t*       clusterdefs;
 // [kex] cvars
 //
 
-BoolProperty p_features("p_features", "");
-BoolProperty p_autorun("p_autorun", "");
-BoolProperty p_fdoubleclick("p_fdoubleclick", "");
-BoolProperty p_sdoubleclick("p_sdoubleclick", "");
-BoolProperty p_usecontext("p_usecontext", "");
-BoolProperty p_damageindicator("p_damageindicator", "");
-IntProperty p_regionmode("p_regionmode", "");
+BoolCvar p_features("p_features", "");
+BoolCvar p_autorun("p_autorun", "");
+BoolCvar p_fdoubleclick("p_fdoubleclick", "");
+BoolCvar p_sdoubleclick("p_sdoubleclick", "");
+BoolCvar p_usecontext("p_usecontext", "");
+BoolCvar p_damageindicator("p_damageindicator", "");
+IntCvar p_regionmode("p_regionmode", "");
 
 //
 // [kex] sky definition stuff
@@ -144,28 +135,6 @@ byte*               rejectmatrix;
 mapthing_t          deathmatchstarts[MAX_DEATHMATCH_STARTS];
 mapthing_t*         deathmatch_p;
 mapthing_t          playerstarts[MAXPLAYERS];
-
-//
-// P_InitTextureHashTable
-//
-
-static std::map<wad::LumpHash, int> texturehashlist;
-
-static void P_InitTextureHashTable(void) {
-    auto section = wad::section(wad::Section::textures);
-    for(int i = 0; section; ++section, ++i) {
-        texturehashlist.emplace(wad::LumpHash { section->lump_name() }, i);
-    }
-}
-
-//
-// P_GetTextureHashKey
-//
-
-static word P_GetTextureHashKey(int hash) {
-    auto it = texturehashlist.find(hash);
-    return it != texturehashlist.end() ? it->second : 0;
-}
 
 //
 // P_LoadVertexes
@@ -310,7 +279,7 @@ void P_LoadSectors(int lump) {
         ss->frame_z2[1] = ss->ceilingheight;
 
         for(j = 0; j < numskydef; j++) {
-            if(ss->ceilingpic == wad::find(skydefs[j].flat)->section_index()) {
+            if(ss->ceilingpic == wad::open(wad::Section::textures, skydefs[j].flat).value().section_index()) {
                 skyflatnum = j;
                 break;
             }
@@ -966,14 +935,14 @@ void P_SetupSky(void) {
 
     skyindex    = skyflatnum;
     sky         = &skydefs[skyindex];
-    skyflatnum  = wad::find(sky->flat)->section_index();
+    skyflatnum  = wad::open(wad::Section::textures, sky->flat).value().section_index();
 
     if(sky->pic[0]) {
-        skypicnum = wad::find(sky->pic)->lump_index();
+        skypicnum = wad::open(wad::Section::graphics, sky->pic).value().lump_index();
     }
 
     if(sky->backdrop[0]) {
-        skybackdropnum = wad::find(sky->backdrop)->lump_index();
+        skybackdropnum = wad::open(wad::Section::graphics, sky->backdrop).value().lump_index();
     }
 
     if(sky->flags & SKF_FIRE) {
@@ -1185,13 +1154,13 @@ static void P_InitMapInfo(void) {
 
                         text = sc_parser.getstring();
 
-                        auto lump = wad::find(text);
-                        if(!lump || lump->section() != wad::Section::sounds) {
+                        auto lump = wad::open(wad::Section::sounds, text);
+                        if(!lump) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             mapdef.music = -1;
                         }
                         else {
-                            mapdef.music = Seq_SoundLookup(lump->lump_name());
+                            mapdef.music = Seq_SoundLookup(lump->name());
                         }
                     }
                     else if(!dstricmp(sc_parser.token, "COMPAT_COLLISION")) {
@@ -1266,12 +1235,12 @@ static void P_InitMapInfo(void) {
                     if(!dstricmp(sc_parser.token, "MUSIC")) {
                         text = sc_parser.getstring();
 
-                        auto lump = wad::find(text);
-                        if(!lump || lump->section() != wad::Section::sounds) {
+                        auto lump = wad::open(wad::Section::sounds, text);
+                        if(!lump) {
                             CON_Warnf("P_InitMapInfo: Invalid music name: %s\n", text);
                             cluster.music = -1;
                         } else {
-                            cluster.music = Seq_SoundLookup(lump->lump_name());
+                            cluster.music = Seq_SoundLookup(lump->name());
                         }
                     }
                     //

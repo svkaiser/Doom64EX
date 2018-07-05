@@ -35,7 +35,7 @@
 #include "doomstat.h"
 #include "con_console.h"
 #include "z_zone.h"
-#include <imp/Property>
+#include <core/cvar.hh>
 
 //do controls menu length properly
 //if list of actions for menu>=MAX_MENUACTION_LENGTH then won't display any more
@@ -240,7 +240,7 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
         if(action) {
             action->proc(action->data, al->param);
         }
-        else if (auto cvar = Property::find(al->cmd)) {
+        else if (auto cvar = Cvar::find(al->cmd)) {
             // FIXME: Netgame cvar setting
 #if 0
             if(netgame) {
@@ -256,7 +256,7 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
 #endif
 
             if(!al->param[0]) {
-                auto str = format("{}: {} ({})", cvar->name(), cvar->string(), cvar->default_string());
+                auto str = fmt::format("{}: {} ({})", cvar->name(), cvar->string(), cvar->default_string());
                 CON_AddLine(str.c_str(), str.size());
             }
             else {
@@ -727,12 +727,7 @@ void G_OutputBindings(FILE *fh) {
     }
 
     // cvars
-    for(auto p : Property::all()) {
-        if (p->is_noconfig())
-            continue;
-
-        println(fh, "seta \"{}\" \"{}\"", p->name(), p->string());
-    }
+    Cvar::write_config(fh);
 }
 
 //

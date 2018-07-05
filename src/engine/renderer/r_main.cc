@@ -27,6 +27,7 @@
 
 #include <math.h>
 #include <t_bsp.h>
+#include <wad.hh>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -80,48 +81,48 @@ unsigned int    glBindCalls = 0;
 
 dboolean        bRenderSky = false;
 
-FloatProperty r_fov("r_fov", "Field of view angle", 74.0f);
-BoolProperty r_fillmode("r_fillmode", "", true);
-BoolProperty r_uniformtime("r_uniformtime", "", false);
-BoolProperty r_fog("r_fog", "", true);
-BoolProperty r_wipe("r_wipe", "", true);
-BoolProperty r_drawtris("r_drawtris", "", false);
-BoolProperty r_drawmobjbox("r_drawmobjbox", "", false);
-BoolProperty r_drawblockmap("r_drawblockmap", "", false);
-BoolProperty r_drawtrace("r_drawtrace", "", false);
-BoolProperty r_rendersprites("r_rendersprites", "", true);
-BoolProperty r_drawfill("r_drawfill", "", false);
-BoolProperty r_skybox("r_skybox", "", false);
+FloatCvar r_fov("r_fov", "Field of view angle", 74.0f);
+BoolCvar r_fillmode("r_fillmode", "", true);
+BoolCvar r_uniformtime("r_uniformtime", "", false);
+BoolCvar r_fog("r_fog", "", true);
+BoolCvar r_wipe("r_wipe", "", true);
+BoolCvar r_drawtris("r_drawtris", "", false);
+BoolCvar r_drawmobjbox("r_drawmobjbox", "", false);
+BoolCvar r_drawblockmap("r_drawblockmap", "", false);
+BoolCvar r_drawtrace("r_drawtrace", "", false);
+BoolCvar r_rendersprites("r_rendersprites", "", true);
+BoolCvar r_drawfill("r_drawfill", "", false);
+BoolCvar r_skybox("r_skybox", "", false);
 
-IntProperty r_colorscale("r_colorscale", "", 0, 0,
-                         [](const IntProperty&, int, int&)
+IntCvar r_colorscale("r_colorscale", "", 0, 0,
+                         [](const IntCvar&, int, int&)
                          {
                              GL_SetColorScale();
                          });
 
-BoolProperty r_filter("r_filter", "", false, 0,
-                      [](const BoolProperty&, bool, bool&)
+BoolCvar r_filter("r_filter", "", false, 0,
+                      [](const BoolCvar&, bool, bool&)
                       {
                           GL_DumpTextures();
                           GL_SetTextureFilter();
                       });
 
-BoolProperty r_texnonpowresize("r_texnonpowresize", "", false, 0,
-                               [](const BoolProperty&, bool, bool&)
+BoolCvar r_texnonpowresize("r_texnonpowresize", "", false, 0,
+                               [](const BoolCvar&, bool, bool&)
                                {
                                    GL_DumpTextures();
                                });
 
-BoolProperty r_anisotropic("r_anisotropic", "", false, 0,
-                           [](const BoolProperty&, bool, bool&)
+BoolCvar r_anisotropic("r_anisotropic", "", false, 0,
+                           [](const BoolCvar&, bool, bool&)
                            {
                                GL_DumpTextures();
                                GL_SetTextureFilter();
                            });
 
-extern BoolProperty r_texturecombiner;
-extern BoolProperty i_interpolateframes;
-extern BoolProperty p_usecontext;
+extern BoolCvar r_texturecombiner;
+extern BoolCvar i_interpolateframes;
+extern BoolCvar p_usecontext;
 
 //
 // CMD_Wireframe
@@ -372,7 +373,7 @@ void R_PrecacheLevel(void) {
     mobj_t* mo;
 
     CON_DPrintf("--------R_PrecacheLevel--------\n");
-    GL_DumpTextures();
+    //GL_DumpTextures();
 
     texturepresent = (char*)Z_Alloca(numtextures);
     spritepresent = (char*)Z_Alloca(NUMSPRITES);
@@ -400,8 +401,8 @@ void R_PrecacheLevel(void) {
             num++;
 
             for(p = 0; p < numanimdef; p++) {
-                auto l = wad::find(animdefs[p].name);
-                int lump = l->section_index();
+                auto l = wad::open(wad::Section::textures, animdefs[p].name).value();
+                int lump = l.section_index();
 
                 if(lump != i) {
                     continue;

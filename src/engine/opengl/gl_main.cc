@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <imp/Image>
 
 #include "SDL.h"
 
@@ -60,14 +61,14 @@ int         DGL_CLAMP = GL_CLAMP;
 float       max_anisotropic = 0;
 dboolean    widescreen = false;
 
-extern BoolProperty r_filter;
-extern BoolProperty r_texturecombiner;
-extern BoolProperty r_anisotropic;
-extern BoolProperty st_flashoverlay;
-extern BoolProperty v_vsync;
-extern IntProperty v_depthsize;
-extern IntProperty v_buffersize;
-extern IntProperty r_colorscale;
+extern BoolCvar r_filter;
+extern BoolCvar r_texturecombiner;
+extern BoolCvar r_anisotropic;
+extern BoolCvar st_flashoverlay;
+extern BoolCvar v_vsync;
+extern IntCvar v_depthsize;
+extern IntCvar v_buffersize;
+extern IntCvar r_colorscale;
 
 //
 // CMD_DumpGLExtensions
@@ -242,13 +243,9 @@ void GL_SwapBuffers(void) {
 // GL_GetScreenBuffer
 //
 
-byte* GL_GetScreenBuffer(int x, int y, int width, int height) {
+Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height) {
     byte* buffer;
     byte* data;
-    int i;
-    int j;
-    int offset1;
-    int offset2;
     int pack;
     int col;
 
@@ -264,25 +261,13 @@ byte* GL_GetScreenBuffer(int x, int y, int width, int height) {
     dglFlush();
     dglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
     dglPixelStorei(GL_PACK_ALIGNMENT, pack);
+    RgbImage image { width, height };
 
-    //
-    // Need to vertically flip the image
-    // 20120313 villsa - better method to flip image. uses one buffer instead of two
-    //
-    for(i = 0; i < height / 2; i++) {
-        for(j = 0; j < col; j++) {
-            offset1 = (i * col) + j;
-            offset2 = ((height - (i + 1)) * col) + j;
-
-            buffer[j] = data[offset1];
-            data[offset1] = data[offset2];
-            data[offset2] = buffer[j];
-        }
-    }
+//    image.flip(Flip::vertical);
 
     Z_Free(buffer);
 
-    return data;
+    return image;
 }
 
 //

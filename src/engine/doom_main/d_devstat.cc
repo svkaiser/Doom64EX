@@ -42,9 +42,9 @@ static dboolean showstats = true;
 
 extern word statindice;
 
-extern BoolProperty v_mlook;
-extern BoolProperty v_mlookinvert;
-extern BoolProperty sv_lockmonsters;
+extern BoolCvar v_mlook;
+extern BoolCvar v_mlookinvert;
+extern BoolCvar sv_lockmonsters;
 
 //
 // ST_DrawFPS
@@ -224,7 +224,8 @@ void D_BoyISuck(void) {
 // Special debug actions when pressing the F## keys
 //
 
-static bool freelook = false;
+// FIXME: Figure out why this is unused
+//static bool freelook = false;
 dboolean D_DevKeyResponder(event_t* ev) {
     if(ev->type == ev_keydown) {
         switch(ev->data1) {

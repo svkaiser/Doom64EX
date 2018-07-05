@@ -40,7 +40,7 @@ static float envcolor[4] = { 0, 0, 0, 0 };
 drawlist_t drawlist[NUMDRAWLISTS];
 vtx_t drawVertex[MAXDLDRAWCOUNT];
 
-extern BoolProperty r_texturecombiner;
+extern BoolCvar r_texturecombiner;
 
 //
 // DL_AddVertexList

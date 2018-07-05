@@ -66,8 +66,8 @@
 #include "p_setup.h"
 #include "gl_texture.h"
 #include "gl_draw.h"
-#include <imp/Wad>
 #include <imp/Video>
+#include <wad.hh>
 //
 // definitions
 //
@@ -146,14 +146,14 @@ typedef struct {
 } menuitem_t;
 
 typedef struct {
-    Property *mitem;
+    Cvar *mitem;
     float    mdefault;
 } menudefault_t;
 
 typedef struct {
     int item;
     float width;
-    Property *mitem;
+    Cvar *mitem;
 } menuthermobar_t;
 
 typedef struct menu_s {
@@ -213,10 +213,10 @@ static void M_DoDefaults(int choice);
 static void M_Return(int choice);
 static void M_ReturnToOptions(int choice);
 template <class T, class U>
-static void M_SetCvar(TypedProperty<T> &property, const U &value);
+static void M_SetCvar(BasicCvar<T> &property, const U &value);
 template <class T, class U>
-static void M_SetOptionValue(int choice, U min, U max, U inc, TypedProperty<T> &cvar);
-static void M_SetOptionValue(int choice, BoolProperty &cvar);
+static void M_SetOptionValue(int choice, U min, U max, U inc, BasicCvar<T> &cvar);
+static void M_SetOptionValue(int choice, BoolCvar &cvar);
 static void M_DrawSmbString(const char* text, menu_t* menu, int item);
 static void M_DrawSaveGameFrontend(menu_t* def);
 static void M_SetInputString(char* string, int len);
@@ -224,24 +224,24 @@ static void M_Scroll(menu_t* menu, dboolean up);
 
 static dboolean M_SetThumbnail(int which);
 
-IntProperty m_regionblood("m_regionblood", "");
+IntCvar m_regionblood("m_regionblood", "");
 
-FloatProperty m_menufadetime("m_menufadetime", "", 0.0f, 0,
-                             [](const FloatProperty &p, float, float& x)
+FloatCvar m_menufadetime("m_menufadetime", "", 0.0f, 0,
+                             [](const FloatCvar &p, float, float& x)
                              {
                                  x = clamp(*p, 0.0f, 80.0f);
                              });
 
-BoolProperty m_menumouse("m_menumouse", "", true, 0,
-                         [](const BoolProperty &p, bool, bool&) {
+BoolCvar m_menumouse("m_menumouse", "", true, 0,
+                         [](const BoolCvar &p, bool, bool&) {
                              SDL_ShowCursor(*p ? SDL_FALSE : SDL_TRUE);
                              if(!*p) {
                                  itemSelected = -1;
                              }
                          });
 
-FloatProperty m_cursorscale("m_cursorscale", "", 8.0f, 0,
-                            [](const FloatProperty &p, float, float &x)
+FloatCvar m_cursorscale("m_cursorscale", "", 8.0f, 0,
+                            [](const FloatCvar &p, float, float &x)
                             {
                                 x = clamp(*p, 0.0f, 50.0f);
                             });
@@ -749,9 +749,9 @@ void M_DrawOptions(void) {
 void M_RegionChoice(int choice);
 void M_DrawRegion(void);
 
-extern BoolProperty st_regionmsg;
-extern IntProperty m_regionblood;
-extern IntProperty p_regionmode;
+extern BoolCvar st_regionmsg;
+extern IntCvar m_regionblood;
+extern IntCvar p_regionmode;
 
 enum {
     region_mode,
@@ -918,16 +918,16 @@ void M_NetworkChoice(int choice);
 void M_PlayerSetName(int choice);
 void M_DrawNetwork(void);
 
-extern StringProperty m_playername;
-extern BoolProperty p_allowjump;
-extern BoolProperty p_autoaim;
-extern BoolProperty sv_nomonsters;
-extern BoolProperty sv_fastmonsters;
-extern BoolProperty sv_respawnitems;
-extern BoolProperty sv_respawn;
-extern BoolProperty sv_allowcheats;
-extern BoolProperty sv_friendlyfire;
-extern BoolProperty sv_keepitems;
+extern StringCvar m_playername;
+extern BoolCvar p_allowjump;
+extern BoolCvar p_autoaim;
+extern BoolCvar sv_nomonsters;
+extern BoolCvar sv_fastmonsters;
+extern BoolCvar sv_respawnitems;
+extern BoolCvar sv_respawn;
+extern BoolCvar sv_allowcheats;
+extern BoolCvar sv_friendlyfire;
+extern BoolCvar sv_keepitems;
 
 enum {
     network_header1,
@@ -1120,22 +1120,22 @@ void M_DrawNetwork(void) {
 void M_MiscChoice(int choice);
 void M_DrawMisc(void);
 
-extern BoolProperty am_showkeymarkers;
-extern BoolProperty am_showkeycolors;
-extern BoolProperty am_drawobjects;
-extern BoolProperty am_overlay;
-extern BoolProperty r_skybox;
-extern BoolProperty r_texnonpowresize;
-extern BoolProperty i_interpolateframes;
-extern BoolProperty p_usecontext;
-extern BoolProperty compat_collision;
-extern BoolProperty compat_limitpain;
-extern BoolProperty compat_mobjpass;
-extern BoolProperty compat_grabitems;
-extern BoolProperty r_wipe;
-extern BoolProperty r_rendersprites;
-extern BoolProperty r_texturecombiner;
-extern IntProperty r_colorscale;
+extern BoolCvar am_showkeymarkers;
+extern BoolCvar am_showkeycolors;
+extern BoolCvar am_drawobjects;
+extern BoolCvar am_overlay;
+extern BoolCvar r_skybox;
+extern BoolCvar r_texnonpowresize;
+extern BoolCvar i_interpolateframes;
+extern BoolCvar p_usecontext;
+extern BoolCvar compat_collision;
+extern BoolCvar compat_limitpain;
+extern BoolCvar compat_mobjpass;
+extern BoolCvar compat_grabitems;
+extern BoolCvar r_wipe;
+extern BoolCvar r_rendersprites;
+extern BoolCvar r_texturecombiner;
+extern IntCvar r_colorscale;
 
 enum {
     misc_header1,
@@ -1479,12 +1479,12 @@ void M_ChangeMouseInvert(int choice);
 void M_ChangeYAxisMove(int choice);
 void M_DrawMouse(void);
 
-extern FloatProperty v_msensitivityx;
-extern FloatProperty v_msensitivityy;
-extern BoolProperty v_mlook;
-extern BoolProperty v_mlookinvert;
-extern BoolProperty v_yaxismove;
-extern FloatProperty v_macceleration;
+extern FloatCvar v_msensitivityx;
+extern FloatCvar v_msensitivityy;
+extern BoolCvar v_mlook;
+extern BoolCvar v_mlookinvert;
+extern BoolCvar v_yaxismove;
+extern FloatCvar v_macceleration;
 
 enum {
     mouse_sensx,
@@ -1661,15 +1661,15 @@ void M_ChangeCrosshair(int choice);
 void M_ChangeOpacity(int choice);
 void M_DrawDisplay(void);
 
-extern IntProperty st_drawhud;
-extern BoolProperty st_crosshair;
-extern FloatProperty st_crosshairopacity;
-extern BoolProperty st_flashoverlay;
-extern BoolProperty st_showpendingweapon;
-extern BoolProperty st_showstats;
-extern FloatProperty i_brightness;
-extern BoolProperty m_messages;
-extern BoolProperty p_damageindicator;
+extern IntCvar st_drawhud;
+extern BoolCvar st_crosshair;
+extern FloatCvar st_crosshairopacity;
+extern BoolCvar st_flashoverlay;
+extern BoolCvar st_showpendingweapon;
+extern BoolCvar st_showstats;
+extern FloatCvar i_brightness;
+extern BoolCvar m_messages;
+extern BoolCvar p_damageindicator;
 
 enum {
     dbrightness,
@@ -1784,7 +1784,7 @@ void M_DrawDisplay(void) {
     }
     else {
         ST_DrawCrosshair(DisplayDef.x + 140, DisplayDef.y+LINEHEIGHT*display_crosshair,
-                         (int)st_crosshair, 1, MENUCOLORWHITE);
+                         (int)*st_crosshair, 1, MENUCOLORWHITE);
     }
 
     M_DrawThermo(DisplayDef.x, DisplayDef.y+LINEHEIGHT*(display_opacity+1),
@@ -1893,16 +1893,16 @@ void M_ChangeBufferSize(int choice);
 void M_ChangeAnisotropic(int choice);
 void M_DrawVideo(void);
 
-extern IntProperty v_width;
-extern IntProperty v_height;
-extern IntProperty v_windowed;
-extern BoolProperty v_vsync;
-extern IntProperty v_depthsize;
-extern IntProperty v_buffersize;
-extern FloatProperty i_gamma;
-extern FloatProperty i_brightness;
-extern BoolProperty r_filter;
-extern BoolProperty r_anisotropic;
+extern IntCvar v_width;
+extern IntCvar v_height;
+extern IntCvar v_windowed;
+extern BoolCvar v_vsync;
+extern IntCvar v_depthsize;
+extern IntCvar v_buffersize;
+extern FloatCvar i_gamma;
+extern FloatCvar i_brightness;
+extern BoolCvar r_filter;
+extern BoolCvar r_anisotropic;
 
 enum {
     video_dgamma,
@@ -1993,8 +1993,6 @@ static char gammamsg[21][28] = {
 };
 
 void M_Video(int choice) {
-    int i;
-
     M_SetupNextMenu(&VideoDef);
 
     m_ScreenSize = -1;
@@ -2140,7 +2138,7 @@ void M_ChangeGammaLevel(int choice) {
             i_gamma = i_gamma + 1;
         }
 
-        players[consoleplayer].message = gammamsg[(int)i_gamma];
+        players[consoleplayer].message = gammamsg[(int)*i_gamma];
         break;
     }
 }
@@ -2352,9 +2350,9 @@ void M_MusicVol(int choice);
 void M_GainOutput(int choice);
 void M_DrawSound(void);
 
-extern FloatProperty s_sfxvol;
-extern FloatProperty s_musvol;
-extern FloatProperty s_gain;
+extern FloatCvar s_sfxvol;
+extern FloatCvar s_musvol;
+extern FloatCvar s_gain;
 
 enum {
     sfx_vol,
@@ -2496,7 +2494,7 @@ void M_GainOutput(int choice) {
 void M_DoFeature(int choice);
 void M_DrawFeaturesMenu(void);
 
-extern BoolProperty sv_lockmonsters;
+extern BoolCvar sv_lockmonsters;
 
 enum {
     features_levels = 0,
@@ -2558,7 +2556,7 @@ void M_DrawFeaturesMenu(void) {
     M_DrawSmbString(map->mapname, &featuresDef, features_levels);
 
     /*Lock Monsters Mode*/
-    M_DrawSmbString(msgNames[(int)sv_lockmonsters], &featuresDef, features_lockmonsters);
+    M_DrawSmbString(msgNames[(int)*sv_lockmonsters], &featuresDef, features_lockmonsters);
 
     /*Wireframe Mode*/
     M_DrawSmbString(msgNames[wireframeon], &featuresDef, features_wireframe);
@@ -3505,7 +3503,7 @@ void M_QuickLoadResponse(int ch) {
 
 static int prevtic = 0; // hack - check for overlapping sounds
 template <class T, class U>
-static void M_SetCvar(TypedProperty<T> &property, const U &value) {
+static void M_SetCvar(BasicCvar<T> &property, const U &value) {
     if(property == value) {
         return;
     }
@@ -3524,13 +3522,13 @@ static void M_SetCvar(TypedProperty<T> &property, const U &value) {
 // M_SetOptionValue
 //
 
-static void M_SetOptionValue(int choice, BoolProperty &property)
+static void M_SetOptionValue(int choice, BoolCvar &property)
 {
     M_SetCvar(property, !property);
 }
 
 template <class T, class U>
-static void M_SetOptionValue(int choice, U min, U max, U inc, TypedProperty<T> &cvar) {
+static void M_SetOptionValue(int choice, U min, U max, U inc, BasicCvar<T> &cvar) {
     if(choice) {
         if(cvar < max) {
             M_SetCvar(cvar, cvar + inc);
@@ -5221,7 +5219,7 @@ void M_MenuFadeOut(void) {
 // M_Ticker
 //
 
-extern BoolProperty p_features;
+extern BoolCvar p_features;
 
 void M_Ticker(void) {
     mainmenuactive = (currentMenu == &MainDef) ? true : false;
@@ -5361,17 +5359,17 @@ void M_Init(void) {
 
     // setup region menu
 
-    if(wad::have_lump("BLUDA0")) {
+    if(wad::exists("BLUDA0")) {
         m_regionblood = 0;
         RegionMenu[region_blood].status = 1;
     }
 
-    if(!wad::have_lump("JPMSG01")) {
+    if(!wad::exists("JPMSG01")) {
         st_regionmsg = false;
         RegionMenu[region_lang].status = 1;
     }
 
-    if(!wad::have_lump("PLLEGAL") && !wad::have_lump("JPLEGAL")) {
+    if(!wad::exists("PLLEGAL") && !wad::exists("JPLEGAL")) {
         p_regionmode = 0;
         RegionMenu[region_mode].status = 1;
     }

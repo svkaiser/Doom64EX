@@ -24,9 +24,9 @@
 
 set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
-if (CMAKE_VERSION VERSION_LESS 3.1.3)
+# if (CMAKE_VERSION VERSION_LESS 3.1.3)
   add_definitions(-std=c++14)
-endif ()
+# endif ()
 
 ##------------------------------------------------------------------------------
 ## Platform-specific sources
@@ -46,32 +46,7 @@ if(WIN32)
   endif()
 
 else()
-
-  set(WADGEN_SOURCES
-    wadgen/deflate-N64.cc
-    wadgen/deflate-N64.h
-    wadgen/gfx.cc
-    wadgen/gfx.h
-    wadgen/level.cc
-    wadgen/level.h
-    wadgen/png.cc
-    wadgen/rom.cc
-    wadgen/rom.h
-    wadgen/sndfont.cc
-    wadgen/sndfont.h
-    wadgen/sound.cc
-    wadgen/sound.h
-    wadgen/sprite.cc
-    wadgen/sprite.h
-    wadgen/texture.cc
-    wadgen/texture.h
-    wadgen/wad.cc
-    wadgen/wad.h
-    wadgen/wadgen.cc
-    wadgen/wadgen.h)
-
   set(PLATFORM_SOURCES
-    ${WADGEN_SOURCES}
     native_ui/Gtk3.cc
     system/i_cpu_posix.cc)
 
@@ -80,6 +55,14 @@ else()
     m)
 
 endif()
+
+##------------------------------------------------------------------------------
+## Headers
+##
+
+set(HEADERS
+  #${CMAKE_SOURCE_DIR}/include/imp/detail/image.hh
+  )
 
 ##------------------------------------------------------------------------------
 ## Sources
@@ -92,7 +75,8 @@ set(LIBRARIES
   ${PNG_LIBRARIES}
   ${FLUIDSYNTH_LIBRARIES}
   ${OPENGL_LIBRARIES}
-  ${CONAN_LIBS})
+  ${CONAN_LIBS}
+  easy_profiler)
 
 set(INCLUDES
   ${PLATFORM_INCLUDES}
@@ -105,6 +89,7 @@ set(INCLUDES
   ${PNG_INCLUDE_DIRS}
   ${FLUIDSYNTH_INCLUDE_DIR}
   ${OPENGL_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 
   automap
   common
@@ -124,7 +109,6 @@ set(INCLUDES
   sound
   statusbar
   system
-  wadgen
   zone)
 
 set(SOURCES
@@ -138,10 +122,11 @@ set(SOURCES
   automap/am_map.cc
 
   # common
+  common/logger.cc
   common/info.cc
   common/md5.cc
   common/tables.cc
-  common/Property.cc
+        core/cvar.cc
 
   # console
   console/con_console.cc
@@ -165,11 +150,12 @@ set(SOURCES
   game/g_game.cc
   game/g_settings.cc
 
-  # gfx
-  gfx/Image.cc
-  gfx/PngImage.cc
-  gfx/DoomImage.cc
-  gfx/Pixel.cc
+  # image
+  image/Doom.cc
+  image/Image.cc
+  image/PaletteCache.cc
+  image/Pixel.cc
+  image/Png.cc
 
   # intermission
   intermission/wi_stuff.cc
@@ -183,6 +169,9 @@ set(SOURCES
   misc/m_password.cc
   misc/m_random.cc
   misc/m_shift.cc
+
+  # native_ui
+  native_ui/Sdl2.cc
 
   # net
   net/net_client.cc
@@ -243,6 +232,7 @@ set(SOURCES
   renderer/r_wipe.cc
 
   # sound
+  sound/RomSource.cc
   sound/s_sound.cc
 
   # statusbar
@@ -255,16 +245,32 @@ set(SOURCES
   system/i_swap.h
   system/i_system.cc
   system/i_video.cc
+  system/n64_rom.cc
   system/SdlVideo.cc
 
   # wad
-  wad/Wad.cc
-  wad/DoomWad.cc
-  wad/RomWad.cc
-  wad/ZipWad.cc
+  wad/device.cc
+  wad/doom/doom_wad.cc
+  wad/ilump.cc
+  wad/lump.cc
+  wad/wad.cc
+  wad/zip/zip_wad.cc
+
+  # wad/rom
+  wad/rom/deflate.cc
+  wad/rom/lzss.cc
+  wad/rom/device.cc
+  wad/rom/gfx_lump.cc
+  wad/rom/sprite_lump.cc
+  wad/rom/texture_lump.cc
+  wad/rom/palette.cc
 
   # zone
-  zone/z_zone.cc)
+  zone/z_zone.cc
+
+  # top-level
+  prelude.hh
+  )
 
 ##------------------------------------------------------------------------------
 ## Build target

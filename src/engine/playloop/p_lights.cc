@@ -683,7 +683,7 @@ typedef struct {
     float factor;
 } fadebright_t;
 
-extern FloatProperty i_brightness;
+extern FloatCvar i_brightness;
 
 //
 // T_FadeInBrightness

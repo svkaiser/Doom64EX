@@ -34,12 +34,13 @@
 #include "m_misc.h"
 #include "m_random.h"
 #include "con_console.h"
-#include <imp/Wad>
 
 #ifdef _MSC_VER
 #include "i_opndir.h"
 #else
 #include <unistd.h>
+#include <wad.hh>
+
 #endif
 
 void        G_DoLoadLevel(void);
@@ -242,13 +243,13 @@ void G_PlayDemo(const char* name) {
         demo_p = demobuffer;
     }
     else {
-        if (!wad::have_lump(name)) {
+        if (!wad::exists(name)) {
             gameaction = ga_exitdemo;
             return;
         }
 
         CON_DPrintf("--------Playing demo %s--------\n", name);
-        demobuffer = demo_p = (byte*) wad::find(name)->bytes_ptr();
+        demobuffer = demo_p = reinterpret_cast<byte*>(wad::open(name)->read_bytes_ccompat());
     }
     
     if(strncmp((char*)demo_p, "DM64", 4)) {

@@ -1,8 +1,11 @@
 #include <map>
 #include <fstream>
-#include <imp/App>
-#include <imp/Wad>
+#include <platform/app.hh>
 #include <sys/stat.h>
+#include <imp/detail/Pixel.hh>
+
+#include <easy/profiler.h>
+#include <cxxabi.h>
 
 #include "SDL.h"
 
@@ -11,6 +14,24 @@
 #else
 #define SDL_main main
 #endif
+
+String imp::type_to_string(const std::type_info& type)
+{
+#ifdef __GNUC__
+    int status {};
+    auto real_name = abi::__cxa_demangle(type.name(), nullptr, nullptr, &status);
+
+    if (status == 0) {
+        String name = real_name;
+        std::free(real_name);
+        return name;
+    }
+
+    return type.name();
+#else
+    return type.name();
+#endif
+}
 
 [[noreturn]]
 void D_DoomMain();
@@ -45,21 +66,19 @@ namespace {
 
       void process(StringView arg)
       {
+          EASY_FUNCTION();
           if (arg[0] == '-') {
               arg.remove_prefix(1);
               auto it = _params.find(arg);
               if (it == _params.end()) {
-                  println(stderr, "Unknown parameter -{}", arg);
+                  log::warn("Unknown parameter -{}", arg);
               } else {
                   if (param) {
-                      println("");
                   }
                   param = it->second;
                   param->set_have();
-                  print("{:16s} = ", arg);
                   if (param->arity() == Arity::nullary) {
                       param = nullptr;
-                      println(" true");
                   }
               }
           } else {
@@ -69,10 +88,8 @@ namespace {
               }
 
               param->add(arg);
-              print(" {}", arg);
               if (param->arity() != Arity::nary) {
                   param = nullptr;
-                  println("");
               }
           }
       }
@@ -82,7 +99,9 @@ namespace {
 [[noreturn]]
 void app::main(int argc, char **argv)
 {
-    using Arity = app::Param::Arity;
+    EASY_PROFILER_ENABLE;
+    EASY_MAIN_THREAD;
+
     myargc = argc;
     myargv = argv;
 
@@ -104,7 +123,7 @@ void app::main(int argc, char **argv)
 #endif
 
     /* Process command-line arguments */
-    println("Parameters:");
+    log::debug("Parameters:");
     ParamsParser parser;
     for (int i = 1; i < argc; ++i) {
         auto arg = argv[i];
@@ -113,7 +132,7 @@ void app::main(int argc, char **argv)
             std::ifstream f(arg + 1);
 
             if (!f.is_open()) {
-                // TODO: Print error
+                log::fatal("Could not open '{}'", arg + 1);
                 continue;
             }
 
@@ -126,26 +145,12 @@ void app::main(int argc, char **argv)
             parser.process(arg);
         }
     }
-    if (parser.param && parser.param->arity() == Arity::nary)
-        println("");
 
     /* Print rest params */
     if (!_rest.empty()) {
-        print("{:16s} = ", "rest");
-        for (const auto &s : _rest)
-            print(" {}", s);
-        println("");
     }
 
-#ifndef _WIN32
-    if (_wadgen_param) {
-        WGen_WadgenMain();
-    } else {
-        D_DoomMain();
-    }
-#else
     D_DoomMain();
-#endif
 }
 
 bool app::file_exists(StringView path)
@@ -158,18 +163,18 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
     String path;
 
     if (!dir_hint.empty()) {
-        path = format("{}{}", dir_hint, name);
+        path = fmt::format("{}{}", dir_hint, name);
         if (app::file_exists(path))
-            return { inplace, path };
+            return path;
     }
 
-    path = format("{}{}", _base_dir, name);
+    path = fmt::format("{}{}", _base_dir, name);
     if (app::file_exists(path))
-        return { inplace, path };
+        return path;
 
-    path = format("{}{}", _data_dir, name);
+    path = fmt::format("{}{}", _data_dir, name);
     if (app::file_exists(path))
-        return { inplace, path };
+        return path;
 
 #if defined(__LINUX__) || defined(__OpenBSD__)
     const char *paths[] = {
@@ -183,9 +188,9 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
     };
 
     for (auto p : paths) {
-        path = format("{}{}", p, name);
+        path = fmt::format("{}{}", p, name);
         if (app::file_exists(path))
-            return { inplace, path };
+            return path;
     }
 #endif
 
@@ -199,7 +204,7 @@ StringView app::program()
 
 bool app::have_param(StringView name)
 {
-    return _params.count(name);
+    return _params.count(name) == 1;
 }
 
 const app::Param *app::param(StringView name)

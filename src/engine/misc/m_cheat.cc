@@ -155,7 +155,7 @@ static void M_CheatBerserk(player_t* player, char dat[4]) {
     player->message = GOTBERSERK;
 }
 
-extern IntProperty sv_skill;
+extern IntCvar sv_skill;
 static void M_CheatWarp(player_t* player, char dat[4]) {
     int map;
     map = datoi(dat);

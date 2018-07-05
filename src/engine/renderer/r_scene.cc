@@ -32,11 +32,11 @@
 #include "r_sky.h"
 #include "r_drawlist.h"
 
-extern BoolProperty i_interpolateframes;
-extern BoolProperty r_texturecombiner;
-extern BoolProperty r_fog;
-extern BoolProperty r_rendersprites;
-extern BoolProperty st_flashoverlay;
+extern BoolCvar i_interpolateframes;
+extern BoolCvar r_texturecombiner;
+extern BoolCvar r_fog;
+extern BoolCvar r_rendersprites;
+extern BoolCvar st_flashoverlay;
 
 //
 // ProcessWalls

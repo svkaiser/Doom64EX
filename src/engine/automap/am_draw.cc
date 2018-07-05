@@ -45,9 +45,9 @@ extern byte amModeCycle;
 
 static angle_t am_viewangle;
 
-extern BoolProperty am_fulldraw;
-extern BoolProperty am_ssect;
-extern BoolProperty r_texturecombiner;
+extern BoolCvar am_fulldraw;
+extern BoolCvar am_ssect;
+extern BoolCvar r_texturecombiner;
 
 //
 // AM_BeginDraw

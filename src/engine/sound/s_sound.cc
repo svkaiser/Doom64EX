@@ -43,7 +43,6 @@
 #include "p_setup.h"
 #include "i_audio.h"
 #include "con_console.h"
-#include <imp/Wad>
 
 // Adjustable by menu.
 #define NORM_VOLUME     127
@@ -71,24 +70,24 @@ static dboolean nosound = false;
 static dboolean nomusic = false;
 static int lastmusic = 0;
 
-FloatProperty s_sfxvol("s_sfxvol", "", 80.0f, 0,
-                       [](const FloatProperty& p, float, float&)
+FloatCvar s_sfxvol("s_sfxvol", "", 80.0f, 0,
+                       [](const FloatCvar& p, float, float&)
                        {
                            if (p < 0.0f)
                                return;
                            S_SetSoundVolume(*p);
                        });
 
-FloatProperty s_musvol("s_musvol", "", 80.0f, 0,
-                       [](const FloatProperty& p, float, float&)
+FloatCvar s_musvol("s_musvol", "", 80.0f, 0,
+                       [](const FloatCvar& p, float, float&)
                        {
                            if (p < 0.0f)
                                return;
                            S_SetMusicVolume(*p);
                        });
 
-FloatProperty s_gain("s_gain", "", 1.0f, 0,
-                     [](const FloatProperty& p, float, float&)
+FloatCvar s_gain("s_gain", "", 1.0f, 0,
+                     [](const FloatCvar& p, float, float&)
                      {
                          if(p < 0.0f)
                              return;

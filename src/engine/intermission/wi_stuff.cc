@@ -204,7 +204,8 @@ bool WI_Ticker(void) {
 
         if((nextcluster && cluster != nextcluster && nextcluster->enteronly) ||
             (cluster && cluster != nextcluster && !cluster->enteronly)) {
-            return ga_victory;
+            //return ga_victory;
+            return true;
         }
 
         return 1;

@@ -43,6 +43,7 @@ namespace NativeUI {
 
 	  public void insert (string text) {
 		  text_buffer.insert_at_cursor (text, text.length);
+		  text_buffer.insert_at_cursor ("\n", 1);
 	  }
   }
 }
