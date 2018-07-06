@@ -30,7 +30,7 @@
 #include "d_ticcmd.h"
 #include "d_event.h"
 #include "m_fixed.h"
-#include "logger.hh"
+#include "core/log/logger.hh"
 
 #ifdef __GNUG__
 #pragma interface
@@ -80,8 +80,6 @@ ticcmd_t* I_BaseTiccmd(void);
 void I_Quit(void);
 
 void I_BeginRead(void);
-#define I_Error(fmt, ...) ::imp::log::error.printf(fmt, ##__VA_ARGS__)
-#define I_Printf(fmt, ...) ::imp::log::info.printf(fmt, ##__VA_ARGS__)
 
 char *I_GetUserDir(void);
 char *I_GetBaseDir(void);

@@ -22,7 +22,6 @@
 
 #include <utility/endian.hh>
 
-#include <easy/profiler.h>
 #include "rom_private.hh"
 
 #include <imp/Image>
@@ -41,8 +40,6 @@ namespace {
 Optional<Image> GfxLump::read_image()
 {
     auto s = this->p_stream();
-
-    EASY_FUNCTION(profiler::colors::Green50);
 
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));

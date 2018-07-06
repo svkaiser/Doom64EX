@@ -75,8 +75,7 @@ set(LIBRARIES
   ${PNG_LIBRARIES}
   ${FLUIDSYNTH_LIBRARIES}
   ${OPENGL_LIBRARIES}
-  ${CONAN_LIBS}
-  easy_profiler)
+  ${CONAN_LIBS})
 
 set(INCLUDES
   ${PLATFORM_INCLUDES}
@@ -122,11 +121,13 @@ set(SOURCES
   automap/am_map.cc
 
   # common
-  common/logger.cc
   common/info.cc
   common/md5.cc
   common/tables.cc
-        core/cvar.cc
+
+  # core
+  core/log/log.cc
+  core/cvar.cc
 
   # console
   console/con_console.cc

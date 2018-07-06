@@ -18,12 +18,8 @@
 #include "utility/guard.hh"
 #include "utility/optional.hh"
 #include "imp/detail/Memory.hh"
+#include "core/log.hh"
 
-#include <common/logger.hh>
-
-#define STUB(msg) log::debug("STUB {}: {} ({}:{})", __FUNCTION__, msg, __LINE__, __FILE__)
-
-#define FIXME(msg) log::debug("FIXME {}: {} ({}:{})", __FUNCTION__, msg, __LINE__, __FILE__)
 
 namespace imp {
   struct dummy_t {

@@ -36,7 +36,6 @@
 #include "p_local.h"
 #include "con_console.h"
 #include "g_actions.h"
-#include <easy/profiler.h>
 #include <wad/section.hh>
 #include <wad.hh>
 
@@ -162,7 +161,6 @@ static void InitWorldTextures(void) {
 //
 
 void GL_BindWorldTexture(int texnum, int *width, int *height) {
-    EASY_FUNCTION(profiler::colors::Amber);
     if(r_fillmode <= 0) {
         return;
     }
@@ -198,7 +196,6 @@ void GL_BindWorldTexture(int texnum, int *width, int *height) {
     auto image = I_ReadImage(wad::open(wad::Section::textures, texnum).value().lump_index(), false, true, true, palettetranslation[texnum]);
 
     {
-        EASY_BLOCK("Bind texture");
         dglGenTextures(1, &textureptr[texnum][palettetranslation[texnum]]);
         dglBindTexture(GL_TEXTURE_2D, textureptr[texnum][palettetranslation[texnum]]);
         dglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -246,7 +243,6 @@ void GL_SetNewPalette(int id, byte palID) {
 
 static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
 {
-    EASY_FUNCTION();
     if(r_texnonpowresize > 0) {
 //        int wp;
 //        int hp;
@@ -331,7 +327,6 @@ static void InitGfxTextures(void) {
 //
 
 int GL_BindGfxTexture(const char* name, dboolean alpha) {
-    EASY_FUNCTION(profiler::colors::Amber);
     dboolean npot;
     int width;
     int height;
@@ -444,7 +439,6 @@ static void InitSpriteTextures(void) {
 //
 
 void GL_BindSpriteTexture(int spritenum, int pal) {
-    EASY_FUNCTION(profiler::colors::Amber);
     dboolean npot;
 
     if(!r_fillmode) {
@@ -557,7 +551,6 @@ dtexture GL_ScreenToTexture(void) {
 static dtexture dummytexture = 0;
 
 void GL_BindDummyTexture(void) {
-    EASY_FUNCTION(profiler::colors::Amber);
     if(dummytexture == 0) {
         //
         // build dummy texture
@@ -588,7 +581,6 @@ void GL_BindDummyTexture(void) {
 static dtexture envtexture = 0;
 
 void GL_BindEnvTexture(void) {
-    EASY_FUNCTION(profiler::colors::Amber);
     rcolor rgb[16];
 
     if(!r_fillmode) {

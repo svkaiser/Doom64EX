@@ -4,7 +4,6 @@
 #include <sys/stat.h>
 #include <imp/detail/Pixel.hh>
 
-#include <easy/profiler.h>
 #include <cxxabi.h>
 
 #include "SDL.h"
@@ -66,7 +65,6 @@ namespace {
 
       void process(StringView arg)
       {
-          EASY_FUNCTION();
           if (arg[0] == '-') {
               arg.remove_prefix(1);
               auto it = _params.find(arg);
@@ -99,9 +97,6 @@ namespace {
 [[noreturn]]
 void app::main(int argc, char **argv)
 {
-    EASY_PROFILER_ENABLE;
-    EASY_MAIN_THREAD;
-
     myargc = argc;
     myargv = argv;
 

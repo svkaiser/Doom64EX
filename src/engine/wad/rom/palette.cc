@@ -22,13 +22,11 @@
 
 #include <istream>
 #include <utility/endian.hh>
-#include <easy/profiler.h>
 
 #include "rom_private.hh"
 
 Rgba5551Palette wad::rom::read_n64palette(std::istream &s, size_t count)
 {
-    EASY_FUNCTION(profiler::colors::Green50);
     constexpr size_t r_mask = 0b0000'0000'0011'1110;
     constexpr size_t r_shr  = 1;
     constexpr size_t g_mask = 0b0000'0111'1100'0000;

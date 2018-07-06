@@ -30,7 +30,7 @@ namespace imp {
   using StringView = ::boost::string_view;
 
   namespace string_view_literals {
-    constexpr StringView operator ""_sv(const char *str, size_t len)
+    constexpr StringView operator ""_sv(const char *str, size_t len) noexcept
     { return { str, len }; }
   }
 }

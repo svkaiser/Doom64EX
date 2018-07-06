@@ -24,8 +24,6 @@
 #include <vector>
 #include <cstring>
 
-#include <easy/profiler_colors.h>
-#include <easy/profiler.h>
 #include "Image.hh"
 
 namespace {
@@ -45,7 +43,6 @@ namespace {
 
 void Image::load(std::istream& s)
 {
-    EASY_FUNCTION(profiler::colors::Magenta);
     auto pos = s.tellg();
     for (auto fmt : auto_order_) {
         auto io = image_formats_[static_cast<int>(fmt)].get();
@@ -61,7 +58,6 @@ void Image::load(std::istream& s)
 
 void Image::load(std::istream& s, ImageFormat format)
 {
-    EASY_FUNCTION(profiler::colors::Magenta);
     auto io = image_formats_[static_cast<int>(format)].get();
     auto opt = io->load(s);
     if (opt) {
@@ -80,7 +76,6 @@ void Image::save(std::ostream &s, ImageFormat format) const
 
 void Image::convert(PixelFormat format)
 {
-    EASY_FUNCTION(profiler::colors::Blue);
     if (pixel_format() == format)
         return;
 

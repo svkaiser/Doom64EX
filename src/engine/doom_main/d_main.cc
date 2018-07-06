@@ -36,7 +36,6 @@
 #endif
 
 #include <stdlib.h>
-#include <easy/profiler.h>
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -64,7 +63,7 @@
 #include "g_demo.h"
 #include "p_saveg.h"
 #include "gl_draw.h"
-#include "logger.hh"
+#include "core/log/logger.hh"
 
 #include "net_client.h"
 #include <wad.hh>
@@ -246,7 +245,6 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
     }
 
     while(!action) {
-        //EASY_BLOCK("Mainloop");
         int i = 0;
         int lowtic = 0;
         int entertic = 0;
@@ -980,8 +978,6 @@ void D_DoomMain(void) {
 
     {
         // init subsystems
-        EASY_BLOCK("D_DoomMain");
-
         I_Printf("imp::init_image: Init Image\n");
         void init_image();
         init_image();

@@ -26,7 +26,6 @@
 
 #include <ctype.h>
 #include <stdarg.h>
-#include <easy/profiler.h>
 #include "doomtype.h"
 #include "doomstat.h"
 #include "dgl.h"
@@ -40,7 +39,6 @@
 //
 
 void Draw_GfxImage(int x, int y, const char* name, rcolor color, dboolean alpha) {
-    EASY_FUNCTION(profiler::colors::Red);
     int gfxIdx = GL_BindGfxTexture(name, alpha);
 
     dglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DGL_CLAMP);
@@ -59,7 +57,6 @@ void Draw_GfxImage(int x, int y, const char* name, rcolor color, dboolean alpha)
 
 void Draw_Sprite2D(int type, int rot, int frame, int x, int y,
                    float scale, int pal, rcolor c) {
-    EASY_FUNCTION(profiler::colors::Red);
     spritedef_t    *sprdef;
     spriteframe_t *sprframe;
     float flip = 0.0f;
@@ -118,7 +115,6 @@ static vtx_t vtxstring[MAX_MESSAGE_SIZE];
 
 int Draw_Text(int x, int y, rcolor color, float scale,
               dboolean wrap, const char* string, ...) {
-    EASY_FUNCTION(profiler::colors::Red);
     int c;
     int i;
     int vi = 0;

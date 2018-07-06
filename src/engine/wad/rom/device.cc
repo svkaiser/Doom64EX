@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <imp/detail/Image.hh>
 #include <set>
-#include <easy/profiler.h>
 #include <utility/endian.hh>
 #include "rom_private.hh"
 #include "../wad_loaders.hh"
@@ -121,7 +120,6 @@ public:
 
     Vector<ILumpPtr> read_all() override
     {
-        EASY_FUNCTION(profiler::colors::Green);
         Vector<ILumpPtr> lumps;
         wad::Section section {};
         bool is_weapon {};

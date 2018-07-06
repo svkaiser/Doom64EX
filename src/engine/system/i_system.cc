@@ -35,7 +35,6 @@
 
 #include <stdarg.h>
 #include <sys/stat.h>
-#include <easy/profiler.h>
 #include "doomstat.h"
 #include "doomdef.h"
 #include "m_misc.h"
@@ -327,8 +326,6 @@ void I_Quit(void) {
 
     I_ShutdownSound();
     I_ShutdownVideo();
-
-    profiler::dumpBlocksToFile("doom64ex.prof");
 
     exit(0);
 }

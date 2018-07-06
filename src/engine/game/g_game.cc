@@ -139,6 +139,22 @@ IntCvar sv_skill("sv_Skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Cvar::n
 
 static void G_SetGameFlags();
 
+static void G_SetGameFlagsCvarCallback(const BoolCvar&, bool, bool&)
+{
+    G_SetGameFlags();
+}
+
+BoolCvar sv_lockmonsters("sv_lockmonsters", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar sv_friendlyfire("sv_friendlyfire", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar sv_keepitems("sv_keepitems", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar p_allowjump("p_allowjump", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar p_autoaim("p_autoaim", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar compat_collision("compat_collision", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar compat_mobjpass("compat_mobjpass", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar compat_limitpain("compat_limitpain", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
+BoolCvar compat_grabitems("compat_grabitems", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
+
 extern BoolCvar v_mlook;
 extern BoolCvar v_mlookinvert;
 extern BoolCvar v_yaxismove;

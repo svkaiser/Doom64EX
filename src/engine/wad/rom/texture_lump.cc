@@ -22,8 +22,6 @@
 
 #include <utility/endian.hh>
 
-#include <easy/profiler.h>
-
 #include "rom_private.hh"
 
 using namespace imp::wad::rom;
@@ -41,7 +39,6 @@ Optional<Image> TextureLump::read_image()
 {
     auto s = this->p_stream();
 
-    EASY_FUNCTION(profiler::colors::Green50);
     Header header;
     s.read(reinterpret_cast<char*>(&header), sizeof(header));
 

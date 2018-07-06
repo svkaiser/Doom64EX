@@ -23,7 +23,6 @@
 #include <utility/endian.hh>
 #include <ostream>
 #include <set>
-#include <easy/profiler.h>
 #include <map>
 
 #include "rom_private.hh"
@@ -100,7 +99,6 @@ SharedPtr<Palette> SpriteLump::m_palette()
 
 Optional<Image> SpriteLump::read_image()
 {
-    EASY_FUNCTION(profiler::colors::Green50);
     auto s = this->p_stream();
 
     auto header = read_header(s);
