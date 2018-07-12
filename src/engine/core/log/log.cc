@@ -18,6 +18,12 @@ namespace {
       return fmt::format("[{:>6}] ", sec);
   }
 
+  void s_fatal(StringView message)
+  {
+      native_ui::error(message.to_string());
+      std::exit(0);
+  }
+
   auto s_ansi_info = "\x1b[37m"_sv; // ANSI White
   auto s_ansi_warn = "\x1b[33m"_sv; // ANSI Yellow
   auto s_ansi_error = "\x1b[1;31m"_sv; // ANSI Bold & Red
@@ -55,6 +61,8 @@ Init::Init()
         log::error.m_init(s_ansi_error, std::cerr);
         log::fatal.m_init(s_ansi_fatal, std::cerr);
         log::debug.m_init(s_ansi_debug, std::cerr);
+
+        log::fatal.set_callback(s_fatal);
 
         s_program_start = std::chrono::steady_clock::now();
     }

@@ -6,12 +6,46 @@
 
 #include "n64_rom.hh"
 
+String n64_rom_text = "WADGEN";
+
 namespace {
-  const sys::N64Version g_versions[4] = {
-      { 'P', 0, { 0x63f60, 0x5d6cdc }, { 0x63ac40, 0x50000 }, { 0x646620, 0x50000 }, {0x83c40, 0x50000} },
-      { 'J', 0, { 0x64580, 0x5d8478 }, { 0, 0 }, { 0x6483e0, 0 }, {0, 0} },
-      { 'E', 0, { 0x63d10, 0x5d18b0 }, { 0x6355c0, 0x50000 }, { 0x640fa0, 0x50000 }, {0x6552a0, 0x500000} },
-      { 'E', 1, { 0x63dc0, 0x5d301c }, { 0x63ac40, 0x50000 }, { 0x646620, 0x50000 }, {0, 0} }
+  /**
+   * The way it seems to be laid out
+   */
+
+  /* Hardcoded ROM locations */
+  constexpr sys::N64Version g_versions[4] = {
+      /* US, NTSC */
+      { "USA"_sv, 'P', 0,
+        { 0x63f60,  0x5d6cdc }, // IWAD
+        { 0x63ac40, 0xb9d8 },   // SN64
+        { 0x646620, 0x142f8 },  // SSEQ
+        { 0x65a920, 0x1716c4 }  // PCM data
+      },
+
+      /* Japan, PAL */
+      { "JAP"_sv, 'J', 0,
+        { 0x64580,  0x5d8478 }, // IWAD
+        { 0x63ca00, 0xb9d8 },   // SN64
+        { 0x6483e0, 0x142f8 },  // SSEQ
+        { 0x65c6e0, 0x1716c4}   // PCM data
+      },
+
+      /* Europe rev. 1, PAL */
+      { "EUR v1"_sv, 'E', 0,
+        { 0x63d10,  0x5d18b0 }, // IWAD
+        { 0x6355c0, 0xb9d8 },   // SN64
+        { 0x640fa0, 0x142f8 },  // SSEQ
+        { 0x6552a0, 0x1716c4 }  // PCM data
+      },
+
+      /* Europe rev. 2, PAL */
+      { "EUR v2"_sv, 'E', 1,
+        { 0x63dc0,   0x5d301c }, // IWAD
+        { 0x63ac40,  0xb9d8},   // SN64
+        { 0x646620,  0x142f8 }, // SSEQ
+        { 0x65a920 , 0x1716c4 } // PCM DATA
+      }
   };
 
   struct Header {
@@ -65,8 +99,6 @@ std::istringstream sys::N64Rom::m_load(const sys::N64Loc &loc)
 
 bool sys::N64Rom::open(StringView path)
 {
-    return false;
-
     /* Used to detect endianess. Padded to 20 characters. */
     constexpr auto norm_name = "Doom64              "_sv;
     constexpr auto swap_name = "oDmo46              "_sv;
@@ -101,12 +133,29 @@ bool sys::N64Rom::open(StringView path)
         }
     }
 
+    // It's likely a hacked region-free ROM, so iterate over the different
+    // versions and check if the magic values match
+    if (country == '\0') {
+        for (const auto& l : g_versions) {
+            char magic[4];
+            m_file.seekg(l.iwad.offset, std::ios::beg);
+            m_file.read(magic, 4);
+
+            if ("IWAD"_sv == magic || "DAWI"_sv == magic) {
+                m_rom_version = &l;
+                break;
+            }
+        }
+    }
+
     if (!m_rom_version) {
-        m_error = fmt::format("WAD not found in Doom 64 ROM. (Country: {}, Version: {})",
+        m_error = fmt::format("WAD not found in Doom 64 ROM. (Country: {}, Version: {:d})",
                               country, version);
+        log::warn("{}", m_error);
         return false;
     } else {
-        m_version = fmt::format("(Country: {}, Version: {:d})", country, version);
+        m_version = m_rom_version->name.to_string();
+        n64_rom_text = fmt::format("{} rom", m_version);
     }
 
     return true;

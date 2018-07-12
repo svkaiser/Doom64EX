@@ -1,0 +1,54 @@
+app-id: com.github.Doom64EX
+sdk: org.gnome.Sdk
+runtime: org.gnome.Platform
+runtime-version: 3.26
+command: doom64ex
+
+finish-args:
+  # OpenGL
+  - --device=dri
+
+  # Create windows
+  - --socket=x11
+  - --socket=wayland
+
+  # Audio
+  - --socket=pulseaudio
+
+modules:
+  # Boost includes aren't in org.freedesktop.Sdk sadly, so download and install
+  - name: boost
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2
+        sha256: 2684c972994ee57fc5632e03bf044746f6eb45d4920c343937a465fd67a5adba
+
+    ## Only copy the include directory, since that's all we're using.
+    build-commands:
+      - mkdir -p /app/include
+      - cp -R boost /app/include
+
+    ## Commands to compile boost in case we ever decide to include any boost
+    ## libraries
+    # build-commands:
+    #   - ./bootstrap.sh --prefix=/app --with-libraries=
+    #   - ./b2 --build-type=minimal --type=shared
+    #   - ./b2 --build-type=minimal --type=shared install
+
+    cleanup:
+      - /include
+
+  # Finally, build the actual project
+  - name: doom64ex
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        path: doom64ex.tar.xz
+
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_GTK3=ON
+
+    cleanup:
+      - /include

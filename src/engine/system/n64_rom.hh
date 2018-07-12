@@ -12,6 +12,7 @@ namespace imp {
     };
 
     struct N64Version {
+        StringView name;
         char country_id;
         char version_id;
         N64Loc iwad;

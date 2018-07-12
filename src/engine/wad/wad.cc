@@ -13,7 +13,7 @@ void wad::init()
     wad::add_device_loader(rom_loader);
 
     // Find and add the Doom 64 IWAD
-    if (path = app::find_data_file("doom64.rom")) {
+    if ((path = app::find_data_file("doom64.rom"))) {
         iwad_loaded = wad::add_device(*path);
     }
 

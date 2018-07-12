@@ -12,6 +12,8 @@
 
 # build dir
 /build
+/build-*
+/.flatpak-builder
 
 # conan
 conanbuildinfo.cmake

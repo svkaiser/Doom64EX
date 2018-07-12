@@ -731,12 +731,17 @@ void M_Options(int choice) {
     M_SetupNextMenu(&OptionsDef);
 }
 
+extern String n64_rom_text;
 void M_DrawOptions(void) {
     if(OptionsDef.hints[itemOn] != NULL) {
         GL_SetOrthoScale(0.5f);
         Draw_BigText(-1, 410, MENUCOLORWHITE, OptionsDef.hints[itemOn]);
         GL_SetOrthoScale(OptionsDef.scale);
     }
+
+    GL_SetOrthoScale(0.5f);
+    Draw_BigText(0, 460, MENUCOLORWHITE, n64_rom_text.data());
+    GL_SetOrthoScale(OptionsDef.scale);
 }
 
 
@@ -5359,17 +5364,18 @@ void M_Init(void) {
 
     // setup region menu
 
-    if(wad::exists("BLUDA0")) {
+    if(wad::exists(wad::Section::graphics, "BLUDA0")) {
         m_regionblood = 0;
         RegionMenu[region_blood].status = 1;
     }
 
-    if(!wad::exists("JPMSG01")) {
+    if (!wad::exists(wad::Section::graphics, "JPMSG01")) {
         st_regionmsg = false;
         RegionMenu[region_lang].status = 1;
     }
 
-    if(!wad::exists("PLLEGAL") && !wad::exists("JPLEGAL")) {
+    if (!wad::exists(wad::Section::graphics, "PLLEGAL") &&
+        !wad::exists(wad::Section::graphics, "JPLEGAL")) {
         p_regionmode = 0;
         RegionMenu[region_mode].status = 1;
     }

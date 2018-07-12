@@ -150,7 +150,18 @@ void app::main(int argc, char **argv)
 
 bool app::file_exists(StringView path)
 {
-	return std::ifstream(path.to_string()).is_open();
+#ifdef _WIN32
+    return std::ifstream(path.to_string()).is_open();
+#else
+    struct stat st;
+
+    if (stat(path.data(), &st) == -1) {
+        DEBUG("Failed stat for {}", path);
+        return false;
+    }
+
+    return S_ISREG(st.st_mode);
+#endif
 }
 
 Optional<String> app::find_data_file(StringView name, StringView dir_hint)
@@ -163,11 +174,11 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
             return path;
     }
 
-    path = fmt::format("{}{}", _base_dir, name);
+    path = _base_dir + name.to_string();
     if (app::file_exists(path))
         return path;
 
-    path = fmt::format("{}{}", _data_dir, name);
+    path = _data_dir + name.to_string();
     if (app::file_exists(path))
         return path;
 
@@ -180,6 +191,9 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
         "/usr/share/doom64ex/",
         "/usr/share/doom/",
         "/opt/doom64ex/",
+
+        /* flatpak */
+        "/app/share/games/doom64ex/"
     };
 
     for (auto p : paths) {

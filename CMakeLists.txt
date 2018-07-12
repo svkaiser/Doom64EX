@@ -61,6 +61,10 @@ endif()
 ## Compiler Options
 ##
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  add_definitions(-DIMP_DEBUG=1)
+endif()
+
 if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Debug mode: Enabling stricter warnings")
   set(FLAGS "-Wall -Wno-unknown-pragmas -Wno-undefined-var-template -fno-strict-aliasing -D_GLIBCXX_DEBUG")

@@ -438,6 +438,7 @@ namespace {
   void load_sn64_()
   {
       auto s = g_rom.sn64();
+      auto start = static_cast<size_t>(s.tellg());
 
       /* read header */
       sn64 = Sn64Header::from_istream(s);
@@ -539,6 +540,8 @@ namespace {
               inst.sample_id = subpatch.id;
           }
       }
+
+      fmt::print("SN64 Length: {}\n", static_cast<size_t>(s.tellg()) - start);
   }
 
   enum struct midi {
@@ -823,6 +826,7 @@ namespace {
   auto load_sseq_()
   {
       auto s = g_rom.sseq();
+      auto start = static_cast<size_t>(s.tellg());
 
       /* process header */
       auto sseq = SseqHeader::from_istream(s);
@@ -873,6 +877,8 @@ namespace {
               read_midi_(midi_data, track, str, j, i, patches_[track.id]);
           }
       }
+
+      fmt::print("SSEQ Length: {}\n", static_cast<size_t>(s.tellg()) - start);
 
       return s;
   }
@@ -946,6 +952,7 @@ fluid_sfont_t* rom_sfont()
 
     /* read pcm */
     auto s = g_rom.pcm();
+    auto start = static_cast<size_t>(s.tellg());
     samples_.resize(sn64.num_sounds);
     auto pcm_ptr = sample_data_.data();
     for (size_t i {}; i < sn64.num_sounds; ++i) {
@@ -982,6 +989,7 @@ fluid_sfont_t* rom_sfont()
             sample.loopend = loop.loop_end;
         }
     }
+    fmt::print("PCM Length: 0x{:x}\n", static_cast<size_t>(s.tellg()) - start);
 
     struct Soundfont {
         char name[20] = "Doom64EX RomSource";
