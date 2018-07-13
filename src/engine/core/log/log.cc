@@ -30,13 +30,39 @@ namespace {
   auto s_ansi_fatal = "\x1b[1;30;41m"_sv; // ANSI Bold & Black on Red
   auto s_ansi_debug = "\x1b[34m"_sv; // ANSI Blue
   auto s_ansi_reset = "\x1b[0m"_sv;
+
+#ifdef _WIN32
+  //
+  // static vasprintf
+  //
+
+  int vasprintf(char **buf, const char *fmt, va_list ap)
+  {
+      // WinAPI doesn't contain an implementation of vasprintf, so let's do it
+      // ourselves.
+      // https://stackoverflow.com/questions/40159892/using-asprintf-on-windows#40160038
+
+      auto len = _vscprintf(fmt, ap);
+      if (len == -1) {
+          return -1;
+      }
+
+      *buf = reinterpret_cast<char*>(malloc(len + 1));
+      if (!*buf) {
+          // Out-of-memory. Should probably just die or something.
+          return -1;
+      }
+
+      return vsprintf_s(*buf, len + 1, fmt, ap);
+  }
+#endif
 }
 
 //
 // Globals
 //
 
-std::atomic<size_t> Init::m_refcnt;
+std::atomic<size_t> Init::m_refcnt {};
 
 Logger log::info;
 Logger log::warn;

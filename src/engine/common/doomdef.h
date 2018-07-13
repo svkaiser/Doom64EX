@@ -342,6 +342,29 @@ extern dboolean windowpause;
 #define KEY_MWHEELUP            (0x80 + 0x6b)
 #define KEY_MWHEELDOWN          (0x80 + 0x6c)
 
+//
+// Controller
+//
+
+enum {
+    JOY_INVALID = 0,
+    JOY_A,
+    JOY_B,
+    JOY_X,
+    JOY_Y,
+    JOY_BACK,
+    JOY_GUIDE,
+    JOY_START,
+    JOY_LSTICK,
+    JOY_RSTICK,
+    JOY_LSHOULDER,
+    JOY_RSHOULDER,
+    JOY_DPAD_UP,
+    JOY_DPAD_DOWN,
+    JOY_DPAD_LEFT,
+    JOY_DPAD_RIGHT
+};
+
 // DOOM basic types (dboolean),
 //  and max/min values.
 #include "doomtype.h"

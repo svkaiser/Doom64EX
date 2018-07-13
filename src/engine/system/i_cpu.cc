@@ -32,19 +32,12 @@
 #error This version of i_cpu.c is for Win32 only.
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <prelude.hh>
+#include <m_misc.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 // #include "doomtype.h"
-
-// cannot include DOOM headers here; required externs:
-extern void     I_Printf(const char* string, ...);
-extern int      M_CheckParm(const char *);
-extern int      datoi(const char *str);
-extern int      myargc;
-extern char**   myargv;
 
 unsigned int process_affinity_mask;
 

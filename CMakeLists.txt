@@ -62,7 +62,7 @@ endif()
 ##
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  add_definitions(-DIMP_DEBUG=1)
+  add_definitions(-DIMP_DEBUG)
 endif()
 
 if(NOT MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
@@ -74,7 +74,7 @@ endif()
 
 if(MINGW)
   add_definitions(-DFMT_USE_WINDOWS_H=0)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -static")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lmingw32 -static -mwindows")
 endif(MINGW)
 
 ##------------------------------------------------------------------------------

@@ -24,10 +24,6 @@
 
 set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
-# if (CMAKE_VERSION VERSION_LESS 3.1.3)
-  add_definitions(-std=c++14)
-# endif ()
-
 ##------------------------------------------------------------------------------
 ## Platform-specific sources
 ##
@@ -44,7 +40,6 @@ if(WIN32)
     set(PLATFORM_LIBRARIES
       mingw32)
   endif()
-
 else()
   set(PLATFORM_SOURCES
     native_ui/Gtk3.cc
@@ -70,6 +65,7 @@ set(HEADERS
 
 set(LIBRARIES
   ${PLATFORM_LIBRARIES}
+  ${SDL2MAIN_LIBRARY}
   ${SDL2_LIBRARIES}
   ${SDL2_NET_LIBRARIES}
   ${PNG_LIBRARIES}

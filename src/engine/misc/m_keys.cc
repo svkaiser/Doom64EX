@@ -111,7 +111,7 @@ static keyinfo_t    Keys[]= {
     {KEY_MWHEELDOWN,        "MouseWheelDown"},
 
     // villsa 01052014
-#ifdef _USE_XINPUT  // XINPUT
+#if 0
     {BUTTON_DPAD_UP,        "DPadUp"},
     {BUTTON_DPAD_DOWN,      "DPadDown"},
     {BUTTON_DPAD_LEFT,      "DPadLeft"},

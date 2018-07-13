@@ -823,6 +823,59 @@ void G_DoCmdMouseMove(int x, int y) {
     pc->mousey += static_cast<int>((y * *v_msensitivityy) / 128);
 }
 
+//
+// G_DoCmdGamepadMove
+//
+
+#if 0
+void G_DoCmdGamepadMove(event_t *ev)
+{
+    // Most of this is taken from kaiser's xinput.c
+    playercontrols_t *pc = &Controls;
+
+    if (ev->type == ev_gamepad) {
+        pc->flags |= PCF_GAMEPAD;
+
+        //
+        // left analog stick
+        //
+        if (ev->data3 == GAMEPAD_LEFT_STICK) {
+            auto y = static_cast<float>(ev->data2) * 0.0015f;
+
+            //
+            // classic scheme uses traditional turning for x-axis
+            //
+            if (i_xinputscheme.value()) {
+                auto turnspeed = i_rsticksensitivity / i_rstickthreshold;
+
+                if (ev->data1 != 0) {
+
+                }
+            }
+            //
+            // modern scheme uses strafing for x-axis
+            //
+            else {
+                pc->joyx += static_cast<float>(ev->data1) * 0.0015f;
+            }
+            pc->joyy += y;
+        }
+        //
+        // right analog stick
+        //
+        else if (ev->data3 == GAMEPAD_RIGHT_STICK) {
+            auto y = static_cast<float>(ev->data2) * 0.0015f;
+
+            if (ev->data1 != 0) {
+
+            }
+
+            pc->mousex += y;
+            pc->mousey += y;
+        }
+    }
+}
+#endif
 
 //
 // G_ClearInput

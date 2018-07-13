@@ -63,6 +63,24 @@ namespace imp {
     {
         return resize_component_shift<FromDepth, ToDepth - FromDepth>()(x);
     };
+
+    /**
+     * unit_type, get the smallest type that will fit n bytes
+     */
+    template <size_t NBytes>
+    struct unit_type;
+
+    template <>
+    struct unit_type<1> { using type = uint8; };
+
+    template <>
+    struct unit_type<2> { using type = uint16; };
+
+    template <>
+    struct unit_type<3> { using type = uint32; };
+
+    template <>
+    struct unit_type<4> { using type = uint32; };
   }
 
 #pragma pack(push, 1)
@@ -72,10 +90,12 @@ namespace imp {
       static constexpr auto format = Format;
       static constexpr size_t alpha_max = (1ULL << Alpha) - 1ULL;
 
-      size_t red : Red;
-      size_t green : Green;
-      size_t blue : Blue;
-      size_t alpha : Alpha;
+      using unit = typename detail::unit_type<(Red + Green + Blue + Alpha + 7) / 8>::type;
+
+      unit red   : Red;
+      unit green : Green;
+      unit blue  : Blue;
+      unit alpha : Alpha;
 
       constexpr Color() = default;
 
@@ -115,9 +135,11 @@ namespace imp {
   struct Color<Format, Red, Green, Blue, 0> {
       static constexpr auto format = Format;
 
-      size_t red : Red;
-      size_t green : Green;
-      size_t blue : Blue;
+      using unit = typename detail::unit_type<(Red + Green + Blue + 7) / 8>::type;
+
+      unit red   : Red;
+      unit green : Green;
+      unit blue  : Blue;
 
       constexpr Color() = default;
 
@@ -143,11 +165,42 @@ namespace imp {
       constexpr Color &operator=(Color &&) = default;
   };
 
+  // RGB888 is a special case in that it's 3 bytes, but MSVC rounds it up to 4
+  // because of bitmasks. So in this case, specify that it's exactly 3 uint8's.
+  template <>
+  struct Color<PixelFormat::rgb, 8, 8, 8, 0> {
+      static constexpr auto format = PixelFormat::rgb;
+
+      uint8 red {};
+      uint8 green {};
+      uint8 blue {};
+
+      constexpr Color() = default;
+      constexpr Color(const Color&) = default;
+      constexpr Color(Color&&) = default;
+
+      constexpr Color(size_t red, size_t green, size_t blue):
+          red(red),
+          green(green),
+          blue(blue)
+      {}
+
+      template <PixelFormat CFormat, size_t CRed, size_t CGreen, size_t CBlue, size_t CAlpha>
+      constexpr Color(const Color<CFormat, CRed, CGreen, CBlue, CAlpha>& other):
+          red(detail::resize_component<CRed, 8>(other.red)),
+          green(detail::resize_component<CGreen, 8>(other.green)),
+          blue(detail::resize_component<CBlue, 8>(other.blue))
+      {}
+
+      constexpr Color& operator=(const Color&) = default;
+      constexpr Color& operator=(Color&&) = default;
+  };
+
   template<PixelFormat Format, size_t Depth>
   struct Index {
       static constexpr auto format = Format;
 
-      size_t index : Depth;
+      uint8 index : Depth;
 
       constexpr Index() = default;
 

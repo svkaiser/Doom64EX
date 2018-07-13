@@ -18,6 +18,8 @@ namespace {
   constexpr auto fullscreen_enum = Fullscreen::noborder;
 #endif
 
+  SDL_GameController *g_controller {};
+
   int translate_scancode_(const SDL_Scancode key) {
       switch(key) {
       case SDL_SCANCODE_LEFT: return KEY_LEFTARROW;
@@ -138,18 +140,43 @@ namespace {
 
       case SDLK_LALT:
       case SDLK_RALT: return KEY_RALT;
-          
+
       case SDLK_CAPSLOCK: return KEY_CAPS;
 
       default: return key;
       }
   }
 
+  int translate_controller_(int state)
+  {
+      switch (state) {
+      case SDL_CONTROLLER_BUTTON_A: return JOY_A;
+      case SDL_CONTROLLER_BUTTON_B: return JOY_B;
+      case SDL_CONTROLLER_BUTTON_X: return JOY_X;
+      case SDL_CONTROLLER_BUTTON_Y: return JOY_Y;
+
+      case SDL_CONTROLLER_BUTTON_BACK: return JOY_BACK;
+      case SDL_CONTROLLER_BUTTON_GUIDE: return JOY_GUIDE;
+      case SDL_CONTROLLER_BUTTON_START: return JOY_START;
+      case SDL_CONTROLLER_BUTTON_LEFTSTICK: return JOY_LSTICK;
+      case SDL_CONTROLLER_BUTTON_RIGHTSTICK: return JOY_RSTICK;
+      case SDL_CONTROLLER_BUTTON_LEFTSHOULDER: return JOY_LSHOULDER;
+      case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: return JOY_RSHOULDER;
+
+      case SDL_CONTROLLER_BUTTON_DPAD_UP: return JOY_DPAD_UP;
+      case SDL_CONTROLLER_BUTTON_DPAD_DOWN: return JOY_DPAD_DOWN;
+      case SDL_CONTROLLER_BUTTON_DPAD_LEFT: return JOY_DPAD_LEFT;
+      case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return JOY_DPAD_RIGHT;
+
+      default: return JOY_INVALID;
+      }
+  }
+
   int translate_mouse_(int state) {
       return 0
-             | (state & SDL_BUTTON(SDL_BUTTON_LEFT)      ? 1 : 0)
-             | (state & SDL_BUTTON(SDL_BUTTON_MIDDLE)    ? 2 : 0)
-             | (state & SDL_BUTTON(SDL_BUTTON_RIGHT)     ? 4 : 0);
+          | (state & SDL_BUTTON(SDL_BUTTON_LEFT)      ? 1 : 0)
+          | (state & SDL_BUTTON(SDL_BUTTON_MIDDLE)    ? 2 : 0)
+          | (state & SDL_BUTTON(SDL_BUTTON_RIGHT)     ? 4 : 0);
   }
 }
 
@@ -262,7 +289,7 @@ public:
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_ShowCursor(SDL_FALSE);
         init_modes_();
-        
+
         SDL_DisplayMode desktop_mode;
         SDL_GetDesktopDisplayMode(0, &desktop_mode);
 
@@ -494,6 +521,25 @@ public:
                 D_PostEvent(&doom);
                 break;
 
+            // case SDL_CONTROLLERDEVICEADDED:
+            //     log::info("Controller added: {}", SDL_GameControllerNameForIndex(e.cdevice.which));
+            //     g_controller = SDL_GameControllerOpen(e.cdevice.which);
+            //     break;
+
+            // case SDL_CONTROLLERDEVICEREMOVED:
+            //     g_controller = nullptr;
+            //     break;
+
+            // case SDL_CONTROLLERBUTTONDOWN:
+            // case SDL_CONTROLLERBUTTONUP:
+            //     if (!has_focus_)
+            //         break;
+
+            //     doom.type = (e.type == SDL_CONTROLLERBUTTONUP) ? ev_conup : ev_condown;
+            //     doom.data1 = translate_controller_(e.cbutton.which);
+            //     D_PostEvent(&doom);
+            //     break;
+
             case SDL_WINDOWEVENT:
                 switch (e.window.event) {
                 case SDL_WINDOWEVENT_FOCUS_GAINED:
@@ -520,13 +566,36 @@ public:
             case SDL_QUIT:
                 I_Quit();
                 return;
-                
+
             default:
                 break;
             }
         }
 
         int x, y;
+
+        // if (g_controller) {
+        //     event_t ev {};
+
+        //     x = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_LEFTX);
+        //     y = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_LEFTY);
+
+        //     ev.type = ev_conleft;
+        //     ev.data1 = 0;
+        //     ev.data2 = x << 5;
+        //     ev.data3 = (-y) << 5;
+        //     D_PostEvent(&ev);
+
+        //     x = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_RIGHTX);
+        //     y = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_RIGHTY);
+
+        //     ev.type = ev_conright;
+        //     ev.data1 = 0;
+        //     ev.data2 = x << 5;
+        //     ev.data3 = (-y) << 5;
+        //     D_PostEvent(&ev);
+        // }
+
         SDL_GetRelativeMouseState(&x, &y);
         auto btn = SDL_GetMouseState(&mouse_x, &mouse_y);
         if (x != 0 || y != 0 || btn || (lastmbtn_ != btn)) {

@@ -91,7 +91,7 @@ std::istringstream sys::N64Rom::m_load(const sys::N64Loc &loc)
         }
     }
 
-    std::istringstream iss;
+    std::istringstream iss(std::ios_base::binary);
     iss.str(buf);
     iss.exceptions(std::ios_base::eofbit | std::ios_base::failbit | std::ios_base::badbit);
     return iss;
@@ -105,7 +105,7 @@ bool sys::N64Rom::open(StringView path)
 
     Header header;
 
-    m_file.open(path.to_string());
+    m_file.open(path.to_string(), std::ios::binary);
     m_file.read(reinterpret_cast<char*>(&header), sizeof(header));
 
     char country {};

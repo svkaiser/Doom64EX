@@ -904,10 +904,10 @@ void GL_DumpTextures(void) {
 
             if(animdefs[p].palette) {
                 for(j = 1; j < animdefs[p].frames; j++) {
-                    GL_UnloadTexture(&textureptr[i][j]);
+                    // GL_UnloadTexture(&textureptr[i][j]);
                 }
             }
-        }
+       }
     }
 
     for(i = 0; i < numsprtex; i++) {

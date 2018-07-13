@@ -2,6 +2,7 @@
 #define __LOGGER__81425854
 
 #include <sstream>
+#include <iostream>
 #include <utility/string_view.hh>
 #include <fmt/format.h>
 

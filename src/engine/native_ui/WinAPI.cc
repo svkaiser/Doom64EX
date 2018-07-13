@@ -20,6 +20,6 @@ void native_ui::console_show(bool show)
 
 void native_ui::console_add_line(StringView line)
 {
-    String text = line;
+    String text = line.to_string();
     winapi_add_text(text.c_str());
 }

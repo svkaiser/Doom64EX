@@ -244,6 +244,15 @@ static void Audio_Play(void *user, Uint8 *stream, int len)
 }
 
 //
+// Audio_Play_float
+//
+static void Audio_Play_float(void *user, Uint8 *stream, int len)
+{
+    fluid_synth_t *synth = (fluid_synth_t *) user;
+    fluid_synth_write_float(synth, len / (2 * sizeof(float)), stream, 0, 2, stream, 1, 2);
+}
+
+//
 // Seq_SetGain
 //
 // Set the 'master' volume for the sequencer. Affects
@@ -289,22 +298,22 @@ static double Song_GetTimeDivision(song_t* song) {
 
 static void Seq_SetStatus(doomseq_t* seq, int status) {
     MUTEX_LOCK()
-    seq->signal = status;
+        seq->signal = status;
     MUTEX_UNLOCK()
-}
+        }
 
 //
 // Seq_WaitOnSignal
 //
 
 /*static void Seq_WaitOnSignal(doomseq_t* seq)
-{
-    while(1)
-    {
-        if(seq->signal == SEQ_SIGNAL_READY)
-            break;
-    }
-}*/
+  {
+  while(1)
+  {
+  if(seq->signal == SEQ_SIGNAL_READY)
+  break;
+  }
+  }*/
 
 //
 // Chan_SetMusicVolume
@@ -615,7 +624,7 @@ static void Event_Meta(doomseq_t* seq, channel_t* chan) {
     meta = Chan_GetNextMidiByte(chan);
 
     switch(meta) {
-    // mostly for debugging/logging
+        // mostly for debugging/logging
     case MIDI_MESSAGE:
         b = Chan_GetNextMidiByte(chan);
         dmemset(string, 0, 256);
@@ -652,7 +661,7 @@ static void Event_Meta(doomseq_t* seq, channel_t* chan) {
         chan->starttime = chan->curtime;
         break;
 
-    // game-specific midi event
+        // game-specific midi event
     case MIDI_SEQUENCER:
         b = Chan_GetNextMidiByte(chan);   // length
         b = Chan_GetNextMidiByte(chan);   // manufacturer (should be 0)
@@ -714,16 +723,16 @@ static int Signal_StopAll(doomseq_t* seq) {
     int i;
 
     SEMAPHORE_LOCK()
-    for(i = 0; i < MIDI_CHANNELS; i++) {
-        c = &playlist[i];
+        for(i = 0; i < MIDI_CHANNELS; i++) {
+            c = &playlist[i];
 
-        if(c->song) {
-            Chan_RemoveTrackFromPlaylist(seq, c);
+            if(c->song) {
+                Chan_RemoveTrackFromPlaylist(seq, c);
+            }
         }
-    }
     SEMAPHORE_UNLOCK()
 
-    Seq_SetStatus(seq, SEQ_SIGNAL_READY);
+        Seq_SetStatus(seq, SEQ_SIGNAL_READY);
     return 1;
 }
 
@@ -749,17 +758,17 @@ static int Signal_Pause(doomseq_t* seq) {
     channel_t* c;
 
     SEMAPHORE_LOCK()
-    for(i = 0; i < MIDI_CHANNELS; i++) {
-        c = &playlist[i];
+        for(i = 0; i < MIDI_CHANNELS; i++) {
+            c = &playlist[i];
 
-        if(c->song && !c->paused) {
-            c->paused = true;
-            Chan_StopTrack(seq, c);
+            if(c->song && !c->paused) {
+                c->paused = true;
+                Chan_StopTrack(seq, c);
+            }
         }
-    }
     SEMAPHORE_UNLOCK()
 
-    Seq_SetStatus(seq, SEQ_SIGNAL_READY);
+        Seq_SetStatus(seq, SEQ_SIGNAL_READY);
     return 1;
 }
 
@@ -774,17 +783,17 @@ static int Signal_Resume(doomseq_t* seq) {
     channel_t* c;
 
     SEMAPHORE_LOCK()
-    for(i = 0; i < MIDI_CHANNELS; i++) {
-        c = &playlist[i];
+        for(i = 0; i < MIDI_CHANNELS; i++) {
+            c = &playlist[i];
 
-        if(c->song && c->paused) {
-            c->paused = false;
-            fluid_synth_noteon(seq->synth, c->track->channel, c->key, c->velocity);
+            if(c->song && c->paused) {
+                c->paused = false;
+                fluid_synth_noteon(seq->synth, c->track->channel, c->key, c->velocity);
+            }
         }
-    }
     SEMAPHORE_UNLOCK()
 
-    Seq_SetStatus(seq, SEQ_SIGNAL_READY);
+        Seq_SetStatus(seq, SEQ_SIGNAL_READY);
     return 1;
 }
 
@@ -795,11 +804,11 @@ static int Signal_Resume(doomseq_t* seq) {
 static int Signal_UpdateGain(doomseq_t* seq) {
     SEMAPHORE_LOCK()
 
-    Seq_SetGain(seq);
+        Seq_SetGain(seq);
 
     SEMAPHORE_UNLOCK()
 
-    Seq_SetStatus(seq, SEQ_SIGNAL_READY);
+        Seq_SetStatus(seq, SEQ_SIGNAL_READY);
     return 1;
 }
 
@@ -950,22 +959,22 @@ static void Seq_RunSong(doomseq_t* seq, dword msecs) {
     seq->playtime = msecs;
 
     SEMAPHORE_LOCK()
-    for(i = 0; i < MIDI_CHANNELS; i++) {
-        chan = &playlist[i];
+        for(i = 0; i < MIDI_CHANNELS; i++) {
+            chan = &playlist[i];
 
-        if(!chan->song) {
-            continue;
-        }
+            if(!chan->song) {
+                continue;
+            }
 
-        if(chan->stop) {
-            Chan_RemoveTrackFromPlaylist(seq, chan);
+            if(chan->stop) {
+                Chan_RemoveTrackFromPlaylist(seq, chan);
+            }
+            else {
+                Chan_RunSong(seq, chan, msecs);
+            }
         }
-        else {
-            Chan_RunSong(seq, chan, msecs);
-        }
-    }
     SEMAPHORE_UNLOCK()
-}
+        }
 
 //
 // Song_RegisterTracks
@@ -1007,19 +1016,19 @@ static dboolean Song_RegisterTracks(song_t* song) {
 
 // Doom64EX expects audio to be loaded in this order since the sound indices are hardcoded in info.cc
 static const std::array<StringView, 117> audio_lumps_ {{
-    "NOSOUND", "SNDPUNCH", "SNDSPAWN", "SNDEXPLD", "SNDIMPCT", "SNDPSTOL", "SNDSHTGN", "SNDPLSMA", "SNDBFG",
-    "SNDSAWUP", "SNDSWIDL", "SNDSAW1", "SNDSAW2", "SNDMISLE", "SNDBFGXP", "SNDPSTRT", "SNDPSTOP", "SNDDORUP",
-    "SNDDORDN", "SNDSCMOV", "SNDSWCH1", "SNDSWCH2", "SNDITEM", "SNDSGCK", "SNDOOF1", "SNDTELPT", "SNDOOF2",
-    "SNDSHT2F", "SNDLOAD1", "SNDLOAD2", "SNDPPAIN", "SNDPLDIE", "SNDSLOP", "SNDZSIT1", "SNDZSIT2", "SNDZSIT3",
-    "SNDZDIE1", "SNDZDIE2", "SNDZDIE3", "SNDZACT", "SNDPAIN1", "SNDPAIN2", "SNDDBACT", "SNDSCRCH", "SNDISIT1",
-    "SNDISIT2", "SNDIDIE1", "SNDIDIE2", "SNDIACT", "SNDSGSIT", "SNDSGATK", "SNDSGDIE", "SNDB1SIT", "SNDB1DIE",
-    "SNDHDSIT", "SNDHDDIE", "SNDSKATK", "SNDB2SIT", "SNDB2DIE", "SNDPESIT", "SNDPEPN", "SNDPEDIE", "SNDBSSIT",
-    "SNDBSDIE", "SNDBSLFT", "SNDBSSMP", "SNDFTATK", "SNDFTSIT", "SNDFTHIT", "SNDFTDIE", "SNDBDMSL", "SNDRVACT",
-    "SNDTRACR", "SNDDART", "SNDRVHIT", "SNDCYSIT", "SNDCYDTH", "SNDCYHOF", "SNDMETAL", "SNDDOR2U", "SNDDOR2D",
-    "SNDPWRUP", "SNDLASER", "SNDBUZZ", "SNDTHNDR", "SNDLNING", "SNDQUAKE", "SNDDRTHT", "SNDRCACT", "SNDRCATK",
-    "SNDRCDIE", "SNDRCPN", "SNDRCSIT", "MUSAMB01", "MUSAMB02", "MUSAMB03", "MUSAMB04", "MUSAMB05", "MUSAMB06",
-    "MUSAMB07", "MUSAMB08", "MUSAMB09", "MUSAMB10", "MUSAMB11", "MUSAMB12", "MUSAMB13", "MUSAMB14", "MUSAMB15",
-    "MUSAMB16", "MUSAMB17", "MUSAMB18", "MUSAMB19", "MUSAMB20", "MUSFINAL", "MUSDONE", "MUSINTRO", "MUSTITLE" }};
+        "NOSOUND", "SNDPUNCH", "SNDSPAWN", "SNDEXPLD", "SNDIMPCT", "SNDPSTOL", "SNDSHTGN", "SNDPLSMA", "SNDBFG",
+            "SNDSAWUP", "SNDSWIDL", "SNDSAW1", "SNDSAW2", "SNDMISLE", "SNDBFGXP", "SNDPSTRT", "SNDPSTOP", "SNDDORUP",
+            "SNDDORDN", "SNDSCMOV", "SNDSWCH1", "SNDSWCH2", "SNDITEM", "SNDSGCK", "SNDOOF1", "SNDTELPT", "SNDOOF2",
+            "SNDSHT2F", "SNDLOAD1", "SNDLOAD2", "SNDPPAIN", "SNDPLDIE", "SNDSLOP", "SNDZSIT1", "SNDZSIT2", "SNDZSIT3",
+            "SNDZDIE1", "SNDZDIE2", "SNDZDIE3", "SNDZACT", "SNDPAIN1", "SNDPAIN2", "SNDDBACT", "SNDSCRCH", "SNDISIT1",
+            "SNDISIT2", "SNDIDIE1", "SNDIDIE2", "SNDIACT", "SNDSGSIT", "SNDSGATK", "SNDSGDIE", "SNDB1SIT", "SNDB1DIE",
+            "SNDHDSIT", "SNDHDDIE", "SNDSKATK", "SNDB2SIT", "SNDB2DIE", "SNDPESIT", "SNDPEPN", "SNDPEDIE", "SNDBSSIT",
+            "SNDBSDIE", "SNDBSLFT", "SNDBSSMP", "SNDFTATK", "SNDFTSIT", "SNDFTHIT", "SNDFTDIE", "SNDBDMSL", "SNDRVACT",
+            "SNDTRACR", "SNDDART", "SNDRVHIT", "SNDCYSIT", "SNDCYDTH", "SNDCYHOF", "SNDMETAL", "SNDDOR2U", "SNDDOR2D",
+            "SNDPWRUP", "SNDLASER", "SNDBUZZ", "SNDTHNDR", "SNDLNING", "SNDQUAKE", "SNDDRTHT", "SNDRCACT", "SNDRCATK",
+            "SNDRCDIE", "SNDRCPN", "SNDRCSIT", "MUSAMB01", "MUSAMB02", "MUSAMB03", "MUSAMB04", "MUSAMB05", "MUSAMB06",
+            "MUSAMB07", "MUSAMB08", "MUSAMB09", "MUSAMB10", "MUSAMB11", "MUSAMB12", "MUSAMB13", "MUSAMB14", "MUSAMB15",
+            "MUSAMB16", "MUSAMB17", "MUSAMB18", "MUSAMB19", "MUSAMB20", "MUSFINAL", "MUSDONE", "MUSINTRO", "MUSTITLE" }};
 
 size_t Seq_SoundLookup(StringView name) {
     return std::distance(audio_lumps_.begin(), std::find(audio_lumps_.begin(), audio_lumps_.end(), name));
@@ -1156,6 +1165,20 @@ static int SDLCALL Thread_PlayerHandler(void *param) {
 
     return 0;
 }
+
+//
+// equality operators for SDL_AudioSpec, for ease of use.
+//
+bool operator==(const SDL_AudioSpec& lhs, const SDL_AudioSpec& rhs)
+{
+    return lhs.format == rhs.format &&
+        lhs.freq == rhs.freq &&
+        lhs.channels == rhs.channels &&
+        lhs.samples == rhs.samples;
+}
+
+bool operator!=(const SDL_AudioSpec& lhs, const SDL_AudioSpec& rhs)
+{ return !(lhs == rhs); }
 
 //
 // I_InitSequencer
@@ -1306,13 +1329,48 @@ void I_InitSequencer(void) {
     spec.userdata = doomseq.synth;
 
     SDL_OpenAudio(&spec, &obtained);
-    SDL_PauseAudio(SDL_FALSE);
 
     log::debug("SDL_OpenAudio settings:");
-    log::debug("\t format   (spec: {:<5}, got: {:<5})", spec.format, obtained.format);
-    log::debug("\t freq     (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
-    log::debug("\t samples  (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
-    log::debug("\t channels (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
+    log::debug("| format             (spec: {:<5}, got: {:<5})", spec.format, obtained.format);
+    log::debug("+-+ bitsize          (spec: {:<5}, got: {:<5})",
+               SDL_AUDIO_BITSIZE(spec.format),
+               SDL_AUDIO_BITSIZE(obtained.format));
+    log::debug("  | is signed        (spec: {:<5}, got: {:<5})",
+               SDL_AUDIO_ISSIGNED(spec.format),
+               SDL_AUDIO_ISSIGNED(obtained.format));
+    log::debug("  | is int           (spec: {:<5}, got: {:<5})",
+               SDL_AUDIO_ISINT(spec.format),
+               SDL_AUDIO_ISINT(obtained.format));
+    log::debug("  | is little-endian (spec: {:<5}, got: {:<5})",
+               SDL_AUDIO_ISLITTLEENDIAN(spec.format),
+               SDL_AUDIO_ISLITTLEENDIAN(obtained.format));
+    log::debug("+-+ is unsigned      (spec: {:<5}, got: {:<5})",
+               SDL_AUDIO_ISUNSIGNED(spec.format),
+               SDL_AUDIO_ISUNSIGNED(obtained.format));
+    log::debug("| freq               (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
+    log::debug("| samples            (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
+    log::debug("| channels           (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
+
+    // If we didn't get what we asked for, try again with float
+    if (spec != obtained) {
+        fluid_settings_setstr(doomseq.settings, "audio.sample-format", "float");
+
+        spec.format = AUDIO_F32;
+        spec.callback = Audio_Play_float;
+
+        SDL_CloseAudio();
+        SDL_OpenAudio(&spec, &obtained);
+    }
+
+    // Finally, if we still don't have what we asked for, quit. Silence is
+    // better than broken ears.
+    if (spec != obtained) {
+        log::warn("Failed to start audio: Couldn't get audio spec that we asked for");
+        SDL_CloseAudio();
+        return;
+    }
+
+    SDL_PauseAudio(SDL_FALSE);
 
     // 20120205 villsa - sequencer is now ready
     seqready = true;
@@ -1460,7 +1518,7 @@ void I_StartMusic(int mus_id) {
     }
 
     SEMAPHORE_LOCK()
-    song = &doomseq.songs[mus_id];
+        song = &doomseq.songs[mus_id];
     for(i = 0; i < song->ntracks; i++) {
         chan = Song_AddTrackToPlaylist(&doomseq, song, &song->tracks[i]);
 
@@ -1471,7 +1529,7 @@ void I_StartMusic(int mus_id) {
         chan->volume = doomseq.musicvolume;
     }
     SEMAPHORE_UNLOCK()
-}
+        }
 
 //
 // I_StopSound
@@ -1487,7 +1545,7 @@ void I_StopSound(sndsrc_t* origin, int sfx_id) {
     }
 
     SEMAPHORE_LOCK()
-    song = &doomseq.songs[sfx_id];
+        song = &doomseq.songs[sfx_id];
     for(i = 0; i < MIDI_CHANNELS; i++) {
         c = &playlist[i];
 
@@ -1496,7 +1554,7 @@ void I_StopSound(sndsrc_t* origin, int sfx_id) {
         }
     }
     SEMAPHORE_UNLOCK()
-}
+        }
 
 //
 // I_StartSound
@@ -1516,7 +1574,7 @@ void I_StartSound(int sfx_id, sndsrc_t* origin, int volume, int pan, int reverb)
     }
 
     SEMAPHORE_LOCK()
-    song = &doomseq.songs[sfx_id];
+        song = &doomseq.songs[sfx_id];
     for(i = 0; i < song->ntracks; i++) {
         chan = Song_AddTrackToPlaylist(&doomseq, song, &song->tracks[i]);
 
@@ -1530,5 +1588,4 @@ void I_StartSound(int sfx_id, sndsrc_t* origin, int volume, int pan, int reverb)
         chan->depth = reverb;
     }
     SEMAPHORE_UNLOCK()
-}
-
+        }
