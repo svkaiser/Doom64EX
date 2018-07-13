@@ -237,6 +237,8 @@ namespace imp {
 
       void scale(size_t new_width, size_t new_height);
 
+      void canvas(size_t new_width, size_t new_height);
+
       void flip_vertical();
 
       Scanline operator[](size_t i)

@@ -149,6 +149,20 @@ void Image::scale(size_t new_width, size_t new_height)
     *this = match(scale);
 }
 
+void Image::canvas(size_t new_width, size_t new_height)
+{
+    Image copy { pixel_format(), new_width, new_height };
+
+    auto copyx = std::min(width(), copy.width()) * pixel_info().width;
+    auto copyy = std::min(height(), copy.height());
+
+    for (size_t y = 0; y < copyy; ++y) {
+        std::copy_n((*this)[y].data_ptr(), copyx, copy[y].data_ptr());
+    }
+
+    *this = copy;
+}
+
 void Image::flip_vertical()
 {
     auto half_height = height() / 2;
