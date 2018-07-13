@@ -256,7 +256,10 @@ Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height) {
     dglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, image.data_ptr());
     dglPixelStorei(GL_PACK_ALIGNMENT, pack);
 
-    return image;
+    Image img = std::move(image);
+    img.flip_vertical();
+
+    return img;
 }
 
 //

@@ -134,9 +134,6 @@ void Image::scale(size_t new_width, size_t new_height)
         double dx = static_cast<double>(image.width()) / new_width;
         double dy = static_cast<double>(image.height()) / new_height;
 
-        DEBUG("dx: {}", dx);
-        DEBUG("dy: {}", dy);
-
         for (size_t y = 0; y < new_height; ++y, sy += dy) {
             auto zy = static_cast<size_t>(sy);
             double sx = 0;
@@ -150,6 +147,18 @@ void Image::scale(size_t new_width, size_t new_height)
     };
 
     *this = match(scale);
+}
+
+void Image::flip_vertical()
+{
+    auto half_height = height() / 2;
+
+    for (size_t y = 0; y < half_height; ++y) {
+        auto top = (*this)[y].data_ptr();
+        auto bot = (*this)[height() - y - 1].data_ptr();
+
+        std::swap_ranges(top, top + pitch(), bot);
+    }
 }
 
 void init_image()
