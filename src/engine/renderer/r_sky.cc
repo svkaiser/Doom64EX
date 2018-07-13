@@ -362,7 +362,7 @@ static void R_DrawSkyboxCloud(void) {
     // bind cloud texture and set blending
     //
     GL_SetTextureUnit(0, true);
-    GL_BindGfxTexture(wad::open(wad::Section::textures, skypicnum).value().name().data(), false);
+    GL_BindGfxTexture(wad::open(skypicnum).value().name().data(), false);
     GL_SetState(GLSTATE_BLEND, 1);
 
     //
@@ -810,7 +810,7 @@ void R_DrawSky(void) {
             }
             else {
                 GL_SetTextureUnit(0, true);
-                GL_BindGfxTexture(wad::open(wad::Section::graphics, skypicnum).value().name().data(), true);
+                GL_BindGfxTexture(wad::open(skypicnum).value().name().data(), true);
 
                 //
                 // drawer will assume that the texture's
@@ -843,7 +843,7 @@ void R_DrawSky(void) {
                 float base;
 
                 GL_SetTextureUnit(0, true);
-                l = GL_BindGfxTexture(wad::open(wad::Section::textures, skybackdropnum).value().name().data(), true);
+                l = GL_BindGfxTexture(wad::open(skybackdropnum).value().name().data(), true);
 
                 //
                 // handle the case for non-powers of 2 texture

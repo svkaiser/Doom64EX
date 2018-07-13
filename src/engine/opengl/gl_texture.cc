@@ -373,7 +373,10 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     SetTextureImage(reinterpret_cast<byte*>(image.data_ptr()), (alpha ? 4 : 3), &width, &height, format, type);
 
     gfxwidth[gfxid] = width;
+    gfxorigwidth[gfxid] = width;
+
     gfxheight[gfxid] = height;
+    gfxorigheight[gfxid] = height;
 
     if(devparm) {
         glBindCalls++;
