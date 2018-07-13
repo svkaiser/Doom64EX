@@ -72,7 +72,7 @@ Optional<Image> GfxLump::read_image()
     if (info().hack != Hack::fire) {
         // Seek to the palette and read it
         s.seekg(palofs);
-        image.palette(read_n64palette(s, 256));
+        image.set_palette(read_n64palette(s, 256));
     }
 
     return Image { image };

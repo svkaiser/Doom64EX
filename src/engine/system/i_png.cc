@@ -91,7 +91,7 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
         snprintf(palname, sizeof(palname), "PAL%4.4s%d", l.name().data(), palindex);
 
         if (wad::exists(palname)) {
-            image.palette(cache::palette(palname));
+            image.set_palette(cache::palette(palname));
         } else {
             /*
             Palette newpal = { pal.pixel_format(), 16 };

@@ -41,11 +41,23 @@ namespace imp {
       const PixT* data() const
       { return reinterpret_cast<const PixT*>(data_); }
 
+      PixT& get(size_t i)
+      { return data()[i]; }
+
+      const PixT& get(size_t i) const
+      { return data()[i]; }
+
       const PixT& index(size_t i) const
       { return data()[i]; }
 
       void index(size_t i, PixT x)
       { data()[i] = x; }
+
+      PixT& operator[](size_t i)
+      { return data()[i]; }
+
+      const PixT& operator[](size_t i) const
+      { return data()[i]; }
   };
 
   template <class PixT>
@@ -76,6 +88,12 @@ namespace imp {
 
       const PixT* data() const
       { return reinterpret_cast<const PixT*>(data_); }
+
+      PixT& get(size_t i)
+      { return data()[i]; }
+
+      const PixT& get(size_t i) const
+      { return data()[i]; }
 
       PixT& operator[](size_t i)
       { return data()[i]; }
@@ -113,6 +131,9 @@ namespace imp {
       const PixT& index(size_t i) const
       { return data()[i]; }
 
+      const PixT& get(size_t i) const
+      { return data()[i]; }
+
       const PalT& operator[](size_t i) const
       { return pal_[index(i).index]; }
   };
@@ -140,6 +161,9 @@ namespace imp {
 
       const PixT* data() const
       { return reinterpret_cast<const PixT*>(data_); }
+
+      const PixT& get(size_t i) const
+      { return data()[i]; }
 
       const PixT& operator[](size_t i) const
       { return data()[i]; }

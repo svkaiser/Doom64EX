@@ -668,7 +668,7 @@ void R_InitFire(void) {
         c = Rgba { j, j, j, 0xff };
         j += 16;
     }
-    fireImage.palette(std::move(paldata));
+    fireImage.set_palette(std::move(paldata));
 }
 
 //

@@ -244,14 +244,8 @@ void GL_SwapBuffers(void) {
 //
 
 Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height) {
-    byte* buffer;
-    byte* data;
+    RgbImage image { width, height };
     int pack;
-    int col;
-
-    col     = (width * 3);
-    data    = (byte*)Z_Calloc(height * width * 3, PU_STATIC, 0);
-    buffer  = (byte*)Z_Calloc(col, PU_STATIC, 0);
 
     //
     // 20120313 villsa - force pack alignment to 1
@@ -259,13 +253,8 @@ Image GL_GetScreenBuffer(int16 x, int16 y, uint16 width, uint16 height) {
     dglGetIntegerv(GL_PACK_ALIGNMENT, &pack);
     dglPixelStorei(GL_PACK_ALIGNMENT, 1);
     dglFlush();
-    dglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+    dglReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, image.data_ptr());
     dglPixelStorei(GL_PACK_ALIGNMENT, pack);
-    RgbImage image { width, height };
-
-//    image.flip(Flip::vertical);
-
-    Z_Free(buffer);
 
     return image;
 }

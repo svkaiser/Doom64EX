@@ -68,7 +68,7 @@ Optional<Image> TextureLump::read_image()
     }
 
     auto palsize = static_cast<size_t>(header.numpal) * 16;
-    image.palette(read_n64palette(s, palsize));
+    image.set_palette(read_n64palette(s, palsize));
 
     return Image { image };
 }

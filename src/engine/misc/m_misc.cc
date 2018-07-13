@@ -319,10 +319,10 @@ int M_CacheThumbNail(byte** data) {
     char* tbn;
 
     auto image = GL_GetScreenBuffer(0, 0, video_width, video_height);
-    //image.align(1);
-    //image.scale(128, 128, ScaleFlag::keep_ratio);
+    // image.align(1);
+    image.scale(128, 128);
 
-    tbn = new char[SAVEGAMESIZE];
+    tbn = new char[SAVEGAMETBSIZE];
 
     std::copy_n(image.data_ptr(), SAVEGAMETBSIZE, tbn);
 

@@ -109,6 +109,49 @@ void Image::convert(PixelFormat format)
     });
 }
 
+void Image::scale(size_t new_width, size_t new_height)
+{
+    if (this->width() == new_width && this->height() == new_height)
+        return;
+
+    if (this->width() == 0 || this->height() == 0) {
+        // If the new size is also 0 pixels
+        if (new_width == 0 || new_height == 0) {
+            return;
+        }
+
+        *this = Image { pixel_format(), new_width, new_height };
+        return;
+    }
+
+    auto scale = [this, new_width, new_height](auto image) {
+        using pixel_type   = typename decltype(image)::pixel_type;
+        using palette_type = typename decltype(image)::palette_type;
+        BasicImage<pixel_type, palette_type> copy(new_width, new_height);
+        copy.set_palette(image.palette());
+
+        double sy = 0;
+        double dx = static_cast<double>(image.width()) / new_width;
+        double dy = static_cast<double>(image.height()) / new_height;
+
+        DEBUG("dx: {}", dx);
+        DEBUG("dy: {}", dy);
+
+        for (size_t y = 0; y < new_height; ++y, sy += dy) {
+            auto zy = static_cast<size_t>(sy);
+            double sx = 0;
+            for (size_t x = 0; x < new_width; ++x, sx += dx) {
+                auto zx = static_cast<size_t>(sx);
+                copy[y].get(x) = image[zy].get(zx);
+            }
+        }
+
+        return Image(copy);
+    };
+
+    *this = match(scale);
+}
+
 void init_image()
 {
     init_image_formats_();

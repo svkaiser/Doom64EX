@@ -358,6 +358,9 @@ namespace imp {
 
       case PixelFormat::index8:
           return ifunc(Index8{});
+
+      default:
+          throw std::logic_error("");
       }
   }
 }

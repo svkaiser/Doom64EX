@@ -230,10 +230,12 @@ namespace imp {
       const Palette& palette() const
       { return pal_; }
 
-      void palette(const Palette& pal)
+      void set_palette(const Palette& pal)
       { pal_ = pal; }
 
       void convert(PixelFormat format);
+
+      void scale(size_t new_width, size_t new_height);
 
       Scanline operator[](size_t i)
       { return { data_ptr() + pitch_ * i }; }
@@ -323,7 +325,7 @@ namespace imp {
       const BasicPalette<PalT>& palette() const
       { return pal_; }
 
-      void palette(const BasicPalette<PalT>& pal)
+      void set_palette(const BasicPalette<PalT>& pal)
       { pal_ = pal; }
 
       uint16 width() const
@@ -396,6 +398,12 @@ namespace imp {
       const char* data_ptr() const
       { return data_.get(); }
 
+      bool palette() const
+      { return false; }
+
+      void set_palette(bool)
+      {}
+
       uint16 width() const
       { return width_; }
 
@@ -431,6 +439,8 @@ namespace imp {
 
   public:
       using value_type = BasicScanline<PixT, PalT>;
+      using pixel_type = PixT;
+      using palette_type = PalT;
 
       BasicImageView() = default;
 
@@ -482,6 +492,8 @@ namespace imp {
 
   public:
       using value_type = BasicScanline<PixT, void>;
+      using pixel_type = PixT;
+      using palette_type = void;
 
       BasicImageView() = default;
 
@@ -495,6 +507,9 @@ namespace imp {
 
       const char* data_ptr() const
       { return data_; }
+
+      bool palette() const
+      { return false; }
 
       uint16 width() const
       { return width_; }

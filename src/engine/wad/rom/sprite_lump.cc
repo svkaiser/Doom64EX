@@ -120,7 +120,7 @@ Optional<Image> SpriteLump::read_image()
             }
         }
 
-        image.palette(read_n64palette(s, 16));
+        image.set_palette(read_n64palette(s, 16));
     } else {
         for (size_t y = 0; y < image.height(); ++y)
             for (size_t x = 0; x < image.pitch(); ++x)
@@ -159,6 +159,6 @@ Optional<Image> SpriteLump::read_image()
     image.sprite_offset({ header.xoffs, header.yoffs });
 
     Image ret { std::move(image) };
-    if (palette) ret.palette(palette);
+    if (palette) ret.set_palette(palette);
     return ret;
 }

@@ -1138,7 +1138,7 @@ static void saveg_write_header(char *description) {
         saveg_write8(tbn[i]);
     }
 
-    Z_Free(tbn);
+    delete[] tbn;
 
     for(i = 0; i < 16; i++) {
         saveg_write8(passwordData[i]);

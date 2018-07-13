@@ -100,7 +100,7 @@ IntCvar r_colorscale("r_colorscale", "", 0, 0,
                              GL_SetColorScale();
                          });
 
-BoolCvar r_filter("r_filter", "", false, 0,
+BoolCvar r_filter("r_filter", "", false, BoolCvar::user_config,
                       [](const BoolCvar&, bool, bool&)
                       {
                           GL_DumpTextures();
