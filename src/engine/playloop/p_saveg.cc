@@ -54,7 +54,12 @@ void G_DoLoadLevel(void);
 static FILE*    save_stream;
 static byte*    savebuffer;
 
+static unsigned long save_length = 0;
 static unsigned long save_offset = 0;
+
+struct read_error : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 //
 // P_GetSaveGameName
@@ -76,6 +81,9 @@ char *P_GetSaveGameName(int num) {
 static byte saveg_read8(void) {
     byte result;
 
+    if (save_offset + 1 > save_length)
+        throw read_error("saveg_read8");
+
     result = savebuffer[save_offset++];
 
     return result;
@@ -88,6 +96,9 @@ static void saveg_write8(byte value) {
 
 static short saveg_read16(void) {
     int result;
+
+    if (save_offset + 2 > save_length)
+        throw read_error("saveg_read16");
 
     result = saveg_read8();
     result |= saveg_read8() << 8;
@@ -102,6 +113,9 @@ static void saveg_write16(short value) {
 
 static int saveg_read32(void) {
     int result;
+
+    if (save_offset + 4 > save_length)
+        throw read_error("saveg_read32");
 
     result = saveg_read8();
     result |= saveg_read8() << 8;
@@ -126,34 +140,34 @@ static void saveg_write32(int value) {
 
 static void saveg_read_pad(void) {
     /*unsigned long pos;
-    int padding;
-    int i;
+      int padding;
+      int i;
 
-    //
-    // avoid using fseek due to returning incorrect file offsets
-    //
-    pos = save_offset;
+      //
+      // avoid using fseek due to returning incorrect file offsets
+      //
+      pos = save_offset;
 
-    padding = (4 - (pos & 3)) & 3;
+      padding = (4 - (pos & 3)) & 3;
 
-    for(i = 0; i < padding; i++)
-        saveg_read8();*/
+      for(i = 0; i < padding; i++)
+      saveg_read8();*/
 }
 
 static void saveg_write_pad(void) {
     /*unsigned long pos;
-    int padding;
-    int i;
+      int padding;
+      int i;
 
-    //
-    // avoid using fseek due to returning incorrect file offsets
-    //
-    pos = save_offset;
+      //
+      // avoid using fseek due to returning incorrect file offsets
+      //
+      pos = save_offset;
 
-    padding = (4 - (pos & 3)) & 3;
+      padding = (4 - (pos & 3)) & 3;
 
-    for(i = 0; i < padding; i++)
-        saveg_write8(0);*/
+      for(i = 0; i < padding; i++)
+      saveg_write8(0);*/
 }
 
 //------------------------------------------------------------------------
@@ -1284,23 +1298,28 @@ dboolean P_WriteSaveGame(char* description, int slot) {
 //
 
 dboolean P_ReadSaveGame(char* name) {
-    M_ReadFile(name, &savebuffer);
+    save_length = M_ReadFile(name, &savebuffer);
     save_offset = 0;
 
-    saveg_read_header();
+    try {
+        saveg_read_header();
 
-    // load a base level
-    G_InitNew(gameskill, gamemap);
-    G_DoLoadLevel();
+        // load a base level
+        G_InitNew(gameskill, gamemap);
+        G_DoLoadLevel();
 
-    P_UnArchiveMobjs();
-    P_UnArchivePlayers();
-    P_UnArchiveWorld();
-    P_UnArchiveSpecials();
-    P_UnArchiveMacros();
+        P_UnArchiveMobjs();
+        P_UnArchivePlayers();
+        P_UnArchiveWorld();
+        P_UnArchiveSpecials();
+        P_UnArchiveMacros();
 
-    if(!saveg_read_marker(SAVEGAME_EOF)) {
-        I_Error("Bad savegame");
+        if(!saveg_read_marker(SAVEGAME_EOF)) {
+            I_Error("Bad savegame");
+        }
+    } catch (read_error& e) {
+        log::warn("Error loading savegame '{}': File corrupted/invalid", name);
+        log::warn("{}", e.what());
     }
 
     Z_Free(savebuffer);
@@ -1317,34 +1336,44 @@ dboolean P_QuickReadSaveHeader(char* name, char* date,
     int i;
     int size;
 
-    if(M_ReadFile(name, &savebuffer) == -1) {
+    save_length = M_ReadFile(name, &savebuffer);
+
+    if(save_length != -1) {
         return 0;
     }
 
     save_offset = 0;
 
-    // skip the description field
-    for(i = 0; i < SAVESTRINGSIZE; i++) {
-        saveg_read8();
+    try {
+        // skip the description field
+        for(i = 0; i < SAVESTRINGSIZE; i++) {
+            saveg_read8();
+        }
+
+        for(i = 0; i < 32; i++) {
+            date[i] = saveg_read8();
+        }
+
+        size = saveg_read32() / sizeof(int);
+
+        for(i = 0; i < size; i++) {
+            thumbnail[i] = saveg_read32();
+        }
+
+        // skip password
+        for(i = 0; i < 16; i++) {
+            saveg_read8();
+        }
+
+        *skill  = saveg_read8();
+        *map    = saveg_read8();
+
+    } catch(read_error& e) {
+        log::warn("Error loading savegame '{}': File corrupted/invalid", name);
+        log::warn("{}", e.what());
+        Z_Free(savebuffer);
+        return 0;
     }
-
-    for(i = 0; i < 32; i++) {
-        date[i] = saveg_read8();
-    }
-
-    size = saveg_read32() / sizeof(int);
-
-    for(i = 0; i < size; i++) {
-        thumbnail[i] = saveg_read32();
-    }
-
-    // skip password
-    for(i = 0; i < 16; i++) {
-        saveg_read8();
-    }
-
-    *skill  = saveg_read8();
-    *map    = saveg_read8();
 
     Z_Free(savebuffer);
 
@@ -1973,5 +2002,3 @@ void P_UnArchiveMacros(void) {
         taglist[i] = saveg_read16();
     }
 }
-
-
