@@ -663,7 +663,7 @@ void GL_UpdateEnvTexture(rcolor color) {
 //
 
 void GL_UnloadTexture(dtexture* texture) {
-    if(*texture != 0) {
+    if(texture != nullptr && *texture != 0) {
         dglDeleteTextures(1, texture);
         *texture = 0;
     }
@@ -904,7 +904,7 @@ void GL_DumpTextures(void) {
 
             if(animdefs[p].palette) {
                 for(j = 1; j < animdefs[p].frames; j++) {
-                    // GL_UnloadTexture(&textureptr[i][j]);
+                    GL_UnloadTexture(&textureptr[i][j]);
                 }
             }
        }
