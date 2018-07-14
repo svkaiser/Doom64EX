@@ -50,7 +50,7 @@ Optional<Image> TextureLump::read_image()
     uint16 width = static_cast<uint16>(1 << header.wshift);
     uint16 height = static_cast<uint16>(1 << header.hshift);
 
-    I8Rgba5551Image image { width, height };
+    I8Rgba5551Image image { width, height, 8 };
 
     for (size_t i = 0; i + 2 <= image.size(); i += 2) {
         auto p = image.data_ptr() + i;
