@@ -1323,7 +1323,7 @@ void I_InitSequencer(void) {
 
     spec.format = AUDIO_S16;
     spec.freq = 44100;
-    spec.samples = 128;
+    spec.samples = 512;
     spec.channels = 2;
     spec.callback = Audio_Play;
     spec.userdata = doomseq.synth;
