@@ -305,7 +305,7 @@ namespace {
       int type;
       int ival;
 
-      explicit Generator(int type, uint16 value):
+      explicit Generator(int type, int value):
           type(type), ival(value) {}
 
       explicit Generator(int type, uint8 lo, uint8 hi):
@@ -412,7 +412,7 @@ namespace {
   double s_usec_to_timecents(int usec)
   {
       auto t = static_cast<double>(usec) / 1000.0;
-      return 1200 * (log10(t) / log10(2));
+      return 1200 * log2(t);
   }
 
   double s_pan_to_percent(int pan)
@@ -423,7 +423,7 @@ namespace {
 
   int s_get_original_pitch(int key, int pitch)
   {
-      return ((pitch / 100) - key) * -1;
+      return key - (pitch / 100);
   }
 
   double s_attenuation_to_percent(int attenuation)
@@ -509,22 +509,22 @@ namespace {
               gens.emplace_back(GEN_KEYRANGE, subpatch.note_min, subpatch.note_max);
 
               if (subpatch.attenuation < 127) {
-                  auto val = static_cast<uint16>(s_attenuation_to_percent(subpatch.attenuation));
+                  int val = s_attenuation_to_percent(subpatch.attenuation);
                   gens.emplace_back(GEN_ATTENUATION, val);
               }
 
               if (subpatch.pan != 64) {
-                  auto val = static_cast<uint16>(s_pan_to_percent(subpatch.pan));
+                  int val = s_pan_to_percent(subpatch.pan);
                   gens.emplace_back(GEN_PAN, val);
               }
 
               if (subpatch.attack_time > 1) {
-                  auto val = static_cast<int>(s_usec_to_timecents(subpatch.attack_time));
+                  int val = s_usec_to_timecents(subpatch.attack_time);
                   gens.emplace_back(GEN_VOLENVATTACK, val);
               }
 
               if (subpatch.decay_time > 1) {
-                  auto val = static_cast<int>(s_usec_to_timecents(subpatch.decay_time));
+                  int val = s_usec_to_timecents(subpatch.decay_time);
                   gens.emplace_back(GEN_VOLENVRELEASE, val);
               }
 
@@ -532,12 +532,15 @@ namespace {
                   gens.emplace_back(GEN_SAMPLEMODE, 1_u16);
               }
 
-              // root key override
-              auto val = static_cast<uint16>(s_get_original_pitch(big_endian(subpatch.root_key), wavtable.pitch));
+              // // root key override
+              int val = s_get_original_pitch(subpatch.root_key, wavtable.pitch);
+              if (val < 0)
+                  val = 0;
               gens.emplace_back(GEN_OVERRIDEROOTKEY, val);
 
               // sample id
               inst.sample_id = subpatch.id;
+              gens.emplace_back(GEN_SAMPLEID, inst.sample_id);
           }
       }
 
@@ -564,7 +567,7 @@ namespace {
 
       void chan_prefix()
       {
-          out_.put(0xb0_i8 | chan_);
+          out_.put(0xb0 | chan_);
       }
 
   public:
@@ -581,7 +584,7 @@ namespace {
 
       void program_change(char program)
       {
-          out_.put(0xc0_i8 | chan_);
+          out_.put(0xc0 | chan_);
           out_.put(program);
       }
 
@@ -595,7 +598,7 @@ namespace {
       void set_pan(char pan)
       {
           chan_prefix();
-          out_.put(0xa_i8);
+          out_.put(0x0a);
           out_.put(pan);
       }
 
@@ -724,7 +727,7 @@ namespace {
                   w.registered_parameter_number(0x7f00);
               }
 
-              ss.put(0xe0_u8 | chan);
+              ss.put(0xe0 | chan);
               m++;
 
               tmp[0] = *m++;
@@ -759,15 +762,15 @@ namespace {
           case midi::global_panning: // 0x0d
               /* We're skipping the first byte for whatever reason */
               m++;
-              ss.put(0xb0_u8 | chan);
-              ss.put(0x0a);
+              ss.put(0xb0 | chan);
+              ss.put(0x0a_u8);
               ss.put(*m++);
               break;
 
           case midi::sustain_pedal: // 0x0e
               /* We're skipping the first byte for whatever reason */
               m++;
-              ss.put(0xb0_u8 | chan);
+              ss.put(0xb0 | chan);
               ss.put(0x40);
               ss.put(*m++);
               break;
@@ -775,7 +778,7 @@ namespace {
           case midi::play_note:
               /* We're skipping the first byte for whatever reason */
               m++;
-              ss.put(0x90_u8 | chan);
+              ss.put(0x90 | chan);
               tmp[1] = *m++;
               ss.put(tmp[1]);
               ss.put(*m++);
@@ -785,7 +788,7 @@ namespace {
           case midi::stop_note:
               /* We're skipping the first byte for whatever reason */
               m++;
-              ss.put(0x90_u8 | chan);
+              ss.put(0x90 | chan);
               ss.put(*m++);
               ss.put(0);
               break;
@@ -878,8 +881,6 @@ namespace {
           }
       }
 
-      fmt::print("SSEQ Length: {}\n", static_cast<size_t>(s.tellg()) - start);
-
       return s;
   }
 }
@@ -941,6 +942,11 @@ void rom_preset(fluid_sfont_t* sfont, fluid_preset_t* preset, size_t id)
 
 fluid_sfont_t* rom_sfont()
 {
+    /* create a RAM soundfont */
+    auto sfont = fluid_ramsfont_create_sfont();
+    auto ramsfont = (fluid_ramsfont_t*) sfont->data;
+    fluid_ramsfont_set_name(ramsfont, "Doom64EX RomSource");
+
     load_sn64_();
     load_sseq_();
 
@@ -950,11 +956,12 @@ fluid_sfont_t* rom_sfont()
     }
     sample_data_.resize(pcm_size);
 
-    /* read pcm */
+    /* read samples */
     auto s = g_rom.pcm();
     auto start = static_cast<size_t>(s.tellg());
     samples_.resize(sn64.num_sounds);
     auto pcm_ptr = sample_data_.data();
+    std::vector<fluid_sample_t*> fluid_samples;
     for (size_t i {}; i < sn64.num_sounds; ++i) {
         auto& sample = samples_[i];
         std::fill_n(reinterpret_cast<char*>(&sample), sizeof(sample), 0);
@@ -971,13 +978,20 @@ fluid_sfont_t* rom_sfont()
         sample.samplerate = 22050;
         sample.origpitch = 60;
         sample.pitchadj = 0;
-        sample.sampletype = (wavtable.loop_id != ~0U);
+        sample.sampletype = FLUID_SAMPLETYPE_MONO;
 
         sample.valid = true;
         sample.data = sample_data_.data();
 
         s.seekg(wavtable.start);
         decode_vadpcm(s, pcm_ptr, wavtable.size, predictor);
+
+        auto fsamp = new_fluid_ramsample();
+        fluid_sample_set_sound_data(fsamp, pcm_ptr, wavtable.size / 9 * 16 + 16, false, 60);
+        fluid_samples.push_back(fsamp);
+
+        fsamp->samplerate = 22050;
+
         pcm_ptr += wavtable.size / 9 * 16 + 16;
 
         sample.loopstart = sample.start;
@@ -987,10 +1001,32 @@ fluid_sfont_t* rom_sfont()
             const auto& loop = loop_table[wavtable.loop_id];
             sample.loopstart = sample.start + loop.loop_start;
             sample.loopend = sample.start + loop.loop_end;
+
+            fsamp->loopstart = fsamp->start + loop.loop_start;
+            fsamp->loopend = fsamp->start + loop.loop_end;
         }
     }
-    fmt::print("PCM Length: 0x{:x}\n", static_cast<size_t>(s.tellg()) - start);
 
+    for (size_t i {}; i < presets_.size(); ++i) {
+        auto& p = presets_[i];
+
+        for (const auto& inst : p.instruments) {
+            auto s = fluid_samples[inst.sample_id];
+
+            fluid_ramsfont_add_izone(ramsfont,
+                                     p.bank, p.prog,
+                                     s,
+                                     inst.note_min, inst.note_max);
+
+            for (const auto& gen : inst.generators) {
+                fluid_ramsfont_izone_set_gen(ramsfont, p.bank, p.prog, s, gen.type, gen.ival);
+            }
+        }
+    }
+
+    return (fluid_sfont_t*) sfont;
+
+    /*
     struct Soundfont {
         char name[20] = "Doom64EX RomSource";
         size_t iter;
@@ -1031,6 +1067,7 @@ fluid_sfont_t* rom_sfont()
             iteration_start,
             iteration_next
             };
+    */
 }
 
 fluid_sfloader_t* rom_soundfont()
