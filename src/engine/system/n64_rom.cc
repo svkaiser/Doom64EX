@@ -17,7 +17,7 @@ namespace {
   constexpr sys::N64Version g_versions[4] = {
       /* US, NTSC */
       { "USA"_sv, 'P', 0,
-        { 0x63f60,  0x5d6cdc }, // IWAD
+        { 0x63f60,  0x5e89a4 }, // IWAD
         { 0x63ac40, 0xb9d8 },   // SN64
         { 0x646620, 0x142f8 },  // SSEQ
         { 0x65a920, 0x1716c4 }  // PCM data
@@ -25,7 +25,7 @@ namespace {
 
       /* Japan, PAL */
       { "JAP"_sv, 'J', 0,
-        { 0x64580,  0x5d8478 }, // IWAD
+        { 0x64580,  0x5ea120 }, // IWAD
         { 0x63ca00, 0xb9d8 },   // SN64
         { 0x6483e0, 0x142f8 },  // SSEQ
         { 0x65c6e0, 0x1716c4}   // PCM data
@@ -33,7 +33,7 @@ namespace {
 
       /* Europe rev. 1, PAL */
       { "EUR v1"_sv, 'E', 0,
-        { 0x63d10,  0x5d18b0 }, // IWAD
+        { 0x63d10,  0x5e38a8 }, // IWAD
         { 0x6355c0, 0xb9d8 },   // SN64
         { 0x640fa0, 0x142f8 },  // SSEQ
         { 0x6552a0, 0x1716c4 }  // PCM data
@@ -41,7 +41,7 @@ namespace {
 
       /* Europe rev. 2, PAL */
       { "EUR v2"_sv, 'E', 1,
-        { 0x63dc0,   0x5d301c }, // IWAD
+        { 0x63dc0,   0x6d301c }, // IWAD
         { 0x63ac40,  0xb9d8},   // SN64
         { 0x646620,  0x142f8 }, // SSEQ
         { 0x65a920 , 0x1716c4 } // PCM DATA
@@ -157,6 +157,8 @@ bool sys::N64Rom::open(StringView path)
         m_version = m_rom_version->name.to_string();
         n64_rom_text = fmt::format("{} rom", m_version);
     }
+
+    log::debug("SIZE: {:x}", m_rom_version->iwad.size);
 
     return true;
 }
