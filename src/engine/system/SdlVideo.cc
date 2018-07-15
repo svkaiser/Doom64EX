@@ -376,7 +376,28 @@ public:
             if (!sdl_glcontext_)
                 throw video_error { fmt::format("Couldn't create OpenGL Context: {}", SDL_GetError()) };
         } else {
-            SDL_SetWindowSize(sdl_window_, copy.width, copy.height);
+            auto current_flags = SDL_GetWindowFlags(sdl_window_);
+            if (current_flags & SDL_WINDOW_FULLSCREEN ||
+                current_flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
+
+                // Find an appropriate display mode
+                SDL_DisplayMode target {}, closest {};
+                target.w = copy.width;
+                target.h = copy.height;
+
+                auto display_id = SDL_GetWindowDisplayIndex(sdl_window_);
+                SDL_GetClosestDisplayMode(display_id, &target, &closest);
+
+                SDL_SetWindowDisplayMode(sdl_window_, &closest);
+
+                video_width = closest.w;
+                video_height = closest.h;
+            } else {
+                SDL_SetWindowSize(sdl_window_, copy.width, copy.height);
+
+                video_width = copy.width;
+                video_height = copy.height;
+            }
 
             switch (copy.fullscreen) {
             case Fullscreen::none:
@@ -392,8 +413,9 @@ public:
                 break;
             }
 
-            SDL_GetWindowSize(sdl_window_, &video_width, &video_height);
             video_ratio = static_cast<float>(video_width) / video_height;
+            ViewWidth = video_width;
+            ViewHeight = video_height;
             glViewport(0, 0, video_width, video_height);
             GL_CalcViewSize();
             R_SetViewMatrix();
