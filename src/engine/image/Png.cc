@@ -245,11 +245,13 @@ namespace {
                    format, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
       png_write_info(writep, infop);
 
-      auto scanlines = std::make_unique<const uint8_t*[]>(image.height());
-      for (int i = 0; i < image.height(); i++)
-          scanlines[i] = reinterpret_cast<const byte*>(image[i].data_ptr());
+      auto scanlines = std::make_unique<png_bytep[]>(image.height());
+      for (int i = 0; i < image.height(); i++) {
+          scanlines[i] = new png_byte[image.pitch()];
+          std::copy_n(reinterpret_cast<const byte*>(image[i].data_ptr()), image.pitch(), scanlines[i]);
+      }
 
-      png_write_image(writep, const_cast<png_bytepp>(scanlines.get()));
+      png_write_image(writep, scanlines.get());
       png_write_end(writep, infop);
       png_destroy_write_struct(&writep, &infop);
   }

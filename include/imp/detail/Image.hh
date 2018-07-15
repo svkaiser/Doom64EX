@@ -60,6 +60,7 @@ namespace imp {
       uint16 pitch_ {};
       UniquePtr<char[]> data_ {};
       Palette pal_ {};
+      size_t align_ {};
 
       template <class T>
       Image& assign_move_(T&& other)
@@ -107,6 +108,7 @@ namespace imp {
           width_(width),
           height_(height),
           pitch_(detail::image_pitch(width, align, info_->width)),
+          align_(align),
           data_(make_unique<char[]>(size())) {}
 
       template <class PixT, class PalT>
@@ -214,6 +216,9 @@ namespace imp {
 
       size_t size() const
       { return info_ ? pitch_ * height_: 0; }
+
+      size_t align() const
+      { return align_; }
 
       const PixelInfo& pixel_info() const
       { return *info_; }

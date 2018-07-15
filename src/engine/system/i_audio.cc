@@ -1167,7 +1167,7 @@ static int SDLCALL Thread_PlayerHandler(void *param) {
 }
 
 //
-// equality operators for SDL_AudioSpec, for ease of use.
+// equality operators for SDL_AudioSpec
 //
 bool operator==(const SDL_AudioSpec& lhs, const SDL_AudioSpec& rhs)
 {
@@ -1323,7 +1323,7 @@ void I_InitSequencer(void) {
 
     spec.format = AUDIO_S16;
     spec.freq = 44100;
-    spec.samples = 2048;
+    spec.samples = 128;
     spec.channels = 2;
     spec.callback = Audio_Play;
     spec.userdata = doomseq.synth;
@@ -1574,7 +1574,7 @@ void I_StartSound(int sfx_id, sndsrc_t* origin, int volume, int pan, int reverb)
     }
 
     SEMAPHORE_LOCK()
-        song = &doomseq.songs[sfx_id];
+    song = &doomseq.songs[sfx_id];
     for(i = 0; i < song->ntracks; i++) {
         chan = Song_AddTrackToPlaylist(&doomseq, song, &song->tracks[i]);
 
@@ -1588,4 +1588,4 @@ void I_StartSound(int sfx_id, sndsrc_t* origin, int volume, int pan, int reverb)
         chan->depth = reverb;
     }
     SEMAPHORE_UNLOCK()
-        }
+}

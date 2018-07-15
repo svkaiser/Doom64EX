@@ -412,12 +412,12 @@ namespace {
   double s_usec_to_timecents(int usec)
   {
       auto t = static_cast<double>(usec) / 1000.0;
-      return 1200 * log2(t);
+      return 1200 * (log10(t) / log10(2));
   }
 
   double s_pan_to_percent(int pan)
   {
-      auto p = static_cast<double>((pan - 64) * 25) / 32.0f;
+      auto p = static_cast<double>((pan - 64) * 25) / 32.0;
       return p / 0.1;
   }
 
@@ -519,12 +519,12 @@ namespace {
               }
 
               if (subpatch.attack_time > 1) {
-                  auto val = static_cast<uint16>(s_usec_to_timecents(subpatch.attack_time));
+                  auto val = static_cast<int>(s_usec_to_timecents(subpatch.attack_time));
                   gens.emplace_back(GEN_VOLENVATTACK, val);
               }
 
               if (subpatch.decay_time > 1) {
-                  auto val = static_cast<uint16>(s_usec_to_timecents(subpatch.decay_time));
+                  auto val = static_cast<int>(s_usec_to_timecents(subpatch.decay_time));
                   gens.emplace_back(GEN_VOLENVRELEASE, val);
               }
 
@@ -971,7 +971,7 @@ fluid_sfont_t* rom_sfont()
         sample.samplerate = 22050;
         sample.origpitch = 60;
         sample.pitchadj = 0;
-        sample.sampletype = FLUID_SAMPLETYPE_MONO;
+        sample.sampletype = (wavtable.loop_id != ~0U);
 
         sample.valid = true;
         sample.data = sample_data_.data();
@@ -981,12 +981,12 @@ fluid_sfont_t* rom_sfont()
         pcm_ptr += wavtable.size / 9 * 16 + 16;
 
         sample.loopstart = sample.start;
-        sample.loopend = sample.end;
+        sample.loopend = sample.end - 1;
 
         if (wavtable.loop_id != ~0U) {
             const auto& loop = loop_table[wavtable.loop_id];
-            sample.loopstart = loop.loop_start;
-            sample.loopend = loop.loop_end;
+            sample.loopstart = sample.start + loop.loop_start;
+            sample.loopend = sample.start + loop.loop_end;
         }
     }
     fmt::print("PCM Length: 0x{:x}\n", static_cast<size_t>(s.tellg()) - start);

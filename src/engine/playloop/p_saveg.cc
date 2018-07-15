@@ -54,8 +54,8 @@ void G_DoLoadLevel(void);
 static FILE*    save_stream;
 static byte*    savebuffer;
 
-static unsigned long save_length = 0;
-static unsigned long save_offset = 0;
+static long save_length = 0;
+static long save_offset = 0;
 
 struct read_error : std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -1338,7 +1338,7 @@ dboolean P_QuickReadSaveHeader(char* name, char* date,
 
     save_length = M_ReadFile(name, &savebuffer);
 
-    if(save_length != -1) {
+    if(save_length == -1) {
         return 0;
     }
 

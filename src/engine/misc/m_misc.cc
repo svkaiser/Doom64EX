@@ -286,14 +286,14 @@ void M_LoadDefaults(void) {
 //
 
 void M_ScreenShot(void) {
-    char    name[13];
+    String name;
     int     shotnum=0;
-    std::ofstream file;
 
     while(shotnum < 1000) {
-        file.open(fmt::format("sshot{:03d}.png", shotnum));
+        name = fmt::format("sshot{:03d}.png", shotnum);
+        std::ifstream f(name, std::ios_base::binary);
 
-        if (file.is_open())
+        if (!f.is_open())
             break;
 
         shotnum++;
@@ -302,6 +302,8 @@ void M_ScreenShot(void) {
     if(shotnum >= 1000) {
         return;
     }
+
+    std::ofstream file(name, std::ios_base::binary);
 
     auto image = GL_GetScreenBuffer(0, 0, video_width, video_height);
     image.save(file, ImageFormat::png);
