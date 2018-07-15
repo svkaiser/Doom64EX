@@ -51,7 +51,7 @@ Optional<Image> GfxLump::read_image()
     // The palette is located right after the image
     auto palofs = static_cast<size_t>(s.tellg()) + pad<8>(header.width * header.height);
 
-    I8Rgba5551Image image { header.width, header.height };
+    I8Rgba5551Image image { pad<4>(header.width), header.height };
 
     for (size_t y {}; y < header.height; ++y) {
         for (size_t x {}; x < header.width; ++x) {
