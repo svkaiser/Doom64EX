@@ -47,7 +47,7 @@
 #include "SDL.h"
 
 // 20120203 villsa - cvar for soundfont location
-StringCvar s_soundfont("s_soundfont", "doomsnd.sf2 location", "doomsnd.sf2");
+StringCvar s_soundfont("s_soundfont", "doomsnd.sf2 location", "");
 
 //
 // Mutex
@@ -240,6 +240,10 @@ typedef int(*signalhandler)(doomseq_t*);
 static void Audio_Play(void *user, Uint8 *stream, int len)
 {
     fluid_synth_t *synth = (fluid_synth_t *) user;
+
+    // zero out the audio
+    std::fill_n(stream, len, 0);
+
     fluid_synth_write_s16(synth, len / (2 * sizeof(short)) , stream, 0, 2, stream, 1, 2);
 }
 
@@ -249,6 +253,10 @@ static void Audio_Play(void *user, Uint8 *stream, int len)
 static void Audio_Play_float(void *user, Uint8 *stream, int len)
 {
     fluid_synth_t *synth = (fluid_synth_t *) user;
+
+    // zero out the audio
+    std::fill_n(stream, len, 0);
+
     fluid_synth_write_float(synth, len / (2 * sizeof(float)), stream, 0, 2, stream, 1, 2);
 }
 
@@ -1323,7 +1331,7 @@ void I_InitSequencer(void) {
 
     spec.format = AUDIO_S16;
     spec.freq = 44100;
-    spec.samples = 512;
+    spec.samples = 256;
     spec.channels = 2;
     spec.callback = Audio_Play;
     spec.userdata = doomseq.synth;
