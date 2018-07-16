@@ -15,32 +15,32 @@ namespace {
 
   /* Hardcoded ROM locations */
   constexpr sys::N64Version g_versions[4] = {
-      /* US, NTSC */
-      { "USA"_sv, 'P', 0,
+      /* EU, P is Portugal? */
+      { "EU"_sv, 'P', 0,
         { 0x63f60,  0x5e89a4 }, // IWAD
         { 0x63ac40, 0xb9d8 },   // SN64
         { 0x646620, 0x142f8 },  // SSEQ
         { 0x65a920, 0x1716c4 }  // PCM data
       },
 
-      /* Japan, PAL */
-      { "JAP"_sv, 'J', 0,
+      /* Japan, J is for Japan, which makes sense */
+      { "JP"_sv, 'J', 0,
         { 0x64580,  0x5ea120 }, // IWAD
         { 0x63ca00, 0xb9d8 },   // SN64
         { 0x6483e0, 0x142f8 },  // SSEQ
         { 0x65c6e0, 0x1716c4}   // PCM data
       },
 
-      /* Europe rev. 1, PAL */
-      { "EUR v1"_sv, 'E', 0,
+      /* US rev. 1, E stands for Eunited States */
+      { "US v1"_sv, 'E', 0,
         { 0x63d10,  0x5e38a8 }, // IWAD
         { 0x6355c0, 0xb9d8 },   // SN64
         { 0x640fa0, 0x142f8 },  // SSEQ
         { 0x6552a0, 0x1716c4 }  // PCM data
       },
 
-      /* Europe rev. 2, PAL */
-      { "EUR v2"_sv, 'E', 1,
+      /* US rev. 2 */
+      { "US v2"_sv, 'E', 1,
         { 0x63dc0,   0x6d301c }, // IWAD
         { 0x63ac40,  0xb9d8},   // SN64
         { 0x646620,  0x142f8 }, // SSEQ
