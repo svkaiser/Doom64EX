@@ -973,7 +973,7 @@ fluid_sfont_t* rom_sfont()
         wavtable.size -= wavtable.size % 9;
 
         std::copy_n(name.data(), name.size(), sample.name);
-        sample.start = std::distance(sample_data_.data(), pcm_ptr);
+        sample.start = std::distance(sample_data_.data(), pcm_ptr) + 8;
         sample.end = sample.start + wavtable.size / 9 * 16;
         sample.samplerate = 22050;
         sample.origpitch = 60;
@@ -984,9 +984,13 @@ fluid_sfont_t* rom_sfont()
         sample.data = sample_data_.data();
 
         s.seekg(wavtable.start);
-        decode_vadpcm(s, pcm_ptr, wavtable.size, predictor);
+        decode_vadpcm(s, pcm_ptr + 8, wavtable.size, predictor);
+
+        std::fill_n(pcm_ptr, 8, 0);
 
         pcm_ptr += wavtable.size / 9 * 16 + 16;
+
+        std::fill_n(pcm_ptr - 8, 8, 0);
 
         sample.loopstart = sample.start;
         sample.loopend = sample.end - 1;
