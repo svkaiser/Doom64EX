@@ -100,8 +100,10 @@ std::istringstream sys::N64Rom::m_load(const sys::N64Loc &loc)
 bool sys::N64Rom::open(StringView path)
 {
     /* Used to detect endianess. Padded to 20 characters. */
-    constexpr auto norm_name = "Doom64              "_sv;
-    constexpr auto swap_name = "oDmo46              "_sv;
+    constexpr auto norm_name  = "Doom64              "_sv;
+    constexpr auto norm_name2 = "Doom 64             "_sv;
+    constexpr auto swap_name  = "oDmo46              "_sv;
+    constexpr auto swap_name2 = "oDmo4 6             "_sv;
 
     Header header;
 
@@ -110,16 +112,21 @@ bool sys::N64Rom::open(StringView path)
 
     char country {};
     char version {};
-    if (boost::iequals(norm_name, header.name)) {
+    if (boost::iequals(norm_name, header.name) ||
+        boost::iequals(norm_name2, header.name)) {
         country = header.country;
         version = header.version;
         m_swapped = false;
-    } else if (boost::iequals(swap_name, header.name)) {
+    } else if (boost::iequals(swap_name, header.name) ||
+               boost::iequals(swap_name2, header.name)) {
         country = header.version;
         version = header.country;
         m_swapped = true;
     } else {
         m_error = "Could not detect ROM";
+        m_file.close();
+
+        return false;
     }
 
     for (const auto& l : g_versions) {
@@ -152,6 +159,7 @@ bool sys::N64Rom::open(StringView path)
         m_error = fmt::format("WAD not found in Doom 64 ROM. (Country: {}, Version: {:d})",
                               country, version);
         log::warn("{}", m_error);
+        m_file.close();
         return false;
     } else {
         m_version = m_rom_version->name.to_string();

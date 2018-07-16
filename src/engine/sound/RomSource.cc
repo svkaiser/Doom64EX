@@ -986,12 +986,6 @@ fluid_sfont_t* rom_sfont()
         s.seekg(wavtable.start);
         decode_vadpcm(s, pcm_ptr, wavtable.size, predictor);
 
-        auto fsamp = new_fluid_ramsample();
-        fluid_sample_set_sound_data(fsamp, pcm_ptr, wavtable.size / 9 * 16 + 16, false, 60);
-        fluid_samples.push_back(fsamp);
-
-        fsamp->samplerate = 22050;
-
         pcm_ptr += wavtable.size / 9 * 16 + 16;
 
         sample.loopstart = sample.start;
@@ -1001,32 +995,9 @@ fluid_sfont_t* rom_sfont()
             const auto& loop = loop_table[wavtable.loop_id];
             sample.loopstart = sample.start + loop.loop_start;
             sample.loopend = sample.start + loop.loop_end;
-
-            fsamp->loopstart = fsamp->start + loop.loop_start;
-            fsamp->loopend = fsamp->start + loop.loop_end;
         }
     }
 
-    for (size_t i {}; i < presets_.size(); ++i) {
-        auto& p = presets_[i];
-
-        for (const auto& inst : p.instruments) {
-            auto s = fluid_samples[inst.sample_id];
-
-            fluid_ramsfont_add_izone(ramsfont,
-                                     p.bank, p.prog,
-                                     s,
-                                     inst.note_min, inst.note_max);
-
-            for (const auto& gen : inst.generators) {
-                fluid_ramsfont_izone_set_gen(ramsfont, p.bank, p.prog, s, gen.type, gen.ival);
-            }
-        }
-    }
-
-    return (fluid_sfont_t*) sfont;
-
-    /*
     struct Soundfont {
         char name[20] = "Doom64EX RomSource";
         size_t iter;
@@ -1067,7 +1038,6 @@ fluid_sfont_t* rom_sfont()
             iteration_start,
             iteration_next
             };
-    */
 }
 
 fluid_sfloader_t* rom_soundfont()

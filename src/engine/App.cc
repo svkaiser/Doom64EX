@@ -156,7 +156,6 @@ bool app::file_exists(StringView path)
     struct stat st;
 
     if (stat(path.data(), &st) == -1) {
-        DEBUG("Failed stat for {}", path);
         return false;
     }
 
