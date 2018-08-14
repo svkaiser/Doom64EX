@@ -42,7 +42,7 @@ dboolean doPassword = false;
 const char *passwordChar = "bcdfghjklmnpqrstvwxyz0123456789?";
 static const int passwordTable[10] = { 1, 8, 9, 5, 6, 2, 7, 0, 4, 3 };
 
-extern BoolCvar p_features;
+extern cvar::BoolVar p_features;
 
 //
 // M_EncodePassItem

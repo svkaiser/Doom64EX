@@ -35,9 +35,6 @@ String imp::type_to_string(const std::type_info& type)
 [[noreturn]]
 void D_DoomMain();
 
-[[noreturn]]
-void WGen_WadgenMain();
-
 int myargc{};
 
 char **myargv{};
@@ -56,8 +53,6 @@ namespace {
   StringView _program;
 
   Vector<String> _rest;
-
-  app::StringParam _wadgen_param("wadgen");
 
   struct ParamsParser {
       using Arity = app::Param::Arity;

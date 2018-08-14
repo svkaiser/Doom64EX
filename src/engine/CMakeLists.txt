@@ -123,7 +123,7 @@ set(SOURCES
 
   # core
   core/log/log.cc
-  core/cvar.cc
+  core/cvar/store.cc
 
   # console
   console/con_console.cc

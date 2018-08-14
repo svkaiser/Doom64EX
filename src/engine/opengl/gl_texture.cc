@@ -89,19 +89,24 @@ typedef struct {
 static gl_env_state_t gl_env_state[GL_MAX_TEX_UNITS];
 static int curunit = 0;
 
-extern BoolCvar r_texnonpowresize;
-extern BoolCvar r_fillmode;
+extern cvar::BoolVar r_texnonpowresize;
+extern cvar::BoolVar r_fillmode;
+extern cvar::BoolVar r_texturecombiner;
 
-BoolCvar r_texturecombiner("r_texturecombiner", "", true, 0,
-                               [](const BoolCvar &, bool, bool&) {
-                                   int i;
+//
+// R_TextureCombinerFunc
+//
 
-                                   curunit = 0;
+void R_TextureCombinerFunc(const bool&)
+{
+    int i;
 
-                                   for(i = 0; i < GL_MAX_TEX_UNITS; i++) {
-                                       dmemset(&gl_env_state[i], 0, sizeof(gl_env_state_t));
-                                   }
-                               });
+    curunit = 0;
+
+    for(i = 0; i < GL_MAX_TEX_UNITS; i++) {
+        dmemset(&gl_env_state[i], 0, sizeof(gl_env_state_t));
+    }
+}
 
 //
 // CMD_DumpTextures

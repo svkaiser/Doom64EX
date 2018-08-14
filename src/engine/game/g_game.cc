@@ -131,38 +131,38 @@ byte forcecollision = 0;
 byte forcejump = 0;
 byte forcefreelook = 0;
 
-BoolCvar sv_nomonsters("sv_NoMonsters", "Disable monsters", false, Cvar::net_server);
-BoolCvar sv_fastmonsters("sv_FastMonsters", "Fast monsters", false, Cvar::net_server);
-BoolCvar sv_respawnitems("sv_RespawnItems", "Allow items to respawn", false, Cvar::net_server);
-BoolCvar sv_respawn("sv_Respawn", "", false, Cvar::net_server);
-IntCvar sv_skill("sv_Skill", "Skill level (0 - Easy, 4 - Nightmare)", 2, Cvar::net_server);
+cvar::BoolVar sv_nomonsters   = false;
+cvar::BoolVar sv_fastmonsters = false;
+cvar::BoolVar sv_respawnitems = false;
+cvar::BoolVar sv_respawn      = false;
+cvar::IntVar sv_skill         = 2;
 
 static void G_SetGameFlags();
 
-static void G_SetGameFlagsCvarCallback(const BoolCvar&, bool, bool&)
+static void G_SetGameFlagsCvarCallback(const bool&)
 {
     G_SetGameFlags();
 }
 
-BoolCvar sv_lockmonsters("sv_lockmonsters", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar sv_allowcheats("sv_allowcheats", "Allow cheats on the server", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar sv_friendlyfire("sv_friendlyfire", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar sv_keepitems("sv_keepitems", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar p_allowjump("p_allowjump", "", false, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar p_autoaim("p_autoaim", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar compat_collision("compat_collision", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar compat_mobjpass("compat_mobjpass", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar compat_limitpain("compat_limitpain", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
-BoolCvar compat_grabitems("compat_grabitems", "", true, Cvar::net_server, G_SetGameFlagsCvarCallback);
+cvar::BoolVar sv_lockmonsters  = false;
+cvar::BoolVar sv_allowcheats   = false;
+cvar::BoolVar sv_friendlyfire  = false;
+cvar::BoolVar sv_keepitems     = false;
+cvar::BoolVar p_allowjump      = false;
+cvar::BoolVar p_autoaim        = true;
+cvar::BoolVar compat_collision = true;
+cvar::BoolVar compat_mobjpass  = true;
+cvar::BoolVar compat_limitpain = true;
+cvar::BoolVar compat_grabitems = true;
 
-extern BoolCvar v_mlook;
-extern BoolCvar v_mlookinvert;
-extern BoolCvar v_yaxismove;
-extern BoolCvar p_autorun;
-extern BoolCvar p_fdoubleclick;
-extern BoolCvar p_sdoubleclick;
-extern FloatCvar v_msensitivityx;
-extern FloatCvar v_msensitivityy;
+extern cvar::BoolVar v_mlook;
+extern cvar::BoolVar v_mlookinvert;
+extern cvar::BoolVar v_yaxismove;
+extern cvar::BoolVar p_autorun;
+extern cvar::BoolVar p_fdoubleclick;
+extern cvar::BoolVar p_sdoubleclick;
+extern cvar::FloatVar v_msensitivityx;
+extern cvar::FloatVar v_msensitivityy;
 
 //
 // G_CmdButton
@@ -264,11 +264,7 @@ static CMD(Seta) {
         return;
     }
 
-    if (auto p = Cvar::find(param[0])) {
-        p->set_string(param[1]);
-    } else {
-        I_Printf("Couldn't find property (cvar) %s\n", param[0]);
-    }
+    cvar::g_store->user_value(param[0], param[1]);
 }
 
 //
@@ -1632,6 +1628,35 @@ void G_DeferedInitNew(skill_t skill, int map) {
 //
 
 void G_Init(void) {
+    cvar::Register(cvar::Flag::server)
+        (sv_nomonsters,   "sv_NoMonsters",   "Disable monsters")
+        (sv_fastmonsters, "sv_FastMonsters", "Fast monsters")
+        (sv_respawnitems, "sv_RespawnItems", "Allow items to respawn")
+        (sv_respawn,      "sv_Respawn",      "TODO")
+        (sv_skill,        "sv_Skill",        "Skill level")
+
+        (sv_lockmonsters,  "sv_LockMonsters",  "TODO")
+        (sv_allowcheats,   "sv_AllowCheats",   "Allow cheats on the server")
+        (sv_friendlyfire,  "sv_FriendlyFire",  "Damage teammates")
+        (sv_keepitems,     "sv_KeepItems",     "TODO")
+        (p_allowjump,      "p_AllowJump",      "TODO")
+        (p_autoaim,        "p_AutoAim",        "TODO")
+        (compat_collision, "compat_Collision", "TODO")
+        (compat_mobjpass,  "compat_MobjPass",  "TODO")
+        (compat_limitpain, "compat_LimitPain", "TODO")
+        (compat_grabitems, "compat_GrabItems", "TODO");
+
+    sv_lockmonsters.set_callback(G_SetGameFlagsCvarCallback);
+    sv_allowcheats.set_callback(G_SetGameFlagsCvarCallback);
+    sv_friendlyfire.set_callback(G_SetGameFlagsCvarCallback);
+    sv_keepitems.set_callback(G_SetGameFlagsCvarCallback);
+    p_allowjump.set_callback(G_SetGameFlagsCvarCallback);
+    p_autoaim.set_callback(G_SetGameFlagsCvarCallback);
+    compat_collision.set_callback(G_SetGameFlagsCvarCallback);
+    compat_mobjpass.set_callback(G_SetGameFlagsCvarCallback);
+    compat_limitpain.set_callback(G_SetGameFlagsCvarCallback);
+    compat_grabitems.set_callback(G_SetGameFlagsCvarCallback);
+
     G_ReloadDefaults();
     G_InitActions();
 

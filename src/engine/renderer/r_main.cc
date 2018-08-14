@@ -81,48 +81,26 @@ unsigned int    glBindCalls = 0;
 
 dboolean        bRenderSky = false;
 
-FloatCvar r_fov("r_fov", "Field of view angle", 74.0f);
-BoolCvar r_fillmode("r_fillmode", "", true);
-BoolCvar r_uniformtime("r_uniformtime", "", false);
-BoolCvar r_fog("r_fog", "", true);
-BoolCvar r_wipe("r_wipe", "", true);
-BoolCvar r_drawtris("r_drawtris", "", false);
-BoolCvar r_drawmobjbox("r_drawmobjbox", "", false);
-BoolCvar r_drawblockmap("r_drawblockmap", "", false);
-BoolCvar r_drawtrace("r_drawtrace", "", false);
-BoolCvar r_rendersprites("r_rendersprites", "", true);
-BoolCvar r_drawfill("r_drawfill", "", false);
-BoolCvar r_skybox("r_skybox", "", false);
+cvar::FloatVar r_fov            = 74.0;
+cvar::BoolVar r_fillmode        = true;
+cvar::BoolVar r_uniformtime     = false;
+cvar::BoolVar r_fog             = true;
+cvar::BoolVar r_wipe            = true;
+cvar::BoolVar r_drawtris        = false;
+cvar::BoolVar r_drawmobjbox     = false;
+cvar::BoolVar r_drawblockmap    = false;
+cvar::BoolVar r_drawtrace       = false;
+cvar::BoolVar r_rendersprites   = true;
+cvar::BoolVar r_drawfill        = false;
+cvar::BoolVar r_skybox          = false;
+cvar::IntVar r_colorscale       = 0;
+cvar::BoolVar r_filter          = false;
+cvar::BoolVar r_texnonpowresize = false;
+cvar::BoolVar r_anisotropic     = false;
+cvar::BoolVar r_texturecombiner = false;
 
-IntCvar r_colorscale("r_colorscale", "", 0, 0,
-                         [](const IntCvar&, int, int&)
-                         {
-                             GL_SetColorScale();
-                         });
-
-BoolCvar r_filter("r_filter", "", false, BoolCvar::user_config,
-                      [](const BoolCvar&, bool, bool&)
-                      {
-                          GL_DumpTextures();
-                          GL_SetTextureFilter();
-                      });
-
-BoolCvar r_texnonpowresize("r_texnonpowresize", "", false, 0,
-                               [](const BoolCvar&, bool, bool&)
-                               {
-                                   GL_DumpTextures();
-                               });
-
-BoolCvar r_anisotropic("r_anisotropic", "", false, 0,
-                           [](const BoolCvar&, bool, bool&)
-                           {
-                               GL_DumpTextures();
-                               GL_SetTextureFilter();
-                           });
-
-extern BoolCvar r_texturecombiner;
-extern BoolCvar i_interpolateframes;
-extern BoolCvar p_usecontext;
+extern cvar::BoolVar i_interpolateframes;
+extern cvar::BoolVar p_usecontext;
 
 //
 // CMD_Wireframe
@@ -297,6 +275,47 @@ void R_Init(void) {
         finesine[i] = (fixed_t)(sin(an) * (double)FRACUNIT);
         a += 2;
     }
+
+    cvar::Register()
+        (r_fov,             "r_Fov",             "Field-of-view angle")
+        (r_fillmode,        "r_FillMode",        "TODO")
+        (r_uniformtime,     "r_UniformTime",     "TODO")
+        (r_fog,             "r_Fog",             "TODO")
+        (r_wipe,            "r_Wipe",            "TODO")
+        (r_drawtris,        "r_DrawTris",        "TODO")
+        (r_drawmobjbox,     "r_DrawMobjBox",     "Draw a box around mobjs")
+        (r_drawblockmap,    "r_DrawBlockMap",    "TODO")
+        (r_drawtrace,       "r_DrawTrace",       "TODO")
+        (r_rendersprites,   "r_RenderSprites",   "Render sprites")
+        (r_drawfill,        "r_DrawFill",        "TODO")
+        (r_skybox,          "r_Skybox",          "Draw skybox")
+        (r_colorscale,      "r_ColorScale",      "TODO")
+        (r_filter,          "r_Filter",          "TODO")
+        (r_texnonpowresize, "r_TexNonPowResize", "Resize non-power-of-2 textures")
+        (r_anisotropic,     "r_Anisotropic",     "Anisotropic filtering")
+        (r_texturecombiner, "r_TextureCombiner", "TODO");
+
+    r_colorscale.set_callback([](const int&) {
+        GL_SetColorScale();
+    });
+
+    r_filter.set_callback([](const bool&) {
+        GL_DumpTextures();
+        GL_SetTextureFilter();
+    });
+
+    r_texnonpowresize.set_callback([](const bool&) {
+        GL_DumpTextures();
+        GL_SetTextureFilter();
+    });
+
+    r_anisotropic.set_callback([](const bool&) {
+        GL_DumpTextures();
+        GL_SetTextureFilter();
+    });
+
+    void R_TextureCombinerFunc(const bool&);
+    r_texturecombiner.set_callback(R_TextureCombinerFunc);
 
     GL_InitTextures();
     GL_ResetTextures();

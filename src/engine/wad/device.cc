@@ -14,8 +14,6 @@ namespace {
   Vector<IDevicePtr> devices_;
 
   Array<Vector<ILumpPtr>, num_sections> section_lumps_;
-
-  app::StringParam iwad_path_("iwad");
 }
 
 bool wad::add_device(IDevicePtr device)

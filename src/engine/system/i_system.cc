@@ -48,7 +48,10 @@
 #include "i_audio.h"
 #include "gl_draw.h"
 
-BoolCvar i_interpolateframes("i_interpolateframes", "", false);
+cvar::FloatVar i_gamma            = 0.0;
+cvar::FloatVar i_brightness       = 100.0;
+cvar::BoolVar i_interpolateframes = false;
+cvar::StringVar s_soundfont       = ""s;
 
 ticcmd_t        emptycmd;
 
@@ -275,6 +278,22 @@ void I_Init(void) {
     //I_SpawnLauncher(hwndMain);
 #endif
 
+    cvar::Register()
+        (i_gamma, "i_Gamma", "")
+        (i_brightness, "i_Brightness", "Brightness")
+        (i_interpolateframes, "i_InterpolateFrames", "TODO")
+        (s_soundfont, "s_SoundFont", "Path to 'doomsnd.sf2'");
+
+    i_gamma.set_callback([](const float&) {
+        void GL_DumpTextures();
+        GL_DumpTextures();
+    });
+
+    i_brightness.set_callback([](const float&) {
+        void R_RefreshBrightness();
+        R_RefreshBrightness();
+    });
+
     I_InitVideo();
     I_InitClockRate();
 }
@@ -366,4 +385,3 @@ void I_RegisterCvars(void) {
     CON_CvarRegister(&i_xinputscheme);
 #endif
 }
-

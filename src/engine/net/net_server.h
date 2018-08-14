@@ -45,7 +45,7 @@ void NET_SV_AddModule(net_module_t *module);
 
 // Update server cvars across all clients if changed by host/listen server
 
-void NET_SV_UpdateCvars(const Cvar &cvar);
+void NET_SV_UpdateCvars(const cvar::Ref &cvar);
 
 #endif /* #ifndef NET_SERVER_H */
 

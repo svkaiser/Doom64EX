@@ -67,6 +67,7 @@
 
 #include "net_client.h"
 #include <wad.hh>
+#include <core/cvar/store.hh>
 #include <imp/NativeUI>
 
 //
@@ -117,11 +118,11 @@ void G_BuildTiccmd(ticcmd_t* cmd);
 
 #define STRPAUSED    "Paused"
 
-extern BoolCvar sv_nomonsters;
-extern BoolCvar sv_fastmonsters;
-extern BoolCvar sv_respawnitems;
-extern BoolCvar sv_respawn;
-extern IntCvar sv_skill;
+extern cvar::BoolVar sv_nomonsters;
+extern cvar::BoolVar sv_fastmonsters;
+extern cvar::BoolVar sv_respawnitems;
+extern cvar::BoolVar sv_respawn;
+extern cvar::IntVar sv_skill;
 
 //
 // EVENT HANDLING
@@ -190,7 +191,7 @@ void D_IncValidCount(void) {
 // D_MiniLoop
 //
 
-extern BoolCvar i_interpolateframes;
+extern cvar::BoolVar i_interpolateframes;
 
 extern dboolean renderinframe;
 extern int      gametime;
@@ -252,6 +253,7 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
         int realtics = 0;
         int availabletics = 0;
         int counts = 0;
+        int keyplayer = -1;
 
         windowpause = (menuactive ? true : false);
 
@@ -306,7 +308,6 @@ int D_MiniLoop(void (*start)(void), void (*stop)(void),
             frameon++;
 
             if(!demoplayback) {
-                int keyplayer = -1;
 
                 // ideally maketic should be 1 - 3 tics above lowtic
                 // if we are consistantly slower, speed up time
@@ -524,7 +525,7 @@ static void Title_Stop(void) {
 // Legal_Start
 //
 
-extern IntCvar p_regionmode;
+extern cvar::IntVar p_regionmode;
 
 static const char* legalpic = "USLEGAL";
 static int legal_x = 32;
@@ -875,8 +876,8 @@ static void D_Init(void) {
             name = myargv[p++];
             value = myargv[p++];
 
-            if (auto property = Cvar::find(name)) {
-                property->set_string(value);
+            if (auto ref = cvar::g_store->find(name)) {
+                *ref = value;
             } else {
                 I_Printf("Error: Couldn't find property (cvar) \"%s\"\n", name);
             }
@@ -977,6 +978,9 @@ void D_DoomMain(void) {
     devparm = M_CheckParm("-devparm");
 
     {
+        log::info("Init " sBLUEB("Console variables") "...");
+        cvar::g_store = std::make_unique<cvar::Store>();
+
         // init subsystems
         I_Printf("imp::init_image: Init Image\n");
         void init_image();

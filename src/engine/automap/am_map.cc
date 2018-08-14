@@ -89,17 +89,17 @@ void AM_Start(void);
 
 // automap cvars
 
-BoolCvar am_lines("am_lines", "Draw map with lines", true);
-IntCvar am_nodes("am_nodes", "");
-BoolCvar am_ssect("am_ssect", "");
-BoolCvar am_fulldraw("am_fulldraw", "");
-BoolCvar am_showkeycolors("am_showkeycolors", "Show key colours in automap");
-BoolCvar am_showkeymarkers("am_showkeymarkers", "");
-BoolCvar am_drawobjects("am_drawobjects", "Show objects in automap");
-BoolCvar am_overlay("am_overlay", "Show automap overlay");
+cvar::BoolVar am_lines = true;
+cvar::IntVar am_nodes;
+cvar::BoolVar am_ssect;
+cvar::BoolVar am_fulldraw;
+cvar::BoolVar am_showkeycolors;
+cvar::BoolVar am_showkeymarkers;
+cvar::BoolVar am_drawobjects;
+cvar::BoolVar am_overlay;
 
-extern FloatCvar v_msensitivityx;
-extern FloatCvar v_msensitivityy;
+extern cvar::FloatVar v_msensitivityx;
+extern cvar::FloatVar v_msensitivityy;
 
 #ifdef _USE_XINPUT  // XINPUT
 CVAR_EXTERNAL(i_rsticksensitivity);
@@ -1047,6 +1047,16 @@ void AM_Drawer(void) {
 //
 
 void AM_RegisterCommands(void) {
+    cvar::Register()
+        (am_lines,          "am_Lines",          "Draw map with lines")
+        (am_nodes,          "am_Nodes",          "TODO")
+        (am_ssect,          "am_Ssect",          "TODO")
+        (am_fulldraw,       "am_FullDraw",       "TODO")
+        (am_showkeycolors,  "am_ShowKeyColors",  "TODO")
+        (am_showkeymarkers, "am_ShowKeyMarkers", "TODO")
+        (am_drawobjects,    "am_DrawObjects",    "TODO")
+        (am_overlay,        "am_Overlay",        "TODO");
+
     G_AddCommand("automap", CMD_Automap, 0);
     G_AddCommand("+automap_in", CMD_AutomapSetFlag, AF_ZOOMIN);
     G_AddCommand("-automap_in", CMD_AutomapSetFlag, AF_ZOOMIN|PCKF_UP);

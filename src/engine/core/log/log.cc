@@ -9,6 +9,27 @@ using namespace ::imp::log;
 
 namespace {
   std::chrono::steady_clock::time_point s_program_start;
+  bool s_isatty {};
+
+  String s_strip_ansi(StringView fmt)
+  {
+      String stripped;
+      stripped.reserve(fmt.size());
+
+      bool esc {};
+
+      for (auto c : fmt) {
+          if (c == '\x1b') {
+              esc = true;
+          } else if (esc && c == 'm') {
+              esc = false;
+          } else if (!esc) {
+              stripped.push_back(c);
+          }
+      }
+
+      return stripped;
+  }
 
   String s_timestamp()
   {
@@ -30,6 +51,47 @@ namespace {
   auto s_ansi_fatal = "\x1b[1;30;41m"_sv; // ANSI Bold & Black on Red
   auto s_ansi_debug = "\x1b[34m"_sv; // ANSI Blue
   auto s_ansi_reset = "\x1b[0m"_sv;
+
+  template <class Func>
+  void s_each_line(StringView message, Func yield)
+  {
+      for (;;) {
+          auto pos = message.find('\n');
+          if (pos == message.npos) {
+              yield(message);
+              break;
+          }
+
+          yield(message.substr(0, pos));
+          message.remove_prefix(pos + 1);
+      };
+  }
+
+  void s_write_ansi(std::ostream& s, StringView message, StringView style)
+  {
+      auto prefix = style.to_string() + s_timestamp() + s_ansi_reset.to_string();
+
+      s_each_line(message, [&](StringView msg) {
+          s.write(prefix.data(), prefix.size());
+          s.write(msg.data(), msg.size());
+          s.put('\n');
+      });
+
+      s.flush();
+  }
+
+  void s_write(std::ostream& s, StringView message, StringView style)
+  {
+      auto prefix = style.to_string() + s_timestamp();
+
+      s_each_line(message, [&](StringView msg) {
+          s.write(prefix.data(), prefix.size());
+          s.write(msg.data(), msg.size());
+          s.put('\n');
+      });
+
+      s.flush();
+  }
 
 #ifdef _WIN32
   //
@@ -91,6 +153,10 @@ Init::Init()
         log::fatal.set_callback(s_fatal);
 
         s_program_start = std::chrono::steady_clock::now();
+
+#ifndef _WIN32
+        s_isatty = true;//isatty(STDOUT_FILENO) && isatty(STDERR_FILENO);
+#endif
     }
 }
 
@@ -114,33 +180,21 @@ void Logger::m_init(imp::StringView ansi_color, std::ostream& ostream)
 // Logger::m_println
 //
 
-void Logger::m_println(StringView message)
+void Logger::m_println(StringView message_ansi)
 {
-    auto prefix = m_ansi_color.to_string() + s_timestamp() + s_ansi_reset.to_string();
+    auto message = s_strip_ansi(message_ansi);
 
-    size_t left {};
-    size_t right = String::npos;
-    for (;;) {
-        left = right + 1;
-        right = message.find('\n', left);
-        if (static_cast<size_t>(right) == message.npos) {
-            right = message.size();
-        }
-        if (left >= right) {
-            break;
-        }
+    /* Write to terminal */
+    if (s_isatty) {
+        s_write_ansi(*m_ostream, message_ansi, m_ansi_color);
+    } else {
+        s_write(*m_ostream, message, " "_sv);
+    }
 
-        auto line = message.substr(left, right - left);
+    /* Write to console */
+    native_ui::console_add_line(message);
 
-        m_ostream->write(prefix.data(), prefix.size());
-        m_ostream->write(line.data(), line.size());
-        m_ostream->put('\n');
-
-        native_ui::console_add_line(line);
-    };
-
-    m_ostream->flush();
-
+    /* Hand off to callback */
     if (m_callback) {
         m_callback(message);
     }
@@ -157,6 +211,10 @@ int Logger::printf(const char* fmt, ...)
     va_start(ap, fmt);
 
     auto len = vasprintf(&text, fmt, ap);
+
+    if (text[len - 1] == '\n')
+        text[len - 1] = 0;
+
     m_println(text);
     free(text);
 
@@ -170,4 +228,6 @@ int Logger::printf(const char* fmt, ...)
 //
 
 Stream::~Stream()
-{ m_logger.m_println(m_buffer.str()); }
+{
+    m_logger.m_println(m_buffer.str());
+}

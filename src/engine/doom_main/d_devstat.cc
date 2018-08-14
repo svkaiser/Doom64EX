@@ -42,9 +42,9 @@ static dboolean showstats = true;
 
 extern word statindice;
 
-extern BoolCvar v_mlook;
-extern BoolCvar v_mlookinvert;
-extern BoolCvar sv_lockmonsters;
+extern cvar::BoolVar v_mlook;
+extern cvar::BoolVar v_mlookinvert;
+extern cvar::BoolVar sv_lockmonsters;
 
 //
 // ST_DrawFPS

@@ -47,7 +47,7 @@
 #include "SDL.h"
 
 // 20120203 villsa - cvar for soundfont location
-StringCvar s_soundfont("s_soundfont", "doomsnd.sf2 location", "");
+extern cvar::StringVar s_soundfont;
 
 //
 // Mutex

@@ -53,19 +53,19 @@
 #include "gl_draw.h"
 #include "g_demo.h"
 
-IntCvar st_drawhud("st_drawhud", "", true);
-BoolCvar st_crosshair("st_crosshair", "", false);
-FloatCvar st_crosshairopacity("st_crosshairopacity", "", 80.0f);
-BoolCvar st_flashoverlay("st_flashoverlay", "", false);
-BoolCvar st_regionmsg("st_regionmsg", "", false);
-BoolCvar m_messages("m_messages", "", true);
-StringCvar m_playername("m_playername", "");
-BoolCvar st_showpendingweapon("st_showpendingweapon", "", true);
-BoolCvar st_showstats("st_showstats", "", false);
+cvar::IntVar st_drawhud            = 1;
+cvar::BoolVar st_crosshair         = false;
+cvar::FloatVar st_crosshairopacity = 80.0;
+cvar::BoolVar st_flashoverlay      = false;
+cvar::BoolVar st_regionmsg         = false;
+cvar::BoolVar m_messages           = true;
+cvar::StringVar m_playername       = "Player"s;
+cvar::BoolVar st_showpendingweapon = true;
+cvar::BoolVar st_showstats         = false;
 
-extern BoolCvar p_usecontext;
-extern BoolCvar p_damageindicator;
-extern BoolCvar r_texturecombiner;
+extern cvar::BoolVar p_usecontext;
+extern cvar::BoolVar p_damageindicator;
+extern cvar::BoolVar r_texturecombiner;
 
 //
 // STATUS BAR DATA
@@ -1047,6 +1047,17 @@ void ST_UpdateFlash(void) {
 //
 
 void ST_Init(void) {
+    cvar::Register()
+        (st_drawhud,           "st_DrawHud",           "TODO")
+        (st_crosshair,         "st_Crosshair",         "TODO")
+        (st_crosshairopacity,  "st_CrosshairOpacity",  "TODO")
+        (st_flashoverlay,      "st_FlashOverlay",      "TODO")
+        (st_regionmsg,         "st_RegionMsg",         "TODO")
+        (m_messages,           "m_Messages",           "TODO")
+        (m_playername,         "m_PlayerName",         "TODO")
+        (st_showpendingweapon, "st_ShowPendingWeapon", "TODO")
+        (st_showstats,         "st_ShowStats",         "TODO");
+
     int i = 0;
 
     plyr = &players[consoleplayer];

@@ -280,7 +280,7 @@ static void D_NetWait(void) {
         I_Sleep(100);
 
         while(SDL_PollEvent(&Event))
-            if(Event.type == SDL_KEYDOWN) {
+            if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_RETURN) {
                 NET_CL_StartGame();
             }
     }

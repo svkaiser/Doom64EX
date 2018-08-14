@@ -24,6 +24,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <core/cvar.hh>
+
 #include "r_lights.h"
 #include "m_fixed.h"
 #include "tables.h"
@@ -45,9 +47,9 @@ extern byte amModeCycle;
 
 static angle_t am_viewangle;
 
-extern BoolCvar am_fulldraw;
-extern BoolCvar am_ssect;
-extern BoolCvar r_texturecombiner;
+extern cvar::BoolVar am_fulldraw;
+extern cvar::BoolVar am_ssect;
+extern cvar::BoolVar r_texturecombiner;
 
 //
 // AM_BeginDraw

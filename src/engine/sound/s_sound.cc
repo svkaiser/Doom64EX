@@ -70,29 +70,9 @@ static dboolean nosound = false;
 static dboolean nomusic = false;
 static int lastmusic = 0;
 
-FloatCvar s_sfxvol("s_sfxvol", "", 80.0f, 0,
-                       [](const FloatCvar& p, float, float&)
-                       {
-                           if (p < 0.0f)
-                               return;
-                           S_SetSoundVolume(*p);
-                       });
-
-FloatCvar s_musvol("s_musvol", "", 80.0f, 0,
-                       [](const FloatCvar& p, float, float&)
-                       {
-                           if (p < 0.0f)
-                               return;
-                           S_SetMusicVolume(*p);
-                       });
-
-FloatCvar s_gain("s_gain", "", 1.0f, 0,
-                     [](const FloatCvar& p, float, float&)
-                     {
-                         if(p < 0.0f)
-                             return;
-                         S_SetGainOutput(*p);
-                     });
+cvar::FloatVar s_sfxvol = 80.0;
+cvar::FloatVar s_musvol = 80.0;
+cvar::FloatVar s_gain = 1.0;
 
 //
 // Internals.
@@ -107,6 +87,29 @@ int S_AdjustSoundParams(fixed_t x, fixed_t y, int* vol, int* sep);
 //
 
 void S_Init(void) {
+    cvar::Register()
+        (s_sfxvol, "s_SfxVol", "Sound-effect volume")
+        (s_musvol, "s_MusVol", "Music volume")
+        (s_gain,   "s_Gain",   "Gain");
+
+    s_sfxvol.set_callback([](const double& val) {
+        if (val >= 0) {
+            S_SetSoundVolume(val);
+        }
+    });
+
+    s_musvol.set_callback([](const double& val) {
+        if (val >= 0) {
+            S_SetMusicVolume(val);
+        }
+    });
+
+    s_gain.set_callback([](const double& val) {
+        if (val >= 0) {
+            S_SetGainOutput(val);
+        }
+    });
+
     if(M_CheckParm("-nosound")) {
         nosound = true;
         CON_DPrintf("Sounds disabled\n");

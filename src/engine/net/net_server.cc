@@ -1588,11 +1588,11 @@ void NET_SV_Shutdown(void)
     {
         return;
     }
-    
+
     fprintf(stderr, "SV: Shutting down server...\n");
 
     // Disconnect all clients
-    
+
     for (i=0; i<MAXNETNODES; ++i)
     {
         if (clients[i].active)
@@ -1639,22 +1639,19 @@ void NET_SV_Shutdown(void)
     }
 }
 
-void NET_SV_UpdateCvars(const Cvar &cvar)
+void NET_SV_UpdateCvars(const cvar::Ref &cvar)
 {
     net_packet_t *packet;
     int i;
 
-    // FIXME: Fix cvar sending from clients
-#if 0
-    if(!cvar->nonclient)
+    if(!cvar.is_server())
         return;
-#endif
 
     packet = NET_NewPacket(96);
 
     NET_WriteInt16(packet, NET_PACKET_TYPE_CVAR_UPDATE);
     NET_WriteString(packet, cvar.name());
-    NET_WriteString(packet, cvar.string());
+    NET_WriteString(packet, cvar.get());
 
     // Send packet
 
@@ -1666,9 +1663,3 @@ void NET_SV_UpdateCvars(const Cvar &cvar)
 
     NET_FreePacket(packet);
 }
-
-
-
-
-
-

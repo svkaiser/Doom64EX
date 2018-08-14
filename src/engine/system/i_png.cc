@@ -39,11 +39,7 @@
 #include <image/PaletteCache.hh>
 #include <wad.hh>
 
-FloatCvar i_gamma("i_gamma", "", 0.0f, 0,
-                      [](const FloatCvar&, float, float&)
-                      {
-                          GL_DumpTextures();
-                      });
+extern cvar::FloatVar i_gamma;
 
 //
 // I_GetRGBGamma

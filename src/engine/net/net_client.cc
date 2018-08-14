@@ -42,10 +42,10 @@
 
 #include "st_stuff.h"
 
-extern BoolCvar sv_nomonsters;
-extern BoolCvar sv_fastmonsters;
-extern BoolCvar sv_respawnitems;
-extern BoolCvar sv_respawn;
+extern cvar::BoolVar sv_nomonsters;
+extern cvar::BoolVar sv_fastmonsters;
+extern cvar::BoolVar sv_respawnitems;
+extern cvar::BoolVar sv_respawn;
 
 typedef int net_clientstate_t;
 enum
@@ -1002,9 +1002,9 @@ static void NET_CL_ParseCvarUpdate(net_packet_t* packet)
     cvarname    = NET_ReadString(packet);
     cvarvalue   = NET_ReadString(packet);
 
-    if (auto p = Cvar::find(cvarname)) {
-        if (p->is_network()) {
-            p->set_string(cvarvalue);
+    if (auto ref = cvar::g_store->find(cvarname)) {
+        if (ref->is_server()) {
+            *ref = cvarvalue;
         }
     }
 
@@ -1299,7 +1299,7 @@ void NET_CL_Disconnect(void)
     NET_CL_Shutdown();
 }
 
-extern StringCvar m_playername;
+extern cvar::StringVar m_playername;
 
 void NET_CL_Init(void)
 {

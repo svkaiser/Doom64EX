@@ -84,13 +84,13 @@ clusterdef_t*       clusterdefs;
 // [kex] cvars
 //
 
-BoolCvar p_features("p_features", "");
-BoolCvar p_autorun("p_autorun", "");
-BoolCvar p_fdoubleclick("p_fdoubleclick", "");
-BoolCvar p_sdoubleclick("p_sdoubleclick", "");
-BoolCvar p_usecontext("p_usecontext", "");
-BoolCvar p_damageindicator("p_damageindicator", "");
-IntCvar p_regionmode("p_regionmode", "");
+cvar::BoolVar p_features;
+cvar::BoolVar p_autorun;
+cvar::BoolVar p_fdoubleclick;
+cvar::BoolVar p_sdoubleclick;
+cvar::BoolVar p_usecontext;
+cvar::BoolVar p_damageindicator;
+cvar::IntVar p_regionmode;
 
 //
 // [kex] sky definition stuff
@@ -1411,6 +1411,15 @@ static void P_InitSkyDef(void) {
 //
 
 void P_Init(void) {
+    cvar::Register()
+        (p_features,        "p_Features",        "Additional features")
+        (p_autorun,         "p_Autorun",         "Autorun")
+        (p_fdoubleclick,    "p_FDoubleClick",    "TODO")
+        (p_sdoubleclick,    "p_SDoubleClick",    "TODO")
+        (p_usecontext,      "p_UseContext",      "TODO")
+        (p_damageindicator, "p_DamageIndicator", "TODO")
+        (p_regionmode,      "p_RegionMode",      "TODO");
+
     SC_Init();
     P_InitPicAnims();
     R_InitSprites(sprnames);

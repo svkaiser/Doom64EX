@@ -38,7 +38,7 @@ word statindice = 0;
 static word indicecnt = 0;
 static word drawIndices[MAXINDICES];
 
-extern BoolCvar r_drawtris;
+extern cvar::BoolVar r_drawtris;
 
 //
 // dglLogError

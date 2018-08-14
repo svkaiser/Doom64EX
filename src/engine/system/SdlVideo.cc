@@ -185,20 +185,20 @@ int mouse_x {};
 int mouse_y {};
 
 /* Graphics */
-IntCvar v_width { "v_Width", "Video width (-1: desktop width)", -1 };
-IntCvar v_height { "v_Height", "Video height (-1: desktop height)", -1 };
-IntCvar v_depthsize { "v_DepthSize", "Depth buffer fragment size", 24 };
-IntCvar v_buffersize { "v_BufferSize", "Framebuffer fragment size", 32 };
-BoolCvar v_vsync { "v_VSync", "Vertical sync", true };
-IntCvar v_windowed { "v_Windowed", "Window mode", fullscreen_default };
+cvar::IntVar v_width = -1;
+cvar::IntVar v_height = -1;
+cvar::IntVar v_depthsize = 24;
+cvar::IntVar v_buffersize = 32;
+cvar::BoolVar v_vsync = true;
+cvar::IntVar v_windowed = fullscreen_default;
 
 /* Mouse Input */
-FloatCvar v_msensitivityx { "v_MSensitivityX", "Mouse sensitivity", 5.0f };
-FloatCvar v_msensitivityy { "v_MSensitivityY", "Mouse sensitivity", 5.0f };
-FloatCvar v_macceleration { "v_MAcceleration", "Mouse acceleration", 0.0f };
-BoolCvar v_mlook { "v_MLook", "Mouse-look", true };
-BoolCvar v_mlookinvert { "v_MLookInvert", "Invert Y-Axis", false };
-BoolCvar v_yaxismove { "v_YAxisMove", "Move with the mouse", false };
+cvar::FloatVar v_msensitivityx = 5.0f;
+cvar::FloatVar v_msensitivityy = 5.0f;
+cvar::FloatVar v_macceleration = 0.0f;
+cvar::BoolVar v_mlook = true;
+cvar::BoolVar v_mlookinvert = false;
+cvar::BoolVar v_yaxismove = false;
 
 class SdlVideo : public IVideo {
     SDL_Window* sdl_window_ {};
@@ -635,5 +635,21 @@ public:
 
 void init_video_sdl()
 {
+    cvar::Register()
+        /* Video */
+        (v_width, "v_Width", "Video width (-1 for auto)")
+        (v_height, "v_Height", "Video height (-1 for auto)")
+        (v_depthsize, "v_DepthSize", "Depth buffer fragment size")
+        (v_buffersize, "v_BufferSize", "Framebuffer fragment size")
+        (v_vsync, "v_VSync", "Vertical sync")
+        (v_windowed, "v_Windowed", "Window mode")
+
+        /* Mouse Input */
+        (v_msensitivityx, "v_MSensitivityX", "Mouse X-axis sensitivity")
+        (v_msensitivityy, "v_MSensitivityY", "Mouse Y-axis sensitivity")
+        (v_mlook, "v_MLook", "Mouse-look")
+        (v_mlookinvert, "v_MLookInvert", "Invert Y-axis")
+        (v_yaxismove, "v_YAxisMove", "Move with the mouse");
+
     Video = new SdlVideo { OpenGLVer::gl14 };
 }

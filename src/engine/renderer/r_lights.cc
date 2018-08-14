@@ -35,13 +35,8 @@
 
 rcolor    bspColor[5];
 
-FloatCvar i_brightness("i_brightness", "Brightness", 100.0f, 0,
-                           [](const FloatCvar&, float, float&)
-                           {
-                               R_RefreshBrightness();
-                           });
-
-extern BoolCvar r_texturecombiner;
+extern cvar::FloatVar i_brightness;
+extern cvar::BoolVar r_texturecombiner;
 
 //
 // R_LightToVertex

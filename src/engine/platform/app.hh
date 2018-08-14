@@ -134,16 +134,6 @@ namespace imp {
             *static_cast<BasicCvar<T>*>(this) = from_string<T>(val);
         }
     };
-
-    using IntParam = TypedParam<int>;
-    using FloatParam = TypedParam<float>;
-    using BoolParam = TypedParam<bool>;
-    using StringParam = TypedParam<String>;
-
-    using IntCvarParam = BasicCvarParam<int>;
-    using FloatCvarParam = BasicCvarParam<float>;
-    using BoolCvarParam = BasicCvarParam<bool>;
-    using StringCvarParam = BasicCvarParam<String>;
   }
 }
 

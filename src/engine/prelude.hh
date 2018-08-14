@@ -7,9 +7,9 @@
 #include <memory>
 #include <string>
 #include <cstdint>
+#include <chrono>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
-#include <chrono>
 
 // Include standard utilities
 #include "utility/types.hh"

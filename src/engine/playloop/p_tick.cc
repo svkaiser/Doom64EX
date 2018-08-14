@@ -41,9 +41,9 @@
 #include "p_setup.h"
 #include "g_demo.h"
 
-extern BoolCvar i_interpolateframes;
-extern BoolCvar p_damageindicator;
-extern BoolCvar r_wipe;
+extern cvar::BoolVar i_interpolateframes;
+extern cvar::BoolVar p_damageindicator;
+extern cvar::BoolVar r_wipe;
 
 int     leveltime;
 

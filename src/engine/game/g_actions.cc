@@ -240,7 +240,7 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
         if(action) {
             action->proc(action->data, al->param);
         }
-        else if (auto cvar = Cvar::find(al->cmd)) {
+        else if (auto cvar = cvar::g_store->find(al->cmd)) {
             // FIXME: Netgame cvar setting
 #if 0
             if(netgame) {
@@ -256,11 +256,11 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
 #endif
 
             if(!al->param[0]) {
-                auto str = fmt::format("{}: {} ({})", cvar->name(), cvar->string(), cvar->default_string());
+                auto str = fmt::format("{}: {} ({})", cvar->name(), cvar->get(), cvar->get_default());
                 CON_AddLine(str.c_str(), str.size());
             }
             else {
-                cvar->set_string(al->param[0]);
+                *cvar = (al->param[0]);
                 // FIXME: Update cvar in network game
 #if 0
                 if(netgame) {
@@ -724,7 +724,11 @@ void G_OutputBindings(FILE *fh) {
     }
 
     // cvars
-    Cvar::write_config(fh);
+    for (auto ref : *cvar::g_store) {
+        if (ref.is_noconfig())
+            continue;
+        fmt::print(fh, "seta {} {}\n", ref.name(), ref.get());
+    }
 }
 
 //

@@ -146,14 +146,9 @@ typedef struct {
 } menuitem_t;
 
 typedef struct {
-    Cvar *mitem;
-    float    mdefault;
-} menudefault_t;
-
-typedef struct {
     int item;
     float width;
-    Cvar *mitem;
+    cvar::Ref mitem;
 } menuthermobar_t;
 
 typedef struct menu_s {
@@ -167,7 +162,6 @@ typedef struct menu_s {
     short               y;                  // x,y of menu
     short               lastOn;             // last item user was on in menu
     dboolean            smallfont;          // draw text using small fonts
-    menudefault_t       *defaultitems;      // pointer to default values for cvars
     short               numpageitems;       // number of items to display per page
     short               menupageoffset;
     float               scale;
@@ -213,10 +207,10 @@ static void M_DoDefaults(int choice);
 static void M_Return(int choice);
 static void M_ReturnToOptions(int choice);
 template <class T, class U>
-static void M_SetCvar(BasicCvar<T> &property, const U &value);
+static void M_SetCvar(cvar::VarBase<T> &property, const U &value);
 template <class T, class U>
-static void M_SetOptionValue(int choice, U min, U max, U inc, BasicCvar<T> &cvar);
-static void M_SetOptionValue(int choice, BoolCvar &cvar);
+static void M_SetOptionValue(int choice, U min, U max, U inc, cvar::VarBase<T> &cvar);
+static void M_SetOptionValue(int choice, cvar::BoolVar &cvar);
 static void M_DrawSmbString(const char* text, menu_t* menu, int item);
 static void M_DrawSaveGameFrontend(menu_t* def);
 static void M_SetInputString(char* string, int len);
@@ -224,27 +218,10 @@ static void M_Scroll(menu_t* menu, dboolean up);
 
 static dboolean M_SetThumbnail(int which);
 
-IntCvar m_regionblood("m_regionblood", "");
-
-FloatCvar m_menufadetime("m_menufadetime", "", 0.0f, 0,
-                             [](const FloatCvar &p, float, float& x)
-                             {
-                                 x = clamp(*p, 0.0f, 80.0f);
-                             });
-
-BoolCvar m_menumouse("m_menumouse", "", true, 0,
-                         [](const BoolCvar &p, bool, bool&) {
-                             SDL_ShowCursor(*p ? SDL_FALSE : SDL_TRUE);
-                             if(!*p) {
-                                 itemSelected = -1;
-                             }
-                         });
-
-FloatCvar m_cursorscale("m_cursorscale", "", 8.0f, 0,
-                            [](const FloatCvar &p, float, float &x)
-                            {
-                                x = clamp(*p, 0.0f, 50.0f);
-                            });
+cvar::IntVar m_regionblood    = 0;
+cvar::FloatVar m_menufadetime = 0.0;
+cvar::BoolVar m_menumouse     = true;
+cvar::FloatVar m_cursorscale  = 8.0;
 
 //------------------------------------------------------------------------
 //
@@ -283,7 +260,6 @@ menu_t MainDef = {
     112,150,
     0,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -333,7 +309,6 @@ menu_t PauseDef = {
     112,80,
     0,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -371,7 +346,6 @@ menu_t QuitDef = {
     144,112,
     quitno,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -421,7 +395,6 @@ menu_t QuitDef2 = {
     144,112,
     quit2no,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -470,7 +443,6 @@ menu_t PromptMainDef = {
     144,112,
     PMainNo,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -527,7 +499,6 @@ menu_t RestartDef = {
     144,112,
     RMainNo,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -578,7 +549,6 @@ menu_t StartNewNotifyDef = {
     144,112,
     SNN_Ok,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -630,7 +600,6 @@ menu_t NewDef = {
     112,80,
     toorough,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -719,7 +688,6 @@ menu_t OptionsDef = {
     170,80,
     0,
     false,
-    NULL,
     -1,
     0,
     0.75f,
@@ -754,9 +722,9 @@ void M_DrawOptions(void) {
 void M_RegionChoice(int choice);
 void M_DrawRegion(void);
 
-extern BoolCvar st_regionmsg;
-extern IntCvar m_regionblood;
-extern IntCvar p_regionmode;
+extern cvar::BoolVar st_regionmsg;
+extern cvar::IntVar m_regionblood;
+extern cvar::IntVar p_regionmode;
 
 enum {
     region_mode,
@@ -773,13 +741,6 @@ menuitem_t RegionMenu[]= {
     {2,"Blood Color:",M_RegionChoice, 'b'},
     {-2,"Default",M_DoDefaults,'d'},
     {1,"/r Return",M_Return, 0x20}
-};
-
-menudefault_t RegionDefault[] = {
-    { &p_regionmode, 0 },
-    { &st_regionmsg, 0 },
-    { &m_regionblood, 0 },
-    { NULL, -1 }
 };
 
 const char* RegionHints[region_end]= {
@@ -800,7 +761,6 @@ menu_t RegionDef = {
     130,80,
     0,
     false,
-    RegionDefault,
     -1,
     0,
     0.8f,
@@ -923,16 +883,16 @@ void M_NetworkChoice(int choice);
 void M_PlayerSetName(int choice);
 void M_DrawNetwork(void);
 
-extern StringCvar m_playername;
-extern BoolCvar p_allowjump;
-extern BoolCvar p_autoaim;
-extern BoolCvar sv_nomonsters;
-extern BoolCvar sv_fastmonsters;
-extern BoolCvar sv_respawnitems;
-extern BoolCvar sv_respawn;
-extern BoolCvar sv_allowcheats;
-extern BoolCvar sv_friendlyfire;
-extern BoolCvar sv_keepitems;
+extern cvar::StringVar m_playername;
+extern cvar::BoolVar p_allowjump;
+extern cvar::BoolVar p_autoaim;
+extern cvar::BoolVar sv_nomonsters;
+extern cvar::BoolVar sv_fastmonsters;
+extern cvar::BoolVar sv_respawnitems;
+extern cvar::BoolVar sv_respawn;
+extern cvar::BoolVar sv_allowcheats;
+extern cvar::BoolVar sv_friendlyfire;
+extern cvar::BoolVar sv_keepitems;
 
 enum {
     network_header1,
@@ -971,19 +931,6 @@ menuitem_t NetworkMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-menudefault_t NetworkDefault[] = {
-    { &sv_allowcheats, 0 },
-    { &sv_friendlyfire, 0 },
-    { &sv_keepitems, 0 },
-    { &p_allowjump, 0 },
-    { &p_autoaim, 1 },
-    { &sv_nomonsters, 0 },
-    { &sv_fastmonsters, 0 },
-    { &sv_respawn, 0 },
-    { &sv_respawnitems, 0 },
-    { NULL, -1 }
-};
-
 const char* NetworkHints[network_end]= {
     NULL,
     "set a name for yourself",
@@ -1012,7 +959,6 @@ menu_t NetworkDef = {
     208,108,
     0,
     false,
-    NetworkDefault,
     14,
     0,
     0.5f,
@@ -1125,22 +1071,22 @@ void M_DrawNetwork(void) {
 void M_MiscChoice(int choice);
 void M_DrawMisc(void);
 
-extern BoolCvar am_showkeymarkers;
-extern BoolCvar am_showkeycolors;
-extern BoolCvar am_drawobjects;
-extern BoolCvar am_overlay;
-extern BoolCvar r_skybox;
-extern BoolCvar r_texnonpowresize;
-extern BoolCvar i_interpolateframes;
-extern BoolCvar p_usecontext;
-extern BoolCvar compat_collision;
-extern BoolCvar compat_limitpain;
-extern BoolCvar compat_mobjpass;
-extern BoolCvar compat_grabitems;
-extern BoolCvar r_wipe;
-extern BoolCvar r_rendersprites;
-extern BoolCvar r_texturecombiner;
-extern IntCvar r_colorscale;
+extern cvar::BoolVar am_showkeymarkers;
+extern cvar::BoolVar am_showkeycolors;
+extern cvar::BoolVar am_drawobjects;
+extern cvar::BoolVar am_overlay;
+extern cvar::BoolVar r_skybox;
+extern cvar::BoolVar r_texnonpowresize;
+extern cvar::BoolVar i_interpolateframes;
+extern cvar::BoolVar p_usecontext;
+extern cvar::BoolVar compat_collision;
+extern cvar::BoolVar compat_limitpain;
+extern cvar::BoolVar compat_mobjpass;
+extern cvar::BoolVar compat_grabitems;
+extern cvar::BoolVar r_wipe;
+extern cvar::BoolVar r_rendersprites;
+extern cvar::BoolVar r_texturecombiner;
+extern cvar::IntVar r_colorscale;
 
 enum {
     misc_header1,
@@ -1242,34 +1188,9 @@ const char* MiscHints[misc_end]= {
     NULL
 };
 
-menudefault_t MiscDefault[] = {
-    { &m_menufadetime, 0 },
-    { &m_menumouse, 1 },
-    { &m_cursorscale, 8 },
-    { &p_autoaim, 1 },
-    { &p_allowjump, 0 },
-    { &p_usecontext, 0 },
-    { &r_wipe, 1 },
-    { &r_texnonpowresize, 0 },
-    { &i_interpolateframes, 0 },
-    { &r_texturecombiner, 1 },
-    { &r_rendersprites, 1 },
-    { &r_skybox, 0 },
-    { &r_colorscale, 0 },
-    { &am_showkeymarkers, 0 },
-    { &am_showkeycolors, 0 },
-    { &am_drawobjects, 0 },
-    { &am_overlay, 0 },
-    { &compat_collision, 1 },
-    { &compat_limitpain, 1 },
-    { &compat_mobjpass, 1 },
-    { &compat_grabitems, 1 },
-    { NULL, -1 }
-};
-
 menuthermobar_t SetupBars[] = {
-    { misc_empty1, 80, &m_menufadetime },
-    { misc_empty2, 50, &m_cursorscale },
+    { misc_empty1, 80, m_menufadetime },
+    { misc_empty2, 50, m_cursorscale },
     { -1, 0 }
 };
 
@@ -1283,7 +1204,6 @@ menu_t MiscDef = {
     216,108,
     0,
     false,
-    MiscDefault,
     14,
     0,
     0.5f,
@@ -1484,12 +1404,12 @@ void M_ChangeMouseInvert(int choice);
 void M_ChangeYAxisMove(int choice);
 void M_DrawMouse(void);
 
-extern FloatCvar v_msensitivityx;
-extern FloatCvar v_msensitivityy;
-extern BoolCvar v_mlook;
-extern BoolCvar v_mlookinvert;
-extern BoolCvar v_yaxismove;
-extern FloatCvar v_macceleration;
+extern cvar::FloatVar v_msensitivityx;
+extern cvar::FloatVar v_msensitivityy;
+extern cvar::BoolVar v_mlook;
+extern cvar::BoolVar v_mlookinvert;
+extern cvar::BoolVar v_yaxismove;
+extern cvar::FloatVar v_macceleration;
 
 enum {
     mouse_sensx,
@@ -1520,20 +1440,10 @@ menuitem_t MouseMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-menudefault_t MouseDefault[] = {
-    { &v_msensitivityx, 5 },
-    { &v_msensitivityy, 5 },
-    { &v_macceleration, 0 },
-    { &v_mlook, 0 },
-    { &v_mlookinvert, 0 },
-    { &v_yaxismove, 0 },
-    { NULL, -1 }
-};
-
 menuthermobar_t MouseBars[] = {
-    { mouse_empty1, 32, &v_msensitivityx },
-    { mouse_empty2, 32, &v_msensitivityy },
-    { mouse_empty3, 20, &v_macceleration },
+    { mouse_empty1, 32, v_msensitivityx },
+    { mouse_empty2, 32, v_msensitivityy },
+    { mouse_empty3, 20, v_macceleration },
     { -1, 0 }
 };
 
@@ -1547,7 +1457,6 @@ menu_t MouseDef = {
     104,52,
     0,
     false,
-    MouseDefault,
     -1,
     0,
     0.925f,
@@ -1666,15 +1575,15 @@ void M_ChangeCrosshair(int choice);
 void M_ChangeOpacity(int choice);
 void M_DrawDisplay(void);
 
-extern IntCvar st_drawhud;
-extern BoolCvar st_crosshair;
-extern FloatCvar st_crosshairopacity;
-extern BoolCvar st_flashoverlay;
-extern BoolCvar st_showpendingweapon;
-extern BoolCvar st_showstats;
-extern FloatCvar i_brightness;
-extern BoolCvar m_messages;
-extern BoolCvar p_damageindicator;
+extern cvar::IntVar st_drawhud;
+extern cvar::BoolVar st_crosshair;
+extern cvar::FloatVar st_crosshairopacity;
+extern cvar::BoolVar st_flashoverlay;
+extern cvar::BoolVar st_showpendingweapon;
+extern cvar::BoolVar st_showstats;
+extern cvar::FloatVar i_brightness;
+extern cvar::BoolVar m_messages;
+extern cvar::BoolVar p_damageindicator;
 
 enum {
     dbrightness,
@@ -1725,21 +1634,9 @@ const char* DisplayHints[display_end]= {
     NULL
 };
 
-menudefault_t DisplayDefault[] = {
-    { &i_brightness, 0 },
-    { &m_messages, 1 },
-    { &st_drawhud, 1 },
-    { &p_damageindicator, 0 },
-    { &st_showpendingweapon, 1 },
-    { &st_showstats, 0 },
-    { &st_crosshair, 0 },
-    { &st_crosshairopacity, 80 },
-    { NULL, -1 }
-};
-
 menuthermobar_t DisplayBars[] = {
-    { display_empty1, 100, &i_brightness },
-    { display_empty2, 255, &st_crosshairopacity },
+    { display_empty1, 100, i_brightness },
+    { display_empty2, 255, st_crosshairopacity },
     { -1, 0 }
 };
 
@@ -1753,7 +1650,6 @@ menu_t DisplayDef = {
     165,65,
     0,
     false,
-    DisplayDefault,
     -1,
     0,
     0.715f,
@@ -1898,16 +1794,16 @@ void M_ChangeBufferSize(int choice);
 void M_ChangeAnisotropic(int choice);
 void M_DrawVideo(void);
 
-extern IntCvar v_width;
-extern IntCvar v_height;
-extern IntCvar v_windowed;
-extern BoolCvar v_vsync;
-extern IntCvar v_depthsize;
-extern IntCvar v_buffersize;
-extern FloatCvar i_gamma;
-extern FloatCvar i_brightness;
-extern BoolCvar r_filter;
-extern BoolCvar r_anisotropic;
+extern cvar::IntVar v_width;
+extern cvar::IntVar v_height;
+extern cvar::IntVar v_windowed;
+extern cvar::BoolVar v_vsync;
+extern cvar::IntVar v_depthsize;
+extern cvar::IntVar v_buffersize;
+extern cvar::FloatVar i_gamma;
+extern cvar::FloatVar i_brightness;
+extern cvar::BoolVar r_filter;
+extern cvar::BoolVar r_anisotropic;
 
 enum {
     video_dgamma,
@@ -1938,20 +1834,8 @@ menuitem_t VideoMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-menudefault_t VideoDefault[] = {
-    { &i_gamma, 0 },
-    { &r_filter, 0 },
-    { &r_anisotropic, 0 },
-    { &v_windowed, 1 },
-    { &v_vsync, 1 },
-    { &v_depthsize, 24 },
-    { &v_buffersize, 32 },
-    { NULL, -1 },
-    { NULL, -1 }
-};
-
 menuthermobar_t VideoBars[] = {
-    { video_empty1, 20, &i_gamma },
+    { video_empty1, 20, i_gamma },
     { -1, 0 }
 };
 
@@ -1965,7 +1849,6 @@ menu_t VideoDef = {
     136,80,
     0,
     false,
-    VideoDefault,
     12,
     0,
     0.65f,
@@ -2221,7 +2104,6 @@ menu_t PasswordDef = {
     92,60,
     0,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -2355,9 +2237,9 @@ void M_MusicVol(int choice);
 void M_GainOutput(int choice);
 void M_DrawSound(void);
 
-extern FloatCvar s_sfxvol;
-extern FloatCvar s_musvol;
-extern FloatCvar s_gain;
+extern cvar::FloatVar s_sfxvol;
+extern cvar::FloatVar s_musvol;
+extern cvar::FloatVar s_gain;
 
 enum {
     sfx_vol,
@@ -2382,17 +2264,10 @@ menuitem_t SoundMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-menudefault_t SoundDefault[] = {
-    { &s_sfxvol, 80 },
-    { &s_musvol, 80 },
-    { &s_gain, 1 },
-    { NULL, -1 }
-};
-
 menuthermobar_t SoundBars[] = {
-    { sfx_empty1, 100, &s_sfxvol },
-    { sfx_empty2, 100, &s_musvol },
-    { sfx_empty3, 2, &s_gain },
+    { sfx_empty1, 100, s_sfxvol },
+    { sfx_empty2, 100, s_musvol },
+    { sfx_empty3, 2, s_gain },
     { -1, 0 }
 };
 
@@ -2406,7 +2281,6 @@ menu_t SoundDef = {
     96,60,
     0,
     false,
-    SoundDefault,
     -1,
     0,
     1.0f,
@@ -2499,7 +2373,7 @@ void M_GainOutput(int choice) {
 void M_DoFeature(int choice);
 void M_DrawFeaturesMenu(void);
 
-extern BoolCvar sv_lockmonsters;
+extern cvar::BoolVar sv_lockmonsters;
 
 enum {
     features_levels = 0,
@@ -2540,7 +2414,6 @@ menu_t featuresDef = {
     56,56,
     0,
     true,
-    NULL,
     -1,
     0,
     1.0f,
@@ -2733,14 +2606,6 @@ menuitem_t XGamePadMenu[]= {
     {1,"/r Return",M_Return, 0x20}
 };
 
-menudefault_t XGamePadDefault[] = {
-    { &i_rsticksensitivity, 0.0080f },
-    { &i_rstickthreshold, 20 },
-    { &v_mlook, 0 },
-    { &v_mlookinvert, 0 },
-    { NULL, -1 }
-};
-
 menu_t XGamePadDef = {
     xgp_end,
     false,
@@ -2751,7 +2616,6 @@ menu_t XGamePadDef = {
     88,48,
     0,
     false,
-    XGamePadDefault,
     -1,
     0,
     1.0f,
@@ -3015,7 +2879,6 @@ menu_t ControlMenuDef = {
     120,64,
     0,
     false,
-    NULL,
     -1,
     0,
     1,
@@ -3075,7 +2938,6 @@ menu_t QuickSaveConfirmDef = {
     144,112,
     QS_Ok,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -3115,7 +2977,6 @@ menu_t NetLoadNotifyDef = {
     144,112,
     NLN_Ok,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -3155,7 +3016,6 @@ menu_t SaveDeadDef = {
     144,112,
     SDN_Ok,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -3211,7 +3071,6 @@ menu_t SaveDef = {
     112,144,
     0,
     false,
-    NULL,
     -1,
     0,
     0.5f,
@@ -3316,7 +3175,6 @@ menu_t LoadMainDef = {
     112,144,
     0,
     false,
-    NULL,
     -1,
     0,
     0.5f,
@@ -3334,7 +3192,6 @@ menu_t LoadDef = {
     112,144,
     0,
     false,
-    NULL,
     -1,
     0,
     0.5f,
@@ -3443,7 +3300,6 @@ menu_t QuickSavePromptDef = {
     144,112,
     QSP_Yes,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -3484,7 +3340,6 @@ menu_t QuickLoadPromptDef = {
     144,112,
     QLP_Yes,
     false,
-    NULL,
     -1,
     0,
     1.0f,
@@ -3508,7 +3363,7 @@ void M_QuickLoadResponse(int ch) {
 
 static int prevtic = 0; // hack - check for overlapping sounds
 template <class T, class U>
-static void M_SetCvar(BasicCvar<T> &property, const U &value) {
+static void M_SetCvar(cvar::VarBase<T>& property, const U &value) {
     if(property == value) {
         return;
     }
@@ -3527,13 +3382,13 @@ static void M_SetCvar(BasicCvar<T> &property, const U &value) {
 // M_SetOptionValue
 //
 
-static void M_SetOptionValue(int choice, BoolCvar &property)
+static void M_SetOptionValue(int choice, cvar::BoolVar& property)
 {
     M_SetCvar(property, !property);
 }
 
 template <class T, class U>
-static void M_SetOptionValue(int choice, U min, U max, U inc, BasicCvar<T> &cvar) {
+static void M_SetOptionValue(int choice, U min, U max, U inc, cvar::VarBase<T> &cvar) {
     if(choice) {
         if(cvar < max) {
             M_SetCvar(cvar, cvar + inc);
@@ -3563,27 +3418,6 @@ static void M_SetOptionValue(int choice, U min, U max, U inc, BasicCvar<T> &cvar
 //
 
 static void M_DoDefaults(int choice) {
-    // FIXME: Allow defaults
-#if 0
-    int i = 0;
-
-    for(i = 0; currentMenu->defaultitems[i].mitem != NULL; i++) {
-        currentMenu->defaultitems[i].mitem->name, currentMenu->defaultitems[i].mdefault);
-    }
-
-    if(currentMenu == &DisplayDef) {
-        R_RefreshBrightness();
-    }
-
-    if(currentMenu == &VideoDef) {
-        CON_CvarSetValue(v_width.name, 640);
-        CON_CvarSetValue(v_height.name, 480);
-
-        GL_DumpTextures();
-        GL_SetTextureFilter();
-    }
-#endif
-
     S_StartSound(NULL, sfx_switch2);
 }
 
@@ -5224,7 +5058,7 @@ void M_MenuFadeOut(void) {
 // M_Ticker
 //
 
-extern BoolCvar p_features;
+extern cvar::BoolVar p_features;
 
 void M_Ticker(void) {
     mainmenuactive = (currentMenu == &MainDef) ? true : false;
@@ -5328,6 +5162,22 @@ void M_Ticker(void) {
 //
 
 void M_Init(void) {
+    cvar::Register()
+        (m_regionblood,  "m_RegionBlood",  "")
+        (m_menufadetime, "m_MenuFadeTime", "")
+        (m_menumouse,    "m_MenuMouse",    "")
+        (m_cursorscale,  "m_cursorscale",  "");
+
+    /* TODO: Clamp m_menufadetime to [0, 80] */
+    m_menumouse.set_callback([](const bool& show) {
+        SDL_ShowCursor(show ? SDL_FALSE : SDL_TRUE);
+        if (!show) {
+            itemSelected = -1;
+        }
+    });
+
+    /* TODO: Clamp m_cursorscale to [0, 50] */
+
     int i = 0;
 
     currentMenu = &MainDef;

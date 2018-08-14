@@ -4,7 +4,8 @@
 #include <sstream>
 #include <iostream>
 #include <utility/string_view.hh>
-#include <fmt/format.h>
+
+#include "style.hh"
 
 namespace imp {
   namespace log {
@@ -72,7 +73,7 @@ namespace imp {
         std::ostream* m_ostream {};
         void (*m_callback)(StringView message) {};
 
-        void m_println(StringView);
+        void m_println(StringView message);
 
         void m_init(StringView ansi_color, std::ostream& stream);
 

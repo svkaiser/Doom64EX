@@ -52,7 +52,7 @@
 #include "tables.h"
 #include "info.h"
 
-extern BoolCvar p_damageindicator;
+extern cvar::BoolVar p_damageindicator;
 
 
 // a weapon is found with two clip loads,

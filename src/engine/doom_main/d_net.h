@@ -39,7 +39,7 @@
 #endif
 
 #define MAXNETNODES        8    // Max computers/players in a game.
-#define BACKUPTICS        128    // Networking and tick handling related.
+#define BACKUPTICS        1280    // Networking and tick handling related.
 
 
 // Create any new ticcmds and broadcast to other players.

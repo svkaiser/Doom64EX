@@ -63,8 +63,8 @@ static float sky_cloudpan2 = 0;
 #define FIRESKY_WIDTH   64
 #define FIRESKY_HEIGHT  64
 
-extern BoolCvar r_texturecombiner;
-extern BoolCvar r_skybox;
+extern cvar::BoolVar r_texturecombiner;
+extern cvar::BoolVar r_skybox;
 
 #define SKYVIEWPOS(angle, amount, x) x = -(angle / (float)ANG90 * amount); while(x < 1.0f) x += 1.0f
 

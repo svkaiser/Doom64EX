@@ -48,8 +48,8 @@ static void R_AddLeaf(subsector_t *sub);
 static void R_AddLine(seg_t *line);
 static void AddSegToDrawlist(drawlist_t *dl, seg_t *line, int texid, int sidetype);
 
-extern BoolCvar i_interpolateframes;
-extern BoolCvar r_texturecombiner;
+extern cvar::BoolVar i_interpolateframes;
+extern cvar::BoolVar r_texturecombiner;
 
 //
 // R_AddClipLine

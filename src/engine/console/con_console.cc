@@ -36,6 +36,7 @@
 #include "r_main.h"
 #include "i_system.h"
 #include "gl_texture.h"
+#include <core/cvar/store.hh>
 #include <imp/NativeUI>
 
 #define CONSOLE_PROMPTCHAR      '>'
@@ -71,31 +72,33 @@ static int          console_prevcmds[CMD_HISTORY_SIZE];
 static int          console_cmdhead;
 static int          console_nextcmd;
 
-char        console_inputbuffer[MAX_CONSOLE_INPUT_LEN];
-int         console_inputlength;
-int     console_autocomplete = 0;
-bool    console_initialized = false;
-std::vector<Cvar*> console_autocomplete_list;
+char console_inputbuffer[MAX_CONSOLE_INPUT_LEN];
+int console_inputlength;
+bool console_initialized = false;
+
+Optional<int> console_autocomplete;
 
 //
 // CON_AutoComplete
 //
 static void CON_AutoComplete()
 {
+#if 0
     if (console_inputlength <= 1)
         return;
 
-    if (console_autocomplete == 0) {
-        console_autocomplete_list = Cvar::partial(&console_inputbuffer[1]);
+    if (!console_autocomplete) {
+        Autocomplete ac = cvar::g_store->iter_prefix(&console_inputbuffer[1]);
+        console_autocomplete = ac;
     }
 
-    if (console_autocomplete_list.empty())
-        return;
-
-    auto index = (console_autocomplete++) % console_autocomplete_list.size();
-    auto entry = console_autocomplete_list[index]->name();
+    auto entry = console_autocomplete.name();
     strcpy(console_inputbuffer + 1, entry.data());
     console_inputlength = entry.length() + 1;
+
+    if (console_autocomplete->is_good())
+        console_autocomplete->next();
+#endif
 }
 //
 // CON_Init
@@ -401,7 +404,7 @@ dboolean CON_Responder(event_t* ev) {
             switch(c) {
             case KEY_ESCAPE:
                 console_inputlength = 1;
-                console_autocomplete = 0;
+                console_autocomplete = nullopt;
                 break;
 
             case KEY_TAB:
@@ -427,7 +430,7 @@ dboolean CON_Responder(event_t* ev) {
                 console_prevcmds[console_cmdhead] = -1;
                 G_ExecuteCommand(&console_inputbuffer[1]);
                 console_inputlength = 1;
-                console_autocomplete = 0;
+                console_autocomplete = nullopt;
                 CONCLEARINPUT();
                 break;
 
@@ -447,7 +450,7 @@ dboolean CON_Responder(event_t* ev) {
                     console_inputlength = console_buffer[c]->len;
                     dmemcpy(console_inputbuffer, console_buffer[console_prevcmds[console_nextcmd]]->line, console_inputlength);
                 }
-                console_autocomplete = 0;
+                console_autocomplete = nullopt;
                 break;
 
             case KEY_DOWNARROW:
@@ -467,7 +470,7 @@ dboolean CON_Responder(event_t* ev) {
                 console_nextcmd = c;
                 console_inputlength = console_buffer[console_prevcmds[console_nextcmd]]->len;
                 dmemcpy(console_inputbuffer, console_buffer[console_prevcmds[console_nextcmd]]->line, console_inputlength);
-                console_autocomplete = 0;
+                console_autocomplete = nullopt;
                 break;
 
             case KEY_MWHEELUP:
@@ -491,7 +494,7 @@ dboolean CON_Responder(event_t* ev) {
 
                 clearheld = false;
                 CON_ParseKey(c);
-                console_autocomplete = 0;
+                console_autocomplete = nullopt;
                 break;
             }
 

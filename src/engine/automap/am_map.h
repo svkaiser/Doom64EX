@@ -26,7 +26,7 @@
 
 #include <core/cvar.hh>
 
-extern BoolCvar am_overlay;
+extern cvar::BoolVar am_overlay;
 
 // Called by main loop.
 dboolean AM_Responder(event_t* ev);

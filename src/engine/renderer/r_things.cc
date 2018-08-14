@@ -54,11 +54,11 @@ const char*     spritename;
 static visspritelist_t visspritelist[MAX_SPRITES];
 static visspritelist_t *vissprite = NULL;
 
-extern IntCvar m_regionblood;
-extern BoolCvar st_flashoverlay;
-extern BoolCvar i_interpolateframes;
-extern BoolCvar r_texturecombiner;
-extern BoolCvar r_rendersprites;
+extern cvar::IntVar m_regionblood;
+extern cvar::BoolVar st_flashoverlay;
+extern cvar::BoolVar i_interpolateframes;
+extern cvar::BoolVar r_texturecombiner;
+extern cvar::BoolVar r_rendersprites;
 
 static void AddSpriteDrawlist(drawlist_t *dl, visspritelist_t *vis, int texid);
 

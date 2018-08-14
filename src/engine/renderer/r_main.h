@@ -58,10 +58,10 @@ extern unsigned int glBindCalls;
 
 extern dboolean     bRenderSky;
 
-extern FloatCvar r_fov;
-extern BoolCvar r_fillmode;
-extern BoolCvar r_uniformtime;
-extern BoolCvar r_drawtrace;
+extern cvar::FloatVar r_fov;
+extern cvar::BoolVar r_fillmode;
+extern cvar::BoolVar r_uniformtime;
+extern cvar::BoolVar r_drawtrace;
 
 void R_Init(void);
 void R_RenderPlayerView(player_t *player);
