@@ -1,7 +1,7 @@
 #ifndef __STORE_ITERATOR__99202760
 #define __STORE_ITERATOR__99202760
 
-#include <unordered_map>
+#include <utility/radix_tree.hh>
 #include <boost/compressed_pair.hpp>
 
 #include "ref.hh"
@@ -51,15 +51,19 @@ namespace imp::cvar {
 
   template <class Predicate = DummyPred>
   class StoreIterator {
-      using iterator = typename std::unordered_map<String, std::weak_ptr<Data>>::iterator;
+      using iterator = typename imp::radix_tree<String, std::weak_ptr<Data>>::iterator;
       using predicate = Predicate;
 
       struct iter_pair {
           iterator iter;
-          const iterator end;
+          iterator end;
+
+          iter_pair(const iter_pair&) = default;
 
           iter_pair(iterator iter, const iterator end):
               iter(iter), end(end) {}
+
+          iter_pair& operator=(const iter_pair&) = default;
 
           void next()
           { ++iter; }

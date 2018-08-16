@@ -1,14 +1,15 @@
 #include "ref.hh"
 #include "store.hh"
+#include "completion.hh"
 #include <iostream>
 
 using namespace imp;
 namespace internal = imp::cvar::internal;
 
 namespace {
-  using Vars = std::unordered_map<String, std::weak_ptr<cvar::Data>>;
+  using Vars = imp::radix_tree <String, std::weak_ptr<cvar::Data>>;
 
-  String s_standard(StringView name)
+  String s_normalize(StringView name)
   {
       String cname;
 
@@ -53,8 +54,7 @@ UniquePtr<cvar::Store> cvar::g_store = nullptr;
 
 void cvar::Store::p_add(std::shared_ptr<Data> data, StringView name, StringView desc, const FlagSet& flags)
 {
-    String sname = s_standard(name);
-    log::warn("+ {}\n", sname);
+    String sname = s_normalize(name);
 
     auto it = m_vars.find(sname);
     if (it != m_vars.end()) {
@@ -66,7 +66,7 @@ void cvar::Store::p_add(std::shared_ptr<Data> data, StringView name, StringView 
     data->set_valid(true);
     data->set_flags(flags);
 
-    m_vars.emplace(sname, data);
+    m_vars.insert({ sname, data });
 
     auto u_it = m_user_values.find(sname);
     if (u_it != m_user_values.end()) {
@@ -91,7 +91,7 @@ void cvar::Store::user_value(StringView name, StringView value)
             return;
     }
 
-    m_user_values.emplace(s_standard(name), value.to_string());
+    m_user_values.insert({s_normalize(name), value.to_string() });
 }
 
 //
@@ -101,7 +101,7 @@ void cvar::Store::user_value(StringView name, StringView value)
 template <>
 Optional<cvar::IntRef> cvar::Store::find_type<int64>(StringView name)
 {
-    return s_find<int64>(m_vars, s_standard(name));
+    return s_find<int64>(m_vars, s_normalize(name));
 }
 
 //
@@ -110,8 +110,7 @@ Optional<cvar::IntRef> cvar::Store::find_type<int64>(StringView name)
 
 Optional<cvar::Ref> cvar::Store::find(StringView name)
 {
-    auto it = m_vars.find(s_standard(name));
-    log::warn("? {}\n", s_standard(name));
+    auto it = m_vars.find(s_normalize(name));
     if (it == m_vars.end()) {
         return nullopt;
     }
@@ -130,4 +129,53 @@ Optional<cvar::Ref> cvar::Store::find(StringView name)
 //
 template <>
 Optional<cvar::IntRef> internal::find<int64>(StringView name)
-{ return cvar::g_store->find_type<int64>(static_cast<String>(name)); }
+{ return cvar::g_store->find_type<int64>(name.to_string()); }
+
+//
+// Completion::complete
+//
+void cvar::Completion::complete(StringView prefix)
+{
+    auto iter = g_store->iter_prefix(prefix);
+
+    if (iter.begin() == iter.end()) {
+        m_iter = nullopt;
+        m_ref.reset(nullptr);
+    } else {
+        m_iter = Iter { iter, iter.begin() };
+        m_ref.reset(*m_iter->iter);
+    }
+}
+
+//
+// Completion::next
+//
+void cvar::Completion::next()
+{
+    if (!m_iter)
+        return;
+
+    ++m_iter->iter;
+    if (m_iter->iter == m_iter->range.end()) {
+        m_iter->iter = m_iter->range.begin();
+    }
+
+    m_ref.reset(*m_iter->iter);
+}
+
+//
+// Completion::get
+//
+cvar::Ref& cvar::Completion::get()
+{
+    return m_ref;
+}
+
+//
+// Completion::reset
+//
+void cvar::Completion::reset()
+{
+    m_iter = nullopt;
+    m_ref.reset(nullptr);
+}

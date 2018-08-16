@@ -7,6 +7,9 @@
 
 using namespace ::imp::log;
 
+extern bool console_initialized;
+void CON_AddLine(const char* line, int len);
+
 namespace {
   std::chrono::steady_clock::time_point s_program_start;
   bool s_isatty {};
@@ -192,6 +195,11 @@ void Logger::m_println(StringView message_ansi)
     }
 
     /* Write to console */
+    if (console_initialized) {
+        CON_AddLine(message.c_str(), message.size());
+    }
+
+    /* Write to native console */
     native_ui::console_add_line(message);
 
     /* Hand off to callback */

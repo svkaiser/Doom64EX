@@ -214,6 +214,12 @@
          void reset(std::shared_ptr<Data> data)
          { m_data = data; }
 
+         void reset(const Ref& ref)
+         { m_data = ref.m_data; }
+
+         void reset(std::nullptr_t)
+         { m_data = nullptr; }
+
          void set_to_default(bool inhibit_update = false)
          {
              m_data->set_to_default();
@@ -224,6 +230,9 @@
 
          StringView name() const
          { return m_data->name(); }
+
+         bool is_valid() const
+         { return m_data && m_data->is_valid(); }
 
          /**! Don't save this variable to config */
          bool is_noconfig() const

@@ -2,7 +2,7 @@
 #ifndef __CVAR_STORE__88662872
 #define __CVAR_STORE__88662872
 
-#include <unordered_map>
+#include <utility/radix_tree.hh>
 #include "data.hh"
 #include "store_iterator.hh"
 #include <iostream>
@@ -21,15 +21,16 @@ namespace imp {
 
     template <class Predicate>
     class StoreRange {
-        using hash_iterator = typename std::unordered_map<String, std::weak_ptr<Data>>::iterator;
-        using iterator = StoreIterator<Predicate>;
+        using radix_tree_it = typename imp::radix_tree<String, std::weak_ptr<Data>>::iterator;
 
-        hash_iterator m_begin;
-        hash_iterator m_end;
+        radix_tree_it m_begin;
+        radix_tree_it m_end;
         Predicate m_pred;
 
     public:
-        StoreRange(hash_iterator begin, hash_iterator end, Predicate pred):
+        using iterator = StoreIterator<Predicate>;
+
+        StoreRange(const radix_tree_it& begin, const radix_tree_it& end, Predicate pred):
             m_begin(begin), m_end(end), m_pred(pred)
         {
             // Find first element that the predicate will accept.
@@ -44,8 +45,8 @@ namespace imp {
     };
 
     class Store {
-        std::unordered_map<String, std::weak_ptr<Data>> m_vars;
-        std::unordered_map<String, String> m_user_values;
+        imp::radix_tree<String, std::weak_ptr<Data>> m_vars;
+        imp::radix_tree<String, String> m_user_values;
 
         void p_add(std::shared_ptr<Data> data, StringView name, StringView description, const FlagSet& flags);
 
