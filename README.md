@@ -88,7 +88,7 @@ Find a suitable place to build the program and navigate there using `cd`.
     $ cd Doom64EX
 
     $ # If you have previously cloned the repository, you'll need to also grab the fluidsynth-lite submodule
-    $ git update --init --recursive
+    $ git submodule update --init --recursive
     
     $ # Create a new directory inside the repository
     $ mkdir build
@@ -137,7 +137,7 @@ Find a suitable place to build the program and navigate there using terminal.
     $ git clone https://github.com/svkaiser/Doom64EX --recursive
 
     $ # If you have previously cloned the repository, you'll need to also grab the fluidsynth-lite submodule
-    $ git update --init --recursive
+    $ git submodule update --init --recursive
     
     $ mkdir build       # Create a build directory within the git repo
     $ cd build          # Change into the new directory
