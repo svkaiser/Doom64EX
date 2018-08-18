@@ -25,7 +25,7 @@ accepted, however.
 | C++14 compiler                                       | g++-6             | gcc              | gcc                                                     | [Xcode](https://developer.apple.com/xcode/) |
 | [CMake](https://cmake.org/download/)                 | cmake             | cmake            | cmake                                                   | cmake                                       |
 | [SDL2](http://libsdl.org/download-2.0.php)           | libsdl2-dev       | SDL2-devel       | sdl2                                                    | sdl2                                        |
-| [SDL2_net](https://www.libsdl.org/projects/SDL_net/) | libsdl2_net-dev   | SDL2_net-devel   | sdl2_net                                                | sdl2_net                                    |
+| [SDL2_net](https://www.libsdl.org/projects/SDL_net/) | libsdl2-net-dev   | SDL2_net-devel   | sdl2_net                                                | sdl2_net                                    |
 | [zlib](http://www.zlib.net/)                         | zlib1g-dev        | zlib-devel       | zlib                                                    | zlib                                        |
 | [libpng](http://www.libpng.org/pub/png/libpng.html)  | libpng-dev        | libpng-devel     | libpng                                                  | libpng                                      |
 | [FluidSynth**](http://www.fluidsynth.org/)           | libfluidsynth-dev | fluidsynth-devel | fluidsynth                                              | N/A                                         |
@@ -64,7 +64,7 @@ On Ubuntu:
     $ sudo apt install build-essential gcc-6 g++-6
     
     $ # Install dependencies
-    $ sudo apt install git cmake libsdl2-dev libsdl2_net-dev zlib1g-dev libpng-dev
+    $ sudo apt install git cmake libsdl2-dev libsdl2-net-dev zlib1g-dev libpng-dev
 
 On Fedora:
 
