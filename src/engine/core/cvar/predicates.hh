@@ -33,7 +33,7 @@ namespace imp {
 
     /**! Predicate that returns true if the cvar's name starts with the given string */
     class PrefixPred {
-        StringView m_prefix;
+        String m_prefix;
 
     public:
         PrefixPred(StringView prefix):

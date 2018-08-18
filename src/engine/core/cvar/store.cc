@@ -136,7 +136,8 @@ Optional<cvar::IntRef> internal::find<int64>(StringView name)
 //
 void cvar::Completion::complete(StringView prefix)
 {
-    auto iter = g_store->iter_prefix(prefix);
+    auto norm = s_normalize(prefix);
+    auto iter = g_store->iter_prefix(norm);
 
     if (iter.begin() == iter.end()) {
         m_iter = nullopt;
