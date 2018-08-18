@@ -57,7 +57,7 @@ All of these steps are done using the terminal.
 On Ubuntu:
 
     $ # Add additional toolchains
-    $ sudo add-apt repository ppa:ubuntu-toolchain-r/test
+    $ sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     $ sudo apt update
     
     $ # Install GCC
