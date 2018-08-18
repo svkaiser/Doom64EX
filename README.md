@@ -90,10 +90,6 @@ Find a suitable place to build the program and navigate there using `cd`.
     $ # If you have previously cloned the repository, you'll need to also grab the fluidsynth-lite submodule
     $ git update --init --recursive
     
-    $ # Create a new directory inside the repository
-    $ mkdir build
-    $ cd build
-    
     $ mkdir build       # Create a build directory within the git repo
     $ cd build          # Change into the new directory
     $ cmake ..          # Generate Makefiles
