@@ -12,7 +12,6 @@ namespace imp {
     { using std::logic_error::logic_error; };
 
     class Lump {
-        size_t m_offset;
         ILump* m_context {};
         UniquePtr<std::istream> m_stream {};
 
@@ -25,8 +24,7 @@ namespace imp {
         Lump(Lump&&) = default;
         Lump(const Lump&) = default;
 
-        explicit Lump(size_t offset, ILump& context):
-            m_offset(offset),
+        explicit Lump(ILump& context):
             m_context(&context) {}
 
         Lump& operator=(Lump&&) = default;

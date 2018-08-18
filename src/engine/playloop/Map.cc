@@ -87,11 +87,9 @@ int W_MapLumpLength(int lump)
 
 extern Vector<String> rom_textures;
 void P_InitTextureHashTable(void) {
-   for (size_t i = 0; i < rom_textures.size(); ++i) {
-       auto& s = rom_textures[i];
-       auto a = wad::open(wad::Section::textures, s).value().section_index();
-       texturehashlist_.emplace(i, a);
-   }
+    for (size_t i = 0; i < rom_textures.size(); ++i) {
+        texturehashlist_.emplace(i, i);
+    }
     for(auto& lump : wad::list_section(wad::Section::textures)) {
         texturehashlist_.emplace(wad::LumpHash(lump->name()).get(), lump->section_index());
     }

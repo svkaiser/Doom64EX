@@ -2,6 +2,7 @@
 #include <platform/app.hh>
 #include <imp/Image>
 #include <algorithm>
+#include <unordered_map>
 #include "wad.hh"
 
 using namespace imp::wad;
@@ -13,17 +14,60 @@ namespace {
 
   Vector<IDevicePtr> devices_;
 
-  Array<Vector<ILumpPtr>, num_sections> section_lumps_;
+  class SectionLumps {
+      std::vector<ILumpPtr> m_lumps;
+      std::unordered_map<String, size_t> m_index_by_name;
+
+  public:
+      using iterator = typename std::vector<ILumpPtr>::iterator;
+
+      void push_back(ILumpPtr&& lump)
+      {
+          auto it = m_index_by_name.find(lump->name());
+          if (lump->name() == "?" || it == m_index_by_name.end()) {
+              lump->set_section_index(m_lumps.size());
+              m_index_by_name.emplace(lump->name(), m_lumps.size());
+              m_lumps.push_back(std::move(lump));
+          } else {
+              std::swap(m_lumps[it->second], lump);
+          }
+      }
+
+      std::pair<ILump*, size_t> find(StringView name)
+      {
+          auto it = m_index_by_name.find(name.to_string());
+          if (it == m_index_by_name.end())
+              return { nullptr, 0 };
+          return { m_lumps[it->second].get(), it->second };
+      }
+
+      ILump* operator[](size_t index)
+      {
+          if (index >= m_lumps.size()) {
+              return nullptr;
+          }
+          return m_lumps[index].get();
+      }
+
+      iterator begin()
+      { return m_lumps.begin(); }
+
+      iterator end()
+      { return m_lumps.end(); }
+
+      ArrayView<ILumpPtr> view()
+      { return m_lumps; }
+  };
+
+  Array<SectionLumps, num_sections> section_lumps_;
 }
 
 bool wad::add_device(IDevicePtr device)
 {
-    dirty_ = true;
-
     auto lumps = device->read_all();
     for (auto& lump : lumps) {
         auto& list = section_lumps_[static_cast<size_t>(lump->section())];
-        list.emplace_back(std::move(lump));
+        list.push_back(std::move(lump));
     }
 
     log::info("Added {} lumps from '{}'", lumps.size(), "");
@@ -59,26 +103,12 @@ bool wad::add_device_loader(IDeviceLoader& device_loader)
 
 void wad::merge()
 {
-    // Use a stable sort to allow multiple versions of the same lumps.
-    size_t lump_index {};
-    for (size_t i {}; i < num_sections; ++i) {
-        auto& lumps = section_lumps_[i];
-        std::stable_sort(lumps.begin(), lumps.end(), [](const ILumpPtr& a, const ILumpPtr& b) { return a->name() < b->name(); });
-
-        size_t section_index {};
-        ILump *prev_lump{};
-        for (auto &l : lumps) {
-            if (!prev_lump || prev_lump->name() != l->name()) {
-                l->set_section_index(section_index++);
-                l->set_lump_index(lump_index++);
-                prev_lump = l.get();
-            } else {
-                l->set_section_index(prev_lump->section_index());
-                l->set_lump_index(prev_lump->lump_index());
-            }
+    size_t index {};
+    for (auto& section : section_lumps_) {
+        for (auto& lump : section) {
+            lump->set_lump_index(index++);
         }
     }
-
     dirty_ = false;
 }
 
@@ -86,32 +116,22 @@ Optional<Lump> wad::open(Section section, StringView name)
 {
     auto& lumps = section_lumps_[static_cast<size_t>(section)];
 
-    auto it = std::lower_bound(lumps.begin(), lumps.end(), name,
-                               [](const ILumpPtr& a, const StringView& b) {
-                                   return a->name() < b;
-                               });
-
-    if (it == lumps.end() || it->get()->name() != name)
+    auto lump = lumps.find(name);
+    if (!lump.first) {
         return nullopt;
+    }
 
-    auto offset = std::distance(lumps.begin(), it);
-    return make_optional<Lump>(offset, *(it->get()));
+    return make_optional<Lump>(*lump.first);
 }
 
 Optional<Lump> wad::open(Section section, size_t index)
 {
-    assert(!dirty_);
-
     auto& lumps = section_lumps_[static_cast<size_t>(section)];
 
-    for (auto& lump : lumps) {
-        if (lump->section_index() == index) {
-            auto offset = std::distance(lumps.data(), &lump);
-            return make_optional<Lump>(offset, *lump);
-        }
-    }
-
-    return nullopt;
+    auto lump = lumps[index];
+    if (!lump)
+        return nullopt;
+    return make_optional<Lump>(*lump);
 }
 
 Optional<Lump> wad::open(size_t index)
@@ -123,8 +143,7 @@ Optional<Lump> wad::open(size_t index)
 
         for (auto &lump : lumps) {
             if (lump->lump_index() == index) {
-                auto offset = std::distance(lumps.data(), &lump);
-                return make_optional<Lump>(offset, *lump);
+                return make_optional<Lump>(*lump);
             }
         }
     }
@@ -134,63 +153,63 @@ Optional<Lump> wad::open(size_t index)
 
 ArrayView<ILumpPtr> wad::list_section(wad::Section section)
 {
-    assert(!dirty_);
-
-    return section_lumps_[static_cast<size_t>(section)];
+    return section_lumps_[static_cast<size_t>(section)].view();
 }
 
 bool Lump::previous()
 {
-    const auto& sect = section_lumps_[static_cast<size_t>(section())];
-
-    if (m_offset >= sect.size())
-        return false;
-
-    auto& lump = sect[m_offset + 1];
-    if (lump_index() == lump->lump_index()) {
-        m_offset++;
-        m_context = lump.get();
-        return true;
-    }
+//    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+//
+//    if (m_offset >= sect.size())
+//        return false;
+//
+//    auto& lump = sect[m_offset + 1];
+//    if (lump_index() == lump->lump_index()) {
+//        m_offset++;
+//        m_context = lump.get();
+//        return true;
+//    }
 
     return false;
 }
 
 bool Lump::has_previous() const
 {
-    const auto& sect = section_lumps_[static_cast<size_t>(section())];
-
-    if (m_offset >= sect.size())
-        return false;
-
-    const auto& lump = sect[m_offset + 1];
-    return lump_index() == lump->lump_index();
+//    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+//
+//    if (m_offset >= sect.size())
+//        return false;
+//
+//    const auto& lump = sect[m_offset + 1];
+//    return lump_index() == lump->lump_index();
+return false;
 }
 
 bool Lump::next()
 {
-    const auto& sect = section_lumps_[static_cast<size_t>(section())];
-
-    if (m_offset == 0)
-        return false;
-
-    auto& lump = sect[m_offset - 1];
-    if (lump_index() == lump->lump_index()) {
-        m_offset--;
-        m_context = lump.get();
-        return true;
-    }
+//    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+//
+//    if (m_offset == 0)
+//        return false;
+//
+//    auto& lump = sect[m_offset - 1];
+//    if (lump_index() == lump->lump_index()) {
+//        m_offset--;
+//        m_context = lump.get();
+//        return true;
+//    }
 
     return false;
 }
 
 bool Lump::has_next() const
 {
-    const auto& sect = section_lumps_[static_cast<size_t>(section())];
-
-    if (m_offset == 0)
-        return false;
-
-    const auto& lump = sect[m_offset - 1];
-    return lump_index() == lump->lump_index();
+//    const auto& sect = section_lumps_[static_cast<size_t>(section())];
+//
+//    if (m_offset == 0)
+//        return false;
+//
+//    const auto& lump = sect[m_offset - 1];
+//    return lump_index() == lump->lump_index();
+return false;
 }
