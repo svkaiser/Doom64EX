@@ -36,6 +36,13 @@ namespace imp {
     void console_add_line(StringView message);
 
     void error(const std::string& line);
+
+    /**
+     * Show the user a file dialog to find a valid ROM file
+     *
+     * \returns a
+     */
+    Optional<String> rom_select();
   }
 }
 

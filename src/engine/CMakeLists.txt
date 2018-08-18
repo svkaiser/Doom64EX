@@ -31,15 +31,10 @@ set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 if(WIN32)
 
   set(PLATFORM_SOURCES
-    native_ui/WinAPI.cc
-    native_ui/WinAPI-windows-is-dumb.c
+    native_ui/win32.cc
+    native_ui/win32/rom_select.cc
     system/win32/doom64.rc
     system/i_cpu.cc)
-
-  if(MINGW32)
-    set(PLATFORM_LIBRARIES
-      mingw32)
-  endif()
 else()
   set(PLATFORM_SOURCES
     native_ui/Gtk3.cc

@@ -1,5 +1,30 @@
 #include <stdbool.h>
 #include <windows.h>
+#include <imp/NativeUI>
+
+void NET_CL_StartGame();
+void I_Quit();
+int M_CheckParm(const char*);
+void winapi_init();
+void __winapi_quit();
+void winapi_show(bool show);
+void winapi_add_text(const char *text);
+
+void native_ui::init()
+{
+    winapi_init();
+}
+
+void native_ui::console_show(bool show)
+{
+    winapi_show(show);
+}
+
+void native_ui::console_add_line(StringView line)
+{
+    String text = line.to_string();
+    winapi_add_text(text.c_str());
+}
 
 #define EDIT_ID     100
 #define COPY_ID     102
@@ -25,8 +50,8 @@ static LRESULT CALLBACK SysConsoleProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
     case WM_COMMAND:
         switch(LOWORD(wParam)) {
         case QUIT_ID:
-            /* I_DestroySysConsole(); */
-            /* I_ShutdownVideo(); */
+            __winapi_quit();
+            I_Quit();
             exit(0);
             break;
 
@@ -36,7 +61,7 @@ static LRESULT CALLBACK SysConsoleProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
             break;
 
         case READY_ID:
-            /* NET_CL_StartGame(); */
+            NET_CL_StartGame();
             DestroyWindow(hwndButtonReady);
             break;
         }
@@ -107,19 +132,19 @@ void winapi_init()
 
     // Create the window
     hwndMain = CreateWindowEx(
-                   0,                          //Extended window style
-                   d64SysConsoleClass,         // Window class name
-                   NULL,                       // Window title
-                   WS_POPUPWINDOW,             // Window style
-                   (swidth - 400) / 2,
-                   (sheight - 480) / 2 ,
-                   rect.right - rect.left + 1,
-                   rect.bottom - rect.top + 1, // Width and height of the window
-                   NULL,                       // HWND of the parent window (can be null also)
-                   NULL,                       // Handle to menu
-                   hwndMainInst,               // Handle to application instance
-                   NULL                        // Pointer to window creation data
-               );
+                              0,                          //Extended window style
+                              d64SysConsoleClass,         // Window class name
+                              NULL,                       // Window title
+                              WS_POPUPWINDOW,             // Window style
+                              (swidth - 400) / 2,
+                              (sheight - 480) / 2 ,
+                              rect.right - rect.left + 1,
+                              rect.bottom - rect.top + 1, // Width and height of the window
+                              NULL,                       // HWND of the parent window (can be null also)
+                              NULL,                       // Handle to menu
+                              hwndMainInst,               // Handle to application instance
+                              NULL                        // Pointer to window creation data
+                              );
 
     if(!hwndMain) {
         return;
@@ -139,14 +164,14 @@ void winapi_init()
                                   hwndMainInst, NULL);
     SendMessage(hwndButtonCopy, WM_SETTEXT, 0, (LPARAM) "copy");
 
-    /* if(M_CheckParm("-server") > 0) { */
-    /*     hwndButtonReady = CreateWindow("button", NULL, BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, */
-    /*                                    82, 445, 64, 24, */
-    /*                                    hwndMain, */
-    /*                                    (HMENU)READY_ID, */
-    /*                                    hwndMainInst, NULL); */
-    /*     SendMessage(hwndButtonReady, WM_SETTEXT, 0, (LPARAM) "ready"); */
-    /* } */
+    if(M_CheckParm("-server") > 0) {
+        hwndButtonReady = CreateWindow("button", NULL, BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+                                       82, 445, 64, 24,
+                                       hwndMain,
+                                       (HMENU)READY_ID,
+                                       hwndMainInst, NULL);
+        SendMessage(hwndButtonReady, WM_SETTEXT, 0, (LPARAM) "ready");
+    }
 
     hwndButtonQuit = CreateWindow("button", NULL, BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
                                   312, 445, 64, 24,
@@ -182,7 +207,7 @@ void winapi_init()
 void __winapi_quit()
 {
     if (hwndMain) {
-        // I_ShowSysConsole(false);
+        winapi_show(false);
         CloseWindow(hwndMain);
         DestroyWindow(hwndMain);
         hwndMain = NULL;
@@ -196,6 +221,33 @@ void winapi_show(bool show)
 
 void winapi_add_text(const char *text)
 {
+    char winBuff[1024];
+    const char *c = text;
+    char *b = winBuff;
+
+    memset(winBuff, 0, 1024);
+
+    do {
+        if(!*c) {
+            break;
+        }
+
+        if(*c == '\n') {
+            *b = '\r';
+            b++;
+        }
+        *b = *c;
+        b++;
+
+    }
+    while(c++);
+    *b++ = '\r';
+    *b++ = '\n';
+    *b++ = 0;
+
+    SendMessage(hwndBuffer, EM_LINESCROLL, 0, 0xffff);
+    SendMessage(hwndBuffer, EM_SCROLLCARET, 0, 0);
+    SendMessage(hwndBuffer, EM_REPLACESEL, 0, (LPARAM)winBuff);
 }
 
 void winapi_show_and_quit()
