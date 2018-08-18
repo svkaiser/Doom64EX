@@ -1,6 +1,8 @@
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#endif
 
 #include <platform/app.hh>
 #include <imp/NativeUI>
@@ -23,6 +25,7 @@ void wad::init()
             iwad_loaded = wad::add_device(*path);
         }
 
+#ifdef _WIN32
         if (!iwad_loaded) {
             char cd[MAX_PATH];
             GetCurrentDirectory(MAX_PATH, cd);
@@ -37,6 +40,12 @@ void wad::init()
 
             CopyFile(str->c_str(), "doom64.rom", FALSE);
         }
+#else
+        if (!iwad_loaded) {
+            log::fatal("Couldn't find 'doom64.rom'");
+            break;
+        }
+#endif
     }
 
     // Find and add 'doom64ex.pk3'
