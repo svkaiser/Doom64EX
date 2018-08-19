@@ -41,8 +41,7 @@ namespace imp {
 
         bool operator()(const String& name, std::weak_ptr<Data>&) const
         {
-            StringView n = name;
-            return n.substr(0, m_prefix.size()) == m_prefix;
+            return name.find(m_prefix) != String::npos;
         }
     };
   } // cvar namespace

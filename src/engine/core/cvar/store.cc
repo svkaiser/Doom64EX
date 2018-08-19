@@ -98,10 +98,14 @@ void cvar::Store::user_value(StringView name, StringView value)
 // find_type
 //
 
-template <>
-Optional<cvar::IntRef> cvar::Store::find_type<int64>(StringView name)
-{
-    return s_find<int64>(m_vars, s_normalize(name));
+namespace imp {
+  namespace cvar {
+    template <>
+    Optional<cvar::IntRef> cvar::Store::find_type<int64>(StringView name)
+    {
+        return s_find<int64>(m_vars, s_normalize(name));
+    }
+  }
 }
 
 //
@@ -127,9 +131,15 @@ Optional<cvar::Ref> cvar::Store::find(StringView name)
 //
 // internal find
 //
-template <>
-Optional<cvar::IntRef> internal::find<int64>(StringView name)
-{ return cvar::g_store->find_type<int64>(name.to_string()); }
+namespace imp {
+  namespace cvar {
+    namespace internal {
+      template <>
+      Optional<IntRef> find<int64>(StringView name)
+      { return g_store->find_type<int64>(name.to_string()); }
+    }
+  }
+}
 
 //
 // Completion::complete
