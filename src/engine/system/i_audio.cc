@@ -1331,7 +1331,7 @@ void I_InitSequencer(void) {
 
     spec.format = AUDIO_S16;
     spec.freq = 44100;
-    spec.samples = 256;
+    spec.samples = 128;
     spec.channels = 2;
     spec.callback = Audio_Play;
     spec.userdata = doomseq.synth;
@@ -1358,6 +1358,12 @@ void I_InitSequencer(void) {
     log::info("| freq               (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
     log::info("| samples            (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
     log::info("| channels           (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
+
+    // We can probably just accept the new sample rate without issues.
+    if (spec.samples != obtained.samples) {
+        spec.samples = obtained.samples;
+        log::warn("Setting sample rate to {}", spec.samples);
+    }
 
     // If we didn't get what we asked for, try again with float
     if (spec != obtained) {
