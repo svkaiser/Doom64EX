@@ -1338,26 +1338,26 @@ void I_InitSequencer(void) {
 
     SDL_OpenAudio(&spec, &obtained);
 
-    log::debug("SDL_OpenAudio settings:");
-    log::debug("| format             (spec: {:<5}, got: {:<5})", spec.format, obtained.format);
-    log::debug("+-+ bitsize          (spec: {:<5}, got: {:<5})",
-               SDL_AUDIO_BITSIZE(spec.format),
-               SDL_AUDIO_BITSIZE(obtained.format));
-    log::debug("  | is signed        (spec: {:<5}, got: {:<5})",
-               SDL_AUDIO_ISSIGNED(spec.format),
-               SDL_AUDIO_ISSIGNED(obtained.format));
-    log::debug("  | is int           (spec: {:<5}, got: {:<5})",
-               SDL_AUDIO_ISINT(spec.format),
-               SDL_AUDIO_ISINT(obtained.format));
-    log::debug("  | is little-endian (spec: {:<5}, got: {:<5})",
-               SDL_AUDIO_ISLITTLEENDIAN(spec.format),
-               SDL_AUDIO_ISLITTLEENDIAN(obtained.format));
-    log::debug("+-+ is unsigned      (spec: {:<5}, got: {:<5})",
-               SDL_AUDIO_ISUNSIGNED(spec.format),
-               SDL_AUDIO_ISUNSIGNED(obtained.format));
-    log::debug("| freq               (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
-    log::debug("| samples            (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
-    log::debug("| channels           (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
+    log::info("SDL_OpenAudio settings:");
+    log::info("| format             (spec: {:<5}, got: {:<5})", spec.format, obtained.format);
+    log::info("+-+ bitsize          (spec: {:<5}, got: {:<5})",
+              SDL_AUDIO_BITSIZE(spec.format),
+              SDL_AUDIO_BITSIZE(obtained.format));
+    log::info("  | is signed        (spec: {:<5}, got: {:<5})",
+              SDL_AUDIO_ISSIGNED(spec.format),
+              SDL_AUDIO_ISSIGNED(obtained.format));
+    log::info("  | is int           (spec: {:<5}, got: {:<5})",
+              SDL_AUDIO_ISINT(spec.format),
+              SDL_AUDIO_ISINT(obtained.format));
+    log::info("  | is little-endian (spec: {:<5}, got: {:<5})",
+              SDL_AUDIO_ISLITTLEENDIAN(spec.format),
+              SDL_AUDIO_ISLITTLEENDIAN(obtained.format));
+    log::info("+-+ is unsigned      (spec: {:<5}, got: {:<5})",
+              SDL_AUDIO_ISUNSIGNED(spec.format),
+              SDL_AUDIO_ISUNSIGNED(obtained.format));
+    log::info("| freq               (spec: {:<5}, got: {:<5})", spec.freq, obtained.freq);
+    log::info("| samples            (spec: {:<5}, got: {:<5})", spec.samples, obtained.samples);
+    log::info("| channels           (spec: {:<5}, got: {:<5})", spec.channels, obtained.channels);
 
     // If we didn't get what we asked for, try again with float
     if (spec != obtained) {
