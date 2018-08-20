@@ -38,6 +38,7 @@
 #include <core/cvar.hh>
 #include <image/PaletteCache.hh>
 #include <wad.hh>
+#include <con_console.h>
 
 extern cvar::FloatVar i_gamma;
 
@@ -45,42 +46,33 @@ extern cvar::FloatVar i_gamma;
 // I_GetRGBGamma
 //
 
-#if 0
 d_inline static byte I_GetRGBGamma(int c) {
     return (byte)MIN(pow((float)c, (1.0f + (0.01f * i_gamma))), 255);
 }
-#endif
 
 //
 // I_TranslatePalette
 // Increases the palette RGB based on gamma settings
 //
 
-/*
-static void I_TranslatePalette(Palette &dest) {
+static void I_TranslatePalette(char *data, size_t count, size_t size) {
     if (i_gamma == 0)
         return;
 
-    auto color_count = dest.count();
-    auto color_size = dest.pixel_info().width;
-
-    for(size_t i = 0; i < color_count; i += color_size) {
-        dest.data_ptr()[i + 0] = I_GetRGBGamma(dest.data_ptr()[i + 0]);
-        dest.data_ptr()[i + 1] = I_GetRGBGamma(dest.data_ptr()[i + 1]);
-        dest.data_ptr()[i + 2] = I_GetRGBGamma(dest.data_ptr()[i + 2]);
+    for(size_t i = 0; i < count * size; i += size) {
+        data[i + 0] = I_GetRGBGamma(data[i + 0]);
+        data[i + 1] = I_GetRGBGamma(data[i + 1]);
+        data[i + 2] = I_GetRGBGamma(data[i + 2]);
     }
 }
-*/
 
-Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex)
-{
+Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex) {
     // get lump data
     auto l = wad::open(lump).value();
 
     auto image = l.read_image().value();
 
-    if (palindex && image.is_indexed())
-    {
+    if (palindex && image.is_indexed()) {
         auto pal = image.palette();
 
         char palname[9];
@@ -89,18 +81,21 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
         if (wad::exists(palname)) {
             image.set_palette(cache::palette(palname));
         } else {
-            /*
-            Palette newpal = { pal.pixel_format(), 16 };
-            std::copy_n(pal.data_ptr(), 16 * palindex * pal.pixel_info().width, newpal.data_ptr());
-
-            I_TranslatePalette(newpal);
-            image.palette(std::move(newpal));
-            */
+            log::debug("TODO: safe 16-colour palette swap to #{} in {}", palindex, l.name());
+            Palette newpal = {pal.pixel_format(), 16};
+            std::copy_n(pal.data_ptr() + palindex * 16 * pal.pixel_info().width, 16, newpal.data_ptr());
+            image.set_palette(newpal);
         }
     }
 
-    if (!palette)
+    if (!palette) {
         image.convert(alpha ? PixelFormat::rgba : PixelFormat::rgb);
+        if (i_gamma != 0) {
+            for (size_t y{}; y < image.height(); ++y) {
+                I_TranslatePalette(image[y].data_ptr(), image.width(), image.pixel_info().width);
+            }
+        }
+    }
 
     return image;
 }

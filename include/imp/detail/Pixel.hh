@@ -307,6 +307,8 @@ namespace imp {
       template <class T>
       constexpr PixelInfo(const detail::pixel_info<T> &x):
           format(x.format),
+          color(x.is_color),
+          index(x.is_index),
           width(x.width) {}
   };
 

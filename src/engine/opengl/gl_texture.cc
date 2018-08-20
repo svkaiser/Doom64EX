@@ -917,7 +917,7 @@ void GL_DumpTextures(void) {
 
     for(i = 0; i < numsprtex; i++) {
         for(p = 0; p < spritecount[i]; p++) {
-            //GL_UnloadTexture(&spriteptr[i][p]);
+            GL_UnloadTexture(&spriteptr[i][p]);
         }
     }
 

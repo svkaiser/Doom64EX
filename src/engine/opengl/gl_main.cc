@@ -590,6 +590,8 @@ void GL_Init(void) {
     dglEnable(GL_SCISSOR_TEST);
     dglEnable(GL_DITHER);
 
+    usingGL = true;
+
     GL_SetTextureFilter();
     GL_SetDefaultCombiner();
     GL_SetColorScale();
@@ -619,8 +621,6 @@ void GL_Init(void) {
     if(GLAD_GL_EXT_texture_filter_anisotropic) {
         dglGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropic);
     }
-
-    usingGL = true;
 
     G_AddCommand("dumpglext", CMD_DumpGLExtensions, 0);
 }

@@ -120,8 +120,6 @@ Palette::Palette(PixelFormat format, size_t count, std::unique_ptr<byte[]> data)
     mTraits(&get_pixel_info(format)),
     mCount(count)
 {
-    fmt::print(">> {}\n", static_cast<int>(format));
-
     if (!mTraits->color)
         throw PixelFormatError("Can't create a palette of non-colors");
 

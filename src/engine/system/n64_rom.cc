@@ -166,8 +166,6 @@ bool sys::N64Rom::open(StringView path)
         n64_rom_text = fmt::format("{} rom", m_version);
     }
 
-    log::debug("SIZE: {:x}", m_rom_version->iwad.size);
-
     return true;
 }
 
