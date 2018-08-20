@@ -109,6 +109,9 @@ void Image::convert(PixelFormat format)
     });
 }
 
+namespace {
+}
+
 void Image::scale(size_t new_width, size_t new_height)
 {
     if (this->width() == new_width && this->height() == new_height)
@@ -124,29 +127,36 @@ void Image::scale(size_t new_width, size_t new_height)
         return;
     }
 
-    auto scale = [this, new_width, new_height](auto image) {
-        using pixel_type   = typename decltype(image)::pixel_type;
-        using palette_type = typename decltype(image)::palette_type;
-        BasicImage<pixel_type, palette_type> copy(new_width, new_height);
-        copy.set_palette(image.palette());
+    auto image = this->view_as<Rgb>();
+    RgbImage copy(new_width, new_height);
 
-        double sy = 0;
-        double dx = static_cast<double>(image.width()) / new_width;
-        double dy = static_cast<double>(image.height()) / new_height;
+    double sy = 0;
+    double dx = static_cast<double>(image.width()) / new_width;
+    double dy = static_cast<double>(image.height()) / new_height;
 
-        for (size_t y = 0; y < new_height; ++y, sy += dy) {
-            auto zy = static_cast<size_t>(sy);
-            double sx = 0;
-            for (size_t x = 0; x < new_width; ++x, sx += dx) {
-                auto zx = static_cast<size_t>(sx);
-                copy[y].get(x) = image[zy].get(zx);
+    for (size_t y = 0; y < new_height; ++y, sy += dy) {
+        auto zy = static_cast<size_t>(sy);
+        double sx = 0;
+        for (size_t x = 0; x < new_width; ++x, sx += dx) {
+            auto zx = static_cast<size_t>(sx);
+            double box_r {};
+            double box_g {};
+            double box_b {};
+            size_t box_siz {};
+            for (size_t box_y {}; box_y < static_cast<size_t>(dy); ++box_y) {
+                for (size_t box_x {}; box_x < static_cast<size_t>(dx); ++box_x) {
+                    auto c = image[static_cast<size_t>(sy + box_y)].get(static_cast<size_t>(sx + box_x));
+                    box_r += c.red;
+                    box_g += c.green;
+                    box_b += c.blue;
+                    box_siz++;
+                }
             }
+            copy[y].get(x) = Rgb(box_r / box_siz, box_g / box_siz, box_b / box_siz);
         }
+    }
 
-        return Image(copy);
-    };
-
-    *this = match(scale);
+    *this = copy;
 }
 
 void Image::canvas(size_t new_width, size_t new_height)
