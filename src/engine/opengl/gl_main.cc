@@ -590,6 +590,7 @@ void GL_Init(void) {
     dglEnable(GL_SCISSOR_TEST);
     dglEnable(GL_DITHER);
 
+    GL_SetColorScale();
     GL_SetTextureFilter();
     GL_SetDefaultCombiner();
 
