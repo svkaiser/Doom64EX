@@ -83,7 +83,7 @@ Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int
         } else {
             log::debug("TODO: safe 16-colour palette swap to #{} in {}", palindex, l.name());
             Palette newpal = {pal.pixel_format(), 16};
-            std::copy_n(pal.data_ptr() + palindex * 16 * pal.pixel_info().width, 16, newpal.data_ptr());
+            std::copy_n(pal.data_ptr() + palindex * 16 * pal.pixel_info().width, 16 * pal.pixel_info().width, newpal.data_ptr());
             image.set_palette(newpal);
         }
     }
