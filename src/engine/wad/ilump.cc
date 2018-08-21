@@ -43,5 +43,14 @@ Optional<Image> ILump::read_image()
 
 Optional<Palette> ILump::read_palette()
 {
-    return nullopt;
+    auto is = stream();
+    RgbaPalette pal(256);
+    for (auto& c : pal) {
+        c.red = is->get();
+        c.green = is->get();
+        c.blue = is->get();
+        c.alpha = 255;
+    }
+    pal[0].alpha = 0;
+    return make_optional<Palette>(pal);
 }
