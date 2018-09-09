@@ -200,6 +200,8 @@ src = [
   'system/i_system.cc',
   'system/i_video.cc',
   'system/n64_rom.cc',
+  'system/sdl2/input.cc',
+  'system/sdl2/translate.cc',
   'system/sdl2/video.cc',
 
   # wad

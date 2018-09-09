@@ -118,7 +118,7 @@ void I_InitVideo(void) {
 //
 
 void I_StartTic(void) {
-    Video->poll_events();
+    Video->begin_frame();
 }
 
 //
@@ -128,7 +128,7 @@ void I_StartTic(void) {
 extern bool BusyDisk;
 void I_FinishUpdate(void) {
     I_UpdateGrab();
-    Video->swap_window();
+    Video->end_frame();
 
     BusyDisk = false;
 }

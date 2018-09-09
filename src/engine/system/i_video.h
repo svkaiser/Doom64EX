@@ -29,8 +29,6 @@
 #include "SDL.h"
 #include "d_event.h"
 
-#define SDL_BPP        32
-
 ////////////Video///////////////
 
 void I_InitVideo(void);
@@ -43,7 +41,6 @@ void I_ShutdownVideo(void);
 void I_StartTic(void);
 void I_FinishUpdate(void);
 int I_ShutdownWait(void);
-void I_CenterMouse(void);
 
 ////////////Input//////////////
 

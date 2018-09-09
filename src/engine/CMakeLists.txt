@@ -64,6 +64,7 @@ set(LIBRARIES
   ${SDL2_LIBRARIES}
   ${SDL2_NET_LIBRARIES}
   ${PNG_LIBRARIES}
+  ${ZLIB_LIBRARIES}
   ${FLUIDSYNTH_LIBRARIES}
   ${OPENGL_LIBRARIES}
   ${CONAN_LIBS})
@@ -239,6 +240,8 @@ set(SOURCES
   system/i_video.cc
   system/n64_rom.cc
   system/sdl2/video.cc
+  system/sdl2/input.cc
+  system/sdl2/translate.cc
 
   # wad
   wad/device.cc

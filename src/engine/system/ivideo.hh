@@ -5,10 +5,6 @@
 #include "prelude.hh"
 
 namespace imp {
-  struct video_error : std::runtime_error {
-      using std::runtime_error::runtime_error;
-  };
-
   enum struct Fullscreen {
       none, // Windowed
       noborder, // Noborder fullscreen window
@@ -31,12 +27,38 @@ namespace imp {
 
   struct IVideo {
       virtual ~IVideo() {}
+
+      /**
+       * Tries to set video mode. If successful, should also set relevant cvars.
+       */
       virtual void set_mode(const VideoMode&) = 0;
+
+      /**
+       * @return Current video mode
+       */
       virtual VideoMode current_mode() = 0;
+
+      /**
+       * List available (fullscreen) video modes
+       * @return A list of video modes
+       */
       virtual ArrayView<VideoMode> modes() = 0;
-      virtual void swap_window() = 0;
-      virtual void grab(bool) = 0;
-      virtual void poll_events() = 0;
+
+      /**
+       * Grab mouse and keyboard
+       * @param should_grab
+       */
+      virtual void grab(bool should_grab) = 0;
+
+      /**
+       * Called at the beginning of a new frame.
+       */
+      virtual void begin_frame() = 0;
+
+      /**
+       * Called at the end of a frame. Should swap window etc.
+       */
+      virtual void end_frame() = 0;
 
       bool is_windowed()
       { return current_mode().fullscreen == Fullscreen::none; }
