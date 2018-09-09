@@ -2,7 +2,7 @@
 #define __IMP_PALETTE__76334850
 
 #include <algorithm>
-#include "Memory.hh"
+#include "utility/Memory.hh"
 #include "Pixel.hh"
 
 namespace imp {
