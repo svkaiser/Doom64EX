@@ -1,7 +1,7 @@
 #ifndef __IMP_PALETTECACHE__61831962
 #define __IMP_PALETTECACHE__61831962
 
-#include <imp/Image>
+#include "image.hh"
 
 namespace imp {
   namespace cache {

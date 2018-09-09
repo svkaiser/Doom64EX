@@ -1,7 +1,7 @@
 #ifndef __IMP_SCANLINE__77828553
 #define __IMP_SCANLINE__77828553
 
-#include "Palette.hh"
+#include "palette.hh"
 
 namespace imp {
   template <class, class> class BasicImage;

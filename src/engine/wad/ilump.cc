@@ -1,6 +1,7 @@
-#include <imp/Image>
+#include "image/image.hh"
+#include "utility/convert.hh"
+
 #include "ilump.hh"
-#include <utility/convert.hh>
 
 using namespace imp::wad;
 

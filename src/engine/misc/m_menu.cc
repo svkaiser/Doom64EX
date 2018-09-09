@@ -66,7 +66,7 @@
 #include "p_setup.h"
 #include "gl_texture.h"
 #include "gl_draw.h"
-#include <imp/Video>
+#include <system/ivideo.hh>
 #include <wad.hh>
 //
 // definitions

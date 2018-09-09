@@ -27,7 +27,7 @@
 //-----------------------------------------------------------------------------
 
 #include "i_video.h"
-#include <imp/Video>
+#include "ivideo.hh"
 #include <common/doomstat.h>
 
 void I_UpdateGrab(void);

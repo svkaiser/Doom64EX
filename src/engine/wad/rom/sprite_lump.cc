@@ -20,13 +20,14 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <utility/endian.hh>
 #include <ostream>
 #include <set>
 #include <map>
 
+#include "image/palette_cache.hh"
+#include "utility/endian.hh"
+
 #include "rom_private.hh"
-#include <image/PaletteCache.hh>
 
 using namespace imp::wad::rom;
 

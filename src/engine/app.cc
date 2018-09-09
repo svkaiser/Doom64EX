@@ -2,7 +2,6 @@
 #include <fstream>
 #include <platform/app.hh>
 #include <sys/stat.h>
-#include <imp/detail/Pixel.hh>
 
 #include <cxxabi.h>
 

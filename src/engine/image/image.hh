@@ -1,7 +1,7 @@
 #ifndef __IMP_IMAGE__33434191
 #define __IMP_IMAGE__33434191
 
-#include <imp/Image>
+#include "detail/image.hh"
 
 namespace imp {
   struct ImageFormatIO {

@@ -24,7 +24,7 @@
 #include <vector>
 #include <cstring>
 
-#include "Image.hh"
+#include "image.hh"
 
 namespace {
   UniquePtr<ImageFormatIO> image_formats_[num_image_formats] {};

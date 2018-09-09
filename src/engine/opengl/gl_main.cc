@@ -25,9 +25,9 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
-#include <imp/Image>
-
 #include "SDL.h"
+
+#include "image/image.hh"
 
 #include "doomdef.h"
 #include "doomstat.h"

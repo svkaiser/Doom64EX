@@ -1,12 +1,11 @@
 #include "SDL.h"
-#include <imp/Video>
-#include <core/cvar.hh>
-#include <config.hh>
-#include <doomdef.h>
-#include <doom_main/d_main.h>
-#include <SDL_video.h>
-#include <common/doomstat.h>
-#include <renderer/r_main.h>
+#include "system/ivideo.hh"
+#include "core/cvar.hh"
+#include "config.hh"
+#include "doomdef.h"
+#include "doom_main/d_main.h"
+#include "common/doomstat.h"
+#include "renderer/r_main.h"
 
 namespace {
   // Exclusive fullscreen by default on Windows only.

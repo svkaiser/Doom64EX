@@ -20,7 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "Image.hh"
+#include "image/image.hh"
 
 namespace {
   struct Doom : ImageFormatIO {

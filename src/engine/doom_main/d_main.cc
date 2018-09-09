@@ -66,9 +66,9 @@
 #include "core/log/logger.hh"
 
 #include "net_client.h"
-#include <wad.hh>
-#include <core/cvar/store.hh>
-#include <imp/NativeUI>
+#include "wad/wad.hh"
+#include "core/cvar/store.hh"
+#include "native_ui/native_ui.hh"
 
 //
 // D_DoomLoop()

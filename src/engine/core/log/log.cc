@@ -2,8 +2,8 @@
 #include <atomic>
 #include <cstdarg>
 
-#include <imp/NativeUI>
-#include <prelude.hh>
+#include "prelude.hh"
+#include "native_ui/native_ui.hh"
 
 using namespace ::imp::log;
 

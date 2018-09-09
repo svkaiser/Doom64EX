@@ -26,19 +26,19 @@
 //-----------------------------------------------------------------------------
 
 #include <algorithm>
-#include <math.h>
+#include <sstream>
+#include <cmath>
 
 #include "doomdef.h"
 #include "i_swap.h"
 #include "z_zone.h"
 #include "gl_texture.h"
 
-#include <imp/Image>
-#include <sstream>
-#include <core/cvar.hh>
-#include <image/PaletteCache.hh>
-#include <wad.hh>
-#include <con_console.h>
+#include "core/cvar.hh"
+#include "image/image.hh"
+#include "image/palette_cache.hh"
+#include "wad/wad.hh"
+#include "console/con_console.h"
 
 extern cvar::FloatVar i_gamma;
 

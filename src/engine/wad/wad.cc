@@ -5,7 +5,7 @@
 #endif
 
 #include <platform/app.hh>
-#include <imp/NativeUI>
+#include "native_ui/native_ui.hh"
 #include "wad.hh"
 #include "wad_loaders.hh"
 

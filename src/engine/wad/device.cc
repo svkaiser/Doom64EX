@@ -1,9 +1,10 @@
 #include <map>
-#include <platform/app.hh>
-#include <imp/Image>
 #include <algorithm>
 #include <unordered_map>
-#include "wad.hh"
+
+#include "platform/app.hh"
+#include "image/image.hh"
+#include "wad/wad.hh"
 
 using namespace imp::wad;
 

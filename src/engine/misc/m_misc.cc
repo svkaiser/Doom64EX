@@ -42,8 +42,8 @@
 
 #include <fstream>
 #include <algorithm>
-#include <imp/Image>
 
+#include "image/image.hh"
 #include "doomstat.h"
 #include "m_misc.h"
 #include "z_zone.h"

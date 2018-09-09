@@ -2,8 +2,8 @@
 #define __IMP_PALETTE__76334850
 
 #include <algorithm>
-#include "utility/Memory.hh"
-#include "Pixel.hh"
+#include "utility/memory.hh"
+#include "pixel.hh"
 
 namespace imp {
   template <class, class> class BasicImageView;

@@ -1,5 +1,5 @@
-#include <imp/NativeUI>
 #include "SDL.h"
+#include "native_ui/native_ui.hh"
 
 void native_ui::error(const std::string& message)
 {

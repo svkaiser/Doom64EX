@@ -2,12 +2,13 @@
 #include <sstream>
 #include <utility>
 #include <algorithm>
-#include <imp/detail/Image.hh>
 #include <set>
-#include <utility/endian.hh>
+
+#include "image/image.hh"
 #include "rom_private.hh"
-#include "../wad_loaders.hh"
-#include <system/n64_rom.hh>
+#include "system/n64_rom.hh"
+#include "wad/wad_loaders.hh"
+#include "utility/endian.hh"
 
 using namespace imp::wad;
 

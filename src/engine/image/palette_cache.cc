@@ -1,9 +1,9 @@
 #include <unordered_map>
 
-#include "PaletteCache.hh"
-#include "Image.hh"
+#include "palette_cache.hh"
+#include "image.hh"
 
-#include <wad.hh>
+#include "wad/wad.hh"
 
 template <class T1, class T2>
 struct mutable_pair {

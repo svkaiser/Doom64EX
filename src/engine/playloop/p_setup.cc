@@ -43,7 +43,7 @@
 #include "m_random.h"
 #include "z_zone.h"
 #include "sc_main.h"
-#include "Map.hh"
+#include "map.hh"
 
 mobj_t* P_SpawnMapThing(mapthing_t *mthing);
 

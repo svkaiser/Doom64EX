@@ -1,14 +1,14 @@
 #include <algorithm>
 #include <fstream>
-#include <platform/app.hh>
-#include <prelude.hh>
-#include <utility/endian.hh>
-
-#include <system/n64_rom.hh>
 #include <fluidsynth.h>
 #include <ostream>
 #include <numeric>
-#include "BinaryReader.hh"
+
+#include "prelude.hh"
+
+#include "system/n64_rom.hh"
+#include "utility/endian.hh"
+#include "utility/binary_reader.hh"
 
 namespace {
   sys::N64Rom g_rom;

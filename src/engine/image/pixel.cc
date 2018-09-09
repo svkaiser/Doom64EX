@@ -1,7 +1,7 @@
 // -*- mode: c++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2016-2017 Zohar Malamant
+// Copyright(C) 2016 Zohar Malamant
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,10 +20,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __IMP_IMAGE__96112498
-#define __IMP_IMAGE__96112498
+#include <algorithm>
+#include "detail/pixel.hh"
 
-#include "imp/detail/Image.hh"
-#include "imp/detail/Functions.hh"
+namespace {
+  template <class... Args>
+  constexpr auto infos_array_() -> Array<PixelInfo, sizeof...(Args)>
+  {
+      return {{ detail::pixel_info<Args> {}... }};
+  }
 
-#endif //__IMP_IMAGE__96112498
+  constexpr auto infos_ = infos_array_<void, Index8, Rgb, Rgb565, Rgba, Rgba5551>();
+}
+
+const PixelInfo& imp::get_pixel_info(PixelFormat format)
+{
+    return infos_[static_cast<size_t>(format)];
+}

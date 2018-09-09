@@ -37,7 +37,7 @@ if(WIN32)
     system/i_cpu.cc)
 else()
   set(PLATFORM_SOURCES
-    native_ui/Gtk3.cc
+    native_ui/gtk3.cc
     system/i_cpu_posix.cc)
 
   set(PLATFORM_LIBRARIES
@@ -104,8 +104,8 @@ set(INCLUDES
 set(SOURCES
   ${PLATFORM_SOURCES}
 
-  App.cc
-  Globals.cc
+  app.cc
+  globals.cc
 
   # automap
   automap/am_draw.cc
@@ -143,11 +143,11 @@ set(SOURCES
   game/g_settings.cc
 
   # image
-  image/Doom.cc
-  image/Image.cc
-  image/PaletteCache.cc
-  image/Pixel.cc
-  image/Png.cc
+  image/doom.cc
+  image/image.cc
+  image/palette_cache.cc
+  image/pixel.cc
+  image/png.cc
 
   # intermission
   intermission/wi_stuff.cc
@@ -163,7 +163,7 @@ set(SOURCES
   misc/m_shift.cc
 
   # native_ui
-  native_ui/Sdl2.cc
+  native_ui/sdl2.cc
 
   # net
   net/net_client.cc
@@ -209,7 +209,7 @@ set(SOURCES
   playloop/p_telept.cc
   playloop/p_tick.cc
   playloop/p_user.cc
-  playloop/Map.cc
+  playloop/map.cc
 
   # renderer
   renderer/r_bsp.cc
@@ -224,7 +224,7 @@ set(SOURCES
   renderer/r_wipe.cc
 
   # sound
-  sound/RomSource.cc
+  sound/rom_source.cc
   sound/s_sound.cc
 
   # statusbar
@@ -238,7 +238,7 @@ set(SOURCES
   system/i_system.cc
   system/i_video.cc
   system/n64_rom.cc
-  system/SdlVideo.cc
+  system/sdl2/video.cc
 
   # wad
   wad/device.cc

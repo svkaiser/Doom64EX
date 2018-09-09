@@ -1,7 +1,8 @@
 #include <sstream>
 #include <map>
-#include <wad.hh>
-#include "Map.hh"
+
+#include "wad/wad.hh"
+#include "map.hh"
 
 namespace {
   template <class T>
@@ -91,7 +92,7 @@ void P_InitTextureHashTable(void) {
         texturehashlist_.emplace(i, i);
     }
     for(auto& lump : wad::list_section(wad::Section::textures)) {
-        texturehashlist_.emplace(wad::LumpHash(lump->name()).get(), lump->section_index());
+        //texturehashlist_.emplace(wad::LumpHash(lump->name()).get(), lump->section_index());
     }
 }
 

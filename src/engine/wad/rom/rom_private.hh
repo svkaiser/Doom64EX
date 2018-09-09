@@ -26,8 +26,8 @@
 #include <istream>
 #include <sstream>
 
-#include <wad.hh>
-#include <imp/Image>
+#include "wad/wad.hh"
+#include "image/image.hh"
 
 namespace imp {
   namespace wad {

@@ -1,8 +1,8 @@
 #ifndef __IMP_IMAGE__94221350
 #define __IMP_IMAGE__94221350
 
-#include <utility/types.hh>
-#include "Scanline.hh"
+#include "utility/types.hh"
+#include "scanline.hh"
 
 namespace imp {
   namespace wad {

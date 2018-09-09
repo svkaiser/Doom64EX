@@ -22,9 +22,9 @@
 
 #include <cstring>
 #include <png.h>
-#include <utility/endian.hh>
 
-#include "Image.hh"
+#include "utility/endian.hh"
+#include "image.hh"
 
 namespace {
   constexpr const char magic[] = "\x89PNG\r\n\x1a\n";

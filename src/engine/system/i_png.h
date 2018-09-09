@@ -25,7 +25,7 @@
 
 #include "doomtype.h"
 
-#include <imp/Image>
+#include "image/image.hh"
 
 Image I_ReadImage(int lump, dboolean palette, dboolean nopack, double alpha, int palindex);
 

@@ -36,8 +36,8 @@
 #include "r_main.h"
 #include "i_system.h"
 #include "gl_texture.h"
-#include <core/cvar/completion.hh>
-#include <imp/NativeUI>
+#include "core/cvar/completion.hh"
+#include "native_ui/native_ui.hh"
 
 #define CONSOLE_PROMPTCHAR      '>'
 #define MAX_CONSOLE_LINES       256//must be power of 2

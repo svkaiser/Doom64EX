@@ -1,4 +1,5 @@
-#include <imp/Image>
+#include "image/image.hh"
+
 #include "lump.hh"
 
 using namespace imp::wad;

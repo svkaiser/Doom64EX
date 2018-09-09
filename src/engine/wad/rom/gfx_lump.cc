@@ -20,11 +20,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <utility/endian.hh>
+#include "image/image.hh"
+#include "utility/endian.hh"
 
 #include "rom_private.hh"
-
-#include <imp/Image>
 
 using namespace imp::wad::rom;
 
