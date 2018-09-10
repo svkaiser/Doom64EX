@@ -69,9 +69,6 @@ void ST_DrawFPS(int offset) {
         lasttick = ticks;
         fps = frames;
         frames = 0;
-        if(fps > 99) {
-            fps = 99;
-        }
     }
     n = fps;
     Draw_Text(0, offset, WHITE, 0.35f, false, "FPS: %i", n);
