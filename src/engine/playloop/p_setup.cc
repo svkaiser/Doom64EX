@@ -91,6 +91,7 @@ cvar::BoolVar p_sdoubleclick;
 cvar::BoolVar p_usecontext;
 cvar::BoolVar p_damageindicator;
 cvar::IntVar p_regionmode;
+cvar::FloatVar p_movebob = 1;
 
 //
 // [kex] sky definition stuff
@@ -1418,7 +1419,8 @@ void P_Init(void) {
         (p_sdoubleclick,    "p_SDoubleClick",    "TODO")
         (p_usecontext,      "p_UseContext",      "TODO")
         (p_damageindicator, "p_DamageIndicator", "TODO")
-        (p_regionmode,      "p_RegionMode",      "TODO");
+        (p_regionmode,      "p_RegionMode",      "TODO")
+        (p_movebob,         "p_MoveBob",         "Modifies amount of view-bobbing when moving");
 
     SC_Init();
     P_InitPicAnims();
