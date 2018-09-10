@@ -28,7 +28,11 @@
 #define APIENTRY __stdcall
 #endif
 
-#include "glad.h"
+#include <glbinding/gl14/gl.h>
+#include <glbinding/gl14ext/gl.h>
+
+using namespace gl14;
+using namespace gl14ext;
 
 typedef GLuint        dtexture;
 typedef GLfloat        rfloat;
@@ -80,7 +84,7 @@ extern int ViewWindowY;
 
 #define TESTALPHA(x)        ((byte)((x >> 24) & 0xff) < 0xff)
 
-extern int DGL_CLAMP;
+extern GLenum DGL_CLAMP;
 
 extern dboolean usingGL;
 
@@ -110,5 +114,12 @@ void GL_Set2DQuad(vtx_t *v, float x, float y, int width, int height,
 void GL_Draw2DQuad(vtx_t *v, dboolean stretch);
 void GL_SetupAndDraw2DQuad(float x, float y, int width, int height,
                            float u1, float u2, float v1, float v2, rcolor c, dboolean stretch);
+
+constexpr bool GLAD_GL_ARB_multitexture               = true;
+constexpr bool GLAD_GL_ARB_texture_non_power_of_two   = true;
+constexpr bool GLAD_GL_ARB_texture_env_combine        = true;
+constexpr bool GLAD_GL_EXT_compiled_vertex_array      = true;
+constexpr bool GLAD_GL_EXT_texture_env_combine        = true;
+constexpr bool GLAD_GL_EXT_texture_filter_anisotropic = true;
 
 #endif

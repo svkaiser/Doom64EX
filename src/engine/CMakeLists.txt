@@ -66,7 +66,7 @@ set(LIBRARIES
   ${PNG_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${FLUIDSYNTH_LIBRARIES}
-  ${OPENGL_LIBRARIES}
+  glbinding::glbinding
   ${CONAN_LIBS})
 
 set(INCLUDES
@@ -184,7 +184,6 @@ set(SOURCES
   opengl/gl_draw.cc
   opengl/gl_main.cc
   opengl/gl_texture.cc
-  opengl/glad.cc
 
   # parser
   parser/sc_main.cc

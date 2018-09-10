@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
+#include <glbinding/Binding.h>
 #include "SDL.h"
 
 #include "image/image.hh"
@@ -57,7 +58,7 @@ const char *gl_version;
 static float glScaleFactor = 1.0f;
 
 dboolean    usingGL = false;
-int         DGL_CLAMP = GL_CLAMP;
+GLenum      DGL_CLAMP = GL_CLAMP;
 float       max_anisotropic = 0;
 dboolean    widescreen = false;
 
@@ -466,17 +467,6 @@ void GL_ClearView(rcolor clearcolor) {
 }
 
 //
-// GL_GetBool
-//
-
-dboolean GL_GetBool(int x) {
-    byte b;
-    dglGetBooleanv(x, &b);
-
-    return (dboolean)b;
-}
-
-//
 // GL_CalcViewSize
 //
 
@@ -556,7 +546,7 @@ static int GetVersionInt(const char* version) {
 //
 
 void GL_Init(void) {
-    gladLoadGLLoader(SDL_GL_GetProcAddress);
+    glbinding::Binding::initialize(SDL_GL_GetProcAddress);
 
     gl_vendor = dglGetString(GL_VENDOR);
     I_Printf("GL_VENDOR: %s\n", gl_vendor);
