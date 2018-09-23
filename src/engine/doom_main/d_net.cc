@@ -28,6 +28,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <system/ivideo.hh>
 #include "m_menu.h"
 #include "i_system.h"
 #include "g_game.h"
@@ -37,7 +38,6 @@
 #include "m_misc.h"
 #include "con_console.h"
 #include "SDL.h"
-#include "i_video.h"
 
 #define FEATURE_MULTIPLAYER 1
 
@@ -143,7 +143,7 @@ void NetUpdate(void) {
     for(i=0 ; i<newtics ; i++) {
         ticcmd_t cmd;
 
-        I_StartTic();
+        Video->begin_frame();
         D_ProcessEvents();
         //if (maketic - gameticdiv >= BACKUPTICS/2-1)
         //    break;          // can't hold any more

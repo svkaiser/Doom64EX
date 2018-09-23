@@ -2,7 +2,7 @@ app-id: com.github.Doom64EX
 sdk: org.gnome.Sdk
 runtime: org.gnome.Platform
 runtime-version: 3.26
-command: doom64ex
+command: com.github.Doom64EX
 
 finish-args:
   # OpenGL
@@ -39,16 +39,47 @@ modules:
     cleanup:
       - /include
 
-  # Finally, build the actual project
-  - name: doom64ex
+  # GLBinding
+  - name: glbinding
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        path: doom64ex.tar.xz
+        url: https://github.com/cginternals/glbinding/archive/v2.1.4.tar.gz
+        sha256: cb5971b086c0d217b2304d31368803fd2b8c12ee0d41c280d40d7c23588f8be2
+    config-opts:
+      - -DBUILD_SHARED_LIBS=OFF
+      - -DOPTION_SELF_CONTAINED=ON
+      - -DOPTION_BUILD_TOOLS=OFF
+      - -DOPTION_BUILD_EXAMPLES=OFF
+
+    cleanup:
+      - /include
+      - /lib
+
+  # Fluidsynth
+  - name: fluidsynth
+    buildsystem: cmake-ninja
+    sources:
+      # - type: git
+      #   url: https://github.com/dotfloat/fluidsynth-lite.git
+      - type: dir
+        path: fluidsynth
+
+    cleanup:
+      - /include
+      - /lib
+
+  # Finally, build the actual project
+  - name: doom64ex
+    buildsystem: meson
+    sources:
+      - type: dir
+        path: .
 
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_GTK3=ON
+      - -Dprogram_name=com.github.Doom64EX
 
     cleanup:
       - /include

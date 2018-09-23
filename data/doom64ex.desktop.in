@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Doom 64 EX
-Exec=doom64ex
-Icon=doom64ex
+Exec=@program_name@
+Icon=@program_name@
 Type=Application
-Comment=A Doom64 game engine
+Comment=A Doom 64 game engine
 Categories=Game;ActionGame;

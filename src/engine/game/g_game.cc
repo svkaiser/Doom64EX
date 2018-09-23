@@ -56,7 +56,6 @@
 #include "con_console.h"
 #include "g_local.h"
 #include "m_password.h"
-#include "i_video.h"
 #include "g_demo.h"
 
 #define DCLICK_TIME     20

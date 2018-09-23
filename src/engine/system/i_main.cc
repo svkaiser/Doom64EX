@@ -36,7 +36,6 @@
 #include "doomstat.h"
 #include "d_main.h"
 #include "SDL.h"
-#include "i_video.h"
 #include "m_misc.h"
 #include "i_system.h"
 #include "con_console.h"

@@ -57,7 +57,7 @@ extern fixed_t rendertic_frac;
 extern int (*I_GetTime)(void);
 void            I_InitClockRate(void);
 int             I_GetTimeMS(void);
-void            I_Sleep(unsigned long usecs);
+void            I_Sleep(int usecs);
 dboolean        I_StartDisplay(void);
 void            I_EndDisplay(void);
 fixed_t         I_GetTimeFrac(void);
@@ -68,13 +68,6 @@ unsigned long   I_GetRandomTimeSeed(void);
 // that are read by the synchronous functions
 // to be converted into events.
 
-// Either returns a null ticcmd,
-// or calls a loadable driver to build it.
-// This ticcmd will then be modified by the gameloop
-// for normal input.
-ticcmd_t* I_BaseTiccmd(void);
-
-
 // Called by M_Responder when quit is selected.
 // Clean exit, displays sell blurb.
 void I_Quit(void);
@@ -84,12 +77,5 @@ void I_BeginRead(void);
 char *I_GetUserDir(void);
 char *I_GetBaseDir(void);
 char *I_GetUserFile(const char *file);
-char *I_FindDataFile(const char *file);
-
-dboolean I_FileExists(const char *path);
-
-void I_RegisterCvars(void);
-
-extern FILE    *DebugFile;
 
 #endif

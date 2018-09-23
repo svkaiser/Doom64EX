@@ -31,7 +31,6 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
-#include "i_video.h"
 #include "d_devstat.h"
 #include "r_local.h"
 #include "r_sky.h"

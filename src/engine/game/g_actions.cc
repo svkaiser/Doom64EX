@@ -31,7 +31,6 @@
 #include "g_local.h"
 #include "m_keys.h"
 #include "i_system.h"
-#include "i_video.h"
 #include "doomstat.h"
 #include "con_console.h"
 #include "z_zone.h"

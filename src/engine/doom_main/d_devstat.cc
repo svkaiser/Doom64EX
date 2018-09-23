@@ -36,7 +36,6 @@
 #include "s_sound.h"
 #include "d_englsh.h"
 #include "r_drawlist.h"
-#include "i_video.h"
 
 static dboolean showstats = true;
 
@@ -188,8 +187,8 @@ void D_DeveloperDisplay(void) {
     Draw_Text(0, y, WHITE, 0.35f, false, "Active Sounds: %i", S_GetActiveSounds());
     y+=16;
 
-    Draw_Text(0, y, WHITE, 0.35f, false, "Mouse Cursor: %i, %i", mouse_x, mouse_y);
-    y+=16;
+    //Draw_Text(0, y, WHITE, 0.35f, false, "Mouse Cursor: %i, %i", mouse_x, mouse_y);
+    //y+=16;
 
 #ifdef INSTRUMENTED
     Z_PrintStats();

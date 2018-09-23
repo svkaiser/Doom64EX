@@ -1,0 +1,6 @@
+option(
+  'program_name',
+  description : 'Name of the game binary that will be generated',
+  type : 'string',
+  value : 'doom64ex'
+)

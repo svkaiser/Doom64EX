@@ -237,7 +237,6 @@ set(SOURCES
   system/i_png.cc
   system/i_swap.h
   system/i_system.cc
-  system/i_video.cc
   system/n64_rom.cc
   system/sdl2/video.cc
   system/sdl2/input.cc

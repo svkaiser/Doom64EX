@@ -39,9 +39,10 @@
 #include <dirent.h>
 #endif
 
+#include "SDL.h"
+
 #include <fcntl.h>
 #include "doomdef.h"
-#include "i_video.h"
 #include "d_englsh.h"
 #include "m_cheat.h"
 #include "m_misc.h"
@@ -68,6 +69,9 @@
 #include "gl_draw.h"
 #include <system/ivideo.hh>
 #include <wad.hh>
+
+extern int mouse_x;
+extern int mouse_y;
 //
 // definitions
 //

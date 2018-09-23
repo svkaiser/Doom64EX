@@ -39,7 +39,6 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
-#include "i_video.h"
 #include "d_englsh.h"
 #include "sounds.h"
 #include "m_shift.h"
@@ -69,6 +68,7 @@
 #include "wad/wad.hh"
 #include "core/cvar/store.hh"
 #include "native_ui/native_ui.hh"
+#include "system/ivideo.hh"
 
 //
 // D_DoomLoop()
@@ -230,7 +230,7 @@ static void D_FinishDraw(void) {
     NetUpdate();
 
     // normal update
-    I_FinishUpdate();
+    Video->end_frame();
 
     if(i_interpolateframes) {
         I_EndDisplay();

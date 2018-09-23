@@ -43,6 +43,8 @@
 #include "r_local.h"
 #include "st_stuff.h"
 
+extern cvar::FloatVar p_movebob;
+
 //
 // Movement.
 //
@@ -249,6 +251,7 @@ void P_CalcHeight(player_t* player) {
     angle = (FINEANGLES / 20 * leveltime) & FINEMASK;
     bob = FixedMul(player->bob / 2, finesine[angle]);
 
+    bob *= p_movebob;
 
     // move viewheight
     if(player->playerstate == PST_LIVE) {

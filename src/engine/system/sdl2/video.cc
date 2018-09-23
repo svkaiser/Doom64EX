@@ -53,6 +53,9 @@ namespace {
       void m_init_modes();
       int m_mouse_accel(int val);
 
+      void m_init_mode(const VideoMode&);
+      void m_change_mode(const VideoMode&);
+
   public:
       SdlVideo(OpenGLVer ver);
       ~SdlVideo();
@@ -72,6 +75,10 @@ namespace {
 // Doom globals
 int mouse_x {};
 int mouse_y {};
+
+int video_width {};
+int video_height {};
+float video_ratio {};
 
 /* Graphics */
 cvar::IntVar v_width = -1;
@@ -250,13 +257,21 @@ void SdlVideo::set_mode(const VideoMode& mode)
                                        copy.height,
                                        flags);
 
-        if (!m_window)
-            throw std::runtime_error  { fmt::format("Couldn't create window: {}", SDL_GetError()) };
+        if (!m_window) {
+            throw std::runtime_error{fmt::format("Couldn't create window: {}", SDL_GetError())};
+        }
 
         m_glcontext = SDL_GL_CreateContext(m_window);
 
-        if (!m_glcontext)
-            throw std::runtime_error { fmt::format("Couldn't create OpenGL Context: {}", SDL_GetError()) };
+        if (!m_glcontext) {
+            throw std::runtime_error{fmt::format("Couldn't create OpenGL Context: {}", SDL_GetError())};
+        }
+
+        video_width = copy.width;
+        video_height = copy.height;
+        video_ratio = static_cast<float>(video_width) / video_height;
+        ViewWidth = video_width;
+        ViewHeight = video_height;
     } else {
         SDL_DisplayMode target {}, closest {};
         auto display_id = SDL_GetWindowDisplayIndex(m_window);
@@ -425,24 +440,14 @@ void SdlVideo::begin_frame()
             D_PostEvent(&doom);
             break;
 
-            // case SDL_CONTROLLERDEVICEADDED:
-            //     log::info("Controller added: {}", SDL_GameControllerNameForIndex(e.cdevice.which));
-            //     g_controller = SDL_GameControllerOpen(e.cdevice.which);
-            //     break;
+        case SDL_CONTROLLERDEVICEADDED:
+            log::info("Controller added: {}", SDL_GameControllerNameForIndex(e.cdevice.which));
+            s_controller = SDL_GameControllerOpen(e.cdevice.which);
+            break;
 
-            // case SDL_CONTROLLERDEVICEREMOVED:
-            //     g_controller = nullptr;
-            //     break;
-
-            // case SDL_CONTROLLERBUTTONDOWN:
-            // case SDL_CONTROLLERBUTTONUP:
-            //     if (!has_focus_)
-            //         break;
-
-            //     doom.type = (e.type == SDL_CONTROLLERBUTTONUP) ? ev_conup : ev_condown;
-            //     doom.data1 = translate_controller_(e.cbutton.which);
-            //     D_PostEvent(&doom);
-            //     break;
+        case SDL_CONTROLLERDEVICEREMOVED:
+            s_controller = nullptr;
+            break;
 
         case SDL_WINDOWEVENT:
             switch (e.window.event) {
@@ -478,27 +483,27 @@ void SdlVideo::begin_frame()
 
     int x, y;
 
-    // if (g_controller) {
-    //     event_t ev {};
+    if (s_controller) {
+        event_t ev {};
 
-    //     x = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_LEFTX);
-    //     y = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_LEFTY);
+        x = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_LEFTX);
+        y = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_LEFTY);
 
-    //     ev.type = ev_conleft;
-    //     ev.data1 = 0;
-    //     ev.data2 = x << 5;
-    //     ev.data3 = (-y) << 5;
-    //     D_PostEvent(&ev);
+        ev.type = ev_gamepad;
+        ev.data1 = 0;
+        ev.data2 = x << 5;
+        ev.data3 = (-y) << 5;
+        D_PostEvent(&ev);
 
-    //     x = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_RIGHTX);
-    //     y = SDL_GameControllerGetAxis(g_controller, SDL_CONTROLLER_AXIS_RIGHTY);
+        x = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_RIGHTX);
+        y = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_RIGHTY);
 
-    //     ev.type = ev_conright;
-    //     ev.data1 = 0;
-    //     ev.data2 = x << 5;
-    //     ev.data3 = (-y) << 5;
-    //     D_PostEvent(&ev);
-    // }
+        ev.type = ev_gamepad;
+        ev.data1 = 0;
+        ev.data2 = x << 5;
+        ev.data3 = (-y) << 5;
+        D_PostEvent(&ev);
+    }
 
     SDL_GetRelativeMouseState(&x, &y);
     auto btn = SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -522,9 +527,9 @@ void SdlVideo::end_frame()
 }
 
 //
-// init_video_sdl
+// imp_init_sdl2
 //
-void init_video_sdl()
+void imp_init_sdl2()
 {
     cvar::Register()
         /* Video */
@@ -543,4 +548,12 @@ void init_video_sdl()
         (v_yaxismove, "v_YAxisMove", "Move with the mouse");
 
     Video = new SdlVideo { OpenGLVer::gl14 };
+}
+
+//
+// imp_quit_sdl2
+//
+void imp_quit_sdl2()
+{
+    delete Video;
 }

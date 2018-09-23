@@ -35,10 +35,10 @@
 
 #include <stdarg.h>
 #include <sys/stat.h>
+#include <thread>
 #include "doomstat.h"
 #include "doomdef.h"
 #include "m_misc.h"
-#include "i_video.h"
 #include "d_net.h"
 #include "g_demo.h"
 #include "d_main.h"
@@ -48,33 +48,44 @@
 #include "i_audio.h"
 #include "gl_draw.h"
 
-cvar::FloatVar i_gamma            = 0.0;
-cvar::FloatVar i_brightness       = 100.0;
+#include "SDL.h"
+
+cvar::FloatVar i_gamma = 0.0;
+cvar::FloatVar i_brightness = 100.0;
 cvar::BoolVar i_interpolateframes = false;
-cvar::StringVar s_soundfont       = ""s;
+cvar::StringVar s_soundfont = ""s;
 
-ticcmd_t        emptycmd;
+namespace {
+  std::chrono::steady_clock::time_point s_program_start{};
 
-//
-// I_uSleep
-//
+  uint32 s_get_ticks()
+  {
+      using namespace std::chrono;
+      auto now = steady_clock::now();
+      return duration_cast<milliseconds>(now - s_program_start).count();
 
-void I_Sleep(unsigned long usecs) {
-    SDL_Delay(usecs);
+  }
 }
 
 static int basetime = 0;
 
 //
+// I_Sleep
+//
+void I_Sleep(int usec)
+{
+    std::this_thread::sleep_for(std::chrono::microseconds(usec));
+}
+
+//
 // I_GetTimeNormal
 //
 
-static int I_GetTimeNormal(void) {
-    uint32 ticks;
+static int I_GetTimeNormal(void)
+{
+    auto ticks = s_get_ticks();
 
-    ticks = SDL_GetTicks();
-
-    if(basetime == 0) {
+    if (basetime == 0) {
         basetime = ticks;
     }
 
@@ -87,7 +98,8 @@ static int I_GetTimeNormal(void) {
 // I_GetTime_Error
 //
 
-static int I_GetTime_Error(void) {
+static int I_GetTime_Error(void)
+{
     I_Error("I_GetTime_Error: GetTime() used before initialization");
     return 0;
 }
@@ -96,7 +108,8 @@ static int I_GetTime_Error(void) {
 // I_InitClockRate
 //
 
-void I_InitClockRate(void) {
+void I_InitClockRate(void)
+{
     I_GetTime = I_GetTimeNormal;
 }
 
@@ -110,24 +123,25 @@ static dboolean InDisplay = false;
 
 dboolean realframe = false;
 
-fixed_t         rendertic_frac = 0;
-unsigned int    rendertic_start;
-unsigned int    rendertic_step;
-unsigned int    rendertic_next;
-const float     rendertic_msec = 100 * TICRATE / 100000.0f;
+fixed_t rendertic_frac = 0;
+unsigned int rendertic_start;
+unsigned int rendertic_step;
+unsigned int rendertic_next;
+const float rendertic_msec = 100 * TICRATE / 100000.0f;
 
 //
 // I_StartDisplay
 //
 
-dboolean I_StartDisplay(void) {
+dboolean I_StartDisplay(void)
+{
     rendertic_frac = I_GetTimeFrac();
 
-    if(InDisplay) {
+    if (InDisplay) {
         return false;
     }
 
-    start_displaytime = SDL_GetTicks();
+    start_displaytime = s_get_ticks();
     InDisplay = true;
 
     return true;
@@ -137,8 +151,9 @@ dboolean I_StartDisplay(void) {
 // I_EndDisplay
 //
 
-void I_EndDisplay(void) {
-    displaytime = SDL_GetTicks() - start_displaytime;
+void I_EndDisplay(void)
+{
+    displaytime = s_get_ticks() - start_displaytime;
     InDisplay = false;
 }
 
@@ -146,21 +161,21 @@ void I_EndDisplay(void) {
 // I_GetTimeFrac
 //
 
-fixed_t I_GetTimeFrac(void) {
+fixed_t I_GetTimeFrac(void)
+{
     unsigned long now;
     fixed_t frac;
 
-    now = SDL_GetTicks();
+    now = s_get_ticks();
 
-    if(rendertic_step == 0) {
+    if (rendertic_step == 0) {
         return FRACUNIT;
-    }
-    else {
-        frac = (fixed_t)((now - rendertic_start + displaytime) * FRACUNIT / rendertic_step);
-        if(frac < 0) {
+    } else {
+        frac = (fixed_t) ((now - rendertic_start + displaytime) * FRACUNIT / rendertic_step);
+        if (frac < 0) {
             frac = 0;
         }
-        if(frac > FRACUNIT) {
+        if (frac > FRACUNIT) {
             frac = FRACUNIT;
         }
         return frac;
@@ -171,18 +186,11 @@ fixed_t I_GetTimeFrac(void) {
 // I_GetTime_SaveMS
 //
 
-void I_GetTime_SaveMS(void) {
-    rendertic_start = SDL_GetTicks();
-    rendertic_next = (unsigned int)((rendertic_start * rendertic_msec + 1.0f) / rendertic_msec);
+void I_GetTime_SaveMS(void)
+{
+    rendertic_start = s_get_ticks();
+    rendertic_next = (unsigned int) ((rendertic_start * rendertic_msec + 1.0f) / rendertic_msec);
     rendertic_step = rendertic_next - rendertic_start;
-}
-
-//
-// I_BaseTiccmd
-//
-
-ticcmd_t* I_BaseTiccmd(void) {
-    return &emptycmd;
 }
 
 /**
@@ -194,7 +202,8 @@ ticcmd_t* I_BaseTiccmd(void) {
  * @note The returning value MUST be freed by the caller.
  */
 
-char *I_GetUserDir(void) {
+char *I_GetUserDir(void)
+{
 #ifdef _WIN32
     return I_GetBaseDir();
 #else
@@ -209,7 +218,8 @@ char *I_GetUserDir(void) {
  * @note The returning value MUST be freed by the caller.
  */
 
-char *I_GetBaseDir(void) {
+char *I_GetBaseDir(void)
+{
     return SDL_GetBasePath();
 }
 
@@ -220,17 +230,18 @@ char *I_GetBaseDir(void) {
  * @note The returning value MUST be freed by the caller.
  */
 
-char *I_GetUserFile(const char *file) {
+char *I_GetUserFile(const char *file)
+{
     char *path;
     char *userdir;
 
     if (!(userdir = I_GetUserDir()))
         return NULL;
 
-    path = (char*) malloc(512);
+    path = (char *) malloc(512);
 
     snprintf(path, 511, "%s%s", userdir, file);
-    
+
     return path;
 }
 
@@ -248,12 +259,13 @@ int (*I_GetTime)(void) = I_GetTime_Error;
 // Same as I_GetTime, but returns time in milliseconds
 //
 
-int I_GetTimeMS(void) {
+int I_GetTimeMS(void)
+{
     uint32 ticks;
 
-    ticks = SDL_GetTicks();
+    ticks = s_get_ticks();
 
-    if(basetime == 0) {
+    if (basetime == 0) {
         basetime = ticks;
     }
 
@@ -264,16 +276,18 @@ int I_GetTimeMS(void) {
 // I_GetRandomTimeSeed
 //
 
-unsigned long I_GetRandomTimeSeed(void) {
+unsigned long I_GetRandomTimeSeed(void)
+{
     // not exactly random....
-    return SDL_GetTicks();
+    return s_get_ticks();
 }
 
 //
 // I_Init
 //
 
-void I_Init(void) {
+void I_Init(void)
+{
 #ifdef USESYSCONSOLE
     //I_SpawnLauncher(hwndMain);
 #endif
@@ -284,55 +298,27 @@ void I_Init(void) {
         (i_interpolateframes, "i_InterpolateFrames", "TODO")
         (s_soundfont, "s_SoundFont", "Path to 'doomsnd.sf2'");
 
-    i_gamma.set_callback([](const float&) {
+    i_gamma.set_callback([](const float &) {
         void GL_DumpTextures();
         GL_DumpTextures();
     });
 
-    i_brightness.set_callback([](const float&) {
-        void R_RefreshBrightness();
+    i_brightness.set_callback([](const float &) {
         R_RefreshBrightness();
     });
 
-    I_InitVideo();
+    void imp_init_sdl2();
+    imp_init_sdl2();
     I_InitClockRate();
-}
-
-//
-// I_Error
-//
-
-void log_error_callback(StringView message) {
-    I_ShutdownSound();
-
-    if(usingGL) {
-        while(1) {
-            GL_ClearView(0xFF000000);
-            Draw_Text(0, 0, WHITE, 1, 1, "Error - %s\n", message.to_string().c_str());
-            GL_SwapBuffers();
-
-            if(I_ShutdownWait()) {
-                break;
-            }
-
-            I_Sleep(1);
-        }
-    }
-    else {
-        I_ShutdownVideo();
-    }
-
-    // TODO: Show sysconsole and quit
-
-    exit(0);    // just in case...
 }
 
 //
 // I_Quit
 //
 
-void I_Quit(void) {
-    if(demorecording) {
+void I_Quit(void)
+{
+    if (demorecording) {
         endDemo = true;
         G_CheckDemoStatus();
     }
@@ -344,7 +330,9 @@ void I_Quit(void) {
 #endif
 
     I_ShutdownSound();
-    I_ShutdownVideo();
+
+    void imp_quit_sdl2();
+    imp_quit_sdl2();
 
     exit(0);
 }
@@ -353,19 +341,20 @@ void I_Quit(void) {
 // I_BeginRead
 //
 
-dboolean    inshowbusy=false;
+dboolean inshowbusy = false;
 
-void I_BeginRead(void) {
-    if(!devparm) {
+void I_BeginRead(void)
+{
+    if (!devparm) {
         return;
     }
 
-    if(inshowbusy) {
+    if (inshowbusy) {
         return;
     }
-    inshowbusy=true;
-    inshowbusy=false;
-    BusyDisk=true;
+    inshowbusy = true;
+    inshowbusy = false;
+    BusyDisk = true;
 }
 
 //
@@ -378,7 +367,8 @@ CVAR_EXTERNAL(i_rstickthreshold);
 CVAR_EXTERNAL(i_xinputscheme);
 #endif
 
-void I_RegisterCvars(void) {
+void I_RegisterCvars(void)
+{
 #ifdef _USE_XINPUT
     CON_CvarRegister(&i_rsticksensitivity);
     CON_CvarRegister(&i_rstickthreshold);

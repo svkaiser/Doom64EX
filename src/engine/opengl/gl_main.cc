@@ -31,7 +31,6 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
-#include "i_video.h"
 #include "gl_main.h"
 #include "i_system.h"
 #include "z_zone.h"
@@ -40,6 +39,8 @@
 #include "con_console.h"
 #include "m_misc.h"
 #include "g_actions.h"
+
+#include "system/ivideo.hh"
 
 int ViewWindowX = 0;
 int ViewWindowY = 0;
@@ -236,7 +237,7 @@ float GL_GetOrthoScale(void) {
 //
 
 void GL_SwapBuffers(void) {
-    I_FinishUpdate();
+    Video->end_frame();
 }
 
 //

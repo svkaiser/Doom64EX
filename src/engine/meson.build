@@ -44,11 +44,12 @@ configure_file(
 # Linux dynamic linking
 dl_dep = cpp.find_library('dl')
 
-dep = [
-  dependency('sdl2'),
-  dependency('SDL2_net'),
-  dependency('zlib'),
-  dependency('libpng'),
+engine_dep = [
+  sdl2_dep,
+  sdl2_net_dep,
+  zlib_dep,
+  png_dep,
+  threads_dep,
   dl_dep,
   fluid_dep
 ]
@@ -56,15 +57,15 @@ dep = [
 ##------------------------------------------------------------------------------
 ## Platform sources
 ##
-platform_src = [
+engine_platform_src = [
   'native_ui/gtk3.cc'
 ]
 
 ##------------------------------------------------------------------------------
 ## Sources
 ##
-src = [
-  platform_src,
+engine_src = files(
+  engine_platform_src,
 
   'app.cc',
   'globals.cc',
@@ -198,7 +199,6 @@ src = [
   'system/i_png.cc',
   'system/i_swap.h',
   'system/i_system.cc',
-  'system/i_video.cc',
   'system/n64_rom.cc',
   'system/sdl2/input.cc',
   'system/sdl2/translate.cc',
@@ -226,9 +226,10 @@ src = [
 
   # top-level
   'prelude.hh',
-]
+)
 
-inc = include_directories(
+engine_inc = include_directories(
+  '.',
   'automap',
   'common',
   'core',
@@ -251,12 +252,4 @@ inc = include_directories(
   'system',
   'wad',
   'zone'
-)
-
-executable(
-  'doom64ex',
-  sources : src,
-  dependencies : dep,
-  include_directories : inc,
-  install : true
 )
