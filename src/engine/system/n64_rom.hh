@@ -2,7 +2,8 @@
 #define __N64_ROM__65058706
 
 #include <sstream>
-#include <prelude.hh>
+#include <fstream>
+#include "prelude.hh"
 
 namespace imp {
   namespace sys {

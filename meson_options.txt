@@ -4,3 +4,10 @@ option(
   type : 'string',
   value : 'doom64ex'
 )
+
+option(
+  'enable_gtk3',
+  description : 'Use Gtk3 for native UI',
+  type : 'boolean',
+  value : false
+)

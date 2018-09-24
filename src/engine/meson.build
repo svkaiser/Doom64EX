@@ -51,21 +51,30 @@ engine_dep = [
   png_dep,
   threads_dep,
   dl_dep,
-  fluid_dep
+  fluid_dep,
+
+  # Additional project dependencies
+  nui_gtk3_dep
 ]
 
 ##------------------------------------------------------------------------------
 ## Platform sources
 ##
 engine_platform_src = [
-  'native_ui/gtk3.cc'
+]
+
+##------------------------------------------------------------------------------
+## Gtk3 Native UI sources
+##
+nui_gtk_src = [
+  'native_ui/gtk3/gtk3.cc',
 ]
 
 ##------------------------------------------------------------------------------
 ## Sources
 ##
 engine_src = files(
-  engine_platform_src,
+  nui_gtk_src,
 
   'app.cc',
   'globals.cc',

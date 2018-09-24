@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <windows.h>
-#include <imp/NativeUI>
+#include "native_ui/native_ui.hh"
 
 void NET_CL_StartGame();
 void I_Quit();

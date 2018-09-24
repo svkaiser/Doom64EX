@@ -23,7 +23,7 @@
 ##
 
 project(
-  'Doom64EX', 'cpp',
+  'Doom64EX', ['c', 'cpp', 'vala'],
   version : '3.0.0-git',
   license : 'GPL',
   default_options : [
@@ -87,6 +87,11 @@ if zip_prog.found()
 else
   warning('`zip` program not found. Can\'t generate `doom64ex.pk3`')
 endif
+
+##------------------------------------------------------------------------------
+## Target: Native UI - Gtk3 (gtk3)
+##
+subdir('src/gtk3')
 
 ##------------------------------------------------------------------------------
 ## Target: doom64ex (engine)

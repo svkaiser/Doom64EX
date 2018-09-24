@@ -4,6 +4,12 @@
 #include <windows.h>
 #endif
 
+#include <sys/sendfile.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <platform/app.hh>
 #include "native_ui/native_ui.hh"
 #include "wad.hh"
@@ -42,8 +48,23 @@ void wad::init()
         }
 #else
         if (!iwad_loaded) {
-            log::fatal("Couldn't find 'doom64.rom'");
-            break;
+            auto str = native_ui::rom_select();
+
+            if (!str) {
+                log::fatal("Couldn't find 'doom64.rom'");
+            }
+
+            auto path = fmt::format("{}/.local/share/doom64ex/doom64.rom", getenv("HOME"));
+            int srcfd = ::open(str->c_str(), O_RDONLY, 0);
+            int dstfd = ::open(path.c_str(), O_WRONLY | O_CREAT, 0644);
+
+            struct stat srcstat;
+            fstat(srcfd, &srcstat);
+
+            sendfile(dstfd, srcfd, 0, srcstat.st_size);
+
+            close(srcfd);
+            close(dstfd);
         }
 #endif
     }
