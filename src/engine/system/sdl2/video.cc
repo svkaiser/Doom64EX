@@ -61,6 +61,7 @@ namespace {
       ~SdlVideo();
 
       void set_mode(const VideoMode& mode) override;
+      void set_vsync(bool should_sync) override;
       VideoMode current_mode() override;
 
       void grab(bool should_grab) override;
@@ -229,7 +230,6 @@ void SdlVideo::set_mode(const VideoMode& mode)
 
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, copy.buffer_size);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, copy.depth_size);
-    SDL_GL_SetSwapInterval(copy.vsync ? 1 : 0);
 
     if (!m_window) {
         // Prepare SDL's GL attributes
@@ -251,11 +251,11 @@ void SdlVideo::set_mode(const VideoMode& mode)
 
         auto title = fmt::format("{} {} - SDL2, OpenGL 1.4", config::name, config::version_full);
         m_window = SDL_CreateWindow(title.c_str(),
-                                       SDL_WINDOWPOS_CENTERED,
-                                       SDL_WINDOWPOS_CENTERED,
-                                       copy.width,
-                                       copy.height,
-                                       flags);
+                                    SDL_WINDOWPOS_CENTERED,
+                                    SDL_WINDOWPOS_CENTERED,
+                                    copy.width,
+                                    copy.height,
+                                    flags);
 
         if (!m_window) {
             throw std::runtime_error{fmt::format("Couldn't create window: {}", SDL_GetError())};
@@ -319,6 +319,8 @@ void SdlVideo::set_mode(const VideoMode& mode)
         R_SetViewMatrix();
     }
 
+    this->set_vsync(copy.vsync);
+
     v_width = copy.width;
     v_height = copy.height;
     v_depthsize = copy.depth_size;
@@ -337,6 +339,16 @@ void SdlVideo::set_mode(const VideoMode& mode)
     case Fullscreen::exclusive:
         v_windowed = 0;
         break;
+    }
+}
+
+//
+// SdlVideo::set_vsync
+//
+void SdlVideo::set_vsync(bool should_sync)
+{
+    if (SDL_GL_SetSwapInterval(should_sync ? 1 : 0) < 0) {
+        log::warn("Couldn't set VSync: {}", SDL_GetError());
     }
 }
 
@@ -548,6 +560,10 @@ void imp_init_sdl2()
         (v_yaxismove, "v_YAxisMove", "Move with the mouse");
 
     Video = new SdlVideo { OpenGLVer::gl14 };
+
+    v_vsync.set_callback([](const bool& value){
+        Video->set_vsync(value);
+    });
 }
 
 //

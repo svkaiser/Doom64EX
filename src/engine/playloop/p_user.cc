@@ -251,7 +251,8 @@ void P_CalcHeight(player_t* player) {
     angle = (FINEANGLES / 20 * leveltime) & FINEMASK;
     bob = FixedMul(player->bob / 2, finesine[angle]);
 
-    bob *= p_movebob;
+    // use the p_MoveBob cvar
+    bob *= p_movebob.get();
 
     // move viewheight
     if(player->playerstate == PST_LIVE) {

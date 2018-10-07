@@ -76,13 +76,13 @@ word*       spriteheight;
 word*       spritecount;
 
 typedef struct {
-    int mode;
-    int combine_rgb;
-    int combine_alpha;
-    int source_rgb[3];
-    int source_alpha[3];
-    int operand_rgb[3];
-    int operand_alpha[3];
+    GLenum mode;
+    GLenum combine_rgb;
+    GLenum combine_alpha;
+    GLenum source_rgb[3];
+    GLenum source_alpha[3];
+    GLenum operand_rgb[3];
+    GLenum operand_alpha[3];
     float color[4];
 } gl_env_state_t;
 
@@ -246,7 +246,7 @@ void GL_SetNewPalette(int id, byte palID) {
 // SetTextureImage
 //
 
-static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, int format, int type)
+static void SetTextureImage(byte* data, int bits, int *origwidth, int *origheight, GLenum format, GLenum type)
 {
     if(r_texnonpowresize > 0) {
        int wp;
@@ -332,8 +332,6 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     dboolean npot;
     int width;
     int height;
-    int format;
-    int type;
     int gfxid;
 
     auto lump = wad::open(wad::Section::graphics, name).value();
@@ -369,8 +367,8 @@ int GL_BindGfxTexture(const char* name, dboolean alpha) {
     dglBindTexture(GL_TEXTURE_2D, gfxptr[gfxid]);
 
     // if alpha is specified, setup the format for only RGBA pixels (4 bytes) per pixel
-    format = alpha ? GL_RGBA8 : GL_RGB8;
-    type = alpha ? GL_RGBA : GL_RGB;
+    GLenum format = alpha ? GL_RGBA8 : GL_RGB8;
+    GLenum type = alpha ? GL_RGBA : GL_RGB;
 
     SetTextureImage(reinterpret_cast<byte*>(image.data_ptr()), (alpha ? 4 : 3), &width, &height, format, type);
 
@@ -705,7 +703,7 @@ void GL_SetTextureUnit(int unit, dboolean enable) {
 // GL_SetTextureMode
 //
 
-void GL_SetTextureMode(int mode) {
+void GL_SetTextureMode(GLenum mode) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];
@@ -722,7 +720,7 @@ void GL_SetTextureMode(int mode) {
 // GL_SetCombineState
 //
 
-void GL_SetCombineState(int combine) {
+void GL_SetCombineState(GLenum combine) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];
@@ -739,7 +737,7 @@ void GL_SetCombineState(int combine) {
 // GL_SetCombineStateAlpha
 //
 
-void GL_SetCombineStateAlpha(int combine) {
+void GL_SetCombineStateAlpha(GLenum combine) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];
@@ -784,7 +782,7 @@ void GL_SetEnvColor(float* param) {
 // GL_SetCombineSourceRGB
 //
 
-void GL_SetCombineSourceRGB(int source, int target) {
+void GL_SetCombineSourceRGB(int source, GLenum target) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];
@@ -801,7 +799,7 @@ void GL_SetCombineSourceRGB(int source, int target) {
 // GL_SetCombineSourceAlpha
 //
 
-void GL_SetCombineSourceAlpha(int source, int target) {
+void GL_SetCombineSourceAlpha(int source, GLenum target) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];
@@ -818,7 +816,7 @@ void GL_SetCombineSourceAlpha(int source, int target) {
 // GL_SetCombineOperandRGB
 //
 
-void GL_SetCombineOperandRGB(int operand, int target) {
+void GL_SetCombineOperandRGB(int operand, GLenum target) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];
@@ -835,7 +833,7 @@ void GL_SetCombineOperandRGB(int operand, int target) {
 // GL_SetCombineOperandAlpha
 //
 
-void GL_SetCombineOperandAlpha(int operand, int target) {
+void GL_SetCombineOperandAlpha(int operand, GLenum target) {
     gl_env_state_t *state;
 
     state = &gl_env_state[curunit];

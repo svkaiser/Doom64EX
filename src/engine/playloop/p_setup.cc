@@ -91,7 +91,7 @@ cvar::BoolVar p_sdoubleclick;
 cvar::BoolVar p_usecontext;
 cvar::BoolVar p_damageindicator;
 cvar::IntVar p_regionmode;
-cvar::FloatVar p_movebob = 0.25;
+cvar::FloatVar p_movebob = 1;
 
 //
 // [kex] sky definition stuff

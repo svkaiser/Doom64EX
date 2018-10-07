@@ -142,7 +142,7 @@ void dglDrawGeometry(dword count, vtx_t *vtx) {
 
     if(r_drawtris) {
         dword j = 0;
-        byte b;
+        GLboolean b;
 
         for(j = 0; j < count; j++) {
             vtx[j].r = 0xff;
@@ -280,7 +280,7 @@ void dglTexCombReplace(void) {
 // dglTexCombColor
 //
 
-void dglTexCombColor(int t, rcolor c, int func) {
+void dglTexCombColor(GLenum t, rcolor c, GLenum func) {
     float f[4];
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("dglTexCombColor(t=0x%x, c=0x%x)\n", t, c);
@@ -299,7 +299,7 @@ void dglTexCombColor(int t, rcolor c, int func) {
 // dglTexCombColorf
 //
 
-void dglTexCombColorf(int t, float* f, int func) {
+void dglTexCombColorf(GLenum t, float* f, GLenum func) {
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("dglTexCombColorf(t=0x%x, f=%p)\n", t, f);
 #endif
@@ -316,7 +316,7 @@ void dglTexCombColorf(int t, float* f, int func) {
 // dglTexCombModulate
 //
 
-void dglTexCombModulate(int t, int s) {
+void dglTexCombModulate(GLenum t, GLenum s) {
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("dglTexCombFinalize(t=0x%x)\n", t);
 #endif
@@ -332,7 +332,7 @@ void dglTexCombModulate(int t, int s) {
 // dglTexCombAdd
 //
 
-void dglTexCombAdd(int t, int s) {
+void dglTexCombAdd(GLenum t, GLenum s) {
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("dglTexCombFinalize(t=0x%x)\n", t);
 #endif
@@ -348,7 +348,7 @@ void dglTexCombAdd(int t, int s) {
 // dglTexCombInterpolate
 //
 
-void dglTexCombInterpolate(int t, float a) {
+void dglTexCombInterpolate(GLenum t, float a) {
     float f[4];
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("dglTexCombInterpolate(t=0x%x, a=%f)\n", t, a);
@@ -371,7 +371,7 @@ void dglTexCombInterpolate(int t, float a) {
 // dglTexCombReplaceAlpha
 //
 
-void dglTexCombReplaceAlpha(int t) {
+void dglTexCombReplaceAlpha(GLenum t) {
 #ifdef LOG_GLFUNC_CALLS
     I_Printf("dglTexCombReplaceAlpha(t=0x%x)\n", t);
 #endif

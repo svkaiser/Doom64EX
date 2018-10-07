@@ -121,8 +121,9 @@ if (NOT USE_CONAN)
   endif()
 
   # OpenGL
-  find_package(OpenGL REQUIRED)
+  find_package(GLBinding REQUIRED)
 
+  # Boost
   find_package(Boost REQUIRED)
 
   # GTK3

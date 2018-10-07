@@ -34,6 +34,11 @@ namespace imp {
       virtual void set_mode(const VideoMode&) = 0;
 
       /**
+       * Enable/disable vsync
+       */
+      virtual void set_vsync(bool should_sync) = 0;
+
+      /**
        * @return Current video mode
        */
       virtual VideoMode current_mode() = 0;
