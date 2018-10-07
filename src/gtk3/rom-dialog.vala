@@ -86,13 +86,3 @@ class RomDialog : Gtk.Dialog {
 		return (size / DIV).to_string ("%ld GB");
 	}
 }
-
-public void nui_gtk_rom_dialog_init () {
-	unowned string[]? argv = null;
-	Gtk.init (ref argv);
-
-	var window = new RomDialog ();
-	window.show ();
-
-	Gtk.main ();
-}

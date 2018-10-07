@@ -2,6 +2,7 @@
 <gresources>
     <gresource prefix="/com/github/Doom64EX">
         <file>rom-dialog.ui</file>
+        <file>console-window.ui</file>
         <file alias="logo.png">../../../data/icons/256x256/doom64ex.png</file>
     </gresource>
 </gresources>

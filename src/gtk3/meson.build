@@ -46,9 +46,9 @@ nui_gtk3_rsc = gnome.compile_resources(
 ## Sources
 ##
 nui_gtk3_src = [
-  'console.vala',
+  'console-window.vala',
   'rom-dialog.vala',
-  'thread.vala',
+  'main.vala',
   nui_gtk3_rsc
 ]
 

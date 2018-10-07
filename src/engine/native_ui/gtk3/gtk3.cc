@@ -1,4 +1,5 @@
 #include "native_ui/native_ui.hh"
+
 #include "system/n64_rom.hh"
 
 namespace {
@@ -7,8 +8,12 @@ namespace {
   bool s_valid_rom {};
 }
 
+void G_ExecuteCommand(char *action);
+
 extern "C" {
+void nui_gtk_init();
 void nui_gtk_rom_dialog_init();
+void nui_gtk_console_add_line(const char *line);
 
 /**
  * Gtk3 interop: Open and check (potential) ROM
@@ -54,10 +59,19 @@ void nui_gtk_rom_select(const char *path)
     s_rom_select = String { path };
 }
 
+/**
+ * Gtk3 interop: Evaluate console input
+ */
+void nui_gtk_console_eval(char *cmd)
+{
+    G_ExecuteCommand(cmd);
+}
+
 }
 
 void native_ui::init()
 {
+    nui_gtk_init();
 }
 
 void native_ui::console_show(bool show)
@@ -67,7 +81,7 @@ void native_ui::console_show(bool show)
 void native_ui::console_add_line(StringView line)
 {
     String str { line };
-    // ftable.console_add_line(str.c_str());
+    nui_gtk_console_add_line(str.c_str());
 }
 
 Optional<String> native_ui::rom_select()

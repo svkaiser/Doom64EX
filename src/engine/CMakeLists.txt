@@ -37,7 +37,6 @@ if(WIN32)
     system/i_cpu.cc)
 else()
   set(PLATFORM_SOURCES
-    native_ui/gtk3.cc
     system/i_cpu_posix.cc)
 
   set(PLATFORM_LIBRARIES
