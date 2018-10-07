@@ -90,6 +90,7 @@ dboolean        ButtonAction = false;
 static CMD(Alias);
 static CMD(Unbind);
 static CMD(UnbindAll);
+static CMD(Crash);
 
 //
 // G_InitActions
@@ -106,6 +107,7 @@ void G_InitActions(void) {
     G_AddCommand("alias", CMD_Alias, 0);
     G_AddCommand("unbind", CMD_Unbind, 0);
     G_AddCommand("unbindall", CMD_UnbindAll, 0);
+    G_AddCommand("crash", CMD_Crash, 0);
 }
 
 //
@@ -271,7 +273,7 @@ alist_t *DoRunActions(alist_t *al, dboolean free) {
             }
         }
         else {
-            CON_Warnf("Unknown command \"%s\"\n", al->cmd);
+            CON_Warnf("Unknown command \"%s\"", al->cmd);
         }
 
         if(free) {
@@ -1308,3 +1310,9 @@ void G_UnbindAction(const char *action) {
     }
 }
 
+//
+// CMD_Crash
+//
+static CMD(Crash) {
+    __builtin_trap();
+}
