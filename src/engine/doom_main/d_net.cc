@@ -143,6 +143,7 @@ void NetUpdate(void) {
     for(i=0 ; i<newtics ; i++) {
         ticcmd_t cmd;
 
+        Video->grab(!menuactive && (gamestate == GS_LEVEL) && !demoplayback);
         Video->begin_frame();
         D_ProcessEvents();
         //if (maketic - gameticdiv >= BACKUPTICS/2-1)

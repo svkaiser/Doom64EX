@@ -288,10 +288,6 @@ unsigned long I_GetRandomTimeSeed(void)
 
 void I_Init(void)
 {
-#ifdef USESYSCONSOLE
-    //I_SpawnLauncher(hwndMain);
-#endif
-
     cvar::Register()
         (i_gamma, "i_Gamma", "")
         (i_brightness, "i_Brightness", "Brightness")
@@ -309,6 +305,7 @@ void I_Init(void)
 
     void imp_init_sdl2();
     imp_init_sdl2();
+    
     I_InitClockRate();
 }
 
