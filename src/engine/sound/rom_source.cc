@@ -892,24 +892,24 @@ std::string get_midi(size_t midi)
 
 void rom_preset(fluid_sfont_t* sfont, fluid_preset_t* preset, size_t id)
 {
-    constexpr auto free = [](fluid_preset_t* preset) -> int {
+    auto free = [](fluid_preset_t* preset) -> int {
         delete preset;
         return 0;
     };
 
-    constexpr auto get_name = [](fluid_preset_t* preset) -> char* {
+    auto get_name = [](fluid_preset_t* preset) -> char* {
         return strdup(reinterpret_cast<Preset*>(preset)->name.c_str());
     };
 
-    constexpr auto get_banknum = [](fluid_preset_t* preset) -> int {
+    auto get_banknum = [](fluid_preset_t* preset) -> int {
         return reinterpret_cast<Preset*>(preset->data)->bank;
     };
 
-    constexpr auto get_num = [](fluid_preset_t* preset) -> int {
+    auto get_num = [](fluid_preset_t* preset) -> int {
         return reinterpret_cast<Preset*>(preset->data)->prog;
     };
 
-    constexpr auto noteon = [](fluid_preset_t* preset, fluid_synth_t* synth, int chan, int key, int vel) -> int {
+    auto noteon = [](fluid_preset_t* preset, fluid_synth_t* synth, int chan, int key, int vel) -> int {
         auto& data = *reinterpret_cast<Preset*>(preset->data);
 
         for (auto& inst : data.instruments) {
@@ -1007,27 +1007,27 @@ fluid_sfont_t* rom_sfont()
         size_t iter;
     };
 
-    constexpr auto free = [](fluid_sfont_t* sfont) -> int {
+    auto free = [](fluid_sfont_t* sfont) -> int {
         delete reinterpret_cast<Soundfont*>(sfont->data);
         delete sfont;
         return 0;
     };
 
-    constexpr auto get_name = [](fluid_sfont_t* sfont) -> char * {
+    auto get_name = [](fluid_sfont_t* sfont) -> char * {
         return reinterpret_cast<Soundfont*>(sfont->data)->name;
     };
 
-    constexpr auto get_preset = [](fluid_sfont_t* sfont, uint32 bank, uint32 prog) -> fluid_preset_t* {
+    auto get_preset = [](fluid_sfont_t* sfont, uint32 bank, uint32 prog) -> fluid_preset_t* {
         auto preset = new fluid_preset_t;
         rom_preset(sfont, preset, (bank ? new_bank_offset_ : 0) + prog);
         return preset;
     };
 
-    constexpr auto iteration_start = [](fluid_sfont_t* sfont) {
+    auto iteration_start = [](fluid_sfont_t* sfont) {
         reinterpret_cast<Soundfont*>(sfont->data)->iter = 0;
     };
 
-    constexpr auto iteration_next = [](fluid_sfont_t* sfont, fluid_preset_t* preset) -> int {
+    auto iteration_next = [](fluid_sfont_t* sfont, fluid_preset_t* preset) -> int {
         auto& data = *reinterpret_cast<Soundfont*>(sfont->data);
         rom_preset(sfont, preset, data.iter);
         return data.iter < presets_.size();
@@ -1046,12 +1046,12 @@ fluid_sfont_t* rom_sfont()
 
 fluid_sfloader_t* rom_soundfont()
 {
-    constexpr auto free = [](fluid_sfloader_t* sf) {
+    auto free = [](fluid_sfloader_t* sf) {
         delete sf;
         return 0;
     };
 
-    constexpr auto load = [](fluid_sfloader_t*, const char *fname) -> fluid_sfont_t* {
+    auto load = [](fluid_sfloader_t*, const char *fname) -> fluid_sfont_t* {
         if (g_rom.open(fname)) {
             return rom_sfont();
         }
