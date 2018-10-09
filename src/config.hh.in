@@ -1,7 +1,7 @@
 #ifndef __CONFIG_HH__51912889
 #define __CONFIG_HH__51912889
 
-#cmakedefine10 USE_NATIVE_UI_GTK3
+#cmakedefine USE_NATIVE_UI_GTK3
 
 namespace imp {
   namespace config {
