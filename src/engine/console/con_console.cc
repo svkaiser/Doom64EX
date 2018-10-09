@@ -223,7 +223,7 @@ void CON_AddText(const char *text) {
         c = *(src++);
     }
 
-    native_ui::console_add_line(text);
+    g_native_ui->console_add_line(text);
 }
 
 //

@@ -30,11 +30,13 @@ conf_data.set('PROJECT_NAME', 'Doom64EX')
 conf_data.set('VERSION', '3.0.0-git')
 conf_data.set('VERSION_GIT', '3.0.0-git')
 conf_data.set('VERSION_FULL', '3.0.0-git')
+conf_data.set10('USE_NATIVE_UI_GTK3', get_option('enable_gtk3'))
 
 configure_file(
   input : '../config.hh.in',
   output : 'config.hh',
-  configuration : conf_data
+  configuration : conf_data,
+  format : 'cmake'
 )
 
 ##------------------------------------------------------------------------------
@@ -52,6 +54,7 @@ engine_dep = [
   threads_dep,
   dl_dep,
   fluid_dep,
+  glbinding_dep,
 
   # Additional project dependencies
   nui_gtk3_dep
@@ -155,7 +158,6 @@ engine_src = files(
   'opengl/gl_draw.cc',
   'opengl/gl_main.cc',
   'opengl/gl_texture.cc',
-  'opengl/glad.cc',
 
   # parser
   'parser/sc_main.cc',

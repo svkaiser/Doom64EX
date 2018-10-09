@@ -6,6 +6,17 @@ namespace {
   Optional<String> s_rom_select;
   String s_version;
   bool s_valid_rom {};
+
+  class Gtk3UI : public NativeUI {
+  public:
+      Gtk3UI();
+
+      void console_show(bool) override;
+
+      void console_add_line(StringView) override;
+
+      Optional<String> rom_select() override;
+  };
 }
 
 void G_ExecuteCommand(char *action);
@@ -69,24 +80,32 @@ void nui_gtk_console_eval(char *cmd)
 
 }
 
-void native_ui::init()
+Gtk3UI::Gtk3UI()
 {
     nui_gtk_init();
 }
 
-void native_ui::console_show(bool show)
+void Gtk3UI::console_show(bool show)
 {
 }
 
-void native_ui::console_add_line(StringView line)
+void Gtk3UI::console_add_line(StringView line)
 {
     String str { line };
     nui_gtk_console_add_line(str.c_str());
 }
 
-Optional<String> native_ui::rom_select()
+Optional<String> Gtk3UI::rom_select()
 {
     nui_gtk_rom_dialog_init();
 
     return s_rom_select;
+}
+
+//
+// imp_init_gtk3_ui
+//
+void imp_init_gtk3_ui()
+{
+    g_native_ui = std::make_unique<Gtk3UI>();
 }

@@ -48,7 +48,7 @@ void wad::init()
         }
 #else
         if (!iwad_loaded) {
-            auto str = native_ui::rom_select();
+            auto str = g_native_ui->rom_select();
 
             if (!str) {
                 log::fatal("Couldn't find 'doom64.rom'");

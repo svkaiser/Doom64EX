@@ -63,6 +63,7 @@
 #include "p_saveg.h"
 #include "gl_draw.h"
 #include "core/log/logger.hh"
+#include "config.hh"
 
 #include "net_client.h"
 #include "wad/wad.hh"
@@ -998,8 +999,12 @@ void D_DoomMain(void) {
         I_Printf("M_LoadDefaults: Loading game configuration\n");
         M_LoadDefaults();
 
-        I_Printf("native_ui: Setting up Native UI\n");
-        native_ui::init();
+#if USE_NATIVE_UI_GTK3
+        I_Printf("Gtk3 Native UI\n");
+        void imp_init_gtk3_ui();
+        imp_init_gtk3_ui();
+#else
+#endif
 
         I_Printf("D_Init: Init DOOM parameters\n");
         D_Init();
@@ -1034,7 +1039,7 @@ void D_DoomMain(void) {
         I_Printf("GL_Init: Init OpenGL\n");
         GL_Init();
 
-        native_ui::console_show(false);
+        g_native_ui->console_show(false);
 
         // garbage collection
         Z_FreeAlloca();

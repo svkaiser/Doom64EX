@@ -68,6 +68,13 @@ if not fluid_dep.found()
   fluid_dep = cpp.find_library('fluidsynth')
 endif
 
+# GLBinding
+glbinding_dep = dependency('glbinding', required : false)
+
+if not glbinding_dep.found()
+  glbinding_dep = cpp.find_library('glbinding')
+endif
+
 ##------------------------------------------------------------------------------
 ## Target: doom64ex.pk3 (data)
 ##

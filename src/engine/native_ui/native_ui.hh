@@ -26,24 +26,27 @@
 #include "prelude.hh"
 
 namespace imp {
-  namespace native_ui {
-    void init();
+  class NativeUI {
+  public:
+      NativeUI();
 
-    void quit();
+      virtual ~NativeUI();
 
-    void console_show(bool);
+      virtual void console_show(bool do_show);
 
-    void console_add_line(StringView message);
+      virtual void console_add_line(StringView message);
 
-    void error(const std::string& line);
+      virtual void error(const std::string& line);
 
-    /**
-     * Show the user a file dialog to find a valid ROM file
-     *
-     * \returns a
-     */
-    Optional<String> rom_select();
-  }
+      /**
+       * Show the user a file dialog to find a valid ROM file
+       *
+       * \returns a
+       */
+      virtual Optional<String> rom_select();
+  };
+
+  extern UniquePtr<NativeUI> g_native_ui;
 }
 
 #endif //__IMP_NATIVEUI__92059425

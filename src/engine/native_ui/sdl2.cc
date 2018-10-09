@@ -1,9 +1,35 @@
 #include "SDL.h"
-#include "native_ui/native_ui.hh"
+#include "native_ui.hh"
 
-void native_ui::error(const std::string& message)
+/* Initialise Native UI to SDL2 at startup by default */
+UniquePtr<NativeUI> imp::g_native_ui = std::make_unique<NativeUI>();
+
+NativeUI::NativeUI()
 {
-    SDL_ShowSimpleMessageBox(0, "Doom64EX Error", message.c_str(), nullptr);
+    /* no-op */
 }
 
-void (*__imp_error)(const std::string&) = native_ui::error;
+NativeUI::~NativeUI()
+{
+    /* no-op */
+}
+
+void NativeUI::console_show(bool)
+{
+    /* no-op */
+}
+
+void NativeUI::console_add_line(StringView)
+{
+    /* no-op */
+}
+
+void NativeUI::error(const std::string &line)
+{
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Doom64EX Fatal Error", line.c_str(), nullptr);
+}
+
+Optional<String> NativeUI::rom_select()
+{
+    return nullopt;
+}

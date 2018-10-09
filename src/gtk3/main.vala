@@ -7,7 +7,6 @@ public void nui_gtk_init () {
 
 	gui_thread = new Thread<void*> ("Gtk3 Thread", () => {
 			console_window = new ConsoleWindow ();
-			console_window.show_all ();
 
 			Gtk.main ();
 
@@ -44,10 +43,21 @@ public void nui_gtk_console_add_line (string line) {
 }
 
 public void nui_gtk_rom_dialog_init () {
+	var mutex = Mutex ();
+	var cond = Cond ();
+
+    mutex.lock ();
 	Idle.add (() => {
 			var window = new RomDialog ();
 			window.show ();
 
+			window.destroy.connect (() => {
+					cond.signal ();
+				});
+
 			return Source.REMOVE;
 		});
+
+	cond.wait (mutex);
+	mutex.unlock ();
 }

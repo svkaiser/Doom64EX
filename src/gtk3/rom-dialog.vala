@@ -27,6 +27,8 @@ class RomDialog : Gtk.Dialog {
 		this.hide_info ();
 	}
 
+	public signal void done ();
+
 	[GtkCallback]
 	void on_file_set (Gtk.FileChooserButton button) {
 		var uri = button.get_uri ();

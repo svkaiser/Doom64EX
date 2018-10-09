@@ -44,7 +44,7 @@ namespace {
 
   void s_fatal(StringView message)
   {
-      native_ui::error(message.to_string());
+      g_native_ui->error(message.to_string());
       std::exit(0);
   }
 
@@ -200,7 +200,7 @@ void Logger::m_println(StringView message_ansi)
     }
 
     /* Write to native console */
-    native_ui::console_add_line(message);
+    g_native_ui->console_add_line(message);
 
     /* Hand off to callback */
     if (m_callback) {
