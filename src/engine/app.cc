@@ -2,6 +2,7 @@
 #include <fstream>
 #include <platform/app.hh>
 #include <sys/stat.h>
+#include <clocale>
 
 #include <cxxabi.h>
 
@@ -223,5 +224,6 @@ app::Param::Param(StringView name, app::Param::Arity arity) :
 
 int SDL_main(int argc, char **argv)
 {
+    std::locale::global(std::locale::classic());
     app::main(argc, argv);
 }

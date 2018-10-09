@@ -822,7 +822,10 @@ void G_DoCmdMouseMove(int x, int y) {
 // G_DoCmdGamepadMove
 //
 
-#if 0
+extern cvar::IntVar i_xinputscheme;
+extern cvar::FloatVar i_rsticksensitivity;
+extern cvar::FloatVar i_rstickthreshold;
+
 void G_DoCmdGamepadMove(event_t *ev)
 {
     // Most of this is taken from kaiser's xinput.c
@@ -840,7 +843,7 @@ void G_DoCmdGamepadMove(event_t *ev)
             //
             // classic scheme uses traditional turning for x-axis
             //
-            if (i_xinputscheme.value()) {
+            if (i_xinputscheme.get()) {
                 auto turnspeed = i_rsticksensitivity / i_rstickthreshold;
 
                 if (ev->data1 != 0) {
@@ -859,18 +862,17 @@ void G_DoCmdGamepadMove(event_t *ev)
         // right analog stick
         //
         else if (ev->data3 == GAMEPAD_RIGHT_STICK) {
+            auto x = static_cast<float>(ev->data1) * 0.0015f;
             auto y = static_cast<float>(ev->data2) * 0.0015f;
 
             if (ev->data1 != 0) {
-
             }
 
-            pc->mousex += y;
+            pc->mousex += x;
             pc->mousey += y;
         }
     }
 }
-#endif
 
 //
 // G_ClearInput

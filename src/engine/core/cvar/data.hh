@@ -113,7 +113,12 @@ namespace imp::cvar {
       {
           boost::apply_visitor([&new_value](auto& var) {
               using type = std::decay_t<decltype(std::get<0>(var))>;
-              std::get<0>(var) = boost::lexical_cast<type>(new_value);
+              try {
+                  std::get<0>(var) = boost::lexical_cast<type>(new_value);
+              } catch (boost::bad_lexical_cast&) {
+                  /* Don't change value and ignore */
+                  DEBUG("Can't cast '{}' to {}", new_value, boost::typeindex::type_id<type>().pretty_name());
+              }
           }, m_data);
       }
 

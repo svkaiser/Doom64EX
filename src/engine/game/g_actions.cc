@@ -418,11 +418,9 @@ dboolean G_ActionResponder(event_t *ev) {
         G_DoCmdMouseMove(ev->data2, ev->data3);
         break;
 
-#if 0
     case ev_gamepad:
         G_DoCmdGamepadMove(ev);
         break;
-#endif
     }
 
     return false;

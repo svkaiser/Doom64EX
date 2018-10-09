@@ -33,6 +33,11 @@ project(
 
 cpp = meson.get_compiler('cpp')
 
+cpp_args = []
+if get_option('buildtype') == 'debug'
+  cpp_args = ['-DIMP_DEBUG']
+endif
+
 ##------------------------------------------------------------------------------
 ## Options
 ##
@@ -110,6 +115,7 @@ executable(
   sources : engine_src,
   dependencies : engine_dep,
   include_directories : engine_inc,
+  cpp_args : cpp_args,
   install : true
 )
 

@@ -97,6 +97,11 @@ cvar::BoolVar v_mlook = true;
 cvar::BoolVar v_mlookinvert = false;
 cvar::BoolVar v_yaxismove = false;
 
+/* Gamepad Input */
+cvar::IntVar i_xinputscheme = 0;
+cvar::FloatVar i_rsticksensitivity = 0.0080;
+cvar::FloatVar i_rstickthreshold = 20.0;
+
 //
 // SdlVideo::m_init_gl
 //
@@ -455,9 +460,11 @@ void SdlVideo::begin_frame()
         case SDL_CONTROLLERDEVICEADDED:
             log::info("Controller added: {}", SDL_GameControllerNameForIndex(e.cdevice.which));
             s_controller = SDL_GameControllerOpen(e.cdevice.which);
+            assert(s_controller);
             break;
 
         case SDL_CONTROLLERDEVICEREMOVED:
+            log::info("Controlled removed");
             s_controller = nullptr;
             break;
 
@@ -502,18 +509,18 @@ void SdlVideo::begin_frame()
         y = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_LEFTY);
 
         ev.type = ev_gamepad;
-        ev.data1 = 0;
-        ev.data2 = x << 5;
-        ev.data3 = (-y) << 5;
+        ev.data1 = x;
+        ev.data2 = -y;
+        ev.data3 = GAMEPAD_LEFT_STICK;
         D_PostEvent(&ev);
 
         x = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_RIGHTX);
         y = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_RIGHTY);
 
         ev.type = ev_gamepad;
-        ev.data1 = 0;
-        ev.data2 = x << 5;
-        ev.data3 = (-y) << 5;
+        ev.data1 = x;
+        ev.data2 = y;
+        ev.data3 = GAMEPAD_RIGHT_STICK;
         D_PostEvent(&ev);
     }
 
@@ -557,7 +564,11 @@ void imp_init_sdl2()
         (v_msensitivityy, "v_MSensitivityY", "Mouse Y-axis sensitivity")
         (v_mlook, "v_MLook", "Mouse-look")
         (v_mlookinvert, "v_MLookInvert", "Invert Y-axis")
-        (v_yaxismove, "v_YAxisMove", "Move with the mouse");
+        (v_yaxismove, "v_YAxisMove", "Move with the mouse")
+
+        (i_xinputscheme, "i_XInputScheme", "")
+        (i_rsticksensitivity, "i_RStickSensitivity", "")
+        (i_rstickthreshold, "i_RStickThreshold", "");
 
     Video = new SdlVideo { OpenGLVer::gl14 };
 
