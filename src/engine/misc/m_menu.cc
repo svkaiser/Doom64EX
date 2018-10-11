@@ -27,6 +27,8 @@
 //
 //-----------------------------------------------------------------------------
 
+struct { bool connected = true; } xgamepad;
+
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -2136,9 +2138,7 @@ void M_DrawPassword(void) {
     byte *passData;
     int i = 0;
 
-#ifdef _USE_XINPUT  // XINPUT
     if(!xgamepad.connected)
-#endif
     {
         Draw_BigText(-1, 240 - 48, MENUCOLORWHITE , "Press Delete To Change");
         Draw_BigText(-1, 240 - 32, MENUCOLORWHITE , "Press Escape To Return");
@@ -2570,8 +2570,6 @@ void M_DoFeature(int choice) {
     S_StartSound(NULL, sfx_switch2);
 }
 
-#ifdef _USE_XINPUT  // XINPUT
-
 #include "g_controls.h"
 
 //------------------------------------------------------------------------
@@ -2583,9 +2581,9 @@ void M_DoFeature(int choice) {
 void M_XGamePadChoice(int choice);
 void M_DrawXGamePad(void);
 
-CVAR_EXTERNAL(i_rsticksensitivity);
-CVAR_EXTERNAL(i_rstickthreshold);
-CVAR_EXTERNAL(i_xinputscheme);
+extern cvar::FloatVar i_rsticksensitivity;
+extern cvar::FloatVar i_rstickthreshold;
+extern cvar::IntVar i_xinputscheme;
 
 enum {
     xgp_sensitivity,
@@ -2634,38 +2632,38 @@ void M_XGamePadChoice(int choice) {
     switch(itemOn) {
     case xgp_sensitivity:
         if(choice) {
-            if(i_rsticksensitivity.value < 0.0125f) {
-                M_SetCvar(&i_rsticksensitivity, i_rsticksensitivity.value + slope1);
+            if(i_rsticksensitivity.get() < 0.0125f) {
+                M_SetCvar(i_rsticksensitivity, i_rsticksensitivity.get() + slope1);
             }
             else {
-                CON_CvarSetValue(i_rsticksensitivity.name, 0.0125f);
+                i_rsticksensitivity = 0.0125f;
             }
         }
         else {
-            if(i_rsticksensitivity.value > 0.001f) {
-                M_SetCvar(&i_rsticksensitivity, i_rsticksensitivity.value - slope1);
+            if(i_rsticksensitivity.get() > 0.001f) {
+                M_SetCvar(i_rsticksensitivity, i_rsticksensitivity.get() - slope1);
             }
             else {
-                CON_CvarSetValue(i_rsticksensitivity.name, 0.001f);
+                i_rsticksensitivity = 0.001f;
             }
         }
         break;
 
     case xgp_threshold:
         if(choice) {
-            if(i_rstickthreshold.value < 100) {
-                M_SetCvar(&i_rstickthreshold, i_rstickthreshold.value + slope2);
+            if(i_rstickthreshold.get() < 100) {
+                M_SetCvar(i_rstickthreshold, i_rstickthreshold.get() + slope2);
             }
             else {
-                CON_CvarSetValue(i_rstickthreshold.name, 100);
+                i_rstickthreshold = 100;
             }
         }
         else {
-            if(i_rstickthreshold.value > 1) {
-                M_SetCvar(&i_rstickthreshold, i_rstickthreshold.value - slope2);
+            if(i_rstickthreshold.get() > 1) {
+                M_SetCvar(i_rstickthreshold, i_rstickthreshold.get() - slope2);
             }
             else {
-                CON_CvarSetValue(i_rstickthreshold.name, 1);
+                i_rstickthreshold = 1;
             }
         }
         break;
@@ -2674,19 +2672,17 @@ void M_XGamePadChoice(int choice) {
 
 void M_DrawXGamePad(void) {
     M_DrawThermo(XGamePadDef.x, XGamePadDef.y + LINEHEIGHT*(xgp_sensitivity+1),
-                 100, i_rsticksensitivity.value * 8000.0f);
+                 100, i_rsticksensitivity.get() * 8000.0f);
 
     M_DrawThermo(XGamePadDef.x, XGamePadDef.y + LINEHEIGHT*(xgp_threshold+1),
-                 50, i_rstickthreshold.value * 0.5f);
+                 50, i_rstickthreshold.get() * 0.5f);
 
     Draw_BigText(XGamePadDef.x + 128, XGamePadDef.y + LINEHEIGHT * xgp_look, MENUCOLORRED,
-                 msgNames[(int)v_mlook.value]);
+                 msgNames[(int)v_mlook.get()]);
 
     Draw_BigText(XGamePadDef.x + 128, XGamePadDef.y + LINEHEIGHT * xgp_invert, MENUCOLORRED,
-                 msgNames[(int)v_mlookinvert.value]);
+                 msgNames[(int)v_mlookinvert.get()]);
 }
-
-#endif  // XINPUT
 
 //------------------------------------------------------------------------
 //
@@ -2848,9 +2844,7 @@ void M_DrawControlMenu(void);
 enum {
     controls_keyboard,
     controls_mouse,
-#ifdef _USE_XINPUT  // XINPUT
     controls_gamepad,
-#endif
     controls_return,
     controls_end
 };
@@ -2858,18 +2852,14 @@ enum {
 menuitem_t ControlsMenu[]= {
     {1,"Bindings",M_ControlChoice, 'k'},
     {1,"Mouse",M_ControlChoice, 'm'},
-#ifdef _USE_XINPUT  // XINPUT
     {1,"GamePad",M_ControlChoice, 'g'},
-#endif
     {1,"/r Return",M_Return, 0x20}
 };
 
 const char* ControlsHints[controls_end]= {
     "configure bindings",
     "configure mouse functionality",
-#ifdef _USE_XINPUT  // XINPUT
     "configure gamepad functionality",
-#endif
     NULL
 };
 
@@ -2899,11 +2889,9 @@ void M_ControlChoice(int choice) {
     case controls_mouse:
         M_SetupNextMenu(&MouseDef);
         break;
-#ifdef _USE_XINPUT  // XINPUT
     case controls_gamepad:
         M_SetupNextMenu(&XGamePadDef);
         break;
-#endif
     }
 }
 
@@ -4051,8 +4039,6 @@ static void M_DrawSaveGameFrontend(menu_t* def) {
 //
 //------------------------------------------------------------------------
 
-#ifdef _USE_XINPUT  // XINPUT
-
 const symboldata_t xinputbutons[12] = {
     { 0, 0, 15, 16 },   // B
     { 15, 0, 15, 16 },  // A
@@ -4087,46 +4073,46 @@ void M_DrawXInputButton(int x, int y, int button) {
     const rcolor color = MENUCOLORWHITE;
 
     switch(button) {
-    case XINPUT_GAMEPAD_B:
+    case GAMEPAD_B:
         index = 0;
         break;
-    case XINPUT_GAMEPAD_A:
+    case GAMEPAD_A:
         index = 1;
         break;
-    case XINPUT_GAMEPAD_Y:
+    case GAMEPAD_Y:
         index = 2;
         break;
-    case XINPUT_GAMEPAD_X:
+    case GAMEPAD_X:
         index = 3;
         break;
-    case XINPUT_GAMEPAD_LEFT_SHOULDER:
+    case GAMEPAD_LSHOULDER:
         index = 4;
         break;
-    case XINPUT_GAMEPAD_RIGHT_SHOULDER:
+    case GAMEPAD_RSHOULDER:
         index = 5;
         break;
-    case XINPUT_GAMEPAD_DPAD_LEFT:
+    case GAMEPAD_DPAD_LEFT:
         index = 6;
         break;
-    case XINPUT_GAMEPAD_DPAD_RIGHT:
+    case GAMEPAD_DPAD_RIGHT:
         index = 7;
         break;
-    case XINPUT_GAMEPAD_DPAD_UP:
+    case GAMEPAD_DPAD_UP:
         index = 8;
         break;
-    case XINPUT_GAMEPAD_DPAD_DOWN:
+    case GAMEPAD_DPAD_DOWN:
         index = 9;
         break;
-    case XINPUT_GAMEPAD_START:
+    case GAMEPAD_START:
         index = 10;
         break;
-    case XINPUT_GAMEPAD_BACK:
+    case GAMEPAD_BACK:
         index = 11;
         break;
-    case XINPUT_GAMEPAD_LEFT_TRIGGER:
+    case GAMEPAD_LTRIGGER:
         index = 4;
         break;
-    case XINPUT_GAMEPAD_RIGHT_TRIGGER:
+    case GAMEPAD_RTRIGGER:
         index = 5;
         break;
     //
@@ -4177,8 +4163,6 @@ void M_DrawXInputButton(int x, int y, int button) {
     GL_ResetViewport();
     dglDisable(GL_BLEND);
 }
-
-#endif
 
 //
 // M_Responder
@@ -4233,31 +4217,29 @@ dboolean M_Responder(event_t* ev) {
         return false;
     }
 
-#ifdef HAVE_XINPUT
     switch(ch) {
-    case BUTTON_DPAD_UP:
+    case GAMEPAD_DPAD_UP:
         ch = KEY_UPARROW;
         break;
-    case BUTTON_DPAD_DOWN:
+    case GAMEPAD_DPAD_DOWN:
         ch = KEY_DOWNARROW;
         break;
-    case BUTTON_DPAD_LEFT:
+    case GAMEPAD_DPAD_LEFT:
         ch = KEY_LEFTARROW;
         break;
-    case BUTTON_DPAD_RIGHT:
+    case GAMEPAD_DPAD_RIGHT:
         ch = KEY_RIGHTARROW;
         break;
-    case BUTTON_START:
+    case GAMEPAD_START:
         ch = KEY_ESCAPE;
         break;
-    case BUTTON_A:
+    case GAMEPAD_A:
         ch = KEY_ENTER;
         break;
-    case BUTTON_B:
+    case GAMEPAD_B:
         ch = KEY_DEL;
         break;
     }
-#endif //HAVE_XINPUT
 
     if(MenuBindActive == true) { //key Bindings
         if(ch == KEY_ESCAPE) {
@@ -4937,27 +4919,25 @@ void M_Drawer(void) {
         GL_SetOrthoScale(1.0f);
     }
 
-#ifdef _USE_XINPUT  // XINPUT
     if(xgamepad.connected && currentMenu != &MainDef) {
         GL_SetOrthoScale(0.75f);
         if(currentMenu == &PasswordDef) {
-            M_DrawXInputButton(4, 271, XINPUT_GAMEPAD_B);
+            M_DrawXInputButton(4, 271, GAMEPAD_B);
             Draw_Text(22, 276, MENUCOLORWHITE, 0.75f, false, "Change");
         }
 
         GL_SetOrthoScale(0.75f);
-        M_DrawXInputButton(4, 287, XINPUT_GAMEPAD_A);
+        M_DrawXInputButton(4, 287, GAMEPAD_A);
         Draw_Text(22, 292, MENUCOLORWHITE, 0.75f, false, "Select");
 
         if(currentMenu != &PauseDef) {
             GL_SetOrthoScale(0.75f);
-            M_DrawXInputButton(5, 303, XINPUT_GAMEPAD_START);
+            M_DrawXInputButton(5, 303, GAMEPAD_START);
             Draw_Text(22, 308, MENUCOLORWHITE, 0.75f, false, "Return");
         }
 
         GL_SetOrthoScale(1);
     }
-#endif
 
     M_DrawCursor(mouse_x, mouse_y);
 }
@@ -5097,14 +5077,12 @@ void M_Ticker(void) {
         currentMenu->menuitems[nightmare].status = p_features ? 1 : -3;
     }
 
-#ifdef _USE_XINPUT  // XINPUT
     //
     // hide mouse menu if xbox 360 controller is plugged in
     //
     if(currentMenu == &ControlMenuDef) {
         currentMenu->menuitems[controls_gamepad].status = xgamepad.connected ? 1 : -3;
     }
-#endif
 
     //
     // hide anisotropic option if not supported on video card

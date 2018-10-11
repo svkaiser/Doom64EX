@@ -11,6 +11,15 @@
 namespace priv = imp::sdl2_private;
 
 namespace {
+  constexpr Sint32 s_deadzone = 8000;
+
+  void s_clamp(Sint32& axis)
+  {
+      if (axis < s_deadzone && axis > -s_deadzone) {
+          axis = 0;
+      }
+  }
+
   // Exclusive fullscreen by default on Windows only.
 #ifdef _WIN32
   constexpr auto fullscreen_default = 0;
@@ -468,6 +477,13 @@ void SdlVideo::begin_frame()
             s_controller = nullptr;
             break;
 
+        case SDL_CONTROLLERBUTTONDOWN:
+        case SDL_CONTROLLERBUTTONUP:
+            doom.type = (e.type == SDL_CONTROLLERBUTTONDOWN) ? ev_keydown : ev_keyup;
+            doom.data1 = priv::translate_controller(e.cbutton.button);
+            D_PostEvent(&doom);
+            break;
+
         case SDL_WINDOWEVENT:
             switch (e.window.event) {
             case SDL_WINDOWEVENT_FOCUS_GAINED:
@@ -508,6 +524,9 @@ void SdlVideo::begin_frame()
         x = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_LEFTX);
         y = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_LEFTY);
 
+        s_clamp(x);
+        s_clamp(y);
+
         ev.type = ev_gamepad;
         ev.data1 = x;
         ev.data2 = -y;
@@ -517,11 +536,43 @@ void SdlVideo::begin_frame()
         x = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_RIGHTX);
         y = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_RIGHTY);
 
+        s_clamp(x);
+        s_clamp(y);
+
         ev.type = ev_gamepad;
         ev.data1 = x;
         ev.data2 = y;
         ev.data3 = GAMEPAD_RIGHT_STICK;
         D_PostEvent(&ev);
+
+        static bool old_ltrigger = false;
+        static bool old_rtrigger = false;
+
+        auto z = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+        if (z >= 0x4000 && !old_ltrigger) {
+            old_ltrigger = true;
+            ev.type = ev_keydown;
+            ev.data1 = GAMEPAD_LTRIGGER;
+            D_PostEvent(&ev);
+        } else if (z < 0x4000 && old_ltrigger) {
+            old_ltrigger = false;
+            ev.type = ev_keyup;
+            ev.data1 = GAMEPAD_LTRIGGER;
+            D_PostEvent(&ev);
+        }
+
+        z = SDL_GameControllerGetAxis(s_controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+        if (z >= 0x4000 && !old_rtrigger) {
+            old_rtrigger = true;
+            ev.type = ev_keydown;
+            ev.data1 = GAMEPAD_RTRIGGER;
+            D_PostEvent(&ev);
+        } else if (z < 0x4000 && old_rtrigger) {
+            old_rtrigger = false;
+            ev.type = ev_keyup;
+            ev.data1 = GAMEPAD_RTRIGGER;
+            D_PostEvent(&ev);
+        }
     }
 
     SDL_GetRelativeMouseState(&x, &y);
