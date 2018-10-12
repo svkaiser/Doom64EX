@@ -52,7 +52,7 @@
 
 cvar::FloatVar i_gamma = 0.0;
 cvar::FloatVar i_brightness = 100.0;
-cvar::BoolVar i_interpolateframes = false;
+cvar::BoolVar i_interpolateframes = true;
 cvar::StringVar s_soundfont = ""s;
 
 namespace {

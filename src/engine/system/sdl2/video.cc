@@ -102,7 +102,7 @@ cvar::IntVar v_windowed = fullscreen_default;
 cvar::FloatVar v_msensitivityx = 5.0f;
 cvar::FloatVar v_msensitivityy = 5.0f;
 cvar::FloatVar v_macceleration = 0.0f;
-cvar::BoolVar v_mlook = true;
+cvar::BoolVar v_mlook = false;
 cvar::BoolVar v_mlookinvert = false;
 cvar::BoolVar v_yaxismove = false;
 

@@ -847,8 +847,8 @@ void G_DoCmdGamepadMove(event_t *ev)
                 auto turnspeed = i_rsticksensitivity / i_rstickthreshold;
 
                 if (ev->data1 != 0) {
-
                 }
+
             }
             //
             // modern scheme uses strafing for x-axis
@@ -862,7 +862,8 @@ void G_DoCmdGamepadMove(event_t *ev)
         // right analog stick
         //
         else if (ev->data3 == GAMEPAD_RIGHT_STICK) {
-            auto x = static_cast<float>(ev->data1) * 0.0015f;
+            auto turnspeed = i_rsticksensitivity / i_rstickthreshold;
+            auto x = static_cast<float>(ev->data1) * i_rsticksensitivity * 0.0015f;
             auto y = static_cast<float>(ev->data2) * 0.0015f;
 
             if (ev->data1 != 0) {

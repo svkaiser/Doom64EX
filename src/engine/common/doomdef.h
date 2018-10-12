@@ -348,7 +348,7 @@ extern dboolean windowpause;
 
 enum {
     GAMEPAD_INVALID = 0,
-    GAMEPAD_A,
+    GAMEPAD_A = 400, // start after KEY_
     GAMEPAD_B,
     GAMEPAD_X,
     GAMEPAD_Y,
