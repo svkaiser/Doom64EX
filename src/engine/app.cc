@@ -187,7 +187,7 @@ Optional<String> app::find_data_file(StringView name, StringView dir_hint)
         "/opt/doom64ex/",
 
         /* flatpak */
-        "/app/share/games/doom64ex/"
+        "/app/share/doom64ex/"
     };
 
     for (auto p : paths) {
