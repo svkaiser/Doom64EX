@@ -65,6 +65,11 @@ namespace imp {
        */
       virtual void end_frame() = 0;
 
+      /**
+       * Controller connected?
+       */
+      virtual bool have_controller() = 0;
+
       bool is_windowed()
       { return current_mode().fullscreen == Fullscreen::none; }
   };

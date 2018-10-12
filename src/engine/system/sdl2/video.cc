@@ -76,6 +76,7 @@ namespace {
       void grab(bool should_grab) override;
       void begin_frame() override;
       void end_frame() override;
+      bool have_controller() override;
 
       ArrayView<VideoMode> modes() override
       { return m_modes; }
@@ -108,7 +109,7 @@ cvar::BoolVar v_yaxismove = false;
 
 /* Gamepad Input */
 cvar::IntVar i_xinputscheme = 0;
-cvar::FloatVar i_rsticksensitivity = 0.0080;
+cvar::FloatVar i_rsticksensitivity = 5;
 cvar::FloatVar i_rstickthreshold = 20.0;
 
 //
@@ -594,6 +595,14 @@ void SdlVideo::begin_frame()
 void SdlVideo::end_frame()
 {
     SDL_GL_SwapWindow(m_window);
+}
+
+//
+// SdlVideo::have_controller
+//
+bool SdlVideo::have_controller()
+{
+    return s_controller;
 }
 
 //

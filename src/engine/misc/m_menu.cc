@@ -27,8 +27,6 @@
 //
 //-----------------------------------------------------------------------------
 
-struct { bool connected = true; } xgamepad;
-
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -2138,7 +2136,7 @@ void M_DrawPassword(void) {
     byte *passData;
     int i = 0;
 
-    if(!xgamepad.connected)
+    if(!Video->have_controller())
     {
         Draw_BigText(-1, 240 - 48, MENUCOLORWHITE , "Press Delete To Change");
         Draw_BigText(-1, 240 - 32, MENUCOLORWHITE , "Press Escape To Return");
@@ -4919,7 +4917,7 @@ void M_Drawer(void) {
         GL_SetOrthoScale(1.0f);
     }
 
-    if(xgamepad.connected && currentMenu != &MainDef) {
+    if(Video->have_controller() && currentMenu != &MainDef) {
         GL_SetOrthoScale(0.75f);
         if(currentMenu == &PasswordDef) {
             M_DrawXInputButton(4, 271, GAMEPAD_B);
@@ -5081,7 +5079,7 @@ void M_Ticker(void) {
     // hide mouse menu if xbox 360 controller is plugged in
     //
     if(currentMenu == &ControlMenuDef) {
-        currentMenu->menuitems[controls_gamepad].status = xgamepad.connected ? 1 : -3;
+        currentMenu->menuitems[controls_gamepad].status = Video->have_controller() ? 1 : -3;
     }
 
     //
