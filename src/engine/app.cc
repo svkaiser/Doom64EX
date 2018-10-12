@@ -39,6 +39,8 @@ int myargc{};
 
 char **myargv{};
 
+String data_dir { "./" };
+
 namespace {
   auto &_gparams()
   {
@@ -49,7 +51,7 @@ namespace {
   auto &_params = _gparams();
 
   String _base_dir { "./" };
-  String _data_dir { "./" };
+  String& _data_dir = data_dir;
   StringView _program;
 
   Vector<String> _rest;

@@ -15,6 +15,8 @@
 #include "wad.hh"
 #include "wad_loaders.hh"
 
+extern String data_dir;
+
 void wad::init()
 {
     Optional<String> path;
@@ -54,7 +56,7 @@ void wad::init()
                 log::fatal("Couldn't find 'doom64.rom'");
             }
 
-            auto path = fmt::format("{}/.local/share/doom64ex/doom64.rom", getenv("HOME"));
+            auto path = fmt::format("{}/doom64.rom", data_dir);
             int srcfd = ::open(str->c_str(), O_RDONLY, 0);
             int dstfd = ::open(path.c_str(), O_WRONLY | O_CREAT, 0644);
 
