@@ -44,8 +44,8 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://github.com/cginternals/glbinding/archive/v2.1.4.tar.gz
-        sha256: cb5971b086c0d217b2304d31368803fd2b8c12ee0d41c280d40d7c23588f8be2
+        url: https://github.com/cginternals/glbinding/archive/v3.0.2.tar.gz
+        sha256: 23a383f3ed31af742a4952b6c26faa9c346dd982ba9112c68293a578a6e542ad
     config-opts:
       - -DBUILD_SHARED_LIBS=OFF
       - -DOPTION_SELF_CONTAINED=ON
@@ -60,10 +60,8 @@ modules:
   - name: fluidsynth
     buildsystem: cmake-ninja
     sources:
-      # - type: git
-      #   url: https://github.com/dotfloat/fluidsynth-lite.git
-      - type: dir
-        path: fluidsynth
+      - type: git
+        url: https://github.com/dotfloat/fluidsynth-lite.git
 
     cleanup:
       - /include
@@ -73,8 +71,9 @@ modules:
   - name: doom64ex
     buildsystem: meson
     sources:
-      - type: dir
-        path: .
+      - type: git
+        url: https://github.com/svkaiser/Doom64EX.git
+        branch: rom
 
     config-opts:
       - -Denable_gtk3=true

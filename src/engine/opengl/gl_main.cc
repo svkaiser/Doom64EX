@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
 
 #include <math.h>
-#include <glbinding/Binding.h>
+#include <glbinding/glbinding.h>
 #include "SDL.h"
 
 #include "image/image.hh"
@@ -547,7 +547,7 @@ static int GetVersionInt(const char* version) {
 //
 
 void GL_Init(void) {
-    glbinding::Binding::initialize(SDL_GL_GetProcAddress);
+    glbinding::initialize([](const char *proc) { return reinterpret_cast<glbinding::ProcAddress>(SDL_GL_GetProcAddress(proc)); });
 
     gl_vendor = dglGetString(GL_VENDOR);
     I_Printf("GL_VENDOR: %s\n", gl_vendor);
