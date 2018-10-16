@@ -21,8 +21,8 @@ namespace imp::cvar {
 
   using Variant = boost::variant<
       VTuple<bool>,
-      VTuple<int64>,
-      VTuple<double>,
+      VTuple<int>,
+      VTuple<float>,
       VTuple<String>
       >;
 
@@ -45,11 +45,11 @@ namespace imp::cvar {
       { return boost::get<VTuple<T>>(m_data); }
 
   public:
-      explicit Data(int64 def):
-          m_data(VTuple<int64> { def, def, nullopt }) {}
+      explicit Data(int def):
+          m_data(VTuple<int> { def, def, nullopt }) {}
 
-      explicit Data(double def):
-          m_data(VTuple<double> { def, def, nullopt }) {}
+      explicit Data(float def):
+          m_data(VTuple<float> { def, def, nullopt }) {}
 
       explicit Data(const String& def):
           m_data(VTuple<String> { def, def, nullopt }) {}

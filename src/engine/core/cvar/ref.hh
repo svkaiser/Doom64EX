@@ -260,9 +260,10 @@
          { return m_data->test_flag(Flag::restart); }
      };
 
-     using IntRef = RefBase<int64>;
-     using StrRef = RefBase<String>;
-     using FltRef = RefBase<double>;
+     using BoolRef = RefBase<bool>;
+     using IntRef = RefBase<int>;
+     using StringRef = RefBase<String>;
+     using FloatRef = RefBase<float>;
    } // cvar namespace
  } // imp namespace
 

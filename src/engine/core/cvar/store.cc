@@ -101,9 +101,9 @@ void cvar::Store::user_value(StringView name, StringView value)
 namespace imp {
   namespace cvar {
     template <>
-    Optional<cvar::IntRef> cvar::Store::find_type<int64>(StringView name)
+    Optional<cvar::IntRef> cvar::Store::find_type<int>(StringView name)
     {
-        return s_find<int64>(m_vars, s_normalize(name));
+        return s_find<int>(m_vars, s_normalize(name));
     }
   }
 }
@@ -135,8 +135,8 @@ namespace imp {
   namespace cvar {
     namespace internal {
       template <>
-      Optional<IntRef> find<int64>(StringView name)
-      { return g_store->find_type<int64>(name.to_string()); }
+      Optional<IntRef> find<int>(StringView name)
+      { return g_store->find_type<int>(name.to_string()); }
     }
   }
 }

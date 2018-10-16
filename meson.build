@@ -23,7 +23,7 @@
 ##
 
 project(
-  'Doom64EX', ['c', 'cpp', 'vala'],
+  'Doom64EX', ['c', 'cpp'],
   version : '3.0.0-git',
   license : 'GPL',
   default_options : [
@@ -42,6 +42,11 @@ endif
 ## Options
 ##
 program_name = get_option('program_name')
+enable_gtk3 = target_machine.system() == 'linux' and get_option('enable_gtk3')
+
+if enable_gtk3
+  add_languages('vala')
+endif
 
 ##------------------------------------------------------------------------------
 ## Dependencies
@@ -54,30 +59,21 @@ threads_dep = dependency('threads')
 sdl2_dep = dependency('sdl2')
 sdl2_net_dep = dependency('SDL2_net')
 
-#
+# zlib & libpng
 zlib_dep = dependency('zlib')
 png_dep = dependency('libpng')
 
-# GLBinding
-glbinding_dep = dependency('glbinding', required : false)
+# fmtlib
+fmt_dep = dependency('fmt', version : ['>=5', '<6'], fallback : ['fmt', 'fmt_dep'])
 
-if not glbinding_dep.found()
-  # GLBinding doesn't have a .pc on Ubuntu
-  glbinding_dep = cpp.find_library('glbinding')
-endif
+# GLBinding
+glbinding_dep = dependency('glbinding', version : '3.0.2', fallback : ['glbinding', 'glbinding_dep'])
 
 # Fluidsynth
 fluid_dep = dependency('fluidsynth', required : false)
 
 if not fluid_dep.found()
   fluid_dep = cpp.find_library('fluidsynth')
-endif
-
-# GLBinding
-glbinding_dep = dependency('glbinding', required : false)
-
-if not glbinding_dep.found()
-  glbinding_dep = cpp.find_library('glbinding')
 endif
 
 ##------------------------------------------------------------------------------
@@ -88,10 +84,18 @@ if zip_prog.found()
   res = run_command('./script/meson_build_pk3.sh')
   message(res.stdout())
 
+  if target_machine.system() == 'linux'
+    install_dir = 'usr/share/doom64ex'
+  elif target_machine.system() == 'darwin'
+    install_dir = 'Resource/Doom64EX'
+  else
+    error('Unsupported target OS!')
+  endif
+
   if res.returncode() == 0
     install_data(
       join_paths(meson.current_build_dir(), 'doom64ex.pk3'),
-      install_dir : 'usr/share/doom64ex'
+      install_dir : install_dir
     )
   else
     warning('Could not create doom64ex.pk3. The game will not run without this file!')
@@ -103,7 +107,11 @@ endif
 ##------------------------------------------------------------------------------
 ## Target: Native UI - Gtk3 (gtk3)
 ##
-subdir('src/gtk3')
+if enable_gtk3
+  subdir('src/gtk3')
+else
+  nui_gtk3_dep = []
+endif
 
 ##------------------------------------------------------------------------------
 ## Target: doom64ex (engine)
@@ -120,41 +128,55 @@ executable(
 )
 
 ##------------------------------------------------------------------------------
-## Install: misc data
+## Install: Linux misc data
 ##
-icon_sizes = ['256x256']
-data_dir = join_paths(get_option('prefix'), 'share')
+if target_machine.system() == 'linux'
+  icon_sizes = ['256x256']
+  data_dir = join_paths(get_option('prefix'), 'share')
 
-foreach icon_size : icon_sizes
-  install_data(
-    join_paths('data/icons', icon_size, 'doom64ex.png'),
-    install_dir : join_paths(data_dir, 'icons/hicolor', icon_size, 'apps'),
-    rename : '@0@.png'.format(program_name)
+  foreach icon_size : icon_sizes
+    install_data(
+      join_paths('data/icons', icon_size, 'doom64ex.png'),
+      install_dir : join_paths(data_dir, 'icons/hicolor', icon_size, 'apps'),
+      rename : '@0@.png'.format(program_name)
+    )
+  endforeach
+
+  desktop_data = configuration_data()
+  desktop_data.set('program_name', program_name)
+  configure_file(
+    input : 'data/doom64ex.desktop.in',
+    output : '@0@.desktop'.format(program_name),
+    configuration : desktop_data
   )
-endforeach
 
-desktop_data = configuration_data()
-desktop_data.set('program_name', program_name)
-configure_file(
-  input : 'data/doom64ex.desktop.in',
-  output : '@0@.desktop'.format(program_name),
-  configuration : desktop_data
-)
+  install_data(
+    join_paths(meson.current_build_dir(), '@0@.desktop'.format(program_name)),
+    install_dir : join_paths(data_dir, 'applications')
+  )
 
-install_data(
-  join_paths(meson.current_build_dir(), '@0@.desktop'.format(program_name)),
-  install_dir : join_paths(data_dir, 'applications')
-)
+  # install_data(
+  #   'data/doom64ex.6',
+  #   install_dir : 'usr/share/man'
+  # )
+endif
 
-# install_data(
-#   'data/doom64ex.6',
-#   install_dir : 'usr/share/man'
-# )
+##------------------------------------------------------------------------------
+## Install: MacOS misc data
+##
+if target_machine.system() == 'darwin'
+  install_data('data/Doom64EX.icns', install_dir : 'Contents/Resources')
+  install_data('data/Info.plist', install_dir : 'Contents')
+endif
 
 ##------------------------------------------------------------------------------
 ## Postinstall
 ##
-meson.add_install_script(
-  'script/post_install.py',
-  data_dir
-)
+if target_machine.system() == 'linux'
+  meson.add_install_script(
+    'script/post_install.py',
+    data_dir
+  )
+elif target_machine.system() == 'darwin'
+  meson.add_install_script('script/macos_install_script.sh')
+endif

@@ -7,7 +7,7 @@ option(
 
 option(
   'enable_gtk3',
-  description : 'Use Gtk3 for native UI',
+  description : 'Use Gtk3 for native UI (Linux Only)',
   type : 'boolean',
-  value : false
+  value: true
 )

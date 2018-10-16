@@ -143,8 +143,8 @@
      IMP_DEFINE_ARITHMETIC(%);
 
      using BoolVar   = VarBase<bool>;
-     using IntVar    = VarBase<int64>;
-     using FloatVar  = VarBase<double>;
+     using IntVar    = VarBase<int>;
+     using FloatVar  = VarBase<float>;
      using StringVar = VarBase<String>;
    } // cvar namespace
  } // imp namespace

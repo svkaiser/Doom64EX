@@ -4,11 +4,13 @@
 #include <windows.h>
 #endif
 
+#ifdef __linux__
 #include <sys/sendfile.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#endif
 
 #include <platform/app.hh>
 #include "native_ui/native_ui.hh"
@@ -48,7 +50,7 @@ void wad::init()
 
             CopyFile(str->c_str(), "doom64.rom", FALSE);
         }
-#else
+#elif __linux__
         if (!iwad_loaded) {
             auto str = g_native_ui->rom_select();
 

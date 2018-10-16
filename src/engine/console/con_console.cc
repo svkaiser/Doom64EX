@@ -490,7 +490,7 @@ dboolean CON_Responder(event_t* ev) {
 
                 clearheld = false;
                 CON_ParseKey(c);
-                console_complete.complete({ console_inputbuffer + 1, console_inputlength - 1});
+                console_complete.complete({ console_inputbuffer + 1, static_cast<size_t>(console_inputlength - 1)});
                 break;
             }
 

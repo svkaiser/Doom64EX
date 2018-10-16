@@ -30,7 +30,7 @@ conf_data.set('PROJECT_NAME', 'Doom64EX')
 conf_data.set('VERSION', '3.0.0-git')
 conf_data.set('VERSION_GIT', '3.0.0-git')
 conf_data.set('VERSION_FULL', '3.0.0-git')
-conf_data.set10('USE_NATIVE_UI_GTK3', get_option('enable_gtk3'))
+conf_data.set10('USE_NATIVE_UI_GTK3', enable_gtk3)
 
 configure_file(
   input : '../config.hh.in',
@@ -55,6 +55,7 @@ engine_dep = [
   dl_dep,
   fluid_dep,
   glbinding_dep,
+  fmt_dep,
 
   # Additional project dependencies
   nui_gtk3_dep
@@ -69,9 +70,11 @@ engine_platform_src = [
 ##------------------------------------------------------------------------------
 ## Gtk3 Native UI sources
 ##
-nui_gtk_src = [
-  'native_ui/gtk3/gtk3.cc',
-]
+nui_gtk_src = []
+
+if enable_gtk3
+  nui_gtk_src += 'native_ui/gtk3/gtk3.cc'
+endif
 
 ##------------------------------------------------------------------------------
 ## Sources
@@ -106,10 +109,6 @@ engine_src = files(
   # finale
   'finale/f_finale.cc',
   'finale/in_stuff.cc',
-
-  # fmt
-  'fmt/format.cc',
-  'fmt/ostream.cc',
 
   # game
   'game/g_actions.cc',
@@ -247,7 +246,6 @@ engine_inc = include_directories(
   'console',
   'doom_main',
   'finale',
-  'fmt',
   'game',
   'image',
   'intermission',

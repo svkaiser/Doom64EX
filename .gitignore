@@ -18,3 +18,7 @@
 # conan
 conanbuildinfo.cmake
 conaninfo.txt
+
+# meson subprojects
+/subprojects/*
+!/subprojects/*.wrap

@@ -123,7 +123,7 @@ void Image::scale(size_t new_width, size_t new_height)
             return;
         }
 
-        *this = Image { pixel_format(), new_width, new_height };
+        *this = Image(pixel_format(), new_width, new_height);
         return;
     }
 
@@ -161,7 +161,7 @@ void Image::scale(size_t new_width, size_t new_height)
 
 void Image::canvas(size_t new_width, size_t new_height)
 {
-    Image copy { pixel_format(), new_width, new_height };
+    Image copy(pixel_format(), new_width, new_height);
 
     auto copyx = std::min(width(), copy.width()) * pixel_info().width;
     auto copyy = std::min(height(), copy.height());
