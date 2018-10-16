@@ -1,0 +1,10 @@
+[wrap-file]
+directory = glbinding-3.0.2
+
+source_url = https://github.com/cginternals/glbinding/archive/v3.0.2.tar.gz
+source_filename = glbinding-3.0.2.tar.gz
+source_hash = 23a383f3ed31af742a4952b6c26faa9c346dd982ba9112c68293a578a6e542ad
+
+patch_url = https://www.dropbox.com/s/uhcrauu4cax7rzz/glbinding-3.0.2-1-wrap.zip?dl=1
+patch_filename = glbinding-3.0.2-1-wrap.zip
+patch_hash = e755182201bcf109ac128349a020ab27420bce0c04f78377f19255040549ae29
