@@ -1,7 +1,8 @@
+#include <iostream>
 #include "ref.hh"
 #include "store.hh"
 #include "completion.hh"
-#include <iostream>
+#include "core/args.hh"
 
 using namespace imp;
 namespace internal = imp::cvar::internal;
@@ -74,6 +75,23 @@ void cvar::Store::p_add(std::shared_ptr<Data> data, StringView name, StringView 
 
         if (!data->test_flag(cvar::Flag::dynamic)) {
             m_user_values.erase(u_it);
+        }
+    }
+}
+
+//
+// Store::Store
+//
+cvar::Store::Store()
+{
+    /* Interpret all arguments of the form "+<key> <val>" as cvars */
+    auto pa = args::all_args();
+    for (size_t i {}; i + 1 < pa.size(); ++i) {
+        const auto& key = pa[i];
+        const auto& val = pa[i + 1];
+        if (key[0] == '+') {
+            this->user_value(key.substr(1), val);
+            ++i;
         }
     }
 }

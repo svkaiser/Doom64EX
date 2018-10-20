@@ -97,6 +97,7 @@ engine_src = files(
   # core
   'core/log/log.cc',
   'core/cvar/store.cc',
+  'core/args.cc',
 
   # console
   'console/con_console.cc',

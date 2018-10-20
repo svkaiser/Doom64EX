@@ -55,10 +55,20 @@ namespace imp {
         using prefix_range = StoreRange<PrefixPred>;
         using prefix_iterator = StoreIterator<PrefixPred>;
 
+        /**
+         * Constructor.
+         */
+        Store();
+
         template <class T>
         void add(VarBase<T>& var, StringView name, StringView description, const FlagSet& flags = {})
         { p_add(var.m_data, name, description, flags); }
 
+        /**
+         * Register a cvar that might not have been constructed at this time.
+         * \param name cvar name (eg. "v_Width")
+         * \param value cvar value as string (eg. "1920")
+         */
         void user_value(StringView name, StringView value);
 
         template <class T>

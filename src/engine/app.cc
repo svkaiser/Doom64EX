@@ -7,6 +7,7 @@
 #include <cxxabi.h>
 
 #include "SDL.h"
+#include "core/args.hh"
 
 #ifdef main
 #undef main
@@ -53,42 +54,6 @@ namespace {
   String _base_dir { "./" };
   String& _data_dir = data_dir;
   StringView _program;
-
-  Vector<String> _rest;
-
-  struct ParamsParser {
-      using Arity = app::Param::Arity;
-      app::Param *param{};
-
-      void process(StringView arg)
-      {
-          if (arg[0] == '-') {
-              arg.remove_prefix(1);
-              auto it = _params.find(arg);
-              if (it == _params.end()) {
-                  log::warn("Unknown parameter -{}", arg);
-              } else {
-                  if (param) {
-                  }
-                  param = it->second;
-                  param->set_have();
-                  if (param->arity() == Arity::nullary) {
-                      param = nullptr;
-                  }
-              }
-          } else {
-              if (!param) {
-                  _rest.emplace_back(arg);
-                  return;
-              }
-
-              param->add(arg);
-              if (param->arity() != Arity::nary) {
-                  param = nullptr;
-              }
-          }
-      }
-  };
 }
 
 [[noreturn]]
@@ -114,33 +79,7 @@ void app::main(int argc, char **argv)
     }
 #endif
 
-    /* Process command-line arguments */
-    log::debug("Parameters:");
-    ParamsParser parser;
-    for (int i = 1; i < argc; ++i) {
-        auto arg = argv[i];
-
-        if (arg[0] == '@') {
-            std::ifstream f(arg + 1);
-
-            if (!f.is_open()) {
-                log::fatal("Could not open '{}'", arg + 1);
-                continue;
-            }
-
-            while (!f.eof()) {
-                String arg;
-                f >> arg;
-                parser.process(arg);
-            }
-        } else {
-            parser.process(arg);
-        }
-    }
-
-    /* Print rest params */
-    if (!_rest.empty()) {
-    }
+    args::parse(argc, argv);
 
     D_DoomMain();
 }
