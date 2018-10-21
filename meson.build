@@ -67,7 +67,14 @@ png_dep = dependency('libpng')
 fmt_dep = dependency('fmt', version : ['>=5', '<6'], fallback : ['fmt', 'fmt_dep'])
 
 # GLBinding
-glbinding_dep = dependency('glbinding', version : '3.0.2', fallback : ['glbinding', 'glbinding_dep'])
+glbinding_dep = []
+if get_option('enable_glbinding')
+  glbinding_dep = dependency(
+    'glbinding',
+    version : '3.0.2',
+    fallback : ['glbinding', 'glbinding_dep']
+  )
+endif
 
 # Fluidsynth
 fluid_dep = dependency('fluidsynth', required : false)

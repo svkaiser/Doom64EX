@@ -263,3 +263,10 @@ engine_inc = include_directories(
   'wad',
   'zone'
 )
+
+##------------------------------------------------------------------------------
+## GLAD Sources
+##
+if not get_option('enable_glbinding')
+  engine_src += files('opengl/glad/glad.c')
+endif

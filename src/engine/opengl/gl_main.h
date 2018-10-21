@@ -28,11 +28,22 @@
 #define APIENTRY __stdcall
 #endif
 
+#ifdef HAVE_GLBINDING_3
 #include <glbinding/gl14/gl.h>
 #include <glbinding/gl14ext/gl.h>
 
+constexpr bool GLAD_GL_ARB_multitexture               = true;
+constexpr bool GLAD_GL_ARB_texture_non_power_of_two   = true;
+constexpr bool GLAD_GL_ARB_texture_env_combine        = true;
+constexpr bool GLAD_GL_EXT_compiled_vertex_array      = true;
+constexpr bool GLAD_GL_EXT_texture_env_combine        = true;
+constexpr bool GLAD_GL_EXT_texture_filter_anisotropic = true;
+
 using namespace gl14;
 using namespace gl14ext;
+#else
+#include "glad/glad.h"
+#endif
 
 typedef GLuint        dtexture;
 typedef GLfloat        rfloat;
@@ -114,12 +125,5 @@ void GL_Set2DQuad(vtx_t *v, float x, float y, int width, int height,
 void GL_Draw2DQuad(vtx_t *v, dboolean stretch);
 void GL_SetupAndDraw2DQuad(float x, float y, int width, int height,
                            float u1, float u2, float v1, float v2, rcolor c, dboolean stretch);
-
-constexpr bool GLAD_GL_ARB_multitexture               = true;
-constexpr bool GLAD_GL_ARB_texture_non_power_of_two   = true;
-constexpr bool GLAD_GL_ARB_texture_env_combine        = true;
-constexpr bool GLAD_GL_EXT_compiled_vertex_array      = true;
-constexpr bool GLAD_GL_EXT_texture_env_combine        = true;
-constexpr bool GLAD_GL_EXT_texture_filter_anisotropic = true;
 
 #endif

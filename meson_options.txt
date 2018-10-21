@@ -11,3 +11,10 @@ option(
   type : 'boolean',
   value: true
 )
+
+option(
+  'enable_glbinding',
+  description : 'Use GLBinding 3 instead of GLAD',
+  type : 'boolean',
+  value : false
+)
