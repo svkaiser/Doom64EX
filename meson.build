@@ -151,15 +151,29 @@ if target_machine.system() == 'linux'
 
   desktop_data = configuration_data()
   desktop_data.set('program_name', program_name)
+
+  ##
+  # freedesktop Desktop file
   configure_file(
     input : 'data/doom64ex.desktop.in',
     output : '@0@.desktop'.format(program_name),
     configuration : desktop_data
   )
-
   install_data(
     join_paths(meson.current_build_dir(), '@0@.desktop'.format(program_name)),
     install_dir : join_paths(data_dir, 'applications')
+  )
+
+  ##
+  # freedesktop Appstream file
+  configure_file(
+    input : 'data/doom64ex.appdata.xml.in',
+    output : '@0@.appdata.xml'.format(program_name),
+    configuration : desktop_data
+  )
+  install_data(
+    join_paths(meson.current_build_dir(), '@0@.appdata.xml'.format(program_name)),
+    install_dir : join_paths(data_dir, 'metainfo')
   )
 
   # install_data(

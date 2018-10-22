@@ -65,8 +65,8 @@ set(LIBRARIES
   ${PNG_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${FLUIDSYNTH_LIBRARIES}
-  glbinding::glbinding
-  ${CONAN_LIBS})
+  ${CONAN_LIBS}
+  fmt::fmt)
 
 set(INCLUDES
   ${PLATFORM_INCLUDES}
@@ -86,7 +86,6 @@ set(INCLUDES
   console
   doom_main
   finale
-  fmt
   game
   gfx
   intermission
@@ -119,6 +118,7 @@ set(SOURCES
   # core
   core/log/log.cc
   core/cvar/store.cc
+  core/args.cc
 
   # console
   console/con_console.cc
@@ -131,10 +131,6 @@ set(SOURCES
   # finale
   finale/f_finale.cc
   finale/in_stuff.cc
-
-  # fmt
-  fmt/format.cc
-  fmt/ostream.cc
 
   # game
   game/g_actions.cc
@@ -183,6 +179,7 @@ set(SOURCES
   opengl/gl_draw.cc
   opengl/gl_main.cc
   opengl/gl_texture.cc
+  opengl/glad/glad.c
 
   # parser
   parser/sc_main.cc

@@ -264,3 +264,8 @@ void winapi_show_and_quit()
         Sleep(100);
     }
 }
+
+void imp_init_winapi_ui()
+{
+
+}

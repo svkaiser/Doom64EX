@@ -120,11 +120,11 @@ if (NOT USE_CONAN)
     find_package(FluidSynth REQUIRED)
   endif()
 
-  # OpenGL
-  find_package(GLBinding REQUIRED)
-
   # Boost
   find_package(Boost REQUIRED)
+
+  # fmt
+  find_package(fmt REQUIRED)
 
   # GTK3
   if(ENABLE_GTK3)

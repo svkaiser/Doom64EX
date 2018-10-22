@@ -1003,7 +1003,12 @@ void D_DoomMain(void) {
         I_Printf("Gtk3 Native UI\n");
         void imp_init_gtk3_ui();
         imp_init_gtk3_ui();
-#else
+#endif
+
+#ifdef _WIN32
+        I_Printf("WinAPI Native UI\n");
+        void imp_init_winapi_ui();
+        imp_init_winapi_ui();
 #endif
 
         I_Printf("D_Init: Init DOOM parameters\n");

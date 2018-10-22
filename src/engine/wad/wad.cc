@@ -40,7 +40,7 @@ void wad::init()
             char cd[MAX_PATH];
             GetCurrentDirectory(MAX_PATH, cd);
 
-            auto str = native_ui::rom_select();
+            auto str = g_native_ui->rom_select();
 
             SetCurrentDirectory(cd);
 
