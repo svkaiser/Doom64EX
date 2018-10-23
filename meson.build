@@ -138,7 +138,7 @@ executable(
 ## Install: Linux misc data
 ##
 if target_machine.system() == 'linux'
-  icon_sizes = ['256x256']
+  icon_sizes = ['16x16', '22x22', '24x24', '32x32', '64x64', '128x128', '256x256']
   data_dir = join_paths(get_option('prefix'), 'share')
 
   foreach icon_size : icon_sizes
