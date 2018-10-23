@@ -42,12 +42,13 @@
 
 extern cvar::FloatVar i_gamma;
 
-//
-// I_GetRGBGamma
-//
+namespace {
+  static int s_rgb_gamma(int c) {
+      float base = c;
+      float exp = 1.0 + (0.01f * i_gamma);
 
-d_inline static byte I_GetRGBGamma(int c) {
-    return (byte)MIN(pow((float)c, (1.0f + (0.01f * i_gamma))), 255);
+      return std::min(std::pow(base, exp), 255.0f);
+  }
 }
 
 //
@@ -59,10 +60,10 @@ static void I_TranslatePalette(char *data, size_t count, size_t size) {
     if (i_gamma == 0)
         return;
 
-    for(size_t i = 0; i < count * size; i += size) {
-        data[i + 0] = I_GetRGBGamma(data[i + 0]);
-        data[i + 1] = I_GetRGBGamma(data[i + 1]);
-        data[i + 2] = I_GetRGBGamma(data[i + 2]);
+    for(size_t i = 0; i + size - 1 < count * size; i += size) {
+        data[i + 0] = s_rgb_gamma(static_cast<uint8>(data[i + 0]));
+        data[i + 1] = s_rgb_gamma(static_cast<uint8>(data[i + 1]));
+        data[i + 2] = s_rgb_gamma(static_cast<uint8>(data[i + 2]));
     }
 }
 
