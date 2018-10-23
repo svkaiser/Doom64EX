@@ -75,6 +75,7 @@ endif()
 if(MINGW)
   add_definitions(-DFMT_USE_WINDOWS_H=0)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lmingw32 -static -mwindows")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
 endif(MINGW)
 
 ##------------------------------------------------------------------------------

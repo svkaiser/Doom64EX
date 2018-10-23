@@ -31,8 +31,8 @@ set(SOURCE_ROOT_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 if(WIN32)
 
   set(PLATFORM_SOURCES
-    native_ui/win32.cc
-    native_ui/win32/rom_select.cc
+    # native_ui/win32.cc
+    # native_ui/win32/rom_select.cc
     system/win32/doom64.rc
     system/i_cpu.cc)
 else()

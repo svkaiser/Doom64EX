@@ -6,7 +6,7 @@ command: com.github.Doom64EX
 
 finish-args:
   # OpenGL
-  - --device=dri
+  - --device=all
 
   # Create windows
   - --socket=x11
@@ -40,21 +40,21 @@ modules:
       - /include
 
   # GLBinding
-  - name: glbinding
-    buildsystem: cmake-ninja
-    sources:
-      - type: archive
-        url: https://github.com/cginternals/glbinding/archive/v3.0.2.tar.gz
-        sha256: 23a383f3ed31af742a4952b6c26faa9c346dd982ba9112c68293a578a6e542ad
-    config-opts:
-      - -DBUILD_SHARED_LIBS=OFF
-      - -DOPTION_SELF_CONTAINED=ON
-      - -DOPTION_BUILD_TOOLS=OFF
-      - -DOPTION_BUILD_EXAMPLES=OFF
-
-    cleanup:
-      - /include
-      - /lib
+  #- name: glbinding
+  #  buildsystem: cmake-ninja
+  #  sources:
+  #    - type: archive
+  #      url: https://github.com/cginternals/glbinding/archive/v3.0.2.tar.gz
+  #      sha256: 23a383f3ed31af742a4952b6c26faa9c346dd982ba9112c68293a578a6e542ad
+  #  config-opts:
+  #    - -DBUILD_SHARED_LIBS=OFF
+  #    - -DOPTION_SELF_CONTAINED=ON
+  #    - -DOPTION_BUILD_TOOLS=OFF
+  #    - -DOPTION_BUILD_EXAMPLES=OFF
+  #
+  #  cleanup:
+  #    - /include
+  #    - /lib
 
   # Fluidsynth
   - name: fluidsynth
