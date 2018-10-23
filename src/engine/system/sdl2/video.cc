@@ -250,7 +250,7 @@ void SdlVideo::set_mode(const VideoMode& mode)
         // Prepare SDL's GL attributes
         m_init_gl();
 
-        uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
+        uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
         switch (copy.fullscreen) {
         case Fullscreen::none:
             break;
