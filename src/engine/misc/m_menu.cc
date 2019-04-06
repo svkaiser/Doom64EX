@@ -1885,6 +1885,7 @@ void M_ChangeOpacity(int choice) {
 void M_ChangeGammaLevel(int choice);
 void M_ChangeFilter(int choice);
 void M_ChangeWindowed(int choice);
+void M_ChangeVideoDisplay(int choice);
 void M_ChangeRatio(int choice);
 void M_ChangeResolution(int choice);
 void M_ChangeVSync(int choice);
@@ -1896,6 +1897,7 @@ void M_DrawVideo(void);
 extern IntProperty v_width;
 extern IntProperty v_height;
 extern IntProperty v_windowed;
+extern IntProperty v_videodisplay;
 extern BoolProperty v_vsync;
 extern IntProperty v_depthsize;
 extern IntProperty v_buffersize;
@@ -1910,6 +1912,7 @@ enum {
     filter,
     anisotropic,
     windowed,
+    videodisplay,
     vsync,
     depth,
     buffer,
@@ -1925,6 +1928,7 @@ menuitem_t VideoMenu[]= {
     {2,"Filter:",M_ChangeFilter, 'f'},
     {2,"Anisotropy:",M_ChangeAnisotropic, 'a'},
     {2,"Windowed:",M_ChangeWindowed, 'w'},
+    {2,"Video Display:",M_ChangeVideoDisplay, 'm'},
     {2,"Vsync:",M_ChangeVSync, 'v'},
     {2,"Depth Size:",M_ChangeDepthSize, 'd'},
     {2,"Buffer Size:",M_ChangeBufferSize, 'b'},
@@ -1938,6 +1942,7 @@ menudefault_t VideoDefault[] = {
     { &r_filter, 0 },
     { &r_anisotropic, 0 },
     { &v_windowed, 1 },
+    { &v_videodisplay, 0 },
     { &v_vsync, 1 },
     { &v_depthsize, 24 },
     { &v_buffersize, 32 },
@@ -2004,6 +2009,7 @@ void M_DrawVideo(void) {
     static const char* filterType[2] = { "Linear", "Nearest" };
     static const char* windowType[3] = { "Off", "On", "Noborder" };
     static char bitValue[8];
+    char disp[32];
     char res[16];
     int y;
 
@@ -2027,10 +2033,16 @@ void M_DrawVideo(void) {
     DRAWVIDEOITEM2(anisotropic, *r_anisotropic, msgNames);
     DRAWVIDEOITEM2(windowed, *v_windowed, windowType);
 
+    const imp::String displayname = (Video->modes(v_videodisplay.value())[0]).displayname;
+    dsnprintf(disp, displayname.size(), displayname.c_str());
+    DRAWVIDEOITEM(videodisplay, disp);
+
     if (m_ScreenSize < 0) {
         sprintf(res, "%ix%i", (int) v_width, (int) v_height);
     } else {
-        auto mode = Video->modes()[m_ScreenSize];
+        auto modes = Video->modes(v_videodisplay.value());
+        int modes_count = modes.size();
+        auto mode = (modes_count >= 0 && m_ScreenSize < modes_count) ? modes[m_ScreenSize] : modes[0];
         sprintf(res, "%ix%i", mode.width, mode.height);
     }
     DRAWVIDEOITEM(resolution, res);
@@ -2157,17 +2169,21 @@ void M_ChangeWindowed(int choice) {
     M_SetOptionValue(choice, 0, 2, 1, v_windowed);
 }
 
+void M_ChangeVideoDisplay(int choice) {
+    M_SetOptionValue(choice, 0, Video->displays() - 1, 1, v_videodisplay);
+}
+
 static void M_SetResolution(void) {
     if (m_ScreenSize < 0)
         return;
 
-    auto mode = Video->modes()[m_ScreenSize];
+    auto mode = Video->modes(v_videodisplay.value())[m_ScreenSize];
     M_SetCvar(v_width, mode.width);
     M_SetCvar(v_height, mode.height);
 }
 
 void M_ChangeResolution(int choice) {
-    int max = Video->modes().size();
+    int max = Video->modes(v_videodisplay.value()).size();
 
     if(choice) {
         if(++m_ScreenSize > max - 1) {
