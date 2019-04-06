@@ -1961,7 +1961,7 @@ menu_t VideoDef = {
     0,
     false,
     VideoDefault,
-    12,
+    11,
     0,
     0.65f,
     NULL,
