@@ -270,7 +270,16 @@ set(SOURCES
 ## Build target
 ##
 
-add_executable(doom64ex MACOSX_BUNDLE WIN32 ${SOURCES})
+if (APPLE)
+    set(MACOSX_BUNDLE_ICON_FILE Doom64EX.icns)
+    set(myApp_ICON ${CMAKE_SOURCE_DIR}/distrib/Doom64EX.icns)
+    set_source_files_properties(${myApp_ICON} PROPERTIES
+    MACOSX_PACKAGE_LOCATION "Resources")
+    add_executable(doom64ex MACOSX_BUNDLE WIN32 ${myApp_ICON} ${SOURCES})
+else ()
+    add_executable(doom64ex MACOSX_BUNDLE WIN32 ${SOURCES})
+endif ()
+
 target_include_directories(doom64ex PRIVATE ${INCLUDES})
 target_link_libraries(doom64ex ${LIBRARIES})
 set_property(TARGET doom64ex PROPERTY CXX_STANDARD 14)
