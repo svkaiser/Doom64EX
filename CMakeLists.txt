@@ -139,7 +139,7 @@ endif(BUILD_TESTS)
 ##
 
 if(NOT ENABLE_SYSTEM_FLUIDSYNTH)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/fluidsynth")
+  add_subdirectory("${CMAKE_SOURCE_DIR}/fluidsynth" EXCLUDE_FROM_ALL)
 endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
