@@ -102,7 +102,7 @@ configure_file("${CMAKE_SOURCE_DIR}/src/config.hh.in" "${CMAKE_BINARY_DIR}/confi
 ## Dependencies
 ##
 
-if (NOT USE_CONAN)
+if(NOT USE_CONAN)
   # SDL2
   find_package(SDL2 REQUIRED)
 
@@ -116,7 +116,7 @@ if (NOT USE_CONAN)
   find_package(PNG REQUIRED)
 
   # FluidSynth
-  if (ENABLE_SYSTEM_FLUIDSYNTH)
+  if(ENABLE_SYSTEM_FLUIDSYNTH)
     find_package(FluidSynth REQUIRED)
   endif()
 
@@ -162,11 +162,11 @@ else()
     COMMAND "${CMAKE_COMMAND}" -E tar "cfv" "${CMAKE_BINARY_DIR}/doom64ex.pk3" --format=zip "--files-from=${CMAKE_SOURCE_DIR}/distrib/doom64ex_pk3.txt")
 
   # Install doom64ex.pk3
-  if (NOT WIN32)
-    if (APPLE)
+  if(NOT WIN32)
+    if(APPLE)
       install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
-    else ()
-      install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION share/games/doom64ex)
-    endif ()
-  endif ()
+    else()
+      install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION "share/games/doom64ex")
+    endif()
+  endif()
 endif()
