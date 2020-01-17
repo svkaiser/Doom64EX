@@ -170,3 +170,16 @@ else()
     endif()
   endif()
 endif()
+
+##------------------------------------------------------------------------------
+## Unix installation : manpage & launcher
+##
+
+include(Gzip)
+
+if(UNIX AND NOT APPLE)
+  compress_gz(-9 "${CMAKE_SOURCE_DIR}/distrib/doom64ex.6" "${CMAKE_BINARY_DIR}/distrib/doom64ex.6.gz")
+  install(FILES "${CMAKE_BINARY_DIR}/distrib/doom64ex.6.gz" DESTINATION "share/man/man6")
+  install(FILES "${CMAKE_SOURCE_DIR}/distrib/doom64ex.desktop" DESTINATION "share/applications")
+  install(FILES "${CMAKE_SOURCE_DIR}/distrib/doom64ex.png" DESTINATION "share/icons")
+endif()
