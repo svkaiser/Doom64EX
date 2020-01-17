@@ -183,3 +183,38 @@ if(UNIX AND NOT APPLE)
   install(FILES "${CMAKE_SOURCE_DIR}/distrib/doom64ex.desktop" DESTINATION "share/applications")
   install(FILES "${CMAKE_SOURCE_DIR}/distrib/doom64ex.png" DESTINATION "share/icons")
 endif()
+
+##------------------------------------------------------------------------------
+## Packages
+##
+
+set(CPACK_STRIP_FILES "games/doom64ex")
+set(CPACK_PACKAGE_VERSION "${VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "doom64ex-${CPACK_PACKAGE_VERSION}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
+set(CPACK_PACKAGE_VENDOR "svkaiser")
+set(CPACK_PACKAGE_CONTACT "svkaiser")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Doom64EX is a reverse-engineering project aimed to recreate Doom64 as close as possible with additional modding features.")
+
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://doom64ex.wordpress.com/")
+set(CPACK_DEBIAN_PACKAGE_SECTION "games")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
+set(CPACK_RPM_PACKAGE_URL "https://doom64ex.wordpress.com/")
+set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
+set(CPACK_RPM_PACKAGE_LICENSE "GPL-2.0")
+
+if(UNIX AND NOT APPLE)
+  set(CPACK_GENERATOR TGZ TBZ2 TXZ DEB) # PKG for freebsd (cmake >= 3.13)
+  find_program(RPMBUILD rpmbuild)
+  if(RPMBUILD)
+    message(STATUS "Found rpmbuild: ${RPMBUILD}")
+	set(CPACK_GENERATOR ${CPACK_GENERATOR} RPM)
+  else()
+    message(STATUS "Not found rpmbuild: RPM package won't be generated")
+  endif()
+endif()
+
+include(CPack)
