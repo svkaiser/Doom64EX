@@ -1283,7 +1283,7 @@ void P_SpawnPlayerMissile(mobj_t* source, mobjtype_t type) {
 //
 
 mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
-                       fixed_t xoffs, fixed_t yoffs, fixed_t heightoffs, dboolean aim) {
+                       fixed_t xoffs, fixed_t yoffs, fixed_t heightoffs, dboolean aim, dboolean lead = false) {
     mobj_t* th;
     angle_t an;
     int dist;
@@ -1325,6 +1325,33 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
         speed *= 2;
     }
 
+    if(lead) {
+        // Get vector between source and dest
+        // ToTarget
+        float relx = F2D3D(dest->x - x); // F2D3D converts fixed to float
+        float rely = F2D3D(dest->y - y);
+        float relz = F2D3D(dest->z - z);
+        // TargetVel
+        float dmomx = F2D3D(dest->momx);
+        float dmomy = F2D3D(dest->momy);
+        float dmomz = F2D3D(dest->momz);
+        // MissileSpeed
+        float missileSpeed = F2D3D(speed);
+        // Get quadratic equation terms
+        float a = (dmomx * dmomx + dmomy * dmomy + dmomz * dmomz) - missileSpeed * missileSpeed;
+        float b = 2 * (dmomx * relx + dmomy * rely + dmomz * relz);
+        float c = (relx * relx + rely * rely + relz * relz);
+        float radicand = (b * b) - (4 * a * c);
+        // printf("abcr: %.3f %.3f %.3f %.3f\n", a, b, c, radicand);
+        if(radicand >= 0) {
+            float time = (-b - sqrt(radicand)) / (2 * a);
+            // TargetPos + TargetVel * ImpactTime
+            fixed_t fixedtime = FLOATTOFIXED(time);
+            fixed_t finalx = dest->x + FixedMul(dest->momx, fixedtime);
+            fixed_t finaly = dest->y + FixedMul(dest->momy, fixedtime);
+            an = R_PointToAngle2(x, y, finalx, finaly);
+        }
+    }
     th->angle = an;
     th->momx = FixedMul(speed, dcos(th->angle));
     th->momy = FixedMul(speed, dsin(th->angle));
