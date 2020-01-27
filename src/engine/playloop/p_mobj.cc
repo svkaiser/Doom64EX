@@ -1310,13 +1310,6 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
         an = source->angle;
     }
 
-    // fuzzy player
-    if(dest) {
-        if(dest->flags & MF_SHADOW) {
-            an += P_RandomShift(pr_shadow, 20);
-        }
-    }
-
     speed = th->info->speed;
 
     // [kex] nightmare missiles move faster
@@ -1325,33 +1318,43 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
         speed *= 2;
     }
 
-    if(lead) {
-        // Get vector between source and dest
-        // ToTarget
-        float relx = F2D3D(dest->x - x); // F2D3D converts fixed to float
-        float rely = F2D3D(dest->y - y);
-        float relz = F2D3D(dest->z - z);
-        // TargetVel
-        float dmomx = F2D3D(dest->momx);
-        float dmomy = F2D3D(dest->momy);
-        float dmomz = F2D3D(dest->momz);
-        // MissileSpeed
-        float missileSpeed = F2D3D(speed);
-        // Get quadratic equation terms
-        float a = (dmomx * dmomx + dmomy * dmomy + dmomz * dmomz) - missileSpeed * missileSpeed;
-        float b = 2 * (dmomx * relx + dmomy * rely + dmomz * relz);
-        float c = (relx * relx + rely * rely + relz * relz);
-        float radicand = (b * b) - (4 * a * c);
-        // printf("abcr: %.3f %.3f %.3f %.3f\n", a, b, c, radicand);
-        if(radicand >= 0) {
-            float time = (-b - sqrt(radicand)) / (2 * a);
-            // TargetPos + TargetVel * ImpactTime
-            fixed_t fixedtime = FLOATTOFIXED(time);
-            fixed_t finalx = dest->x + FixedMul(dest->momx, fixedtime);
-            fixed_t finaly = dest->y + FixedMul(dest->momy, fixedtime);
-            an = R_PointToAngle2(x, y, finalx, finaly);
+    if(dest) {
+        // Calculate target lead position
+        // Based on math and code from https://indyandyjones.wordpress.com/2010/04/08/intercepting-a-target-with-projectile/
+        if(lead) {
+            // ToTarget - Vector between shooter and target
+            float relx = F2D3D(dest->x - x); // F2D3D converts fixed to float
+            float rely = F2D3D(dest->y - y);
+            float relz = F2D3D(dest->z - z);
+            // TargetVel - Target velocity
+            float dmomx = F2D3D(dest->momx);
+            float dmomy = F2D3D(dest->momy);
+            float dmomz = F2D3D(dest->momz);
+            // MissileSpeed - Missile speed converted from fixed point
+            float missileSpeed = F2D3D(speed);
+            // Get quadratic equation terms
+            float a = (dmomx * dmomx + dmomy * dmomy + dmomz * dmomz) - missileSpeed * missileSpeed;
+            float b = 2 * (dmomx * relx + dmomy * rely + dmomz * relz);
+            float c = (relx * relx + rely * rely + relz * relz);
+            float radicand = (b * b) - (4 * a * c);
+            // printf("abcr: %.3f %.3f %.3f %.3f\n", a, b, c, radicand);
+            if(radicand >= 0) {
+                // This aims ahead of the target. If the other root was used,
+                // the calculated impact point would be behind the target.
+                float time = (-b - sqrt(radicand)) / (2 * a);
+                // TargetPos + TargetVel * ImpactTime
+                fixed_t impactTime = FLOATTOFIXED(time);
+                fixed_t impactX = dest->x + FixedMul(dest->momx, impactTime);
+                fixed_t impactY = dest->y + FixedMul(dest->momy, impactTime);
+                an = R_PointToAngle2(x, y, impactX, impactY);
+            }
+        }
+        // fuzzy player
+        if(dest->flags & MF_SHADOW) {
+            an += P_RandomShift(pr_shadow, 20);
         }
     }
+
     th->angle = an;
     th->momx = FixedMul(speed, dcos(th->angle));
     th->momy = FixedMul(speed, dsin(th->angle));
