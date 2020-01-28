@@ -138,5 +138,7 @@ void G_LoadSettings(void) {
         }
     }
 
-    G_ExecuteFile(G_GetConfigFileName());
+    char* config_name = G_GetConfigFileName();
+    G_ExecuteFile(config_name);
+    free(config_name);
 }
