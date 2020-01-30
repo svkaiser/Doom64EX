@@ -3361,7 +3361,9 @@ void M_LoadSelect(int choice) {
 
     // sprintf(name, SAVEGAMENAME"%d.dsg", choice);
     // G_LoadGame(name);
-    G_LoadGame(P_GetSaveGameName(choice));
+    char* save_name = P_GetSaveGameName(choice);
+    G_LoadGame(save_name);
+    free(save_name);
     M_ClearMenus();
 }
 
@@ -3399,7 +3401,9 @@ void M_ReadSaveStrings(void) {
         // sprintf(name, SAVEGAMENAME"%d.dsg", i);
 
         // handle = open(name, O_RDONLY | 0, 0666);
-        handle = open(P_GetSaveGameName(i), O_RDONLY | 0, 0666);
+        char* save_name = P_GetSaveGameName(i);
+        handle = open(save_name, O_RDONLY | 0, 0666);
+        free(save_name); // Allocated by I_GetUserFile
         if(handle == -1) {
             dstrcpy(&savegamestrings[i][0],EMPTYSTRING);
             DoomLoadMenu[i].status = 0;
@@ -4031,11 +4035,14 @@ static dboolean M_SetThumbnail(int which) {
     // poke into savegame file and fetch
     // thumbnail, date and stats
     //
-    if(!P_QuickReadSaveHeader(P_GetSaveGameName(which), thumbnail_date, (int*)data,
+    char* save_name = P_GetSaveGameName(which);
+    if(!P_QuickReadSaveHeader(save_name, thumbnail_date, (int*)data,
                               &thumbnail_skill, &thumbnail_map)) {
+        free(save_name);
         Z_Free(data);
         return 0;
     }
+    free(save_name);
 
     //
     // make a new thumbnail texture
