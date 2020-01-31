@@ -1331,9 +1331,9 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
             float dmomy = F2D3D(dest->momy);
             float dmomz = F2D3D(dest->momz);
             // MissileSpeed - Missile speed converted from fixed point
-            float missileSpeed = F2D3D(speed);
+            float missile_speed = F2D3D(speed);
             // Get quadratic equation terms
-            float a = (dmomx * dmomx + dmomy * dmomy + dmomz * dmomz) - missileSpeed * missileSpeed;
+            float a = (dmomx * dmomx + dmomy * dmomy + dmomz * dmomz) - missile_speed * missile_speed;
             float b = 2 * (dmomx * relx + dmomy * rely + dmomz * relz);
             float c = (relx * relx + rely * rely + relz * relz);
             float radicand = (b * b) - (4 * a * c);
@@ -1343,10 +1343,10 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
                 // the calculated impact point would be behind the target.
                 float time = (-b - sqrt(radicand)) / (2 * a);
                 // TargetPos + TargetVel * ImpactTime
-                fixed_t impactTime = FLOATTOFIXED(time);
-                fixed_t impactX = dest->x + FixedMul(dest->momx, impactTime);
-                fixed_t impactY = dest->y + FixedMul(dest->momy, impactTime);
-                an = R_PointToAngle2(x, y, impactX, impactY);
+                fixed_t impact_time = FLOATTOFIXED(time);
+                fixed_t impactx = dest->x + FixedMul(dest->momx, impact_time);
+                fixed_t impacty = dest->y + FixedMul(dest->momy, impact_time);
+                an = R_PointToAngle2(x, y, impactx, impacty);
             }
         }
         // fuzzy player
