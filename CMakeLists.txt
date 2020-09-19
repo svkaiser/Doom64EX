@@ -79,6 +79,9 @@ if(MINGW)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -static")
 endif(MINGW)
 
+# Add installation path as pre-processor definition
+add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+
 ##------------------------------------------------------------------------------
 ## Configure config.hh
 ##
