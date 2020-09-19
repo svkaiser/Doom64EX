@@ -1254,7 +1254,9 @@ dboolean P_WriteSaveGame(char* description, int slot) {
 
     // setup game save file
     // sprintf(name, SAVEGAMENAME"%d.dsg", slot);
-    save_stream = fopen(P_GetSaveGameName(slot), "wb");
+    char* save_name = P_GetSaveGameName(slot);
+    save_stream = fopen(save_name, "wb");
+    free(save_name); // Allocated by I_GetUserFile
 
     // success?
     if(save_stream == NULL) {
