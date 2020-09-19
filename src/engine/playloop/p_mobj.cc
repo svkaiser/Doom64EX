@@ -1283,7 +1283,7 @@ void P_SpawnPlayerMissile(mobj_t* source, mobjtype_t type) {
 //
 
 mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
-                       fixed_t xoffs, fixed_t yoffs, fixed_t heightoffs, dboolean aim) {
+                       fixed_t xoffs, fixed_t yoffs, fixed_t heightoffs, dboolean aim, dboolean lead = false) {
     mobj_t* th;
     angle_t an;
     int dist;
@@ -1310,19 +1310,49 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
         an = source->angle;
     }
 
-    // fuzzy player
-    if(dest) {
-        if(dest->flags & MF_SHADOW) {
-            an += P_RandomShift(pr_shadow, 20);
-        }
-    }
-
     speed = th->info->speed;
 
     // [kex] nightmare missiles move faster
     if(source && source->flags & MF_NIGHTMARE) {
         th->flags |= MF_NIGHTMARE;
         speed *= 2;
+    }
+
+    if(dest) {
+        // Calculate target lead position
+        // Based on math and code from https://indyandyjones.wordpress.com/2010/04/08/intercepting-a-target-with-projectile/
+        if(lead) {
+            // ToTarget - Vector between shooter and target
+            float relx = F2D3D(dest->x - x); // F2D3D converts fixed to float
+            float rely = F2D3D(dest->y - y);
+            float relz = F2D3D(dest->z - z);
+            // TargetVel - Target velocity
+            float dmomx = F2D3D(dest->momx);
+            float dmomy = F2D3D(dest->momy);
+            float dmomz = F2D3D(dest->momz);
+            // MissileSpeed - Missile speed converted from fixed point
+            float missile_speed = F2D3D(speed);
+            // Get quadratic equation terms
+            float a = (dmomx * dmomx + dmomy * dmomy + dmomz * dmomz) - missile_speed * missile_speed;
+            float b = 2 * (dmomx * relx + dmomy * rely + dmomz * relz);
+            float c = (relx * relx + rely * rely + relz * relz);
+            float radicand = (b * b) - (4 * a * c);
+            // printf("abcr: %.3f %.3f %.3f %.3f\n", a, b, c, radicand);
+            if(radicand >= 0) {
+                // This aims ahead of the target. If the other root was used,
+                // the calculated impact point would be behind the target.
+                float time = (-b - sqrt(radicand)) / (2 * a);
+                // TargetPos + TargetVel * ImpactTime
+                fixed_t impact_time = FLOATTOFIXED(time);
+                fixed_t impactx = dest->x + FixedMul(dest->momx, impact_time);
+                fixed_t impacty = dest->y + FixedMul(dest->momy, impact_time);
+                an = R_PointToAngle2(x, y, impactx, impacty);
+            }
+        }
+        // fuzzy player
+        if(dest->flags & MF_SHADOW) {
+            an += P_RandomShift(pr_shadow, 20);
+        }
     }
 
     th->angle = an;
