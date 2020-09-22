@@ -246,7 +246,7 @@ enum {
     DP_RIGHT
 } dirproj_e;
 
-static mobj_t *P_MissileAttack(mobj_t *actor, int direction) {
+static mobj_t *P_MissileAttack(mobj_t *actor, int direction, bool lead = false) {
     angle_t angle = 0;
     fixed_t deltax = 0;
     fixed_t deltay = 0;
@@ -323,7 +323,7 @@ static mobj_t *P_MissileAttack(mobj_t *actor, int direction) {
     deltax = FixedMul(offs*FRACUNIT, finecosine[angle]);
     deltay = FixedMul(offs*FRACUNIT, finesine[angle]);
 
-    mo = P_SpawnMissile(actor, actor->target, type, deltax, deltay, deltaz, aim);
+    mo = P_SpawnMissile(actor, actor->target, type, deltax, deltay, deltaz, aim, lead);
 
     return mo;
 }
@@ -1170,6 +1170,20 @@ void A_CyberAttack(mobj_t* actor) {
 
     A_FaceTarget(actor);
     P_MissileAttack(actor, DP_LEFT);
+}
+
+//
+// A_CyberSpecial
+// Monster attack that leads the target
+// 
+
+void A_CyberSpecial(mobj_t* actor) {
+    if(!actor->target) {
+        return;
+    }
+
+    A_FaceTarget(actor);
+    P_MissileAttack(actor, DP_LEFT, true);
 }
 
 //

@@ -46,6 +46,8 @@ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_SOURCE_DIR}/extern")
 set(CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}" "${CMAKE_FIND_ROOT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(DATA_DIR "${CMAKE_SOURCE_DIR}/data")
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+  OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
   set(USE_CONAN ON)
@@ -77,6 +79,9 @@ if(MINGW)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -static")
 endif(MINGW)
 
+# Add installation path as pre-processor definition
+add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+
 ##------------------------------------------------------------------------------
 ## Configure config.hh
 ##
@@ -102,7 +107,7 @@ configure_file("${CMAKE_SOURCE_DIR}/src/config.hh.in" "${CMAKE_BINARY_DIR}/confi
 ## Dependencies
 ##
 
-if (NOT USE_CONAN)
+if(NOT USE_CONAN)
   # SDL2
   find_package(SDL2 REQUIRED)
 
@@ -116,7 +121,7 @@ if (NOT USE_CONAN)
   find_package(PNG REQUIRED)
 
   # FluidSynth
-  if (ENABLE_SYSTEM_FLUIDSYNTH)
+  if(ENABLE_SYSTEM_FLUIDSYNTH)
     find_package(FluidSynth REQUIRED)
   endif()
 
@@ -139,7 +144,7 @@ endif(BUILD_TESTS)
 ##
 
 if(NOT ENABLE_SYSTEM_FLUIDSYNTH)
-  add_subdirectory("${CMAKE_SOURCE_DIR}/fluidsynth")
+  add_subdirectory("${CMAKE_SOURCE_DIR}/fluidsynth" EXCLUDE_FROM_ALL)
 endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/engine")
@@ -162,11 +167,59 @@ else()
     COMMAND "${CMAKE_COMMAND}" -E tar "cfv" "${CMAKE_BINARY_DIR}/doom64ex.pk3" --format=zip "--files-from=${CMAKE_SOURCE_DIR}/distrib/doom64ex_pk3.txt")
 
   # Install doom64ex.pk3
-  if (NOT WIN32)
-    if (APPLE)
+  if(NOT WIN32)
+    if(APPLE)
       install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION "$ENV{HOME}/Library/Application Support/doom64ex")
-    else ()
-      install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION share/games/doom64ex)
-    endif ()
-  endif ()
+    else()
+      install(FILES "${CMAKE_BINARY_DIR}/doom64ex.pk3" DESTINATION "share/games/doom64ex")
+    endif()
+  endif()
 endif()
+
+##------------------------------------------------------------------------------
+## Unix installation : manpage & launcher
+##
+
+include(Gzip)
+
+if(UNIX AND NOT APPLE)
+  compress_gz(-9 "${CMAKE_SOURCE_DIR}/distrib/doom64ex.6" "${CMAKE_BINARY_DIR}/distrib/doom64ex.6.gz")
+  install(FILES "${CMAKE_BINARY_DIR}/distrib/doom64ex.6.gz" DESTINATION "share/man/man6")
+  install(FILES "${CMAKE_SOURCE_DIR}/distrib/doom64ex.desktop" DESTINATION "share/applications")
+  install(FILES "${CMAKE_SOURCE_DIR}/distrib/doom64ex.png" DESTINATION "share/icons")
+endif()
+
+##------------------------------------------------------------------------------
+## Packages
+##
+
+set(CPACK_STRIP_FILES "games/doom64ex")
+set(CPACK_PACKAGE_VERSION "${VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "doom64ex-${CPACK_PACKAGE_VERSION}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
+set(CPACK_PACKAGE_VENDOR "svkaiser")
+set(CPACK_PACKAGE_CONTACT "svkaiser")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Doom64EX is a reverse-engineering project aimed to recreate Doom64 as close as possible with additional modding features.")
+
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://doom64ex.wordpress.com/")
+set(CPACK_DEBIAN_PACKAGE_SECTION "games")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
+set(CPACK_RPM_PACKAGE_URL "https://doom64ex.wordpress.com/")
+set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
+set(CPACK_RPM_PACKAGE_LICENSE "GPL-2.0")
+
+if(UNIX AND NOT APPLE)
+  set(CPACK_GENERATOR TGZ TBZ2 TXZ DEB) # PKG for freebsd (cmake >= 3.13)
+  find_program(RPMBUILD rpmbuild)
+  if(RPMBUILD)
+    message(STATUS "Found rpmbuild: ${RPMBUILD}")
+	set(CPACK_GENERATOR ${CPACK_GENERATOR} RPM)
+  else()
+    message(STATUS "Not found rpmbuild: RPM package won't be generated")
+  endif()
+endif()
+
+include(CPack)

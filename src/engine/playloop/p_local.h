@@ -167,7 +167,7 @@ int         EV_SpawnMobjTemplate(line_t* line);
 int         EV_FadeOutMobj(line_t* line);
 void        P_SpawnDartMissile(int tid, int type, mobj_t *target);
 mobj_t*     P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type,
-                           fixed_t xoffs, fixed_t yoffs, fixed_t heightoffs, dboolean aim);
+                           fixed_t xoffs, fixed_t yoffs, fixed_t heightoffs, dboolean aim, dboolean lead);
 
 //
 // P_ENEMY
