@@ -1209,7 +1209,7 @@ void A_BruisAttack(mobj_t* actor) {
         S_StartSound(actor, sfx_scratch);
         hitdice = (P_Random(pr_bruisattack) & 7);
 //      damage = ((hitdice << 2) - hitdice) + 11;
-        damage = (hitdice * 11) + 11
+        damage = (hitdice * 11) + 11;
         P_DamageMobj(actor->target, actor, actor, damage);
         return;
     }
