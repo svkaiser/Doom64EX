@@ -56,7 +56,7 @@ endif()
 set(FluidSynth_URL "https://sourceforge.net/projects/fluidsynth/files/fluidsynth-1.1.6/fluidsynth-1.1.6.tar.gz/download")
 set(FluidSynth_MD5 "ae5aca6de824b4173667cbd3a310b263")
 
-set(zlib_URL "http://zlib.net/zlib-1.2.8.tar.gz")
+set(zlib_URL "http://zlib.net/zlib-1.2.11.tar.gz")
 set(zlib_MD5 "44d667c142d7cda120332623eab69f40")
 
 set(libpng_URL "http://download.sourceforge.net/libpng/libpng-1.6.21.tar.gz")
