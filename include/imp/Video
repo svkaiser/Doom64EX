@@ -21,6 +21,18 @@ namespace imp {
   };
 
   struct VideoMode {
+      VideoMode(const char * const dn = "", int w = 0, int h = 0,
+          int colorbits = 32, int depthbits = 24, bool VSync = false,
+          const Fullscreen fs = Fullscreen::none) {
+          displayname = dn;
+          width = w;
+          height = h;
+          buffer_size = colorbits;
+          depth_size = depthbits;
+          fullscreen = fs;
+          vsync = VSync;
+      }
+      imp::String displayname;
       int width;
       int height;
       int buffer_size { 32 };
@@ -33,7 +45,8 @@ namespace imp {
       virtual ~IVideo() {}
       virtual void set_mode(const VideoMode&) = 0;
       virtual VideoMode current_mode() = 0;
-      virtual ArrayView<VideoMode> modes() = 0;
+      virtual ArrayView<VideoMode> modes(int monitor_index) = 0;
+      virtual int displays() = 0;
       virtual void swap_window() = 0;
       virtual void grab(bool) = 0;
       virtual void poll_events() = 0;
