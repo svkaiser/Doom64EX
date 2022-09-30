@@ -156,7 +156,7 @@
 //
 //  G_game.C
 //
-#define GGSAVED "game saved."
+#define GGSAVED "Game saved"
 #define GGAUTORUNON "Autorun ON"
 #define GGAUTORUNOFF "Autorun OFF"
 #define GGSCREENSHOT "Screenshot saved"

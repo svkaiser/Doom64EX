@@ -438,14 +438,16 @@ dboolean dfcmp(float f1, float f2) {
 //
 
 #ifdef _MSC_VER
-#pragma warning( disable : 4035 )
 int D_abs(int x) {
-    __asm {
-        mov eax,x
-        cdq
-        xor eax,edx
-        sub eax,edx
-    }
+    /* __asm not supported under 64 bit msvc 2019.
+     * __asm {
+     *    mov eax,x
+     *    cdq
+     *    xor eax,edx
+     *    sub eax,edx
+     * }
+     */
+    return std::abs(x);
 }
 #else
 int D_abs(int x) {

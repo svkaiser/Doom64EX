@@ -76,7 +76,7 @@ else()
     system/i_cpu_posix.cc)
 
   set(PLATFORM_LIBRARIES
-    dl
+    ${CMAKE_DL_LIBS}
     m)
 
 endif()
@@ -298,6 +298,6 @@ if (NOT WIN32)
       "fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app\" \"\" \"\")")
     install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doom64ex.app" DESTINATION /Applications USE_SOURCE_PERMISSIONS)
   else ()
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/doom64ex DESTINATION bin)
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/doom64ex DESTINATION games)
   endif ()
 endif ()

@@ -138,7 +138,7 @@ namespace {
 
       case SDLK_LALT:
       case SDLK_RALT: return KEY_RALT;
-          
+
       case SDLK_CAPSLOCK: return KEY_CAPS;
 
       default: return key;
@@ -164,6 +164,7 @@ IntProperty v_depthsize { "v_DepthSize", "Depth buffer fragment size", 24 };
 IntProperty v_buffersize { "v_BufferSize", "Framebuffer fragment size", 32 };
 BoolProperty v_vsync { "v_VSync", "Vertical sync", true };
 IntProperty v_windowed { "v_Windowed", "Window mode", fullscreen_default };
+IntProperty v_videodisplay { "v_VideoDisplay", "Video Diplay Monitor", 0 };
 
 /* Mouse Input */
 FloatProperty v_msensitivityx { "v_MSensitivityX", "Mouse sensitivity", 5.0f };
@@ -179,7 +180,7 @@ class SdlVideo : public IVideo {
     OpenGLVer opengl_;
     bool has_focus_ { false };
     bool has_mouse_ { false };
-    Vector<VideoMode> modes_ {};
+    Vector<Vector<VideoMode>> modes_ {};
     int lastmbtn_ {};
 
     void init_gl_() {
@@ -228,19 +229,55 @@ class SdlVideo : public IVideo {
         SDL_DisplayMode prev_mode, mode;
         int index = 0;
         int num_displays = SDL_GetNumVideoDisplays();
-        println("Available video modes:");
+        println("Video displays found: {}", num_displays);
+
         for (int i = 0; i < num_displays; ++i) {
+            Vector<VideoMode> monitor_modes;
+
+            const char * monitorname = SDL_GetDisplayName(i);
+            imp::String displayname = "";
+            if (NULL == monitorname) {
+                displayname = "Unknown Display";
+            } else {
+                // Remove any duplicate spaces
+                int c = 0;
+                while ('\0' != *(monitorname + c)) {
+                    // Space found
+                    if (' ' == *(monitorname + c)) {
+                        while (' ' == *(monitorname + c + 1)) {
+                            // skip the duplicate space
+                            ++c;
+                        }
+                    }
+
+                    // Add the character to the strings
+                    displayname += *(monitorname + c);
+                    ++c;
+                }
+            };
+
+            println("Available video modes for video display #{}/{}", i, displayname);
+
             int num_modes = SDL_GetNumDisplayModes(i);
             for (int j = 0; j < num_modes; ++j) {
                 SDL_GetDisplayMode(i, j, &mode);
 
-                if (j > 0 && prev_mode.w == mode.w && prev_mode.h == mode.h)
+                if (j > 0 && prev_mode.w == mode.w && prev_mode.h == mode.h) {
                     continue;
+                }
 
-                println("{}: {}x{} on display #{}", index++, mode.w, mode.h, i);
-                modes_.push_back({ mode.w, mode.h });
+                VideoMode vidmode;
+                vidmode.width = mode.w;
+                vidmode.height = mode.h;
+                vidmode.displayname = displayname;
+                println("{}: {}x{} on video display #{}/{}", index++,
+                vidmode.width, vidmode.height, i, vidmode.displayname);
+                monitor_modes.push_back(vidmode);
                 prev_mode = mode;
             }
+
+            println("Initialized video modes for video display #{}", i);
+            modes_.push_back(monitor_modes);
         }
     }
 
@@ -262,18 +299,19 @@ public:
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_ShowCursor(SDL_FALSE);
         init_modes_();
-        
+
         SDL_DisplayMode desktop_mode;
         SDL_GetDesktopDisplayMode(0, &desktop_mode);
 
-        VideoMode mode = {
+        VideoMode mode(
+            SDL_GetDisplayName(*v_videodisplay),
             *v_width,
             *v_height,
             *v_buffersize,
             *v_depthsize,
-            Fullscreen::none,
-            *v_vsync
-        };
+            *v_vsync,
+            Fullscreen::none
+        );
 
         if (mode.width < 0)
             mode.width = desktop_mode.w;
@@ -334,12 +372,13 @@ public:
             }
 
             auto title = format("{} {} - SDL2, OpenGL 1.4", config::name, config::version_full);
+            // SDL_WINDOWPOS_CENTERED_DISPLAY(index) does the same thing as
+            // SDL_WINDOWPOS_CENTERED but for a specific monitor display index.
+            printf("Monitor display index: %d\n", v_videodisplay.value());
             sdl_window_ = SDL_CreateWindow(title.c_str(),
-                                           SDL_WINDOWPOS_CENTERED,
-                                           SDL_WINDOWPOS_CENTERED,
-                                           copy.width,
-                                           copy.height,
-                                           flags);
+                SDL_WINDOWPOS_CENTERED_DISPLAY(v_videodisplay.value()),
+                SDL_WINDOWPOS_CENTERED_DISPLAY(v_videodisplay.value()),
+                copy.width, copy.height, flags);
 
             if (!sdl_window_)
                 throw video_error { format("Couldn't create window: {}", SDL_GetError()) };
@@ -350,6 +389,9 @@ public:
                 throw video_error { format("Couldn't create OpenGL Context: {}", SDL_GetError()) };
         } else {
             SDL_SetWindowSize(sdl_window_, copy.width, copy.height);
+            SDL_SetWindowPosition(sdl_window_,
+            SDL_WINDOWPOS_CENTERED_DISPLAY(v_videodisplay.value()),
+            SDL_WINDOWPOS_CENTERED_DISPLAY(v_videodisplay.value()));
 
             switch (copy.fullscreen) {
             case Fullscreen::none:
@@ -414,9 +456,14 @@ public:
         return mode;
     }
 
-    ArrayView<VideoMode> modes() override
+    ArrayView<VideoMode> modes(int monitor_index) override
     {
-        return modes_;
+        return modes_[monitor_index];
+    }
+
+    int displays() override
+    {
+        return modes_.size();
     }
 
     void swap_window() override
@@ -520,7 +567,7 @@ public:
             case SDL_QUIT:
                 I_Quit();
                 return;
-                
+
             default:
                 break;
             }
