@@ -193,8 +193,6 @@ directories.
 
 **[Official Blog](https://doom64ex.wordpress.com/)**
 
-**[Forum](http://z13.invisionfree.com/Doom64EX/index.php)** 
-
 **[Discord](https://discord.gg/AHd8t33)**
 
 You can join the official IRC channel `#doom64ex` on `irc.oftc.net` (OFTC).
