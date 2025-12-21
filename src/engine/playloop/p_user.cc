@@ -421,7 +421,8 @@ void P_DeathThink(player_t* player) {
         deathmocktics = gametic;
     }
 
-    if(player->cmd.buttons & BT_USE) {
+    // [tjs] Attack button will also respawn player after death.
+    if(player->cmd.buttons & BT_USE || player->cmd.buttons & BT_ATTACK) {
         player->playerstate = PST_REBORN;
     }
 }

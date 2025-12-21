@@ -58,6 +58,26 @@ namespace imp {
     inline uint64 swap_bytes(uint64 x) noexcept
     { return OSSwapInt64(x); }
 }
+#elif defined(__OpenBSD__)
+namespace imp {
+    inline int16 swap_bytes(int16 x) noexcept
+    { return swap16(x); }
+
+    inline uint16 swap_bytes(uint16 x) noexcept
+    { return swap16(x); }
+
+    inline int32 swap_bytes(int32 x) noexcept
+    { return swap32(x); }
+
+    inline uint32 swap_bytes(uint32 x) noexcept
+    { return swap32(x); }
+
+    inline int64 swap_bytes(int64 x) noexcept
+    { return swap64(x); }
+
+    inline uint64 swap_bytes(uint64 x) noexcept
+    { return swap64(x); }
+}
 #elif defined(__GNUC__) || defined(__clang__)
 namespace imp {
   inline int16 swap_bytes(int16 x) noexcept

@@ -136,6 +136,7 @@ void A_BabyMetal();
 void A_BspiAttack();
 void A_Hoof();
 void A_CyberAttack();
+void A_CyberSpecial();
 void A_PainAttack();
 void A_PainDie();
 void A_SpawnSmoke();
@@ -475,7 +476,7 @@ state_t states[NUMSTATES] = {      //0x4DFF4
     /*S_309*/         { SPR_CYBR, 32772, 12, A_FaceTarget/*ACTION_5800*/, S_310 },
     /*S_310*/         { SPR_CYBR, 5, 12, A_CyberAttack/*ACTION_7944*/, S_311 },
     /*S_311*/         { SPR_CYBR, 32772, 12, A_FaceTarget/*ACTION_5800*/, S_312 },
-    /*S_312*/         { SPR_CYBR, 5, 12, A_CyberAttack/*ACTION_7944*/, S_299 },
+    /*S_312*/         { SPR_CYBR, 5, 12, A_CyberSpecial/*ACTION_7944*/, S_299 },
     /*S_313*/         { SPR_CYBR, 5, 10, A_Pain/*ACTION_6148*/, S_299 },
     /*S_314*/         { SPR_CYBR, 6, 30, A_CyberDeathEvent/*ACTION_8004*/, S_315 },
     /*S_315*/         { SPR_CYBR, 7, 8, nullptr, S_316 },

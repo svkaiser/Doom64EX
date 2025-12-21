@@ -39,6 +39,7 @@
 #define MAX_ARGS 256
 char *ArgBuffer[MAX_ARGS + 1];
 
+[[noreturn]]
 void WGen_ShutDownApplication(void);
 
 //**************************************************************
@@ -178,6 +179,8 @@ void WGen_Process(char *path)
 }
 
 int M_CheckParm(const char *);
+
+[[noreturn]]
 void WGen_WadgenMain(void)
 {
 	int parm = M_CheckParm("-wadgen");
@@ -255,9 +258,11 @@ void WGen_UpdateProgress(const char *fmt, ...)
 //**************************************************************
 //**************************************************************
 
+[[noreturn]]
 void WGen_ShutDownApplication(void)
 {
 	Rom_Close();
+	exit(0);
 }
 
 //**************************************************************

@@ -365,7 +365,11 @@ int S_AdjustSoundParams(fixed_t x, fixed_t y, int* vol, int* sep) {
     //  and clip it if necessary
 
     // From _GG1_ p.428. Appox. eucledian distance fast.
-    approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+    // approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+    // P_AproxDistance() is not accurate enough. Start of intro demo sequence causes volume to increase resulting in loud pop.
+    const float dx = F2D3D(listener->x - x);
+    const float dy = F2D3D(listener->y - y);
+    approx_dist = FLOATTOFIXED(sqrt(dx * dx + dy * dy));
 
     if(approx_dist > S_CLIPPING_DIST) {
         return 0;

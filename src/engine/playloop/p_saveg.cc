@@ -847,7 +847,13 @@ static void saveg_write_sequenceGlow_t(void *data) {
 static void saveg_read_sequenceGlow_t(void *data) {
     sequenceGlow_t* seq = (sequenceGlow_t*) data;
     seq->sector         = &sectors[saveg_read32()];
-    seq->headsector     = &sectors[saveg_read32() - 1];
+    int headsector = saveg_read32();
+    if(headsector == 0) {
+        seq->headsector = nullptr;
+    }
+    else {
+        seq->headsector = &sectors[headsector - 1];
+    }
     seq->count          = saveg_read32();
     seq->start          = saveg_read32();
     seq->index          = saveg_read32();
@@ -1254,7 +1260,9 @@ dboolean P_WriteSaveGame(char* description, int slot) {
 
     // setup game save file
     // sprintf(name, SAVEGAMENAME"%d.dsg", slot);
-    save_stream = fopen(P_GetSaveGameName(slot), "wb");
+    char* save_name = P_GetSaveGameName(slot);
+    save_stream = fopen(save_name, "wb");
+    free(save_name); // Allocated by I_GetUserFile
 
     // success?
     if(save_stream == NULL) {
