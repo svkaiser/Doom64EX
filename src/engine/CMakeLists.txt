@@ -76,7 +76,7 @@ else()
     system/i_cpu_posix.cc)
 
   set(PLATFORM_LIBRARIES
-    dl
+    ${CMAKE_DL_LIBS}
     m)
 
 endif()
