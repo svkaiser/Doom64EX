@@ -263,7 +263,9 @@ int M_FileExists(char *filename) {
 void M_SaveDefaults(void) {
     FILE        *fh;
 
-    fh=fopen(G_GetConfigFileName(), "wt");
+    char* config_name = G_GetConfigFileName();
+    fh=fopen(config_name, "wt");
+    free(config_name); // Allocated by I_GetUserFile
     if(fh) {
         G_OutputBindings(fh);
         fclose(fh);
