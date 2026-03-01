@@ -287,20 +287,25 @@ void M_ScreenShot(void) {
     int     shotnum=0;
     byte    *buff;
     std::ofstream file;
+    std::ifstream fileScan;
 
+    // Scan for available file name
     while(shotnum < 1000) {
-        file.open(fmt::format("sshot{:03d}.png", shotnum));
+        fileScan.open(fmt::format("sshot{:03d}.png", shotnum), std::ios_base::in);
 
-        if (file.is_open())
+        if (!fileScan.is_open())
             break;
+        fileScan.close();
 
         shotnum++;
     }
 
+    // Screenshots full
     if(shotnum >= 1000) {
         return;
     }
 
+    file.open(fmt::format("sshot{:03d}.png", shotnum));
     buff = GL_GetScreenBuffer(0, 0, video_width, video_height);
 
     // Get PNG image
@@ -309,7 +314,7 @@ void M_ScreenShot(void) {
     image.save(file, "png");
 
     Z_Free(buff);
-
+    file.close();
     fmt::print("Saved Screenshot {}\n", name);
 }
 
